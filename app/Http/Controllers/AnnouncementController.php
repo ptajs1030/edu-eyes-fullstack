@@ -12,10 +12,17 @@ class AnnouncementController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $announcements = Announcement::query()
+        ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
+        ->when($request->sort, fn($q) => $q->orderBy($request->sort, $request->direction ?? 'asc'))
+        ->paginate(5)
+        ->withQueryString(); // penting agar search & sort tetap saat ganti page
+
         return Inertia::render('announcement', [
-            'announcements' => Announcement::all(),
+            'filters' => $request->only(['search', 'sort', 'direction']),
+            'announcements' => $announcements,
         ]);
     }
 

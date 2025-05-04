@@ -5,7 +5,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\AnnouncementController;
 
 Route::get('/', function () {
-    return Inertia::render('welcome');
+    return redirect('/login');
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {

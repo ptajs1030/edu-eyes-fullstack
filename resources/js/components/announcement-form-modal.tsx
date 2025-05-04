@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 import { Toaster, toast } from 'sonner';
+import { motion } from 'framer-motion';
 
 interface Announcement {
     id?: number;
@@ -84,9 +85,20 @@ export default function AnnouncementFormModal({ isOpen, closeModal, announcement
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-white p-6 rounded-lg w-full max-w-xl">
-                <h2 className='text-lg font-semibold mb-4'>{announcement ? 'Edit Announcement' : 'Add Announcement'}</h2>
+        <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 flex items-center justify-center backdrop-blur-sm bg-black/30 z-50"
+        >
+            <motion.div
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                transition={{ duration: 0.1 }}
+                className="bg-white p-6 rounded-lg w-full max-w-xl shadow-xl"
+            >
+                <h2 className='text-lg font-semibold mb-4'>{announcement ? 'Edit Announcement' : 'Adding Announcement'}</h2>
                 <form onSubmit={handleSubmit} encType="multipart/form-data">
                     <div className="mb-3">
                         <label htmlFor="title" className="block text-sm font-medium text-gray-700">Title</label>
@@ -133,7 +145,7 @@ export default function AnnouncementFormModal({ isOpen, closeModal, announcement
                         <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded hover:cursor-pointer">{announcement ? 'Update' : 'Create'}</button>
                     </div>
                 </form>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     )
 }
