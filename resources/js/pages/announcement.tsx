@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import AnnouncementFormModal from '@/components/announcement-form-modal';
+import AnnouncementDeleteConfirmationModal from '@/components/announcement-delete-confirmation-modal';
 import { type BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
 import SortDropdown from '@/components/ui/sort-drop-down';
@@ -47,6 +48,9 @@ export default function Announcement() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [announcementToDelete, setAnnouncementToDelete] = useState<Announcement | null>(null);
+
 
     const openModal = (announcement: Announcement | null = null) => {
         setSelectedAnnouncement(announcement);
@@ -156,8 +160,21 @@ export default function Announcement() {
                                 <td className='p-3'>{announcement.title}</td>
                                 <td className='p-3'>{announcement.content}</td>
                                 <td className='p-3 flex gap-2'>
-                                    <button onClick={() => openModal(announcement)} className='bg-blue-500 text-sm text-white px-3 py-1 rounded hover:cursor-pointer'>Edit</button>
-                                    <button onClick={() => handleDelete(announcement.id)} className='bg-red-500 text-sm text-white px-3 py-1 rounded hover:cursor-pointer'>Delete</button>
+                                    <button
+                                        onClick={() => openModal(announcement)}
+                                        className='bg-blue-500 text-sm text-white px-3 py-1 rounded hover:cursor-pointer'
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setAnnouncementToDelete(announcement);
+                                            setIsDeleteModalOpen(true);
+                                        }}
+                                        className='bg-red-500 text-sm text-white px-3 py-1 rounded hover:cursor-pointer'
+                                    >
+                                        Delete
+                                    </button>
                                 </td>
                             </tr>
                         )) : (
@@ -179,6 +196,12 @@ export default function Announcement() {
                 </div>
             </div>
             <AnnouncementFormModal isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} announcement={selectedAnnouncement} />
+            <AnnouncementDeleteConfirmationModal
+                isDeleteModalOpen={isDeleteModalOpen}
+                setIsDeleteModalOpen={setIsDeleteModalOpen}
+                handleDelete={handleDelete}
+                announcementToDelete={announcementToDelete}
+            />
         </AppLayout >
     )
 }
