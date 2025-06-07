@@ -45,11 +45,13 @@ class DatabaseSeeder extends Seeder
 
         // Seed Fixed Super Admin
         User::create([
-            'name' => 'Admin School',
+            'full_name' => 'Admin School',
+            'username' => 'superadmin',
             'email' => 'superadmin@gmail.com',
             'role_id' => 1,
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
+            'status' => 'active',
             'remember_token' => Str::random(10),
         ]);
 
