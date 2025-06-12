@@ -12,6 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('students', function (Blueprint $table) {
+            //TODO ada tambahan kolom : religion (varchar), birth_place (varchar)
+            //TODO ada typo nama kolom : kelebihan satu 's' di kolom address
             $table->id();
             $table->unsignedBigInteger('parent_id');
             $table->unsignedBigInteger('class_id')->nullable();
