@@ -13,10 +13,14 @@ return new class extends Migration
     {
         Schema::create('class_shifting_schedules', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('class_id')->constrained();
-            $table->foreignId('shifting_id')->constrained();
-            $table->string('day');
-            $table->timestamps();
+            $table->unsignedBigInteger('class_id');
+            $table->unsignedBigInteger('shifting_id');
+            $table->integer('day');
+
+            $table->unique(['class_id', 'day']);
+
+            $table->foreign('class_id')->references('id')->on('classroms');
+            $table->foreign('shifting_id')->references('id')->on('shiftings');
         });
     }
 

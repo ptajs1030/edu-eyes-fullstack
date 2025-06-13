@@ -14,15 +14,16 @@ return new class extends Migration
         Schema::create('shifting_attendances', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('student_id');
-            $table->foreignId('class_shifting_schedule_id')->constrained();
+            $table->unsignedBigInteger('class_shifting_schedule_id');
             $table->date('submit_date');
             $table->time('submit_hour')->nullable();
-            $table->enum('status', ['present', 'present_in_tolerance', 'absent', 'late'])->nullable();
+            $table->enum('status', ['present', 'present_in_tolerance', 'absent', 'late', 'alpha'])->default('alpha');
             $table->integer('minutes_of_late')->nullable();
             $table->text('note')->nullable();
             $table->timestamps();
 
             $table->foreign('student_id')->references('id')->on('users');
+            $table->foreign('class_shifting_schedule_id')->references('id')->on('class_shifting_schedules');
         });
     }
 

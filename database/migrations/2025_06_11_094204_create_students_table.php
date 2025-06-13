@@ -20,13 +20,15 @@ return new class extends Migration
             $table->year('entry_year');
             $table->enum('gender', ['male', 'female']);
             $table->enum('status', ['active', 'graduated', 'inactive']);
+            $table->string('religion');
+            $table->string('birth_place');
             $table->date('date_of_birth');
             $table->string('addresss');
             $table->string('qr_code_url')->nullable();
             $table->timestamps();
 
             $table->foreign('parent_id')->references('id')->on('users');
-            $table->foreign('class_id')->references('id')->on('classes');
+            $table->foreign('class_id')->references('id')->on('classrooms');
         });
     }
 
