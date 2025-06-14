@@ -19,7 +19,7 @@ return new class extends Migration
 
             $table->unique(['class_id', 'day']);
 
-            $table->foreign('class_id')->references('id')->on('classroms');
+            $table->foreign('class_id')->references('id')->on('classrooms');
             $table->foreign('shifting_id')->references('id')->on('shiftings');
         });
     }
