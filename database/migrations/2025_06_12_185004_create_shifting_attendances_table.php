@@ -17,9 +17,10 @@ return new class extends Migration
             $table->unsignedBigInteger('class_shifting_schedule_id');
             $table->date('submit_date');
             $table->time('submit_hour')->nullable();
-            $table->enum('status', ['present', 'present_in_tolerance', 'absent', 'late', 'alpha'])->default('alpha');
+            $table->enum('status', ['present', 'present_in_tolerance', 'alpha', 'late', 'leave', 'sick_leave', 'day_off'])->default('alpha');
             $table->integer('minutes_of_late')->nullable();
             $table->text('note')->nullable();
+            $table->text('day_off_reason')->nullable();
             $table->timestamps();
 
             $table->foreign('student_id')->references('id')->on('users');
