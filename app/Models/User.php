@@ -23,6 +23,7 @@ class User extends Authenticatable
         'phone',
         'email',
         'password',
+        'status'
     ];
 
     /**
@@ -33,6 +34,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'notification_key',
     ];
 
     /**
@@ -46,5 +48,40 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    public function students()
+    {
+        return $this->hasMany(Student::class);
+    }
+
+    public function teachers()
+    {
+        return $this->hasMany(Classroom::class);
+    }
+
+    public function academicYears()
+    {
+        return $this->belongsToMany(AcademicYear::class, 'class_histories', 'class_id', 'academic_year_id');
+    }
+
+    public function studentHistories()
+    {
+        return $this->belongsToMany(Student::class, 'class_histories', 'class_id', 'student_id');
+    }
+
+    public function shiftingAttendances()
+    {
+        return $this->hasMany(ShiftingAttendance::class, 'student_id');
+    }
+
+    public function classShiftingSchedulePics()
+    {
+        return $this->hasMany(ClassShiftingSchedulePic::class, 'teacher_id');
     }
 }

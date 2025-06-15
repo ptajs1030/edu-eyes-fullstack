@@ -13,11 +13,15 @@ return new class extends Migration
     {
         Schema::create('class_histories', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('academic_year_id')->constrained();
-            $table->foreignId('class_id')->constrained();
-            $table->foreignId('student_id')->constrained();
-            $table->year('join_year');
-            $table->timestamps();
+            $table->unsignedBigInteger('academic_year_id');
+            $table->unsignedBigInteger('class_id');
+            $table->unsignedBigInteger('student_id');
+
+            $table->foreign('academic_year_id')->references('id')->on('academic_years');
+            $table->foreign('class_id')->references('id')->on('classrooms');
+            $table->foreign('student_id')->references('id')->on('students');
+
+            $table->unique(['academic_year_id', 'class_id', 'student_id']);
         });
     }
 

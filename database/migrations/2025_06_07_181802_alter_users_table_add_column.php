@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            //TODO email juga jadikan nullable saja karena login akan pakai username
             // rename column name -> full_name
             $table->renameColumn('name', 'full_name');
 
