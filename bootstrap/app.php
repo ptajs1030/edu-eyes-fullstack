@@ -1,5 +1,6 @@
 <?php
 
+use App\Exceptions\ExceptionHandler;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
@@ -24,5 +25,9 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->renderable(function (Exception $e, $request) {
+            if ($request->is('api/*')) {
+                return ExceptionHandler::handleApiException($e, $request);
+            }
+        });
     })->create();
