@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('class_shifting_schedule_pics', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('class_shifting_schedule_id');
+            $table->unsignedBigInteger('class_shifting_schedule_id');
             $table->unsignedBigInteger('teacher_id');
-            $table->timestamps();
 
+            $table->foreign('class_shifting_schedule_id')->references('id')->on('class_shifting_schedules');
             $table->foreign('teacher_id')->references('id')->on('users');
+
+            $table->unique(['class_shifting_schedule_id', 'teacher_id'], 'class_shifting_schedule_pics_unique');
         });
     }
 
