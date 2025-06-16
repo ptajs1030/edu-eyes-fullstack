@@ -6,7 +6,7 @@
 - Inertia.js + React
 - Tailwind CSS
 - MySQL
-- Clean Architecture (DTO, Service, Resource, Custom Exception)
+- Clean Architecture API (DTO, Service, Resource, Exception)
 
 ---
 
