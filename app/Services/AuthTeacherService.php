@@ -3,49 +3,53 @@
 namespace App\Services;
 
 use App\DTOs\AuthData;
-use App\DTOs\UserData;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 class AuthTeacherService
 {
-    public function addUser(UserData $data)
+    /**
+     * Attempt to login a user with the given credentials.
+     *
+     * @param  \App\DTOs\AuthData  $data
+     * @return \App\Models\User
+     *
+     * @throws \Illuminate\Auth\AuthenticationException
+     */
+    public function login(AuthData $data)
     {
-        $user = User::create([
-            'full_name' => $data->getFullName(),
-            'username' => $data->getUsername(),
-            'email' => $data->getEmail(),
-            'phone' => $data->getPhone(),
-            'password' => Hash::make($data->getPassword()),
-            'role_id' => 1,
-        ]);
-        return $user;
-    }
+        $user = User::where('username', $data->getUsername())->first();
 
-    public function showWithLogic()
-    {
-        // masukkan logic disini lalu di return sesuai Modelnya
-        $users = User::where('role_id', 2)->get();
-
-        if ($users->isEmpty()) {
-            abort(204, "Data Kosong"); // atau gunakan kode lain seperti 204, 422, dsb sesuai kebutuhan
+        if (!$user || !Hash::check($data->getPassword(), $user->password)) {
+            abort(401, 'Unauthorized');
         }
 
-        return $users;
-    }
-
-    public function login(AuthData $body)
-    {
-        $user = User::where('username', $body->getUsername())->first();
-
-        if (!$user || !Hash::check($body->getPassword(), $user->password)) {
-            abort(401, 'Username or password is incorrect');
-        }
         Auth::login($user);
-        return [
-            'token' => $user->createToken('authToken')->plainTextToken,
-            'user' => $user
-        ];
+        $token = $user->createToken('authToken')->plainTextToken;
+
+        return response()->json([
+            'user' => $user,
+            'token' => $token,
+        ]);
+    }
+
+    /**
+     * Logout the current user.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     *
+     * @throws \Illuminate\Auth\AuthenticationException
+     */
+    public function logout()
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(401, 'Unauthorized');
+        }
+
+        Auth::logout();
+        return response()->json(['message' => 'Successfully logged out']);
     }
 }
