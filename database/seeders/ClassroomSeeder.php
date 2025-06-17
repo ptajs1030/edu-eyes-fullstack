@@ -21,12 +21,12 @@ class ClassroomSeeder extends Seeder
         Classroom::create([
             'name' => 'Class V A',
             'level' => 5,
-            'main_teacher' => $teacherLisa->id,
+            'main_teacher_id' => $teacherLisa->id,
         ]);
         Classroom::create([
             'name' => 'Class VI A',
             'level' => 6,
-            'main_teacher' => $teacherBagus->id,
+            'main_teacher_id' => $teacherBagus->id,
         ]);
     }
 }

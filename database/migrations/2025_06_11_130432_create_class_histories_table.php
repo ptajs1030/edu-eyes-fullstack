@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('academic_year_id');
             $table->unsignedBigInteger('class_id');
             $table->unsignedBigInteger('student_id');
+            $table->timestamps();
 
             $table->foreign('academic_year_id')->references('id')->on('academic_years');
             $table->foreign('class_id')->references('id')->on('classrooms');
