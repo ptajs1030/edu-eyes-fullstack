@@ -23,15 +23,15 @@ class ClassShiftingScheduleSeeder extends Seeder
         for ($day = 1; $day <= 5; $day++) {
             ClassShiftingSchedule::create([
                 'class_id' => $classVA->id,
-                'shiftig_id' => $morningShift->id,
+                'shifting_id' => $morningShift->id,
                 'day' => $day,
             ]);
         }
 
         for ($day = 1; $day <= 5; $day++) {
             ClassShiftingSchedule::create([
-                'class_id' => $classVA->id,
-                'shiftig_id' => $dayShift->id,
+                'class_id' => $classVIA->id,
+                'shifting_id' => $dayShift->id,
                 'day' => $day,
             ]);
         }
