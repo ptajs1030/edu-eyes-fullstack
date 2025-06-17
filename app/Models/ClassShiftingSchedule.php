@@ -12,6 +12,9 @@ class ClassShiftingSchedule extends Model
         'day',
     ];
 
+    // not used timestamps
+    public $timestamps = false;
+
     public function shifting()
     {
         return $this->belongsTo(Shifting::class, 'shift_id');

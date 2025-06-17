@@ -16,6 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('main_teacher_id');
             $table->string('name');
             $table->integer('level');
+            $table->timestamps();
 
             $table->foreign('main_teacher_id')->references('id')->on('users');
         });

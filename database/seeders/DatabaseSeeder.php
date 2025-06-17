@@ -2,13 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\Announcement;
-use App\Models\User;
-use App\Models\Role;
+use Exception;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
@@ -19,17 +15,29 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        DB::beginTransaction();
 
-        $this->call([
-            RoleSeeder::class,
-            UserSeeder::class,
-            AnnouncementSeeder::class,
-            AcademicYearSeeder::class,
-            ClassroomSeeder::class,
-            StudentSeeder::class,
-            SettingSeeder::class,
-            ShiftingSeeder::class,
-        ]);
+        try {
+            $this->call([
+                RoleSeeder::class,
+                UserSeeder::class,
+                AnnouncementSeeder::class,
+                AcademicYearSeeder::class,
+                ClassroomSeeder::class,
+                StudentSeeder::class,
+                SettingSeeder::class,
+                ShiftingSeeder::class,
+                ClassShiftingScheduleSeeder::class,
+                ClassShiftingSchedulePicSeeder::class,
+                ShiftingAttendanceSeeder::class,
+            ]);
+
+            DB::commit();
+        } catch (Exception $e) {
+            // Rollback the transaction in case of any error
+            DB::rollBack();
+            // Optionally, log the error or display it
+            echo 'Seeding failed: ' . $e->getMessage();
+        }
     }
 }
