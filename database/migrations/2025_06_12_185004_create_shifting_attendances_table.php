@@ -23,7 +23,7 @@ return new class extends Migration
             $table->text('day_off_reason')->nullable();
             $table->timestamps();
 
-            $table->foreign('student_id')->references('id')->on('users'); 
+            $table->foreign('student_id')->references('id')->on('students'); 
             $table->foreign('class_shifting_schedule_id')->references('id')->on('class_shifting_schedules');
         });
     }
