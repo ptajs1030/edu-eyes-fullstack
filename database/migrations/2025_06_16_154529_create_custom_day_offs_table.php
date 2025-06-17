@@ -11,14 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('classrooms', function (Blueprint $table) {
+        Schema::create('custom_day_offs', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('main_teacher_id');
-            $table->string('name');
-            $table->integer('level');
+            $table->date('date');
+            $table->text('description');
             $table->timestamps();
-
-            $table->foreign('main_teacher_id')->references('id')->on('users');
         });
     }
 
@@ -27,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('classrooms');
+        Schema::dropIfExists('custom_day_offs');
     }
 };
