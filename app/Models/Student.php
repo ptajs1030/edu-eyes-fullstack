@@ -16,6 +16,18 @@ class Student extends Model
         'updated_at'
     ];
 
+    protected static function booted()
+    {
+        static::updated(function (self $student) {
+            if ($student->isDirty('class_id')) {
+                ClassHistory::updateOrCreate(
+                    ['academic_year_id' => $student->academic_year_id, 'student_id' => $student->id],
+                    ['class_id' => $student->class_id]
+                );
+            }
+        });
+    }
+
     public function parent()
     {
         return $this->belongsTo(User::class, 'parent_id');
@@ -26,7 +38,6 @@ class Student extends Model
         return $this->belongsTo(Classroom::class, 'class_id');
     }
 
-    // kasdasnda
     public function academicYearHistories()
     {
         return $this->belongsToMany(AcademicYear::class, 'class_histories', 'student_id', 'academic_year_id')

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->foreign('class_id')->references('id')->on('classrooms');
             $table->foreign('student_id')->references('id')->on('students');
 
-            $table->unique(['academic_year_id', 'class_id', 'student_id']);
+            $table->unique(['academic_year_id', 'student_id']);
         });
     }
 
