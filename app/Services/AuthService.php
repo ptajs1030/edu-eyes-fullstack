@@ -7,7 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
-class AuthTeacherService
+class AuthService
 {
     /**
      * Attempt to login a user with the given credentials.
@@ -28,10 +28,10 @@ class AuthTeacherService
         Auth::login($user);
         $token = $user->createToken('authToken')->plainTextToken;
 
-        return response()->json([
+        return [
             'user' => $user,
             'token' => $token,
-        ]);
+        ];
     }
 
     /**
@@ -50,6 +50,8 @@ class AuthTeacherService
         }
 
         $user->tokens()->delete();
-        
+        return [
+            'message' => 'Logged out successfully',
+        ];
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\AuthTeacherController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ParentController;
 use App\Http\Controllers\Api\SampleAuthTeacherController;
 use App\Http\Controllers\Api\TeacherController;
 use Illuminate\Http\Request;
@@ -23,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 // });
 
 
-Route::prefix('auth/teacher')->controller(AuthTeacherController::class)->group(function (){
+Route::prefix('auth/teacher')->controller(AuthController::class)->group(function (){
     Route::post('/login', 'login');
 
     Route::middleware(['auth:sanctum', 'teacher'])->group(function () {
@@ -31,6 +32,18 @@ Route::prefix('auth/teacher')->controller(AuthTeacherController::class)->group(f
     });
 });
 
+Route::prefix('auth/parent')->controller(AuthController::class)->group(function (){
+    Route::post('/login', 'login');
+
+    Route::middleware(['auth:sanctum', 'parent'])->group(function () {
+        Route::post('/logout', 'logout');
+    });
+});
+
 Route::prefix('teacher')->middleware(['auth:sanctum', 'teacher'])->controller(TeacherController::class)->group(function (){
+    Route::get('/profile', 'profile');
+});
+
+Route::prefix('parent')->middleware(['auth:sanctum', 'parent'])->controller(ParentController::class)->group(function (){
     Route::get('/profile', 'profile');
 });
