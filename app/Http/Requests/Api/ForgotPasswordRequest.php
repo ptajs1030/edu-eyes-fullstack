@@ -2,17 +2,16 @@
 
 namespace App\Http\Requests\Api;
 
-use App\DTOs\ChangePasswordData;
 use Illuminate\Foundation\Http\FormRequest;
 
-class ChangePasswordRequest extends FormRequest
+class ForgotPasswordRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return true ;
     }
 
     /**
@@ -23,13 +22,7 @@ class ChangePasswordRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'old_password' => 'required|string|min:8|',
-            'new_password' => 'required|string|min:8|confirmed',
-            'new_password_confirmation' => 'required|string|min:8',
+            'email' => 'required|email|exists:users,email',
         ];
-    }
-
-    public function getDto(){
-        return new ChangePasswordData($this->validated());
     }
 }

@@ -22,7 +22,7 @@ class AuthService
         $user = User::where('username', $data->getUsername())->first();
 
         if (!$user || !Hash::check($data->getPassword(), $user->password)) {
-            abort(401, 'Unauthorized');
+            abort(400, 'username or password is incorrect');
         }
 
         Auth::login($user);
