@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthTeacherController;
 use App\Http\Controllers\Api\SampleAuthTeacherController;
+use App\Http\Controllers\Api\TeacherController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -23,9 +24,13 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::prefix('auth/teacher')->controller(AuthTeacherController::class)->group(function (){
-    Route::post('/login', [AuthTeacherController::class, 'login']);
+    Route::post('/login', 'login');
 
     Route::middleware(['auth:sanctum', 'teacher'])->group(function () {
-        Route::post('/logout', [AuthTeacherController::class, 'logout']);
+        Route::post('/logout', 'logout');
     });
+});
+
+Route::prefix('teacher')->middleware(['auth:sanctum', 'teacher'])->controller(TeacherController::class)->group(function (){
+    Route::get('/profile', 'profile');
 });

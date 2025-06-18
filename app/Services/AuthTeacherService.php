@@ -49,7 +49,7 @@ class AuthTeacherService
             abort(401, 'Unauthorized');
         }
 
-        Auth::logout();
-        return response()->json(['message' => 'Successfully logged out']);
+        $user->tokens()->delete();
+        
     }
 }
