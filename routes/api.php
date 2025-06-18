@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ForgotPassword;
+use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\ParentController;
 use App\Http\Controllers\Api\SampleAuthTeacherController;
 use App\Http\Controllers\Api\TeacherController;
@@ -24,26 +26,22 @@ use Illuminate\Support\Facades\Route;
 // });
 
 
-Route::prefix('auth/teacher')->controller(AuthController::class)->group(function (){
-    Route::post('/login', 'login');
 
-    Route::middleware(['auth:sanctum', 'teacher'])->group(function () {
-        Route::post('/logout', 'logout');
-    });
-});
-
-Route::prefix('auth/parent')->controller(AuthController::class)->group(function (){
+Route::prefix('auth')->controller(AuthController::class)->group(function (){
     Route::post('/login', 'login');
 
     Route::middleware(['auth:sanctum', 'parent'])->group(function () {
         Route::post('/logout', 'logout');
     });
+    
+    Route::middleware(['auth:sanctum', 'teacher'])->group(function () {
+        Route::post('/logout', 'logout');
+    });
+
 });
 
-Route::middleware(['auth:sanctum'])->controller(ForgotPassWordCon)->group(function () {
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
+Route::middleware(['auth:sanctum'])->controller(ForgotPasswordController::class)->group(function () {
+    Route::post('auth/forgot-password', 'sendLink');
 });
 
 Route::prefix('teacher')->middleware(['auth:sanctum', 'teacher'])->controller(TeacherController::class)->group(function (){

@@ -8,6 +8,10 @@ Route::get('/', function () {
     return redirect('/login');
 })->name('home');
 
+Route::get('/password-reset-success', function () {
+    return inertia('success');
+})->name('password.success');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
