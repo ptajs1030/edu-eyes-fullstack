@@ -7,9 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 class ClassShiftingSchedulePic extends Model
 {
     protected $fillable = [
-        'class_shifting_schedule_id', 
+        'class_shifting_schedule_id',
         'teacher_id'
     ];
+
+    // not used timestamps
+    public $timestamps = false;
 
     public function classShiftingSchedule()
     {

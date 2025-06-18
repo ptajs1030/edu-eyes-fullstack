@@ -2,26 +2,23 @@
 
 namespace Database\Factories;
 
+use App\Models\Announcement;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
  */
 class AnnouncementFactory extends Factory
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    protected $model = Announcement::class;
+
+    public function definition()
     {
         // fake announcement title and content
         return [
-            'title' => fake()->text(),
-            'content' => fake()->text(),
-            'picture' => fake()->imageUrl(),
+            'title' => $this->faker->sentence(),
+            'content' => $this->faker->text(),
+            'picture' => $this->faker->imageUrl(),
         ];
     }
 }
