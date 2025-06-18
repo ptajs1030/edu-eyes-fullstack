@@ -40,10 +40,22 @@ Route::prefix('auth/parent')->controller(AuthController::class)->group(function 
     });
 });
 
+Route::middleware(['auth:sanctum'])->controller(ForgotPassWordCon)->group(function () {
+    Route::get('/user', function (Request $request) {
+        return $request->user();
+    });
+});
+
 Route::prefix('teacher')->middleware(['auth:sanctum', 'teacher'])->controller(TeacherController::class)->group(function (){
-    Route::get('/profile', 'profile');
+    Route::group(['prefix' => 'profile'], function () {
+        Route::get('/', 'profile');
+        Route::post('/change-password', 'changePassword');
+    });
 });
 
 Route::prefix('parent')->middleware(['auth:sanctum', 'parent'])->controller(ParentController::class)->group(function (){
-    Route::get('/profile', 'profile');
+    Route::group(['prefix' => 'profile'], function () {
+        Route::get('/', 'profile');
+        Route::post('/change-password', 'changePassword');
+    });
 });
