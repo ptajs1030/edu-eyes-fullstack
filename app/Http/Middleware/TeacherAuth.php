@@ -16,7 +16,7 @@ class TeacherAuth
     public function handle(Request $request, Closure $next): Response
     {
 
-        if (auth()->user()->role == 2 ) {
+        if (auth()->user()->role_id == 2 ) {
             return $next($request);
         }else {
             abort(403, 'Unauthorized action.');

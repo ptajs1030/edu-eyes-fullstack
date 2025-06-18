@@ -83,7 +83,7 @@ class SampleAuthTeacherController extends BaseApiController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function user(): JsonResponse
+    public function profile(): JsonResponse
     {
         return $this->resource(UserResource::make(auth()->user()));
     }
