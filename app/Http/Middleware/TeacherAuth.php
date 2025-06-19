@@ -19,7 +19,7 @@ class TeacherAuth
         if (auth()->user()->role_id == 2 ) {
             return $next($request);
         }else {
-            abort(403, 'Unauthorized action.');
+            abort(403, 'Unauthorized Teacher Access.');
         }
        
     }

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ForgotPassword;
 use App\Http\Controllers\Api\ForgotPasswordController;
@@ -30,11 +31,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('auth')->controller(AuthController::class)->group(function (){
     Route::post('/login', 'login');
 
-    Route::middleware(['auth:sanctum', 'parent'])->group(function () {
-        Route::post('/logout', 'logout');
-    });
-    
-    Route::middleware(['auth:sanctum', 'teacher'])->group(function () {
+    Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/logout', 'logout');
     });
 
@@ -44,12 +41,18 @@ Route::middleware(['auth:sanctum'])->controller(ForgotPasswordController::class)
     Route::post('auth/forgot-password', 'sendLink');
 });
 
-Route::prefix('teacher')->middleware(['auth:sanctum', 'teacher'])->controller(TeacherController::class)->group(function (){
-    Route::group(['prefix' => 'profile'], function () {
-        Route::get('/', 'profile');
-        Route::post('/change-password', 'changePassword');
+Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(function (){
+
+    Route::controller(TeacherController::class)->group(function (){
+        Route::get('/profile', 'profile');
+        Route::post('/profile/change-password', 'changePassword');
+    });
+   
+    Route::prefix('attendance')->controller(AttendanceController::class)->group(function () {
+        Route::get('/history', 'attendanceHistory');
     });
 });
+
 
 Route::prefix('parent')->middleware(['auth:sanctum', 'parent'])->controller(ParentController::class)->group(function (){
     Route::group(['prefix' => 'profile'], function () {
