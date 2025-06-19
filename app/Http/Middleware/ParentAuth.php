@@ -18,7 +18,7 @@ class ParentAuth
         if (auth()->user()->role_id == 3 ) {
             return $next($request);
         }else {
-            abort(403, 'Unauthorized action.');
+            abort(403, 'Unauthorized Parent Access.');
         }
     }
 }
