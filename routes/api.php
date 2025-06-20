@@ -49,7 +49,7 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
     });
    
     Route::prefix('attendance')->controller(AttendanceController::class)->group(function () {
-        Route::get('/history', 'attendanceHistory');
+        Route::get('/history/{date?}', 'attendanceHistory');
     });
 });
 

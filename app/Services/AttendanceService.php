@@ -11,13 +11,19 @@ use Carbon\Carbon;
 
 class AttendanceService
 {
-    public function attendanceHistory(){
+    public function attendanceHistory($date){
         $attendances = ShiftingAttendance::where('submit_date', Carbon::now()->format('Y-m-d'))->get();
-        
+        $date=Carbon::parse($date)->format('Y-m-d');
+
+        if($date){
+            $attendances = ShiftingAttendance::where('submit_date', $date)->get();
+        }
 
         if ($attendances->isEmpty()) {
             abort(204, "Data Kosong"); 
         }
+
+        
 
         return [
             'number_of_attendances' => $attendances->count(),
