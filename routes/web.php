@@ -16,7 +16,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::resource('announcements', AnnouncementController::class);
-Route::apiResource('academic-years', AcademicYearController::class);
+Route::resource('academic-years', AcademicYearController::class);
 
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
+require __DIR__ . '/settings.php';
+require __DIR__ . '/auth.php';
