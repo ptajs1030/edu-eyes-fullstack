@@ -6,8 +6,6 @@ import { toast } from 'sonner';
 interface AcademicYear {
     id?: number;
     start_year: number;
-    title: string;
-    status: string;
     attendance_mode: string;
     note?: string;
 }
@@ -22,8 +20,6 @@ interface Props {
 export default function AcademicYearFormModal({ isOpen, closeModal, academicYear, attendanceModes }: Props) {
     const [formData, setFormData] = useState<AcademicYear>({
         start_year: new Date().getFullYear(),
-        title: '',
-        status: '',
         attendance_mode: '',
         note: '',
     });
@@ -32,16 +28,12 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
         if (academicYear) {
             setFormData({
                 start_year: academicYear.start_year,
-                title: academicYear.title,
-                status: academicYear.status,
                 attendance_mode: academicYear.attendance_mode,
                 note: academicYear.note || '',
             });
         } else {
             setFormData({
                 start_year: new Date().getFullYear(),
-                title: '',
-                status: '',
                 attendance_mode: '',
                 note: '',
             });
@@ -67,17 +59,29 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                         toast.success('Academic year updated successfully.');
                         router.reload();
                     },
-                    onError: () => toast.error('Failed to update academic year.'),
+                    onError: (errors) => {
+                        if (errors.start_year) {
+                            toast.error('Failed to create academic year: ' + errors.start_year);
+                        } else {
+                            toast.error('Failed to create academic year');
+                        }
+                    },
                 },
             );
         } else {
-            router.post('/ademic-years', payload, {
+            router.post('/academic-years', payload, {
                 onSuccess: () => {
                     closeModal();
                     toast.success('Academic year created successfully.');
                     router.reload();
                 },
-                onError: () => toast.error('Failed to create announcement.'),
+                onError: (errors) => {
+                    if (errors.start_year) {
+                        toast.error('Failed to create academic year: ' + errors.start_year);
+                    } else {
+                        toast.error('Failed to create academic year');
+                    }
+                },
             });
         }
     };
@@ -114,18 +118,6 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                             required
                         ></input>
                     </div>
-                    <div className="mb-3"></div>
-                    {/* <div className="mb-3">
-                        <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-                            Status
-                        </label>
-                        <select name="status" value={formData.status} onChange={handleChange} className="w-full rounded border p-2" required>
-                            <option value="">-- Select Status --</option>
-                            <option value="active">Active</option>
-                            <option value="inactive">Inactive</option>
-                            <option value="completed">Completed</option>
-                        </select>
-                    </div> */}
                     <div className="mb-3">
                         <label htmlFor="attendance_mode" className="block text-sm font-medium text-gray-700">
                             Attendance Mode

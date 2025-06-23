@@ -1,10 +1,11 @@
+import AcademicYearDeleteConfirmationModal from '@/components/academic-year-delete-confirmation-modal';
 import AcademicYearFormModal from '@/components/academic-year-form-modal';
 import SortDropdown from '@/components/ui/sort-drop-down';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Toaster } from 'sonner';
+import { toast, Toaster } from 'sonner';
 
 type AcademicYear = {
     id: number;
@@ -53,10 +54,22 @@ export default function AcademicYear() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedAcademicYear, setSelectedAcademicYear] = useState<AcademicYear | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [academicYearToDelete, setAcademicYearToDelete] = useState<AcademicYear | null>(null);
 
     const openModal = (academicYear: AcademicYear | null = null) => {
         setSelectedAcademicYear(academicYear);
         setIsModalOpen(true);
+    };
+
+    const handleDelete = async (id: number) => {
+        router.delete(`/academic-years/${id}`, {
+            onSuccess: () => {
+                toast.success('Academic year deleted successfully.');
+                router.reload();
+            },
+            onError: () => toast.error('Failed to delete academic year.'),
+        });
     };
 
     const toggleSelect = (id: number) => {
@@ -162,7 +175,7 @@ export default function AcademicYear() {
                                         >
                                             Edit
                                         </button>
-                                        {/* <button
+                                        <button
                                             onClick={() => {
                                                 setAcademicYearToDelete(academicYear);
                                                 setIsDeleteModalOpen(true);
@@ -170,7 +183,7 @@ export default function AcademicYear() {
                                             className="rounded bg-red-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
                                         >
                                             Delete
-                                        </button> */}
+                                        </button>
                                     </td>
                                 </tr>
                             ))
@@ -201,6 +214,12 @@ export default function AcademicYear() {
                 closeModal={() => setIsModalOpen(false)}
                 academicYear={selectedAcademicYear}
                 attendanceModes={attendanceModes}
+            />
+            <AcademicYearDeleteConfirmationModal
+                isDeleteModalOpen={isDeleteModalOpen}
+                setIsDeleteModalOpen={setIsDeleteModalOpen}
+                handleDelete={handleDelete}
+                academicYearToDelete={academicYearToDelete}
             />
         </AppLayout>
     );
