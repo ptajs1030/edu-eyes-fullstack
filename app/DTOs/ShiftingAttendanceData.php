@@ -16,7 +16,7 @@ class ShiftingAttendanceData
     public function __construct(array $data)
     {
         $this->stuent_id = $data['student_id'] ?? null;
-        $this->submit_hour = $data['submit_hour'] ?? null;
+       
     }
 
     /**
@@ -27,8 +27,5 @@ class ShiftingAttendanceData
         return $this->stuent_id;
     }
 
-    public function getSubmitHour(): ?string
-    {
-        return $this->submit_hour;
-    }
+    
 }
