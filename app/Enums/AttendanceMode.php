@@ -1,5 +1,7 @@
 <?php
 
+namespace App\Enums;
+
 enum AttendanceMode: string 
 {
     case PerShift = 'per-shift';

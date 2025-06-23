@@ -45,11 +45,9 @@ export default function AcademicYear() {
         { label: 'Created At (Oldest)', value: { sort: 'created_at', direction: 'asc' } },
     ];
 
-    // const { academicYears, attendanceModes, filters } = usePage<{
-    const { academicYears, filters } = usePage<{
+    const { academicYears, attendanceModes, filters } = usePage<{
         academicYears: PaginatedResponse<AcademicYear, Link>;
-        // attendanceModes: string[];
-        // attendanceModes: [{ value: 'per-shift'; label: 'Per-shift' }, { value: 'per-subject'; label: 'Per-subject' }];
+        attendanceModes: { value: string; label: string }[];
         filters: { search?: string; sort?: string; direction?: string };
     }>().props;
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -202,7 +200,7 @@ export default function AcademicYear() {
                 isOpen={isModalOpen}
                 closeModal={() => setIsModalOpen(false)}
                 academicYear={selectedAcademicYear}
-                // attendanceModes={attendanceModes}
+                attendanceModes={attendanceModes}
             />
         </AppLayout>
     );

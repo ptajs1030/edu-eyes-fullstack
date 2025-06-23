@@ -16,10 +16,10 @@ interface Props {
     isOpen: boolean;
     closeModal: () => void;
     academicYear?: AcademicYear | null;
-    // attendanceModes: { value: string; label: string }[];
+    attendanceModes: { value: string; label: string }[];
 }
 
-export default function AcademicYearFormModal({ isOpen, closeModal, academicYear }: Props) {
+export default function AcademicYearFormModal({ isOpen, closeModal, academicYear, attendanceModes }: Props) {
     const [formData, setFormData] = useState<AcademicYear>({
         start_year: new Date().getFullYear(),
         title: '',
@@ -138,11 +138,11 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                             required
                         >
                             <option value="">-- Select Mode --</option>
-                            {/* {attendanceModes.map((mode) => (
+                            {attendanceModes.map((mode) => (
                                 <option key={mode.value} value={mode.value}>
                                     {mode.label}
                                 </option>
-                            ))} */}
+                            ))}
                         </select>
                     </div>
                     <div className="mb-3">

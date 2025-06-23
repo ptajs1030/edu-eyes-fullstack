@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use AcademicYearStatus;
+use App\Enums\AcademicYearStatus;
+use App\Enums\AttendanceMode;
 use App\Models\AcademicYear;
-use AttendanceMode;
 use Illuminate\Http\Request;
 use Inertia\Response;
 use Inertia\Inertia;
@@ -13,7 +13,11 @@ class AcademicYearController extends Controller
 {
     public function index(Request $request): Response
     {
-        // $attendanceModes = AttendanceMode::getValues();
+        $attendanceModes = collect(AttendanceMode::cases())->map(fn($mode) => [
+            'value' => $mode->value,
+            'label' => $mode->label(),
+        ]);
+        
         $academicYears = AcademicYear::query()
             ->when($request->search, fn($q) => $q->where('start_year', 'like', "%{$request->search}%"))
             ->when($request->sort, fn($q) => $q->orderBy($request->sort, $request->direction ?? 'asc'))
@@ -22,7 +26,7 @@ class AcademicYearController extends Controller
 
         return Inertia::render('academic-year', [
             'academicYears' => $academicYears,
-            // 'attendanceModes' => $attendanceModes,
+            'attendanceModes' => $attendanceModes,
             'filters' => $request->only(['search', 'sort', 'direction']),
         ]);
     }
