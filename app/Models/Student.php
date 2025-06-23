@@ -18,10 +18,22 @@ class Student extends Model
 
     protected static function booted()
     {
+        static::created(function (self $student) {
+            if (!is_null($student->class_id)) {
+                $activeAcademicYear = AcademicYear::where('status', 'active')->first();
+
+                ClassHistory::updateOrCreate(
+                    ['academic_year_id' => $activeAcademicYear->id, 'student_id' => $student->id],
+                    ['class_id' => $student->class_id]
+                );
+            }
+        });
         static::updated(function (self $student) {
             if ($student->isDirty('class_id')) {
+                $activeAcademicYear = AcademicYear::where('status', 'active')->first();
+
                 ClassHistory::updateOrCreate(
-                    ['academic_year_id' => $student->academic_year_id, 'student_id' => $student->id],
+                    ['academic_year_id' => $activeAcademicYear->id, 'student_id' => $student->id],
                     ['class_id' => $student->class_id]
                 );
             }
