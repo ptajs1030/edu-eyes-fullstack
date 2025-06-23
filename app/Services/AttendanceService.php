@@ -4,6 +4,7 @@ namespace App\Services;
 
 
 use App\DTOs\ShiftingAttendanceData;
+use App\Models\ClassShiftingSchedule;
 use App\Models\ClassShiftingSchedulePic;
 use App\Models\Setting;
 use App\Models\Shifting;
@@ -14,11 +15,13 @@ use Carbon\Carbon;
 class AttendanceService
 {
     public function attendanceHistory($date){
-        $attendances = ShiftingAttendance::where('submit_date', Carbon::now()->format('Y-m-d'))->get();
+       
         $date=Carbon::parse($date)->format('Y-m-d');
 
         if($date){
             $attendances = ShiftingAttendance::where('submit_date', $date)->get();
+        }else {
+            $attendances = ShiftingAttendance::whereDate('submit_date', Carbon::today())->get();
         }
 
         if ($attendances->isEmpty()) {
@@ -34,25 +37,33 @@ class AttendanceService
     }
 
     public function shiftingAttendance(ShiftingAttendanceData $data){
-        $pic = ClassShiftingSchedulePic::where('teacher_id', auth()->id())->value('class_shifting_schedule_id');
+        $day= ClassShiftingSchedule::where('day', Carbon::now()->dayOfWeek)->first();
+        
+        $pic = ClassShiftingSchedulePic::where('class_shifting_schedule_id', $day->id)->where('teacher_id', auth()->user()->id)->value('class_shifting_schedule_id');
+
         $attendace=ShiftingAttendance::where('student_id', $data->getStudent())->first();
         $late_tolerance = (int)Setting::where('key', 'late_tolerance')->value('value');
-        $start_hour = Carbon::parse(Shifting::where('id', $attendace->id)->value('start_hour'));
-        $deadline=$start_hour->addMinutes($late_tolerance);
-        $submit_hour = Carbon::parse($data->getSubmitHour());
-        
+        $class_shifting_schedule=ClassShiftingSchedule::where('id', $attendace->class_shifting_schedule_id)->first();
+        $start_hour_raw = Shifting::where('id', $class_shifting_schedule->id)->value('start_hour');
+        $start_hour = Carbon::parse(Carbon::today()->format('Y-m-d') . ' ' . $start_hour_raw, 'Asia/Jakarta');
+        $deadline = $start_hour->copy()->addMinutes($late_tolerance);
+        $submit_hour = Carbon::now()->setTimezone('Asia/Jakarta');
+
+        $minutes_of_late = $deadline->diffInMinutes($submit_hour);
+
         
 
+      
         if(!$attendace){
             abort(404, 'Student not found');
-        }else if($attendace->id != $pic){
+        }else if($attendace->class_shifting_schedule_id != $pic){
             abort(403, 'You are not allowed to access this student');
         }
 
         if ($submit_hour > $deadline) {
             $attendace->update([
                 'status' => 'late',
-                'minutes_of_late' => $submit_hour->diffInMinutes($deadline),
+                'minutes_of_late' => (int) $minutes_of_late,
                 'submit_hour' => $submit_hour->format('H:i'),
             ]);
         }else {
@@ -62,7 +73,11 @@ class AttendanceService
             ]);
         }
 
-        return $attendace;
+        return [
+            'message' => 'Attendance updated successfully',
+            'attendance' => $attendace,
+
+        ];
 
         
     }
