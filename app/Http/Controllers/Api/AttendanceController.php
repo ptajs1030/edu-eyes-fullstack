@@ -13,18 +13,22 @@ class AttendanceController extends BaseApiController
     public function __construct(protected AttendanceService $service){}
 
 
-    public function attendanceHistory(?string $date=null){
-        $data = $this->service->attendanceHistory($date);
-    
+    public function attendanceHistory(?string $date = null, ?int $class_id=null)
+    {
+        $data = $this->service->attendanceHistory($date, $class_id);
+
         return $this->success([
             'number_of_attendances' => $data['number_of_attendances'],
-            'attendances' => AttendanceResource::collection($data['attendances'])
+            'current_page' => $data['current_page'],
+            'last_page' => $data['last_page'],
+            'per_page' => $data['per_page'],
+            'attendances' => AttendanceResource::collection($data['attendances']),
         ]);
     }
 
-    public function shiftingAttendance(ShiftingAttendanceRequest $data){
+    public function shiftingAttendance(?int $student_id){
       
 
-        return $this->success( $this->service->shiftingAttendance($data->getDto()));
+        return $this->success( $this->service->shiftingAttendance($student_id));
     }
 }

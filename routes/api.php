@@ -49,8 +49,8 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
     });
    
     Route::prefix('attendance')->controller(AttendanceController::class)->group(function () {
-        Route::get('/history/{date?}', 'attendanceHistory');
-        Route::post('/shifting', 'shiftingAttendance');
+        Route::get('/history/{date?}/{class_id?}', 'attendanceHistory');
+        Route::post('/shifting/{id}', 'shiftingAttendance');
     });
 });
 
