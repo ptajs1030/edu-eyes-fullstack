@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use AcademicYearStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,6 +17,15 @@ class AcademicYear extends Model
         'attendance_mode',
         'note',
     ];
+
+    protected static function booted()
+    {
+        static::saving(function ($academicYear) {
+            if ($academicYear->status === AcademicYearStatus::Active) {
+                self::where('status', AcademicYearStatus::Active)->update(['status' => AcademicYearStatus::Completed]);
+            }
+        });
+    }
 
     public function classroomHistories()
     {
