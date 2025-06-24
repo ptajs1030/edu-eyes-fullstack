@@ -46,6 +46,8 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
     Route::controller(TeacherController::class)->group(function (){
         Route::get('/profile', 'profile');
         Route::post('/profile/change-password', 'changePassword');
+        Route::get('/students/{id?}', 'getStudents');
+        Route::get('/classrooms/{id?}', 'getClassrooms');
     });
    
     Route::prefix('attendance')->controller(AttendanceController::class)->group(function () {
