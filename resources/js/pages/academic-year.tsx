@@ -1,6 +1,7 @@
 import AcademicYearDeleteConfirmationModal from '@/components/academic-year-delete-confirmation-modal';
 import AcademicYearFormModal from '@/components/academic-year-form-modal';
 import SortDropdown from '@/components/ui/sort-drop-down';
+import SortableTableHeader from '@/components/ui/sort-table-header';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
@@ -56,6 +57,8 @@ export default function AcademicYear() {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [academicYearToDelete, setAcademicYearToDelete] = useState<AcademicYear | null>(null);
+    const [sortColumn, setSortColumn] = useState<string>('start_year');
+    const [sortDirection, setSortDirection] = useState<string>('desc');
 
     const openModal = (academicYear: AcademicYear | null = null) => {
         setSelectedAcademicYear(academicYear);
@@ -99,10 +102,17 @@ export default function AcademicYear() {
         );
     };
 
-    const handleSortChange = (sort: string, direction: string) => {
+    const handleSortChange = (column: string) => {
+        if (column === sortColumn) {
+            setSortDirection(sortDirection === 'desc' ? 'asc' : 'desc');
+        } else {
+            setSortColumn(column);
+            setSortDirection('desc');
+        }
+
         router.get(
             '/academic-years',
-            { ...filters, sort, direction },
+            { ...filters, sort: column, direction: sortDirection },
             {
                 preserveState: true,
                 replace: true,
@@ -146,10 +156,28 @@ export default function AcademicYear() {
                                     onChange={(e) => setSelectedIds(e.target.checked ? academicYears.data.map((a) => a.id) : [])}
                                 />
                             </th>
-                            <th className="p-4 text-sm font-semibold">Title</th>
-                            <th className="p-4 text-sm font-semibold">Status</th>
-                            <th className="p-4 text-sm font-semibold">Attendance Mode</th>
-                            <th className="p-4 text-sm font-semibold">Notes</th>
+                            <SortableTableHeader column="title" sortColumn={sortColumn} sortDirection={sortDirection} onSortChange={handleSortChange}>
+                                Title
+                            </SortableTableHeader>
+                            <SortableTableHeader
+                                column="status"
+                                sortColumn={sortColumn}
+                                sortDirection={sortDirection}
+                                onSortChange={handleSortChange}
+                            >
+                                Status
+                            </SortableTableHeader>
+                            <SortableTableHeader
+                                column="attendance_mode"
+                                sortColumn={sortColumn}
+                                sortDirection={sortDirection}
+                                onSortChange={handleSortChange}
+                            >
+                                Attendance Mode
+                            </SortableTableHeader>
+                            <SortableTableHeader column="note" sortColumn={sortColumn} sortDirection={sortDirection} onSortChange={handleSortChange}>
+                                Notes
+                            </SortableTableHeader>
                             <th className="p-4 text-sm font-semibold">Actions</th>
                         </tr>
                     </thead>
