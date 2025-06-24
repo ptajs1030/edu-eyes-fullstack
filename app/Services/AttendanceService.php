@@ -14,30 +14,37 @@ use Carbon\Carbon;
 
 class AttendanceService
 {
-    public function attendanceHistory($date, $class_id){
-       
+    public function attendanceHistory($date, $class_id, $type = 'in')
+    {
         $query = ShiftingAttendance::query();
 
         if ($date && $date !== 'null') {
             $parsedDate = Carbon::parse($date)->format('Y-m-d');
             $query->where('submit_date', $parsedDate);
         }
-    
+
         if ($class_id) {
             $query->whereHas('classShiftingSchedule', function ($q) use ($class_id) {
                 $q->where('class_id', $class_id);
             });
         }
-        $query->where('clock_out_hour', '!=', null);
-              
+
+        
+        if ($type === 'in') {
+            $query->whereNotNull('clock_in_hour')
+                  ->whereNull('clock_out_hour');
+        } elseif ($type === 'out') {
+            $query->whereNotNull('clock_in_hour')
+                  ->whereNotNull('clock_out_hour');
+        }
+
         $attendances = $query->paginate(10);
 
         if ($attendances->isEmpty()) {
-            abort(204, "Data Kosong"); 
+            abort(204, "Data Kosong");
         }
-
-        
-
+       
+   
         return [
             'number_of_attendances' => $attendances->total(),
             'current_page' => $attendances->currentPage(),
@@ -48,7 +55,9 @@ class AttendanceService
     }
 
     public function shiftingAttendance($student_id){
-        $day= ClassShiftingSchedule::where('day', Carbon::now()->dayOfWeek)->first();
+        $shifting = Shifting::where('end_hour', '>', Carbon::now()->setTimezone('Asia/Jakarta')->format('H:i'))->first();
+
+        $day= ClassShiftingSchedule::where('day', Carbon::now()->dayOfWeek)->where('shifting_id', $shifting->id)->first();
         
         $pic = ClassShiftingSchedulePic::where('class_shifting_schedule_id', $day->id)->where('teacher_id', auth()->user()->id)->value('class_shifting_schedule_id');
 
@@ -61,8 +70,6 @@ class AttendanceService
         $submit_hour = Carbon::now()->setTimezone('Asia/Jakarta');
 
         $minutes_of_late = $deadline->diffInMinutes($submit_hour);
-
-dd($pic, $attendace);
       
         if(!$attendace){
             abort(404, 'Student not found');
@@ -97,5 +104,23 @@ dd($pic, $attendace);
         ];
 
         
+    }
+
+    public function editAttendance(ShiftingAttendanceData $data, $attendance_id){
+        $attendance=ShiftingAttendance::where('id', $attendance_id)->first();
+        if (!$attendance) {
+            abort(404, 'Attendance not found');
+        }
+        if($attendance->submit_date != Carbon::now()->timezone('Asia/Jakarta')->format('Y-m-d')){
+            abort(403, 'You are not allowed to edit this attendance');
+        }
+        $attendance->update([
+            'status' => $data->getStatus(),
+        ]);
+
+        return [
+            'message' => 'Attendance updated successfully',
+            'attendance' => $attendance,
+        ];
     }
 }
