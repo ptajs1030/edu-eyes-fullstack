@@ -1,17 +1,18 @@
-import AnnouncementDeleteConfirmationModal from '@/components/announcement-delete-confirmation-modal';
-import AnnouncementFormModal from '@/components/announcement-form-modal';
+import AcademicYearFormModal from '@/components/academic-year-form-modal';
 import SortDropdown from '@/components/ui/sort-drop-down';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Toaster, toast } from 'sonner';
+import { Toaster } from 'sonner';
 
-type Announcement = {
+type AcademicYear = {
     id: number;
+    start_year: number;
     title: string;
-    content: string;
-    picture?: string;
+    status: string;
+    attendance_mode: string;
+    note?: string;
 };
 
 type PaginatedResponse<T, L> = {
@@ -31,44 +32,33 @@ type Link = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Announcements',
-        href: '/announcements',
+        title: 'Academic Years',
+        href: '/academic-years',
     },
 ];
 
-export default function Announcement() {
+export default function AcademicYear() {
     const sortOptions = [
-        { label: 'Title (A-Z)', value: { sort: 'title', direction: 'asc' } },
-        { label: 'Title (Z-A)', value: { sort: 'title', direction: 'desc' } },
+        { label: 'Academic Year (A-Z)', value: { sort: 'start_year', direction: 'asc' } },
+        { label: 'Academic Year (Z-A)', value: { sort: 'start_year', direction: 'desc' } },
         { label: 'Created At (Newest)', value: { sort: 'created_at', direction: 'desc' } },
         { label: 'Created At (Oldest)', value: { sort: 'created_at', direction: 'asc' } },
     ];
 
-    const { announcements, filters } = usePage<{
-        announcements: PaginatedResponse<Announcement, Link>;
+    // const { academicYears, attendanceModes, filters } = usePage<{
+    const { academicYears, filters } = usePage<{
+        academicYears: PaginatedResponse<AcademicYear, Link>;
+        // attendanceModes: string[];
+        // attendanceModes: [{ value: 'per-shift'; label: 'Per-shift' }, { value: 'per-subject'; label: 'Per-subject' }];
         filters: { search?: string; sort?: string; direction?: string };
     }>().props;
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
+    const [selectedAcademicYear, setSelectedAcademicYear] = useState<AcademicYear | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
-    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [announcementToDelete, setAnnouncementToDelete] = useState<Announcement | null>(null);
 
-    const openModal = (announcement: Announcement | null = null) => {
-        setSelectedAnnouncement(announcement);
+    const openModal = (academicYear: AcademicYear | null = null) => {
+        setSelectedAcademicYear(academicYear);
         setIsModalOpen(true);
-    };
-
-    const handleDelete = async (id: number) => {
-        router.delete(`/announcements/${id}`, {
-            onSuccess: () => {
-                toast.success('Announcement deleted successfully.');
-                router.reload();
-            },
-            onError: () => {
-                toast.error('Failed to delete announcement.');
-            },
-        });
     };
 
     const toggleSelect = (id: number) => {
@@ -76,20 +66,20 @@ export default function Announcement() {
     };
 
     const exportSelected = () => {
-        const selectedData = announcements.data.filter((a) => selectedIds.includes(a.id));
-        const headers = `Title,Content\n`;
-        const csv = selectedData.map((a) => `${a.title},${a.content}`).join('\n');
+        const selectedData = academicYears.data.filter((a) => selectedIds.includes(a.id));
+        const headers = `Title,Status\n`;
+        const csv = selectedData.map((a) => `${a.title},${a.status}`).join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'announcements.csv';
+        link.download = 'academic-years.csv';
         link.click();
     };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         router.get(
-            '/announcements',
+            '/academic-years',
             { ...(filters || {}), search: e.target.value },
             {
                 preserveState: true,
@@ -100,7 +90,7 @@ export default function Announcement() {
 
     const handleSortChange = (sort: string, direction: string) => {
         router.get(
-            '/announcements',
+            '/academic-years',
             { ...filters, sort, direction },
             {
                 preserveState: true,
@@ -111,7 +101,7 @@ export default function Announcement() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Announcements" />
+            <Head title="Academic Years" />
             <Toaster position="top-right" richColors />
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
                 <div className="flex items-center justify-between">
@@ -132,7 +122,7 @@ export default function Announcement() {
                         onClick={() => openModal()}
                         className="rounded bg-green-600 px-3 py-1 text-sm text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
-                        Add Announcement
+                        Add Accademic Year
                     </button>
                 </div>
 
@@ -142,58 +132,54 @@ export default function Announcement() {
                             <th className="p-4">
                                 <input
                                     type="checkbox"
-                                    onChange={(e) => setSelectedIds(e.target.checked ? announcements.data.map((a) => a.id) : [])}
+                                    onChange={(e) => setSelectedIds(e.target.checked ? academicYears.data.map((a) => a.id) : [])}
                                 />
                             </th>
-                            <th className="p-4 text-sm font-semibold">Picture</th>
                             <th className="p-4 text-sm font-semibold">Title</th>
-                            <th className="p-4 text-sm font-semibold">Content</th>
+                            <th className="p-4 text-sm font-semibold">Status</th>
+                            <th className="p-4 text-sm font-semibold">Attendance Mode</th>
+                            <th className="p-4 text-sm font-semibold">Notes</th>
                             <th className="p-4 text-sm font-semibold">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {announcements.data.length > 0 ? (
-                            announcements.data.map((announcement) => (
-                                <tr key={announcement.id} className="border-b">
+                        {academicYears.data.length > 0 ? (
+                            academicYears.data.map((academicYear) => (
+                                <tr key={academicYear.id} className="border-b">
                                     <td className="p-3">
                                         <input
                                             type="checkbox"
-                                            checked={selectedIds.includes(announcement.id)}
-                                            onChange={() => toggleSelect(announcement.id)}
+                                            checked={selectedIds.includes(academicYear.id)}
+                                            onChange={() => toggleSelect(academicYear.id)}
                                         />
                                     </td>
-                                    <td className="p-3">
-                                        {announcement.picture ? (
-                                            <img src={announcement.picture} alt="announcement" className="h-16 w-16 rounded-full object-cover" />
-                                        ) : (
-                                            'No Picture'
-                                        )}
-                                    </td>
-                                    <td className="p-3">{announcement.title}</td>
-                                    <td className="p-3">{announcement.content}</td>
+                                    <td className="p-3">{academicYear.title}</td>
+                                    <td className="p-3">{academicYear.status}</td>
+                                    <td className="p-3">{academicYear.attendance_mode}</td>
+                                    <td className="p-3">{academicYear.note}</td>
                                     <td className="flex gap-2 p-3">
                                         <button
-                                            onClick={() => openModal(announcement)}
+                                            onClick={() => openModal(academicYear)}
                                             className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
                                         >
                                             Edit
                                         </button>
-                                        <button
+                                        {/* <button
                                             onClick={() => {
-                                                setAnnouncementToDelete(announcement);
+                                                setAcademicYearToDelete(academicYear);
                                                 setIsDeleteModalOpen(true);
                                             }}
                                             className="rounded bg-red-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
                                         >
                                             Delete
-                                        </button>
+                                        </button> */}
                                     </td>
                                 </tr>
                             ))
                         ) : (
                             <tr>
                                 <td colSpan={5} className="p-4 text-center text-gray-600">
-                                    No announcements found.
+                                    No academicYears found.
                                 </td>
                             </tr>
                         )}
@@ -201,7 +187,7 @@ export default function Announcement() {
                 </table>
 
                 <div className="mt-4 flex justify-center gap-2">
-                    {announcements.links.map((link, i) => (
+                    {academicYears.links.map((link, i) => (
                         <button
                             key={i}
                             onClick={() => link.url && router.visit(link.url)}
@@ -212,12 +198,11 @@ export default function Announcement() {
                     ))}
                 </div>
             </div>
-            <AnnouncementFormModal isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} announcement={selectedAnnouncement} />
-            <AnnouncementDeleteConfirmationModal
-                isDeleteModalOpen={isDeleteModalOpen}
-                setIsDeleteModalOpen={setIsDeleteModalOpen}
-                handleDelete={handleDelete}
-                announcementToDelete={announcementToDelete}
+            <AcademicYearFormModal
+                isOpen={isModalOpen}
+                closeModal={() => setIsModalOpen(false)}
+                academicYear={selectedAcademicYear}
+                // attendanceModes={attendanceModes}
             />
         </AppLayout>
     );
