@@ -22,8 +22,7 @@ class ShiftingAttendanceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'student_id' => 'required|integer|exists:students,id',
-            
+            'status' => 'required|string|in:present,alpha,late,leave,sick_leave,day_off',
         ];
     }
 
