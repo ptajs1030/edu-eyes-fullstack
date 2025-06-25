@@ -2,12 +2,13 @@ import { motion } from 'framer-motion';
 
 interface Props {
     isOpen: boolean;
+    title: string;
     message: string;
     onConfirm: () => void;
     onCancel: () => void;
 }
 
-export default function ConfirmationModal({ isOpen, message, onConfirm, onCancel }: Props) {
+export default function ConfirmationModal({ isOpen, title, message, onConfirm, onCancel }: Props) {
     if (!isOpen) return null;
 
     return (
@@ -24,7 +25,7 @@ export default function ConfirmationModal({ isOpen, message, onConfirm, onCancel
                 transition={{ duration: 0.1 }}
                 className="w-full max-w-xl rounded-lg bg-white p-6 shadow-xl"
             >
-                <h2 className="mb-4 text-lg font-bold">Please Confirm</h2>
+                <h2 className="mb-4 text-lg font-bold">{title}</h2>
                 <p className="mb-4">{message}</p>
                 <div className="flex justify-end gap-2">
                     <button onClick={onCancel} className="rounded bg-gray-300 px-4 py-2 hover:cursor-pointer">

@@ -169,6 +169,7 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
             </motion.div>
             <ConfirmationModal
                 isOpen={showConfirm}
+                title="Please Confirm"
                 message="Are you sure you want to create new academic year?"
                 onConfirm={handleConfirm}
                 onCancel={() => setShowConfirm(false)}

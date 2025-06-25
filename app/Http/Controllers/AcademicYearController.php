@@ -22,7 +22,7 @@ class AcademicYearController extends Controller
         $academicYears = AcademicYear::query()
             ->when($request->search, fn($q) => $q->where('start_year', 'like', "%{$request->search}%"))
             ->when($request->sort, fn($q) => $q->orderBy($request->sort, $request->direction ?? 'asc'))
-            ->when(!$request->sort, fn($q) => $q->orderBy('start_year', 'desc'))
+            ->when(!$request->sort, fn($q) => $q->orderBy('created_at', 'desc'))
             ->paginate(10)
             ->withQueryString();
 
