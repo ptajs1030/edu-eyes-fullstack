@@ -1,6 +1,5 @@
 import AcademicYearDeleteConfirmationModal from '@/components/academic-year-delete-confirmation-modal';
 import AcademicYearFormModal from '@/components/academic-year-form-modal';
-import SortDropdown from '@/components/ui/sort-drop-down';
 import SortableTableHeader from '@/components/ui/sort-table-header';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
@@ -40,13 +39,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function AcademicYear() {
-    const sortOptions = [
-        { label: 'Academic Year (A-Z)', value: { sort: 'start_year', direction: 'asc' } },
-        { label: 'Academic Year (Z-A)', value: { sort: 'start_year', direction: 'desc' } },
-        { label: 'Created At (Newest)', value: { sort: 'created_at', direction: 'desc' } },
-        { label: 'Created At (Oldest)', value: { sort: 'created_at', direction: 'asc' } },
-    ];
-
     const { academicYears, attendanceModes, filters } = usePage<{
         academicYears: PaginatedResponse<AcademicYear, Link>;
         attendanceModes: { value: string; label: string }[];
@@ -134,7 +126,6 @@ export default function AcademicYear() {
                             placeholder="Search by title..."
                             className="w-64 rounded border px-3 py-1"
                         />
-                        <SortDropdown options={sortOptions} onSortChange={handleSortChange} />
                         <button onClick={exportSelected} className="rounded bg-indigo-600 px-3 py-1 text-sm text-white hover:cursor-pointer">
                             Export Selected
                         </button>
