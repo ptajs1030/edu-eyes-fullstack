@@ -104,7 +104,7 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
         <>
             <FormModal
                 isOpen={isOpen}
-                closeModal={closeModal}
+                onClose={closeModal}
                 title={academicYear ? 'Edit Academic Year' : 'Adding Academic Year'}
                 onSubmit={handleSubmit}
             >
