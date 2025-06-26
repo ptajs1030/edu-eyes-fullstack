@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use AcademicYearStatus;
+use App\Enums\AcademicYearStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -20,9 +20,9 @@ class AcademicYear extends Model
 
     protected static function booted()
     {
-        static::saving(function ($academicYear) {
-            if ($academicYear->status === AcademicYearStatus::Active) {
-                self::where('status', AcademicYearStatus::Active)->update(['status' => AcademicYearStatus::Completed]);
+        static::creating(function (self $academicYear) {
+            if ($academicYear->status === AcademicYearStatus::Active->value) {
+                self::where('status', AcademicYearStatus::Active->value)->update(['status' => AcademicYearStatus::Complete->value]);
             }
         });
     }

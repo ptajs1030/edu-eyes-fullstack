@@ -1,15 +1,22 @@
-<?php  
+<?php
 
-enum AcademicYearStatus: string 
+namespace App\Enums;
+
+enum AcademicYearStatus: string
 {
     case Active = 'active';
-    case Completed = 'completed';
+    case Complete = 'complete';
 
-    public function label(): string 
+    public function label(): string
     {
         return match ($this) {
             self::Active => 'Active',
-            self::Completed => 'Completed',
+            self::Complete => 'Complete',
         };
-    } 
+    }
+
+    public static function getValues(): array
+    {
+        return array_map(fn($mode) => $mode->value, self::cases());
+    }
 }
