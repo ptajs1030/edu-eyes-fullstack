@@ -20,7 +20,7 @@ class AcademicYear extends Model
 
     protected static function booted()
     {
-        static::saving(function (self $academicYear) {
+        static::creating(function (self $academicYear) {
             if ($academicYear->status === AcademicYearStatus::Active->value) {
                 self::where('status', AcademicYearStatus::Active->value)->update(['status' => AcademicYearStatus::Complete->value]);
             }
