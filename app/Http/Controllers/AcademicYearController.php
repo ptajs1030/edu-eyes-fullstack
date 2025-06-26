@@ -53,7 +53,9 @@ class AcademicYearController extends Controller
             'note' => $request->note,
         ]);
 
-        return redirect()->route('academic-years.index')->with('success', 'Academic Year created successfully.');
+        return back()
+            ->with('success', 'Academic Year created successfully.')
+            ->with('queryParams', request()->query());
     }
 
     public function update(Request $request, $id)
@@ -77,7 +79,9 @@ class AcademicYearController extends Controller
             'note' => $request->note,
         ]);
 
-        return redirect()->route('academic-years.index')->with('success', 'Academic Year updated successfully.');
+        return back()
+            ->with('success', 'Academic Year updated successfully.')
+            ->with('queryParams', request()->query());
     }
 
     public function destroy($id)
@@ -85,6 +89,11 @@ class AcademicYearController extends Controller
         $academicYear = AcademicYear::findOrFail($id);
         $academicYear->delete();
 
-        return redirect()->route('academic-years.index')->with('success', 'Academic Year deleted successfully.');
+        return redirect()
+            ->back()
+            ->with([
+                'success' => 'Academic Year deleted successfully.',
+                'queryParams' => request()->query()
+            ]);
     }
 }
