@@ -16,6 +16,5 @@ Route::prefix('sample')->group(function (){
 
     Route::middleware('auth:sanctum')->group(function () {
         Route::get('/me', [AuthTeacherController::class, 'user']);
-
     });
 });
