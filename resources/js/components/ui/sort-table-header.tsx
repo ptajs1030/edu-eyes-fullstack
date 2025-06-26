@@ -22,22 +22,17 @@ const isActive = column === sortColumn
   }
 
   return (
-    <th
-      onClick={() => onSortChange(column)}
-      className="p-4 text-sm font-semibold cursor-pointer"
-    >
-      <div className="flex items-center">
-        <span>{children}</span>
-        <span className="ml-2 flex-none">
-          {isActive
-            ? sortDirection === 'asc'
-              ? <ArrowDown   {...activeIconProps} />
-              : <ArrowUp {...activeIconProps} />
-            : <ArrowDownUp {...inactiveIconProps} />
-          }
-        </span>
-      </div>
-    </th>
+    <div className="flex items-center" onClick={() => onSortChange(column)}>
+      <span>{children}</span>
+      <span className="ml-2 flex-none">
+        {isActive
+          ? sortDirection === 'asc'
+            ? <ArrowDown   {...activeIconProps} />
+            : <ArrowUp {...activeIconProps} />
+          : <ArrowDownUp {...inactiveIconProps} />
+        }
+      </span>
+    </div>
   )
 
 

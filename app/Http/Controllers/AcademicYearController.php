@@ -26,7 +26,7 @@ class AcademicYearController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('academic-year', [
+        return Inertia::render('academic-years/index', [
             'academicYears' => $academicYears,
             'attendanceModes' => $attendanceModes,
             'filters' => $request->only(['search', 'sort', 'direction']),
