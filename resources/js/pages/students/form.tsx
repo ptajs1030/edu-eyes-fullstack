@@ -1,0 +1,350 @@
+import FormModal from '@/components/form-modal';
+import SearchableSelect from '@/components/ui/searchable-select';
+import { router } from '@inertiajs/react';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+
+interface Classroom {
+    id: number;
+    name: string;
+}
+
+interface Parent {
+    id: number;
+    full_name: string;
+}
+
+interface Student {
+    id?: number;
+    parent_id?: number | null;
+    parent?: Parent | null;
+    class_id?: number | null;
+    full_name: string;
+    code: string | null;
+    entry_year: number;
+    gender: string;
+    status: string;
+    religion: string;
+    birth_place: string;
+    date_of_birth: string;
+    address: string;
+}
+
+interface Props {
+    isOpen: boolean;
+    onClose: () => void;
+    student?: Student | null;
+    classrooms: Classroom[];
+    sexes: { value: string; label: string }[];
+    statuses: { value: string; label: string }[];
+    religions: { value: string; label: string }[];
+}
+
+export default function StudentFormModal({ isOpen, onClose, student, classrooms, sexes, statuses, religions }: Props) {
+    const [formData, setFormData] = useState<Omit<Student, 'id'>>({
+        parent_id: null,
+        class_id: null,
+        full_name: '',
+        code: '',
+        entry_year: new Date().getFullYear(),
+        gender: '',
+        status: '',
+        religion: '',
+        birth_place: '',
+        date_of_birth: '',
+        address: '',
+    });
+    const [initialParent, setInitialParent] = useState<Parent | null>(null);
+
+    useEffect(() => {
+        if (student) {
+            setFormData({
+                parent_id: student.parent_id,
+                class_id: student.class_id,
+                full_name: student.full_name,
+                code: student.code || '',
+                entry_year: student.entry_year,
+                gender: student.gender,
+                status: student.status,
+                religion: student.religion,
+                birth_place: student.birth_place,
+                date_of_birth: student.date_of_birth,
+                address: student.address,
+            });
+
+            if (student.parent) {
+                setInitialParent({
+                    id: student.parent_id as number,
+                    full_name: student.parent.full_name,
+                });
+            } else {
+                setInitialParent(null);
+            }
+        } else {
+            setFormData({
+                parent_id: null,
+                class_id: null,
+                full_name: '',
+                code: '',
+                entry_year: new Date().getFullYear(),
+                gender: '',
+                status: '',
+                religion: '',
+                birth_place: '',
+                date_of_birth: '',
+                address: '',
+            });
+            setInitialParent(null);
+        }
+    }, [student]);
+
+    const handleChange = (field: keyof Omit<Student, 'id'>, value: any) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // set default value
+        if (!formData.status) {
+            formData.status = 'active';
+        }
+
+        const { parent, ...payload } = formData; // Destructure and exclude the `parent` property
+        const requestData = {
+            ...payload, // Include all the other fields (without parent)
+            _method: student?.id ? 'PUT' : 'POST', // Use PUT for updates, POST for new entries
+        };
+
+        if (student?.id) {
+            router.post(`/students/${student.id}`, requestData, {
+                onSuccess: () => {
+                    onClose();
+                    toast.success('Student updated successfully.');
+                    router.reload();
+                },
+                onError: (errors) => {
+                    const errorMessage = Object.values(errors).join('\n');
+                    toast.error(`Failed to update student: ${errorMessage}`);
+                },
+            });
+        } else {
+            router.post('/students', requestData, {
+                onSuccess: () => {
+                    onClose();
+                    toast.success('New student successfully added.');
+                    router.reload();
+                },
+                onError: (errors) => {
+                    const errorMessage = Object.values(errors).join('\n');
+                    toast.error(`Failed to add new student: ${errorMessage}`);
+                },
+            });
+        }
+    };
+
+    return (
+        <FormModal isOpen={isOpen} onClose={onClose} title={student ? 'Edit Student' : 'Add New Student'} onSubmit={handleSubmit}>
+            <div className="mb-3">
+                <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
+                    Full Name
+                </label>
+                <input
+                    id="full_name"
+                    name="full_name"
+                    type="text"
+                    value={formData.full_name}
+                    onChange={(e) => handleChange('full_name', e.target.value)}
+                    className="w-full rounded border p-2"
+                    required
+                />
+            </div>
+            <div className="mb-3">
+                <label htmlFor="code" className="block text-sm font-medium text-gray-700">
+                    Student Code
+                </label>
+                <input
+                    id="code"
+                    name="code"
+                    type="text"
+                    value={formData.code}
+                    onChange={(e) => handleChange('code', e.target.value)}
+                    className="w-full rounded border p-2"
+                />
+            </div>
+            <div className="mb-3">
+                <label htmlFor="parent_id" className="block text-sm font-medium text-gray-700">
+                    Parent/Guardian
+                </label>
+                <SearchableSelect
+                    value={formData.parent_id}
+                    onChange={(value) => handleChange('parent_id', value ? Number(value) : null)}
+                    placeholder="Search parent by name..."
+                    endpoint={route('parents.search')}
+                    initialOption={initialParent}
+                />
+            </div>
+            <div className="mb-3">
+                <label htmlFor="class_id" className="block text-sm font-medium text-gray-700">
+                    Classroom
+                </label>
+                <select
+                    id="class_id"
+                    name="class_id"
+                    value={formData.class_id || ''}
+                    onChange={(e) => handleChange('class_id', e.target.value)}
+                    className="w-full rounded border p-2"
+                >
+                    <option value="">Select Classroom</option>
+                    {classrooms.map((classroom) => (
+                        <option key={classroom.id} value={classroom.id}>
+                            {classroom.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <div className="mb-3 flex flex-row justify-between gap-4">
+                <div className="basis-1/2">
+                    <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+                        Gender
+                    </label>
+                    <select
+                        id="gender"
+                        name="gender"
+                        value={formData.gender}
+                        onChange={(e) => handleChange('gender', e.target.value)}
+                        className="w-full rounded border p-2"
+                        required
+                    >
+                        <option value="">Select Gender</option>
+                        {sexes.map((sex) => (
+                            <option key={sex.value} value={sex.value}>
+                                {sex.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="basis-1/2">
+                    <label htmlFor="religion" className="block text-sm font-medium text-gray-700">
+                        Religion
+                    </label>
+                    <select
+                        id="religion"
+                        name="religion"
+                        value={formData.religion}
+                        onChange={(e) => handleChange('religion', e.target.value)}
+                        className="w-full rounded border p-2"
+                        required
+                    >
+                        <option value="">Select Religion</option>
+                        {religions.map((religion) => (
+                            <option key={religion.value} value={religion.value}>
+                                {religion.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+            <div className="mb-3 flex flex-row justify-between gap-4">
+                <div className="basis-1/2">
+                    <label htmlFor="entry_year" className="block text-sm font-medium text-gray-700">
+                        Entry Year
+                    </label>
+                    <input
+                        id="entry_year"
+                        name="entry_year"
+                        type="number"
+                        min="1900"
+                        max={new Date().getFullYear() + 1}
+                        value={formData.entry_year}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                entry_year: parseInt(e.target.value) || new Date().getFullYear(),
+                            })
+                        }
+                        className="w-full rounded border p-2"
+                        required
+                    />
+                </div>
+                <div className="basis-1/2">
+                    <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                        Status
+                    </label>
+                    {student ? (
+                        <select
+                            id="status"
+                            name="status"
+                            value={formData.status}
+                            onChange={(e) => handleChange('status', e.target.value)}
+                            className="w-full rounded border p-2"
+                            required
+                        >
+                            {statuses.map((status) => (
+                                <option key={status.value} value={status.value}>
+                                    {status.label}
+                                </option>
+                            ))}
+                        </select>
+                    ) : (
+                        <input type="text" value="active" disabled className="w-full rounded border bg-gray-100 px-3 py-2" />
+                    )}
+                </div>
+            </div>
+            <div className="mb-3 flex flex-row justify-between gap-4">
+                <div className="basis-1/2">
+                    <label htmlFor="birth_place" className="block text-sm font-medium text-gray-700">
+                        Birth Place
+                    </label>
+                    <input
+                        id="birth_place"
+                        name="birth_place"
+                        type="text"
+                        value={formData.birth_place}
+                        onChange={(e) => handleChange('birth_place', e.target.value)}
+                        className="w-full rounded border p-2"
+                        required
+                    />
+                </div>
+                <div className="basis-1/2">
+                    <label htmlFor="date_of_birth" className="block text-sm font-medium text-gray-700">
+                        Date of Birth
+                    </label>
+                    <input
+                        id="date_of_birth"
+                        name="date_of_birth"
+                        type="date"
+                        value={formData.date_of_birth}
+                        onChange={(e) => handleChange('date_of_birth', e.target.value)}
+                        className="w-full rounded border p-2"
+                        required
+                    />
+                </div>
+            </div>
+            <div className="mb-3"></div>
+            <div className="mb-3"></div>
+            <div className="mb-3">
+                <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                    Addresss
+                </label>
+                <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={(e) => handleChange('address', e.target.value)}
+                    className="w-full rounded border p-2"
+                    required
+                    rows={3}
+                />
+            </div>
+            <div className="flex justify-end">
+                <button type="button" onClick={onClose} className="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:cursor-pointer">
+                    Cancel
+                </button>
+                <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:cursor-pointer">
+                    {student ? 'Update' : 'Create'}
+                </button>
+            </div>
+        </FormModal>
+    );
+}

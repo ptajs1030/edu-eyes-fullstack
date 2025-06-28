@@ -35,13 +35,13 @@ export default function Table({
                         </th>
                     )}
                     {headers.map((header) => (
-                        <th key={header.key} className="p-4 text-sm font-semibold cursor-pointer">
+                        <th key={header.key} className="p-4 text-sm font-semibold cursor-pointer group">
                             {header.sortable ? (
-                                <SortableTableHeader column={header.key} sortColumn={sortColumn} sortDirection={sortDirection} onSortChange={onSort} render={({ children }) => <th className="p-4">{children}</th>} >
+                                <SortableTableHeader column={header.key} sortColumn={sortColumn} sortDirection={sortDirection} onSortChange={onSort}>
                                     {header.label}
                                 </SortableTableHeader>
                             ) : (
-                                <span className="text-sm font-semibold">{header.label}</span>
+                                <span>{header.label}</span>
                             )}
                         </th>
                     ))}

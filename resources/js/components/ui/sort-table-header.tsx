@@ -9,12 +9,12 @@ interface SortableTableHeaderProps {
 }
 
 const SortableTableHeader: React.FC<SortableTableHeaderProps> = ({ column, sortColumn, sortDirection, onSortChange, children }) => {
-const isActive = column === sortColumn
+  const isActive = column === sortColumn
 
-// className dan strokeWidth dinamis
+  // className dan strokeWidth dinamis
   const activeIconProps = {
     className: 'w-4 h-4 text-gray-800 opacity-100',
-    strokeWidth: 2,        // bikin garis ikon lebih tebal
+    strokeWidth: 1.8,
   }
   const inactiveIconProps = {
     className: 'w-4 h-4 text-gray-800 opacity-70 group-hover:opacity-100 transition-opacity',
@@ -22,7 +22,7 @@ const isActive = column === sortColumn
   }
 
   return (
-    <div className="flex items-center" onClick={() => onSortChange(column)}>
+    <div className="flex items-center justify-center" onClick={() => onSortChange(column)}>
       <span>{children}</span>
       <span className="ml-2 flex-none">
         {isActive
