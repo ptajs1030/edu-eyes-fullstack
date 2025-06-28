@@ -73,9 +73,9 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                     },
                     onError: (errors) => {
                         if (errors.start_year) {
-                            toast.error('Failed to create academic year: ' + errors.start_year);
+                            toast.error('Failed to update academic year: ' + errors.start_year);
                         } else {
-                            toast.error('Failed to create academic year');
+                            toast.error('Failed to update academic year');
                         }
                     },
                 },
@@ -104,7 +104,7 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
         <>
             <FormModal
                 isOpen={isOpen}
-                closeModal={closeModal}
+                onClose={closeModal}
                 title={academicYear ? 'Edit Academic Year' : 'Adding Academic Year'}
                 onSubmit={handleSubmit}
             >
