@@ -166,9 +166,10 @@ class StudentController extends Controller
                 ->route('students.index')
                 ->with('success', 'Student deleted successfully');
         } catch (\Exception $e) {
+            // if it's production environment, don't show detailed error
             return redirect()
                 ->back()
-                ->with('error', 'Failed to delete student: ' . $e->getMessage());
+                ->with('error', app()->environment('production') ? 'Failed to delete student' : 'Failed to delete student: ' . $e->getMessage());
         }
     }
 }

@@ -4,7 +4,7 @@ import Table from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 import StudentFormModal from './form';
 
@@ -15,6 +15,10 @@ type Student = {
     gender: string;
     religion: string;
     status: string;
+    code: string;
+    birth_place: string;
+    date_of_birth: string;
+    address: string;
     classroom?: {
         name: string;
     };
@@ -56,6 +60,19 @@ export default function StudentIndex() {
         religions: { value: string; label: string }[];
         filters: { search?: string; sort?: string; direction?: string };
     }>().props;
+
+    const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
+
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
+
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -66,24 +83,13 @@ export default function StudentIndex() {
         setIsFormOpen(true);
     };
 
-    // const handleDelete = async (id: number) => {
-    //     router.delete(`/students/${id}`, {
-    //         preserveScroll: true,
-    //         onError: () => {
-    //             toast.error('Something went wrong');
-    //         },
-    //     });
-    // };
-
     const handleDelete = async (id: number) => {
-        try {
-            router.delete(`/students/${id}`);
-
-            toast.success('harusnya gagal');
-        } catch (error) {
-            toast.error('An error occurred while deleting student data.');
-            console.error('Delete error:', error);
-        }
+        router.delete(`/students/${id}`, {
+            onSuccess: () => {
+                // Do nothing here – let the flash message logic handle it
+                router.reload();
+            }
+        });
     };
 
     const toggleSelect = (id: number) => {
@@ -148,8 +154,8 @@ export default function StudentIndex() {
                 <Table
                     headers={tableHeaders}
                     data={students.data}
-                    sortColumn={filters.sort}
-                    sortDirection={filters.direction}
+                    sortColumn={filters.sort ?? ''}
+                    sortDirection={filters.direction === "asc" || filters.direction === "desc" ? filters.direction : "asc"}
                     onSort={handleSortChange}
                     onSelectAll={(checked) => setSelectedIds(checked ? students.data.map((a) => a.id) : [])}
                     selectedIds={selectedIds}

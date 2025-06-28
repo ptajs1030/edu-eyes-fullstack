@@ -79,7 +79,11 @@ class AnnouncementController extends Controller
      */
     public function destroy(string $id)
     {
-        Announcement::destroy($id);
-        return redirect()->route('announcements.index')->with('success', 'Announcement deleted successfully.');
+        try {
+            Announcement::destroy($id);
+            return redirect()->route('announcements.index')->with('success', 'Announcement deleted successfully.');
+        } catch (\Throwable $th) {
+            return redirect()->route('announcements.index')->with('error', 'Failed to delete announcement: ' . $th->getMessage());
+        }
     }
 }
