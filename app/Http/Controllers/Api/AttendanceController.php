@@ -13,8 +13,10 @@ class AttendanceController extends BaseApiController
     public function __construct(protected AttendanceService $service){}
 
 
-    public function clockInHistory(?string $date = null, ?int $class_id=null)
+    public function clockInHistory(Request $request)
     {
+        $class_id = $request->query('class_id');
+        $date = $request->query('date');
         $data = $this->service->attendanceHistory($date, $class_id, 'in');
 
         return $this->success([
@@ -26,8 +28,10 @@ class AttendanceController extends BaseApiController
         ]);
     }
 
-    public function clockOutHistory(?string $date = null, ?int $class_id=null)
+    public function clockOutHistory(Request $request)
     {
+        $class_id = $request->query('class_id');
+        $date = $request->query('date');
         $data = $this->service->attendanceHistory($date, $class_id, 'out');
 
         return $this->success([

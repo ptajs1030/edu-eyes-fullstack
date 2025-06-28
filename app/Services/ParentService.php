@@ -40,7 +40,7 @@ class ParentService
             'Wednesday' => 'Rabu',
             'Thursday' => 'Kamis',
             'Friday' => 'Jumat',
-       
+            'Saturday' => 'Sabtu', 
         ];
         $carbon = Carbon::now()->timezone('Asia/Jakarta');
         $hari = $days[$carbon->format('l')];
@@ -77,7 +77,7 @@ class ParentService
             'Wednesday' => 'Rabu',
             'Thursday' => 'Kamis',
             'Friday' => 'Jumat',
-            'Saturday' => 'Sabtu',
+            'Saturday' => 'Sabtu', 
         ];
     
         $attendancesWithDay = [];
