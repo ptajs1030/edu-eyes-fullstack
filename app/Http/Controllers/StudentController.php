@@ -138,24 +138,6 @@ class StudentController extends Controller
         }
     }
 
-    // public function destroy($id)
-    // {
-    //     try {
-    //         $student = Student::findOrFail($id);
-    //         $student->delete();
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Student deleted successfully'
-    //         ], 200);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to delete student: ' . $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
-
     public function destroy($id)
     {
         try {
