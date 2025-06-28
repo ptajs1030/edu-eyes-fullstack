@@ -86,26 +86,16 @@ class StudentController extends Controller
 
             Student::create($validated);
 
-            return redirect()
-                ->back()
-                ->with('success', 'Student created successfully')
-                ->with('queryParams', $request->query());
+            return redirect()->back()
+                ->with('success', 'New student successfully added.');
         } catch (ValidationException $e) {
-            return redirect()
-                ->back()
+            return redirect()->back()
                 ->withErrors($e->validator)
-                ->with('toast', [
-                    'type' => 'error',
-                    'message' => 'Validation error: ' . implode(' ', $e->validator->errors()->all())
-                ])
+                ->with('error', 'Validation error: ' . implode(' ', $e->validator->errors()->all()))
                 ->withInput();
         } catch (\Exception $e) {
-            return redirect()
-                ->back()
-                ->with('toast', [
-                    'type' => 'error',
-                    'message' => 'Failed to create student: ' . $e->getMessage()
-                ])
+            return redirect()->back()
+                ->with('error', 'Failed to create student: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -129,10 +119,10 @@ class StudentController extends Controller
 
             $student->update($validated);
 
-            return redirect()->back()->with('success', 'Student updated successfully');
+            return redirect()->back()
+                ->with('success', 'Student updated successfully');
         } catch (\Exception $e) {
-            return redirect()
-                ->back()
+            return redirect()->back()
                 ->with('error', 'Failed to update student: ' . $e->getMessage())
                 ->withInput();
         }
@@ -144,13 +134,11 @@ class StudentController extends Controller
             $student = Student::findOrFail($id);
             $student->delete();
 
-            return redirect()
-                ->route('students.index')
+            return redirect()->back()
                 ->with('success', 'Student deleted successfully');
         } catch (\Exception $e) {
             // if it's production environment, don't show detailed error
-            return redirect()
-                ->back()
+            return redirect()->back()
                 ->with('error', app()->environment('production') ? 'Failed to delete student' : 'Failed to delete student: ' . $e->getMessage());
         }
     }
