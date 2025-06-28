@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BadgeInfo, GraduationCap, LayoutGrid, UserSearch } from 'lucide-react';
+import { BadgeInfo, GraduationCap, LayoutGrid, Settings2, UserSearch } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -27,6 +27,11 @@ const mainNavItems: NavItem[] = [
         title: 'Students',
         href: '/students',
         icon: UserSearch,
+    },
+    {
+        title: 'School Settings',
+        href: '/school-settings',
+        icon: Settings2,
     },
 ];
 
