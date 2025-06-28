@@ -146,8 +146,8 @@ export default function ShiftingIndex() {
                             <td className="p-3">
                                 <input type="checkbox" checked={selectedIds.includes(shifting.id)} onChange={() => toggleSelect(shifting.id)} />
                             </td>
-                            <td className="p-3">{shifting.name}</td>
-                            <td className="p-3">
+                            <td className="p-3 text-center">{shifting.name}</td>
+                            <td className="p-3 text-center">
                                 {shifting.start_hour} - {shifting.end_hour}
                             </td>
                             <td className="flex justify-center gap-2 p-3">
