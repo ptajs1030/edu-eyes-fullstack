@@ -125,7 +125,7 @@ export default function SettingIndex() {
                                 <input type="checkbox" checked={selectedIds.includes(setting.id)} onChange={() => toggleSelect(setting.id)} />
                             </td>
                             <td className="p-3">{setting.key}</td>
-                            <td className="p-3">{setting.value}</td>
+                            <td className="p-3 text-center">{setting.value}</td>
                             <td className="flex justify-center gap-2 p-3">
                                 <button
                                     onClick={() => openForm(setting)}

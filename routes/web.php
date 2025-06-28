@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\SchoolSettingController;
+use App\Http\Controllers\ShiftingController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\UserController;
 
@@ -19,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('announcements', AnnouncementController::class);
     Route::resource('academic-years', AcademicYearController::class);
     Route::resource('students', StudentController::class);
+    Route::resource('shiftings', ShiftingController::class);
     Route::resource('school-settings', SchoolSettingController::class);
 });
 
