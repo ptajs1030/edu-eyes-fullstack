@@ -16,7 +16,7 @@ interface Props {
 }
 
 export default function SettingFormModal({ isOpen, onClose, setting }: Props) {
-    const [formData, setFormData] = useState<Omit<Setting, 'id'>>({
+    const [formData, setFormData] = useState<Setting>({
         key: '',
         value: '',
     });
@@ -35,14 +35,16 @@ export default function SettingFormModal({ isOpen, onClose, setting }: Props) {
         }
     }, [setting]);
 
-    const handleChange = (field: keyof Omit<Setting, 'id'>, value: any) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!setting?.id) {
+            console.log('ga ada id');
             onClose();
             return;
         }
@@ -81,7 +83,7 @@ export default function SettingFormModal({ isOpen, onClose, setting }: Props) {
                     id="value"
                     name="value"
                     value={formData.value}
-                    onChange={(e) => handleChange('value', e.target.value)}
+                    onChange={handleChange}
                     className="w-full rounded border p-2"
                     required
                     rows={5}

@@ -23,11 +23,12 @@ class SchoolSettingController extends Controller
         ]);
     }
 
-    public function update(Request $request, Setting $setting)
+    public function update(Request $request, $id)
     {
         try {
+            $setting = Setting::findOrFail($id);
+
             $validated = $request->validate([
-                // 'key' => 'required|string|max:255',
                 'value' => 'required|string',
             ]);
 
