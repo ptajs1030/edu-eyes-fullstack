@@ -17,7 +17,7 @@ interface Props {
 }
 
 export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) {
-    const [formData, setFormData] = useState<Omit<Shifting, 'id'>>({
+    const [formData, setFormData] = useState<Shifting>({
         name: '',
         start_hour: '07:00',
         end_hour: '12:00',
@@ -33,48 +33,57 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
         } else {
             setFormData({
                 name: '',
-                start_hour: '07:00',
-                end_hour: '12:00',
+                start_hour: '',
+                end_hour: '',
             });
         }
     }, [shifting]);
 
-    const handleChange = (field: keyof Omit<Shifting, 'id'>, value: any) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const requestData = {
-            ...formData,
-            _method: shifting?.id ? 'PUT' : 'POST',
-        };
+        // const requestData = {
+        //     ...formData,
+        //     _method: shifting?.id ? 'PUT' : 'POST',
+        // };
 
         if (shifting?.id) {
-            router.post(`/shiftings/${shifting.id}`, requestData, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    onClose();
-                    router.reload();
+            router.put(
+                `/shiftings/${shifting.id}`,
+                { ...formData },
+                {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        onClose();
+                        router.reload();
+                    },
+                    onError: (errors) => {
+                        const errorMessage = Object.values(errors).join('\n');
+                        toast.error(`Failed to update shifting: ${errorMessage}`);
+                    },
                 },
-                onError: (errors) => {
-                    const errorMessage = Object.values(errors).join('\n');
-                    toast.error(`Failed to update shifting: ${errorMessage}`);
-                },
-            });
+            );
         } else {
-            router.post('/shiftings', requestData, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    onClose();
-                    router.reload();
+            router.post(
+                '/shiftings',
+                { ...formData },
+                {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        onClose();
+                        router.reload();
+                    },
+                    onError: (errors) => {
+                        const errorMessage = Object.values(errors).join('\n');
+                        toast.error(`Failed to add new shifting: ${errorMessage}`);
+                    },
                 },
-                onError: (errors) => {
-                    const errorMessage = Object.values(errors).join('\n');
-                    toast.error(`Failed to add new shifting: ${errorMessage}`);
-                },
-            });
+            );
         }
     };
 
@@ -89,7 +98,7 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
                     name="name"
                     type="text"
                     value={formData.name}
-                    onChange={(e) => handleChange('name', e.target.value)}
+                    onChange={handleChange}
                     className="w-full rounded border p-2"
                     required
                 />
@@ -104,7 +113,7 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
                         name="start_hour"
                         type="time"
                         value={formData.start_hour}
-                        onChange={(e) => handleChange('start_hour', e.target.value)}
+                        onChange={handleChange}
                         className="w-full rounded border p-2"
                         required
                     />
@@ -118,7 +127,7 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
                         name="end_hour"
                         type="time"
                         value={formData.end_hour}
-                        onChange={(e) => handleChange('end_hour', e.target.value)}
+                        onChange={handleChange}
                         className="w-full rounded border p-2"
                         required
                     />
