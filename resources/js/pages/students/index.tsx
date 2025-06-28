@@ -88,7 +88,7 @@ export default function StudentIndex() {
             onSuccess: () => {
                 // Do nothing here – let the flash message logic handle it
                 router.reload();
-            }
+            },
         });
     };
 
@@ -155,7 +155,7 @@ export default function StudentIndex() {
                     headers={tableHeaders}
                     data={students.data}
                     sortColumn={filters.sort ?? ''}
-                    sortDirection={filters.direction === "asc" || filters.direction === "desc" ? filters.direction : "asc"}
+                    sortDirection={filters.direction === 'asc' || filters.direction === 'desc' ? filters.direction : 'asc'}
                     onSort={handleSortChange}
                     onSelectAll={(checked) => setSelectedIds(checked ? students.data.map((a) => a.id) : [])}
                     selectedIds={selectedIds}
@@ -205,7 +205,11 @@ export default function StudentIndex() {
                     isOpen={!!studentToDelete}
                     onClose={() => setStudentToDelete(null)}
                     title="Confirm Deletion"
-                    message={`Are you sure you want to delete ${studentToDelete?.full_name}?`}
+                    message={
+                        <span>
+                            Are you sure you want to delete student <strong>{studentToDelete?.full_name}</strong>?
+                        </span>
+                    }
                     buttons={[
                         {
                             label: 'Cancel',

@@ -148,7 +148,7 @@ export default function ShiftingIndex() {
                             </td>
                             <td className="p-3">{shifting.name}</td>
                             <td className="p-3">
-                                { shifting.start_hour} - {shifting.end_hour}
+                                {shifting.start_hour} - {shifting.end_hour}
                             </td>
                             <td className="flex justify-center gap-2 p-3">
                                 <button
@@ -177,7 +177,11 @@ export default function ShiftingIndex() {
                     isOpen={!!shiftingToDelete}
                     onClose={() => setShiftingToDelete(null)}
                     title="Confirm Deletion"
-                    message={`Are you sure you want to delete "${shiftingToDelete?.name}"?`}
+                    message={
+                        <span>
+                            Are you sure you want to delete shifting <strong>{shiftingToDelete?.name}</strong>?
+                        </span>
+                    }
                     buttons={[
                         {
                             label: 'Cancel',

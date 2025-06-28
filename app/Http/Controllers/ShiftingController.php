@@ -89,4 +89,20 @@ class ShiftingController extends Controller
                 ->withInput();
         }
     }
+
+    public function destroy($id)
+    {
+        try {
+            $shifting = Shifting::findOrFail($id);
+            $shifting->delete();
+
+            return redirect()->back()
+                ->with('success', 'Shifting deleted successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', app()->environment('production')
+                    ? 'Failed to delete shifting'
+                    : 'Failed to delete shifting: ' . $e->getMessage());
+        }
+    }
 }
