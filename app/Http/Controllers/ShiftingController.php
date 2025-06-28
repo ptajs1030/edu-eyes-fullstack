@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Shifting;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -10,12 +11,25 @@ use Inertia\Response;
 
 class ShiftingController extends Controller
 {
+    private function formatTime($time)
+    {
+        return Carbon::createFromFormat('H:i:s', $time)->format('H:i');
+    }
+
     public function index(Request $request): Response
     {
         $shiftings = Shifting::query()
             ->when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%"))
             ->orderBy($request->sort ?? 'created_at', $request->direction ?? 'desc')
             ->paginate(10)
+            ->through(function ($shifting) {
+                return [
+                    'id' => $shifting->id,
+                    'name' => $shifting->name,
+                    'start_hour' => $this->formatTime($shifting->start_hour),
+                    'end_hour' => $this->formatTime($shifting->end_hour),
+                ];
+            })
             ->withQueryString();
 
         return Inertia::render('shiftings/index', [
@@ -45,6 +59,33 @@ class ShiftingController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to create shifting: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $shifting = Shifting::findOrFail($id);
+
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'start_hour' => 'required|date_format:H:i',
+                'end_hour' => 'required|date_format:H:i|after:start_hour',
+            ]);
+
+            $shifting->update($validated);
+
+            return redirect()->back()
+                ->with('success', 'Shifting updated successfully');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->with('error', 'Validation error: ' . implode(' ', $e->validator->errors()->all()))
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to update shifting: ' . $e->getMessage())
                 ->withInput();
         }
     }

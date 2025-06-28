@@ -47,11 +47,6 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // const requestData = {
-        //     ...formData,
-        //     _method: shifting?.id ? 'PUT' : 'POST',
-        // };
-
         if (shifting?.id) {
             router.put(
                 `/shiftings/${shifting.id}`,
