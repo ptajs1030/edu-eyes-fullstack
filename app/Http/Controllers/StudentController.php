@@ -7,31 +7,13 @@ use App\Enums\Sex;
 use App\Enums\StudentStatus;
 use App\Models\Classroom;
 use App\Models\Student;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class StudentController extends Controller
 {
-    public function searchParents(Request $request)
-    {
-        $request->validate([
-            'query' => 'required|string|min:2'
-        ]);
-
-        $parents = User::whereHas('role', function ($query) {
-            $query->where('name', 'parent');
-        })
-            ->where('full_name', 'like', '%' . $request->input('query') . '%')
-            ->limit(10)
-            ->get(['id', 'full_name']);
-
-        return response()->json($parents);
-    }
-
     public function index(Request $request): Response
     {
         // Get enum
@@ -86,26 +68,16 @@ class StudentController extends Controller
 
             Student::create($validated);
 
-            return redirect()
-                ->back()
-                ->with('success', 'Student created successfully')
-                ->with('queryParams', $request->query());
+            return redirect()->back()
+                ->with('success', 'New student successfully added.');
         } catch (ValidationException $e) {
-            return redirect()
-                ->back()
+            return redirect()->back()
                 ->withErrors($e->validator)
-                ->with('toast', [
-                    'type' => 'error',
-                    'message' => 'Validation error: ' . implode(' ', $e->validator->errors()->all())
-                ])
+                ->with('error', 'Validation error: ' . implode(' ', $e->validator->errors()->all()))
                 ->withInput();
         } catch (\Exception $e) {
-            return redirect()
-                ->back()
-                ->with('toast', [
-                    'type' => 'error',
-                    'message' => 'Failed to create student: ' . $e->getMessage()
-                ])
+            return redirect()->back()
+                ->with('error', 'Failed to create student: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -129,32 +101,14 @@ class StudentController extends Controller
 
             $student->update($validated);
 
-            return redirect()->back()->with('success', 'Student updated successfully');
+            return redirect()->back()
+                ->with('success', 'Student updated successfully');
         } catch (\Exception $e) {
-            return redirect()
-                ->back()
+            return redirect()->back()
                 ->with('error', 'Failed to update student: ' . $e->getMessage())
                 ->withInput();
         }
     }
-
-    // public function destroy($id)
-    // {
-    //     try {
-    //         $student = Student::findOrFail($id);
-    //         $student->delete();
-
-    //         return response()->json([
-    //             'success' => true,
-    //             'message' => 'Student deleted successfully'
-    //         ], 200);
-    //     } catch (\Exception $e) {
-    //         return response()->json([
-    //             'success' => false,
-    //             'message' => 'Failed to delete student: ' . $e->getMessage()
-    //         ], 500);
-    //     }
-    // }
 
     public function destroy($id)
     {
@@ -162,13 +116,11 @@ class StudentController extends Controller
             $student = Student::findOrFail($id);
             $student->delete();
 
-            return redirect()
-                ->route('students.index')
+            return redirect()->back()
                 ->with('success', 'Student deleted successfully');
         } catch (\Exception $e) {
             // if it's production environment, don't show detailed error
-            return redirect()
-                ->back()
+            return redirect()->back()
                 ->with('error', app()->environment('production') ? 'Failed to delete student' : 'Failed to delete student: ' . $e->getMessage());
         }
     }

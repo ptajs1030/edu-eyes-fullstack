@@ -110,17 +110,17 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
             formData.status = 'active';
         }
 
-        const { parent, ...payload } = formData; // Destructure and exclude the `parent` property
+        const { parent, ...payload } = formData;
         const requestData = {
-            ...payload, // Include all the other fields (without parent)
-            _method: student?.id ? 'PUT' : 'POST', // Use PUT for updates, POST for new entries
+            ...payload,
+            _method: student?.id ? 'PUT' : 'POST',
         };
 
         if (student?.id) {
             router.post(`/students/${student.id}`, requestData, {
+                preserveScroll: true,
                 onSuccess: () => {
                     onClose();
-                    toast.success('Student updated successfully.');
                     router.reload();
                 },
                 onError: (errors) => {
@@ -130,9 +130,9 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
             });
         } else {
             router.post('/students', requestData, {
+                preserveScroll: true,
                 onSuccess: () => {
                     onClose();
-                    toast.success('New student successfully added.');
                     router.reload();
                 },
                 onError: (errors) => {

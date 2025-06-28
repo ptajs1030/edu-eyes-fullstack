@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -20,7 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
-    Route::get('/parents/search', [StudentController::class, 'searchParents'])->name('parents.search');
+    Route::get('/parents/search', [UserController::class, 'searchParents'])->name('parents.search');
 });
 
 require __DIR__ . '/settings.php';
