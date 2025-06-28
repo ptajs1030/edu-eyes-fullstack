@@ -17,7 +17,7 @@ class AttendanceService
     public function attendanceHistory($date, $class_id, $type = 'in')
     {
         $query = ShiftingAttendance::query();
-
+        $class_id= request()->query('class_id');
         if ($date && $date !== 'null') {
             $parsedDate = Carbon::parse($date)->format('Y-m-d');
             $query->where('submit_date', $parsedDate);
@@ -30,10 +30,8 @@ class AttendanceService
         }
 
         
-        if ($type === 'in') {
-            $query->whereNotNull('clock_in_hour')
-                  ->whereNull('clock_out_hour');
-        } elseif ($type === 'out') {
+        
+        if ($type === 'out') {
             $query->whereNotNull('clock_in_hour')
                   ->whereNotNull('clock_out_hour');
         }
@@ -76,14 +74,20 @@ class AttendanceService
         }else if($attendace->class_shifting_schedule_id != $pic){
             abort(403, 'You are not allowed to access this student');
         }
+        
+        if ($attendace->clock_out_hour) {
+            return abort(400, 'attendance already submitted');
+        }
+        
 
         if ($submit_hour <= $deadline && !$attendace->clock_in_hour) {
+            
             $attendace->update([
                 'status' => 'present',
                 'clock_in_hour' => $submit_hour->format('H:i'),
             ]);
         }else if ($submit_hour > $deadline && !$attendace->clock_in_hour) {
-
+           
             $attendace->update([
                 'status' => 'late',
                 'minutes_of_late' => (int) $minutes_of_late,
