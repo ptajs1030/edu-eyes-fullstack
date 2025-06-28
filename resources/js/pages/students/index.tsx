@@ -5,7 +5,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Toaster } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import StudentFormModal from './form';
 
 type Student = {
@@ -48,17 +48,17 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function StudentIndex() {
-    const { students, classrooms, sexes, religions, filters } = usePage<{
+    const { students, classrooms, sexes, statuses, religions, filters } = usePage<{
         students: PaginatedResponse<Student, Link>;
         classrooms: Classroom[];
         sexes: { value: string; label: string }[];
+        statuses: { value: string; label: string }[];
         religions: { value: string; label: string }[];
         filters: { search?: string; sort?: string; direction?: string };
     }>().props;
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
-
     const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
 
     const openForm = (student: Student | null = null) => {
@@ -66,8 +66,24 @@ export default function StudentIndex() {
         setIsFormOpen(true);
     };
 
+    // const handleDelete = async (id: number) => {
+    //     router.delete(`/students/${id}`, {
+    //         preserveScroll: true,
+    //         onError: () => {
+    //             toast.error('Something went wrong');
+    //         },
+    //     });
+    // };
+
     const handleDelete = async (id: number) => {
-        router.delete(route('students.destroy', id));
+        try {
+            router.delete(`/students/${id}`);
+
+            toast.success('harusnya gagal');
+        } catch (error) {
+            toast.error('An error occurred while deleting student data.');
+            console.error('Delete error:', error);
+        }
     };
 
     const toggleSelect = (id: number) => {
@@ -175,6 +191,7 @@ export default function StudentIndex() {
                     student={selectedStudent}
                     classrooms={classrooms}
                     sexes={sexes}
+                    statuses={statuses}
                     religions={religions}
                 />
 
