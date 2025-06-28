@@ -7,31 +7,13 @@ use App\Enums\Sex;
 use App\Enums\StudentStatus;
 use App\Models\Classroom;
 use App\Models\Student;
-use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class StudentController extends Controller
 {
-    public function searchParents(Request $request)
-    {
-        $request->validate([
-            'query' => 'required|string|min:2'
-        ]);
-
-        $parents = User::whereHas('role', function ($query) {
-            $query->where('name', 'parent');
-        })
-            ->where('full_name', 'like', '%' . $request->input('query') . '%')
-            ->limit(10)
-            ->get(['id', 'full_name']);
-
-        return response()->json($parents);
-    }
-
     public function index(Request $request): Response
     {
         // Get enum
