@@ -27,7 +27,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
     const { auth } = usePage<SharedData>().props;
 
     const { data, setData, patch, errors, processing, recentlySuccessful } = useForm<Required<ProfileForm>>({
-        name: auth.user.name,
+        name: auth.user.full_name,
         email: auth.user.email,
     });
 
@@ -54,14 +54,14 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             <Input
                                 id="name"
                                 className="mt-1 block w-full"
-                                value={data.name}
+                                value={data.full_name}
                                 onChange={(e) => setData('name', e.target.value)}
                                 required
                                 autoComplete="name"
                                 placeholder="Full name"
                             />
 
-                            <InputError className="mt-2" message={errors.name} />
+                            <InputError className="mt-2" message={errors.full_name} />
                         </div>
 
                         <div className="grid gap-2">
