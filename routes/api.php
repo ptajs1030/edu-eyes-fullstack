@@ -8,7 +8,7 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');
 
-Route::prefix('sample')->group(function (){
+Route::prefix('sample')->group(function () {
     Route::get('/user/{id?}', [AuthTeacherController::class, 'show']);
     Route::get('/user-logic', [AuthTeacherController::class, 'showWithLogic']);
     Route::post('/user', [AuthTeacherController::class, 'addUser']);
