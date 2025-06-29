@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 interface Teacher {
     id: number;
-    name: string;
+    full_name: string;
 }
 
 interface Classroom {
@@ -42,7 +42,7 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
             if (classroom.main_teacher) {
                 setInitialTeacher({
                     id: classroom.main_teacher_id as number,
-                    name: classroom.main_teacher.name,
+                    full_name: classroom.main_teacher.full_name,
                 });
             } else {
                 setInitialTeacher(null);
@@ -64,8 +64,9 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
+        const { main_teacher, ...payload } = formData;
         const requestData = {
-            ...formData,
+            ...payload,
             _method: classroom?.id ? 'PUT' : 'POST',
         };
 
@@ -135,7 +136,7 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
                     value={formData.main_teacher_id}
                     onChange={(value) => handleChange('main_teacher_id', value ? Number(value) : null)}
                     placeholder="Search teacher by name..."
-                    // endpoint={route('teachers.search')}
+                    endpoint={route('teachers.search')}
                     initialOption={initialTeacher}
                 />
             </div>

@@ -28,6 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/parents/search', [UserController::class, 'searchParents'])->name('parents.search');
+    Route::get('/teachers/search', [UserController::class, 'searchTeachers'])->name('teachers.search');
 });
 
 require __DIR__ . '/settings.php';
