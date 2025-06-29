@@ -14,11 +14,13 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // })->middleware('auth:sanctum');
 
+
 // Route::prefix('sample')->group(function (){
 //     Route::get('/user/{id?}', [SampleAuthTeacherController::class, 'show']);
 //     Route::get('/user-logic', [SampleAuthTeacherController::class, 'showWithLogic']);
 //     Route::post('/user', [SampleAuthTeacherController::class, 'addUser']);
 //     Route::post('/login', [SampleAuthTeacherController::class, 'login']);
+
 
 //     Route::middleware('auth:sanctum')->group(function () {
 //         Route::get('/me', [SampleAuthTeacherController::class, 'user']);

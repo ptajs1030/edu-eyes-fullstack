@@ -2,13 +2,13 @@ import { motion } from 'framer-motion';
 
 export default function FormModal({
     isOpen,
-    closeModal,
+    onClose,
     title,
     onSubmit,
     children,
 }: {
     isOpen: boolean;
-    closeModal: () => void;
+    onClose: () => void;
     title: string;
     onSubmit: (e: React.FormEvent) => void;
     children: React.ReactNode;

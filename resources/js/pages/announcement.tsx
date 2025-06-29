@@ -4,7 +4,7 @@ import SortDropdown from '@/components/ui/sort-drop-down';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Toaster, toast } from 'sonner';
 
 type Announcement = {
@@ -48,6 +48,19 @@ export default function Announcement() {
         announcements: PaginatedResponse<Announcement, Link>;
         filters: { search?: string; sort?: string; direction?: string };
     }>().props;
+
+    const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
+
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -62,12 +75,9 @@ export default function Announcement() {
     const handleDelete = async (id: number) => {
         router.delete(`/announcements/${id}`, {
             onSuccess: () => {
-                toast.success('Announcement deleted successfully.');
+                // Do nothing here – let the flash message logic handle it
                 router.reload();
-            },
-            onError: () => {
-                toast.error('Failed to delete announcement.');
-            },
+            }
         });
     };
 
