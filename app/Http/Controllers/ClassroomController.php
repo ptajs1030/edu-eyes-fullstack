@@ -48,4 +48,31 @@ class ClassroomController extends Controller
                 ->withInput();
         }
     }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $classroom = Classroom::findOrFail($id);
+
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|unique:classrooms,name,' . $classroom->id,
+                'level' => 'required|integer|min:1',
+                'main_teacher_id' => 'required|exists:users,id',
+            ]);
+
+            $classroom->update($validated);
+
+            return redirect()->back()
+                ->with('success', 'Classroom updated successfully');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->with('error', 'Validation error: ' . implode(' ', $e->validator->errors()->all()))
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to update classroom: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
 }
