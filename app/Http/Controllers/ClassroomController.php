@@ -14,7 +14,7 @@ class ClassroomController extends Controller
     {
         $classrooms = Classroom::with('mainTeacher')
             ->when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%"))
-            ->orderBy($request->sort ?? 'name', $request->direction ?? 'asc')
+            ->orderBy($request->sort ?? 'level', $request->direction ?? 'asc')
             ->paginate(10)
             ->withQueryString();
 
@@ -73,6 +73,22 @@ class ClassroomController extends Controller
             return redirect()->back()
                 ->with('error', 'Failed to update classroom: ' . $e->getMessage())
                 ->withInput();
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $classroom = Classroom::findOrFail($id);
+            $classroom->delete();
+
+            return redirect()->back()
+                ->with('success', 'Classroom deleted successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', app()->environment('production')
+                    ? 'Failed to delete classroom'
+                    : 'Failed to delete classroom: ' . $e->getMessage());
         }
     }
 }
