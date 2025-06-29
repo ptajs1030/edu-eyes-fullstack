@@ -83,17 +83,4 @@ class AcademicYearController extends Controller
             ->with('success', 'Academic Year updated successfully.')
             ->with('queryParams', request()->query());
     }
-
-    public function destroy($id)
-    {
-        $academicYear = AcademicYear::findOrFail($id);
-        $academicYear->delete();
-
-        return redirect()
-            ->back()
-            ->with([
-                'success' => 'Academic Year deleted successfully.',
-                'queryParams' => request()->query()
-            ]);
-    }
 }
