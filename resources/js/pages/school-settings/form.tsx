@@ -44,7 +44,6 @@ export default function SettingFormModal({ isOpen, onClose, setting }: Props) {
         e.preventDefault();
 
         if (!setting?.id) {
-            console.log('ga ada id');
             onClose();
             return;
         }

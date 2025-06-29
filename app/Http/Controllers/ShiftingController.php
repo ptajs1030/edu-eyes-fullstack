@@ -20,7 +20,7 @@ class ShiftingController extends Controller
     {
         $shiftings = Shifting::query()
             ->when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%"))
-            ->orderBy($request->sort ?? 'created_at', $request->direction ?? 'desc')
+            ->orderBy($request->sort ?? 'start_hour', $request->direction ?? 'asc')
             ->paginate(10)
             ->through(function ($shifting) {
                 return [

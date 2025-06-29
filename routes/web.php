@@ -4,6 +4,7 @@ use App\Http\Controllers\AcademicYearController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AnnouncementController;
+use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\SchoolSettingController;
 use App\Http\Controllers\ShiftingController;
 use App\Http\Controllers\StudentController;
@@ -19,6 +20,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
     Route::resource('announcements', AnnouncementController::class);
     Route::resource('academic-years', AcademicYearController::class);
+    Route::resource('classrooms', ClassroomController::class);
     Route::resource('students', StudentController::class);
     Route::resource('shiftings', ShiftingController::class);
     Route::resource('school-settings', SchoolSettingController::class);
@@ -26,6 +28,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/parents/search', [UserController::class, 'searchParents'])->name('parents.search');
+    Route::get('/teachers/search', [UserController::class, 'searchTeachers'])->name('teachers.search');
 });
 
 require __DIR__ . '/settings.php';
