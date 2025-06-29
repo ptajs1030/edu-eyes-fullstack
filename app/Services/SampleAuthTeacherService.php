@@ -8,7 +8,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
-class AuthTeacherService
+class SampleAuthTeacherService
 {
     public function addUser(UserData $data)
     {
@@ -47,5 +47,11 @@ class AuthTeacherService
             'token' => $user->createToken('authToken')->plainTextToken,
             'user' => $user
         ];
+    }
+
+    public function logout()
+    {
+        Auth::logout();
+        return response()->json(['message' => 'Successfully logged out']);
     }
 }
