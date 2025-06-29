@@ -114,11 +114,15 @@ export default function StudentIndex() {
 
     const tableHeaders = [
         { key: 'full_name', label: 'Name', sortable: true },
+        { key: 'parent.full_name', label: 'Parent Name', sortable: false },
         { key: 'classroom.name', label: 'Classroom', sortable: false },
+        { key: 'code', label: 'Code', sortable: true },
+        { key: 'status', label: 'Status', sortable: true },
         { key: 'entry_year', label: 'Entry year', sortable: true },
         { key: 'gender', label: 'Gender', sortable: true },
         { key: 'religion', label: 'Religion', sortable: true },
-        { key: 'status', label: 'Status', sortable: true },
+        { key: 'date_of_birth', label: 'Day of birth', sortable: true },
+        { key: 'address', label: 'Address', sortable: false },
         { key: 'actions', label: 'Actions', sortable: false },
     ];
 
@@ -165,11 +169,17 @@ export default function StudentIndex() {
                                 <input type="checkbox" checked={selectedIds.includes(student.id)} onChange={() => toggleSelect(student.id)} />
                             </td>
                             <td className="p-3">{student.full_name}</td>
+                            <td className="p-3">{student.parent?.full_name || '-'}</td>
                             <td className="p-3">{student.classroom?.name || '-'}</td>
-                            <td className="p-3">{student.entry_year}</td>
+                            <td className="p-3 text-center">{student.code || '-'}</td>
+                            <td className="p-3">{student.status}</td>
+                            <td className="p-3 text-center">{student.entry_year}</td>
                             <td className="p-3">{student.gender}</td>
                             <td className="p-3">{student.religion}</td>
-                            <td className="p-3">{student.status}</td>
+                            <td className="p-3">
+                                {student.birth_place}, {student.date_of_birth}
+                            </td>
+                            <td className="p-3">{student.address}</td>
                             <td className="flex justify-center gap-2 p-3">
                                 <button
                                     onClick={() => openForm(student)}
