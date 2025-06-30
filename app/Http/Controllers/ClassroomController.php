@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AcademicYearStatus;
+use App\Models\AcademicYear;
 use App\Models\Classroom;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -21,6 +23,35 @@ class ClassroomController extends Controller
         return Inertia::render('classrooms/index', [
             'classrooms' => $classrooms,
             'filters' => $request->only(['search', 'sort', 'direction']),
+        ]);
+    }
+
+    public function show(Request $request, $id): Response
+    {
+        $classroom = Classroom::with(['mainTeacher', 'students' => function ($query) use ($request) {
+            // Sorting untuk relasi students
+            $sort = $request->sort ?? 'full_name';
+            $direction = $request->direction ?? 'asc';
+
+            $query->with('parent')
+                ->when($request->sort === 'parent', function ($q) use ($direction) {
+                    $q->join('users', 'students.parent_id', '=', 'users.id')
+                        ->orderBy('users.full_name', $direction)
+                        ->select('students.*');
+                })
+                ->when($request->sort !== 'parent', function ($q) use ($sort, $direction) {
+                    $q->orderBy($sort, $direction);
+                });
+        }])
+            ->withCount('students')
+            ->findOrFail($id);
+
+        $academicYear = AcademicYear::where('status', 'active')->first();
+
+        return Inertia::render('classrooms/detail', [
+            'classroom' => $classroom,
+            'academicYear' => $academicYear,
+            'filters' => $request->only(['sort', 'direction']),
         ]);
     }
 

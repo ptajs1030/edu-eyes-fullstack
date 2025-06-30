@@ -3,7 +3,7 @@ import Pagination from '@/components/ui/pagination';
 import Table from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 import ClassroomFormModal from './form';
@@ -148,19 +148,25 @@ export default function ClassroomIndex() {
                     selectedIds={selectedIds}
                     rowRender={(classroom) => (
                         <tr key={classroom.id} className="border-b">
-                            <td className="p-3">
+                            <td className="w-[10px] p-3 text-sm">
                                 <input type="checkbox" checked={selectedIds.includes(classroom.id)} onChange={() => toggleSelect(classroom.id)} />
                             </td>
-                            <td className="p-3">{classroom.name}</td>
-                            <td className="p-3">Level {classroom.level}</td>
-                            <td className="p-3">{classroom.main_teacher ? classroom.main_teacher.full_name : '-- Not assigned --'}</td>
-                            <td className="flex justify-center gap-2 p-3">
+                            <td className="p-3 text-sm">{classroom.name}</td>
+                            <td className="p-3 text-sm">Level {classroom.level}</td>
+                            <td className="p-3 text-sm">{classroom.main_teacher ? classroom.main_teacher.full_name : '-- Not assigned --'}</td>
+                            <td className="flex gap-2 p-3">
                                 <button
                                     onClick={() => openForm(classroom)}
                                     className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
                                 >
                                     Edit
                                 </button>
+                                <Link
+                                    href={route('classrooms.show', classroom.id)}
+                                    className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
+                                >
+                                    Detail
+                                </Link>
                                 <button
                                     onClick={() => setClassroomToDelete(classroom)}
                                     className="rounded bg-red-500 px-3 py-1 text-sm text-white hover:cursor-pointer"

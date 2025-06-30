@@ -89,7 +89,7 @@ class StudentController extends Controller
                 'parent_id' => 'required|exists:users,id',
                 'class_id' => 'nullable|exists:classrooms,id',
                 'full_name' => 'required|string|max:255',
-                'code' => 'nullable|string|unique:students,code',
+                'code' => 'nullable|string|unique:students,code,' . $student->id,
                 'entry_year' => 'required|digits:4|integer|min:1900|max:' . (date('Y') + 1),
                 'gender' => 'required|in:' . implode(',', Sex::getValues()),
                 'status' => 'required|in:' . implode(',', StudentStatus::getValues()),
