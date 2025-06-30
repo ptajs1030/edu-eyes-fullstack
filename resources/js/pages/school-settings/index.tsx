@@ -121,12 +121,12 @@ export default function SettingIndex() {
                     selectedIds={selectedIds}
                     rowRender={(setting) => (
                         <tr key={setting.id} className="border-b">
-                            <td className="p-3">
+                            <td className="w-[10px] p-3 text-sm">
                                 <input type="checkbox" checked={selectedIds.includes(setting.id)} onChange={() => toggleSelect(setting.id)} />
                             </td>
-                            <td className="p-3">{setting.key}</td>
-                            <td className="p-3 text-center">{setting.value}</td>
-                            <td className="flex justify-center gap-2 p-3">
+                            <td className="p-3 text-sm">{setting.key}</td>
+                            <td className="p-3 text-sm">{setting.value}</td>
+                            <td className="flex gap-2 p-3">
                                 <button
                                     onClick={() => openForm(setting)}
                                     className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"

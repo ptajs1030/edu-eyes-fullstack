@@ -146,18 +146,18 @@ export default function AcademicYearIndex() {
                     emptyMessage="No academic years found."
                     rowRender={(academicYear) => (
                         <tr key={academicYear.id} className="border-b">
-                            <td className="p-3">
+                            <td className="w-[10px] p-3 text-sm">
                                 <input
                                     type="checkbox"
                                     checked={selectedIds.includes(academicYear.id)}
                                     onChange={() => toggleSelect(academicYear.id)}
                                 />
                             </td>
-                            <td className="p-3">{academicYear.title}</td>
-                            <td className="p-3">{academicYear.status}</td>
-                            <td className="p-3">{academicYear.attendance_mode}</td>
-                            <td className="p-3">{academicYear.note}</td>
-                            <td className="flex justify-center gap-2 p-3">
+                            <td className="p-3 text-sm">{academicYear.title}</td>
+                            <td className="p-3 text-sm">{academicYear.status}</td>
+                            <td className="p-3 text-sm">{academicYear.attendance_mode}</td>
+                            <td className="p-3 text-sm">{academicYear.note}</td>
+                            <td className="flex gap-2 p-3">
                                 <button
                                     onClick={() => openModal(academicYear)}
                                     className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
