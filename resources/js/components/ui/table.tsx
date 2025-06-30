@@ -24,9 +24,9 @@ export default function Table({
     return (
         <table className="w-full border-collapse rounded-lg bg-white text-black shadow-sm">
             <thead>
-                <tr className="border-b bg-gray-100 text-gray-800">
+                <tr className="border-b bg-gray-100 text-gray-800 ">
                     {onSelectAll && (
-                        <th className="p-4">
+                        <th className="p-4 text-start">
                             <input
                                 type="checkbox"
                                 onChange={(e) => onSelectAll(e.target.checked)}
@@ -35,7 +35,7 @@ export default function Table({
                         </th>
                     )}
                     {headers.map((header) => (
-                        <th key={header.key} className="p-4 text-sm font-semibold cursor-pointer group">
+                        <th key={header.key} className="p-4 text-sm font-semibold cursor-pointer group text-start">
                             {header.sortable ? (
                                 <SortableTableHeader column={header.key} sortColumn={sortColumn} sortDirection={sortDirection} onSortChange={onSort}>
                                     {header.label}
