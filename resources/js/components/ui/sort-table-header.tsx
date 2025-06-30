@@ -22,7 +22,7 @@ const SortableTableHeader: React.FC<SortableTableHeaderProps> = ({ column, sortC
   }
 
   return (
-    <div className="flex items-center justify-center" onClick={() => onSortChange(column)}>
+    <div className="flex items-center" onClick={() => onSortChange(column)}>
       <span>{children}</span>
       <span className="ml-2 flex-none">
         {isActive
