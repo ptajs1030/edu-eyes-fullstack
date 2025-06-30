@@ -7,12 +7,12 @@ use App\Http\Requests\Api\AuthRequest;
 use App\Http\Requests\Api\UserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
-use App\Services\AuthTeacherService;
+use App\Services\SampleAuthTeacherService;
 use Illuminate\Http\JsonResponse;
 
-class AuthTeacherController extends BaseApiController
+class SampleAuthTeacherController extends BaseApiController
 {
-    public function __construct(protected AuthTeacherService $service)
+    public function __construct(protected SampleAuthTeacherService $service)
     {
     }
 
@@ -83,7 +83,7 @@ class AuthTeacherController extends BaseApiController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function user(): JsonResponse
+    public function profile(): JsonResponse
     {
         return $this->resource(UserResource::make(auth()->user()));
     }

@@ -10,6 +10,10 @@ class ShiftingAttendance extends Model
         'student_id',
         'class_shifting_schedule_id',
         'submit_date',
+        'minutes_of_late',
+        'clock_in_hour',
+        'clock_out_hour',
+        'submit_hour',
         'status',
         'other_columns'
     ];
