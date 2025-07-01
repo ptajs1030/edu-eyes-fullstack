@@ -54,12 +54,19 @@ class AttendanceService
 
     public function shiftingAttendance($student_id){
         $shifting = Shifting::where('end_hour', '>', Carbon::now()->setTimezone('Asia/Jakarta')->format('H:i'))->first();
-
+        if (!$shifting) {
+            abort(404, 'No shifting is active at this hour.');
+        }
         $day= ClassShiftingSchedule::where('day', Carbon::now()->dayOfWeek)->where('shifting_id', $shifting->id)->first();
-        
+        if (!$day) {
+            abort(404, 'No class schedule found for today.');
+        }
         $pic = ClassShiftingSchedulePic::where('class_shifting_schedule_id', $day->id)->where('teacher_id', auth()->user()->id)->value('class_shifting_schedule_id');
-
+        if (!$pic) {
+            abort(403, 'You are not assigned to this class schedule.');
+        }
         $attendace=ShiftingAttendance::where('student_id', $student_id)->first();
+        
         $late_tolerance = (int)Setting::where('key', 'late_tolerance')->value('value');
         $class_shifting_schedule=ClassShiftingSchedule::where('id', $attendace->class_shifting_schedule_id)->first();
         $start_hour_raw = Shifting::where('id', $class_shifting_schedule->shifting_id)->value('start_hour');
@@ -69,6 +76,8 @@ class AttendanceService
 
         $minutes_of_late = $deadline->diffInMinutes($submit_hour);
       
+
+        
         if(!$attendace){
             abort(404, 'Student not found');
         }else if($attendace->class_shifting_schedule_id != $pic){
