@@ -17,7 +17,7 @@ class ClassShiftingSchedule extends Model
 
     public function shifting()
     {
-        return $this->belongsTo(Shifting::class, 'shift_id');
+        return $this->belongsTo(Shifting::class, 'shifting_id');
     }
 
     public function classroom()

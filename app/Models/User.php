@@ -63,7 +63,7 @@ class User extends Authenticatable
 
     public function teachers()
     {
-        return $this->hasMany(Classroom::class);
+        return $this->hasMany(Classroom::class, 'class_id');
     }
 
     public function academicYears()
