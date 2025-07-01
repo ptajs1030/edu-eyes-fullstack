@@ -143,14 +143,14 @@ export default function ShiftingIndex() {
                     selectedIds={selectedIds}
                     rowRender={(shifting) => (
                         <tr key={shifting.id} className="border-b">
-                            <td className="p-3">
+                            <td className="w-[10px] p-3 text-sm">
                                 <input type="checkbox" checked={selectedIds.includes(shifting.id)} onChange={() => toggleSelect(shifting.id)} />
                             </td>
-                            <td className="p-3 text-center">{shifting.name}</td>
-                            <td className="p-3 text-center">
+                            <td className="p-3 text-sm">{shifting.name}</td>
+                            <td className="p-3 text-sm">
                                 {shifting.start_hour} - {shifting.end_hour}
                             </td>
-                            <td className="flex justify-center gap-2 p-3">
+                            <td className="flex gap-2 p-3">
                                 <button
                                     onClick={() => openForm(shifting)}
                                     className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
