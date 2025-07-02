@@ -26,8 +26,13 @@ class GetCurrentStudent
             }else {
                 return response()->json(['error' => 'Student not found'], 404);
             }
-        }else if (!$studentId) {
-            return response()->json(['error' => 'X-Student-ID header is required'], 400);
+        }else if (!$studentId && $user) {
+            $student = Student::where('parent_id', $user->id)->first();
+            if ($student) {
+                $request->attributes->set('current_student', $student);
+            } else {
+                return response()->json(['message' => 'No student found for this user'], 404);
+            }
         } 
 
         return $next($request);
