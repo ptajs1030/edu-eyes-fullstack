@@ -24,7 +24,7 @@ class AttendanceController extends BaseApiController
             'current_page' => $data['current_page'],
             'last_page' => $data['last_page'],
             'per_page' => $data['per_page'],
-            'attendances' => AttendanceResource::collection($data['attendances']),
+            'attendances' => $data['attendances'],
         ]);
     }
 
