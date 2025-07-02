@@ -68,11 +68,11 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
             Route::post('/change-password', 'changePassword');
         });
         Route::get('/announcements/{id?}', 'getAnnouncements');
-    
+        
         Route::prefix('attendance')->group(function (){
             Route::get('/', 'todayAttendance');
             Route::get('/history/{date?}', 'attendanceHistory');
         });
     });
-    Route::get('/students', 'getStudents');
+    Route::get('/students/{id?}', 'getStudents');
 });
