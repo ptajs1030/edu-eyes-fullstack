@@ -71,7 +71,7 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
         
         Route::prefix('attendance')->group(function (){
             Route::get('/', 'todayAttendance');
-            Route::get('/history/{date?}', 'attendanceHistory');
+            Route::get('/history', 'attendanceHistory');
         });
     });
     Route::get('/students/{id?}', 'getStudents');
