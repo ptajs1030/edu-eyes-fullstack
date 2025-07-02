@@ -51,6 +51,13 @@ class User extends Authenticatable
         ];
     }
 
+    // helper to get teacher
+    public function scopeTeachers($query)
+    {
+        return $query->whereHas('role', fn($q) => $q->where('name', 'teacher'));
+    }
+
+    // relation
     public function role()
     {
         return $this->belongsTo(Role::class, 'role_id');
@@ -76,8 +83,8 @@ class User extends Authenticatable
         return $this->belongsToMany(Student::class, 'class_histories', 'class_id', 'student_id');
     }
 
-    public function classShiftingSchedulePics()
+    public function assignedSchedules()
     {
-        return $this->hasMany(ClassShiftingSchedulePic::class, 'teacher_id');
+        return $this->belongsToMany(ClassShiftingSchedule::class, 'class_shifting_schedule_pics');
     }
 }

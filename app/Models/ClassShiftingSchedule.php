@@ -30,8 +30,9 @@ class ClassShiftingSchedule extends Model
         return $this->hasMany(ShiftingAttendance::class);
     }
 
-    public function classShiftingSchedulePics()
+    public function assignedTeachers()
     {
-        return $this->hasMany(ClassShiftingSchedulePic::class);
+        return $this->belongsToMany(User::class, 'class_shifting_schedule_pics')
+            ->using(ClassShiftingSchedulePic::class);
     }
 }
