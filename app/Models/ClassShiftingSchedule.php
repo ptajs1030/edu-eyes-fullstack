@@ -17,7 +17,7 @@ class ClassShiftingSchedule extends Model
 
     public function shifting()
     {
-        return $this->belongsTo(Shifting::class, 'shift_id');
+        return $this->belongsTo(Shifting::class);
     }
 
     public function classroom()
@@ -30,8 +30,9 @@ class ClassShiftingSchedule extends Model
         return $this->hasMany(ShiftingAttendance::class);
     }
 
-    public function classShiftingSchedulePics()
+    public function assignedTeachers()
     {
-        return $this->hasMany(ClassShiftingSchedulePic::class);
+        return $this->belongsToMany(User::class, 'class_shifting_schedule_pics')
+            ->using(ClassShiftingSchedulePic::class);
     }
 }
