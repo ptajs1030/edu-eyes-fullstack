@@ -39,8 +39,8 @@ class Classroom extends Model
             ->withPivot('academic_year_id');
     }
 
-    public function classShiftingSchedules()
+    public function shiftingSchedules()
     {
-        return $this->hasMany(ClassShiftingSchedule::class);
+        return $this->hasMany(ClassShiftingSchedule::class, 'class_id');
     }
 }
