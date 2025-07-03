@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\AuthData;
+use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -28,11 +29,35 @@ class AuthService
         Auth::login($user);
         $token = $user->createToken('authToken')->plainTextToken;
 
-        return [
-            'user' => $user,
+        $response = [
+            'user' => $user->load('role'), 
             'token' => $token,
         ];
+
+        if ($user->role->name === 'parent') {
+            $studentId = request()->header('X-Student-ID');
+
+            $student = null;
+            if ($studentId) {
+                $student = Student::where('id', $studentId)
+                            ->where('parent_id', $user->id)
+                            ->first();
+            }
+
+            if (!$student) {
+                $student = Student::where('parent_id', $user->id)->first();
+            }
+
+            if (!$student) {
+                abort(404, 'No student found for this parent');
+            }
+
+            $response['student_id'] = $student->id;
+        }
+
+        return $response;
     }
+
 
     /**
      * Logout the current user.
