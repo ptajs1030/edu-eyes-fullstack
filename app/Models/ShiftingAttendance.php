@@ -19,8 +19,13 @@ class ShiftingAttendance extends Model
         return $this->belongsTo(Student::class, 'student_id');
     }
 
-    public function classShiftingSchedule()
+    public function classroom()
     {
-        return $this->belongsTo(ClassShiftingSchedule::class, 'class_shifting_schedule_id');
+        return $this->belongsTo(Classroom::class, 'class_id');
+    }
+
+    public function academicYear()
+    {
+        return $this->belongsTo(AcademicYear::class);
     }
 }

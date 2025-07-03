@@ -54,19 +54,12 @@ class Student extends Model
         return $this->belongsTo(Classroom::class, 'class_id');
     }
 
-    public function academicYearHistories()
+    public function classHistories()
     {
-        return $this->belongsToMany(AcademicYear::class, 'class_histories', 'student_id', 'academic_year_id')
-            ->withPivot('class_id');
+        return $this->hasMany(ClassHistory::class);
     }
 
-    public function classroomHistories()
-    {
-        return $this->belongsToMany(Classroom::class, 'class_histories', 'student_id', 'class_id')
-            ->withPivot('academic_year_id');
-    }
-
-    public function attendances()
+    public function shiftingAttendances()
     {
         return $this->hasMany(ShiftingAttendance::class);
     }

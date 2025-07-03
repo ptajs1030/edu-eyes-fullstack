@@ -22,7 +22,7 @@ class ClassHistory extends Model
 
     public function class()
     {
-        return $this->belongsTo(Classroom::class);
+        return $this->belongsTo(Classroom::class, 'class_id');
     }
 
     public function student()

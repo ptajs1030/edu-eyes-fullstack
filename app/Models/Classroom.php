@@ -27,20 +27,18 @@ class Classroom extends Model
         return $this->belongsTo(User::class, 'main_teacher_id');
     }
 
-    public function academicYearHistories()
+    public function classHistories()
     {
-        return $this->belongsToMany(AcademicYear::class, 'class_histories', 'class_id', 'academic_year_id')
-            ->withPivot('student_id');
-    }
-
-    public function studentHistories()
-    {
-        return $this->belongsToMany(Student::class, 'class_histories', 'class_id', 'student_id')
-            ->withPivot('academic_year_id');
+        return $this->hasMany(ClassHistory::class, 'class_id');
     }
 
     public function shiftingSchedules()
     {
         return $this->hasMany(ClassShiftingSchedule::class, 'class_id');
+    }
+
+    public function shiftingAttendances()
+    {
+        return $this->hasMany(ShiftingAttendance::class, 'class_id');
     }
 }
