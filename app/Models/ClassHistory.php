@@ -20,9 +20,9 @@ class ClassHistory extends Model
         return $this->belongsTo(AcademicYear::class);
     }
 
-    public function class()
+    public function classroom()
     {
-        return $this->belongsTo(Classroom::class);
+        return $this->belongsTo(Classroom::class, 'class_id');
     }
 
     public function student()
