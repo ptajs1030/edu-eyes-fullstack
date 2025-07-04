@@ -36,10 +36,4 @@ class AcademicYear extends Model
     {
         return $this->hasMany(ShiftingAttendance::class);
     }
-
-    public function studentHistories()
-    {
-        return $this->belongsToMany(Student::class, 'class_histories', 'academic_year_id', 'student_id')
-            ->withPivot('class_id');
-    }
 }

@@ -8,10 +8,18 @@ class ShiftingAttendance extends Model
 {
     protected $fillable = [
         'student_id',
-        'class_shifting_schedule_id',
+        'class_id',
+        'academic_year_id',
+        'shifting_name',
+        'shifting_start_hour',
+        'shifting_end_hour',
         'submit_date',
+        'clock_in_hour',
+        'clock_out_hour',
         'status',
-        'other_columns'
+        'minutes_of_late',
+        'note',
+        'day_off_reason',
     ];
 
     public function student()
