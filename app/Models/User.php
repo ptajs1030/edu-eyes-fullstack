@@ -77,4 +77,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany(ClassShiftingSchedule::class, 'class_shifting_schedule_pics', 'teacher_id', 'class_shifting_schedule_id');
     }
+
+    public function teachingSubjects()
+    {
+        return $this->hasMany(ClassSubjectSchedule::class, 'teacher_id');
+    }
 }

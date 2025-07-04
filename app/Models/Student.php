@@ -63,4 +63,9 @@ class Student extends Model
     {
         return $this->hasMany(ShiftingAttendance::class);
     }
+
+    public function subjectAttendances()
+    {
+        return $this->hasMany(SubjectAttendance::class);
+    }
 }

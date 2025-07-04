@@ -41,4 +41,9 @@ class Classroom extends Model
     {
         return $this->hasMany(ShiftingAttendance::class, 'class_id');
     }
+
+    public function subjectSchedules()
+{
+    return $this->hasMany(ClassSubjectSchedule::class, 'class_id');
+}
 }
