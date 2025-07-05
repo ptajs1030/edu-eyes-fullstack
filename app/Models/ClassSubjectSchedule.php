@@ -11,6 +11,9 @@ class ClassSubjectSchedule extends Model
 
     protected $fillable = ['class_id', 'subject_id', 'teacher_id', 'day', 'start_hour', 'end_hour'];
 
+    // not used timestamps
+    public $timestamps = false;
+
     public function classroom()
     {
         return $this->belongsTo(Classroom::class, 'class_id');
