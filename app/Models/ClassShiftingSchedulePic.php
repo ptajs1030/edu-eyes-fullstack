@@ -16,14 +16,4 @@ class ClassShiftingSchedulePic extends Pivot
 
     // not used timestamps
     public $timestamps = false;
-
-    public function classShiftingSchedule()
-    {
-        return $this->belongsTo(ClassShiftingSchedule::class, 'class_shifting_schedule_id');
-    }
-
-    public function teacher()
-    {
-        return $this->belongsTo(User::class, 'teacher_id');
-    }
 }
