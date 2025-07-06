@@ -29,13 +29,11 @@ class AcademicYear extends Model
 
     public function classroomHistories()
     {
-        return $this->belongsToMany(Classroom::class, 'class_histories', 'academic_year_id', 'class_id')
-            ->withPivot('student_id');
+        return $this->hasMany(ClassHistory::class);
     }
 
-    public function studentHistories()
+    public function shiftingAttendances()
     {
-        return $this->belongsToMany(Student::class, 'class_histories', 'academic_year_id', 'student_id')
-            ->withPivot('class_id');
+        return $this->hasMany(ShiftingAttendance::class);
     }
 }
