@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
                 ShiftingSeeder::class,
                 ClassShiftingScheduleSeeder::class,
                 ClassShiftingSchedulePicSeeder::class,
+                ShiftingAttendanceSeeder::class,
                 SubjectSeeder::class,
                 ClassSubjectScheduleSeeder::class,
                 SubjectAttendanceSeeder::class,
