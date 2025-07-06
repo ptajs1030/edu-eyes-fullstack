@@ -24,28 +24,33 @@ class ParentController extends BaseApiController
         return $this->success($this->service->changePassword($data->getDto()));
     }
 
-    public function getStudents(){
-        return $this->resource(StudentResource::collection(Student::where('parent_id', auth()->user()->id)->get()));
+    public function getStudents(?int $id = null){
+        if ($id) {
+            return $this->resource(
+                StudentResource::make(
+                    Student::with("classroom")->findOrFail($id)
+                )
+            );
+        }else {
+            return $this->resource(StudentResource::collection(Student::where('parent_id', auth()->user()->id)->with("classroom")->get()));
+        }
     }
 
-    public function getAnnouncements(?int $id = null)
+    public function getAnnouncements(Request $request, ?int $id = null )
     {
-        if ($id) {
-            return $this->resource(AnnouncementResource::make(Announcement::findOrFail($id)));
-        }
-        return $this->resource(AnnouncementResource::collection(Announcement::paginate(10)->getCollection()));
+        return $this->success($this->service->getAnnouncements($id, $request->search));
     }
 
     public function todayAttendance(Request $request){
         $student = $request->attributes->get('current_student');
-       
+      
         return $this->success($this->service->todayAttendance($student));
     }
 
-    public function attendanceHistory(Request $request, ?string $date=null){
+    public function attendanceHistory(Request $request,){
 
         $student = $request->attributes->get('current_student');
-        
+        $date = $request->query('date');
         return $this->success($this->service->attendanceHistory($date, $student));
     }
 }

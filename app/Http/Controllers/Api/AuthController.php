@@ -12,7 +12,9 @@ class AuthController extends BaseApiController
     public function __construct(protected AuthService $service){}
 
     public function login(AuthRequest $data){
-        return $this->success($this->service->login($data->getDto()));
+        $response = $this->service->login($data->getDto());
+
+        return $this->success($response);
     }
 
     public function logout(){

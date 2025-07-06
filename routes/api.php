@@ -39,7 +39,7 @@ Route::prefix('auth')->controller(AuthController::class)->group(function (){
 
 });
 
-Route::middleware(['auth:sanctum'])->controller(ForgotPasswordController::class)->group(function () {
+Route::controller(ForgotPasswordController::class)->group(function () {
     Route::post('auth/forgot-password', 'sendLink');
 });
 
@@ -61,17 +61,18 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
 });
 
 
-Route::prefix('parent')->middleware(['auth:sanctum', 'parent', 'getCurrentStudent'])->controller(ParentController::class)->group(function (){
-    Route::group(['prefix' => 'profile'], function () {
-        Route::get('/', 'profile');
-        Route::post('/change-password', 'changePassword');
-        Route::get('/students', 'getStudents');
+Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(ParentController::class)->group(function (){
+    Route::middleware(['getCurrentStudent'])->group(function (){
+        Route::group(['prefix' => 'profile'], function () {
+            Route::get('/', 'profile');
+            Route::post('/change-password', 'changePassword');
+        });
+        Route::get('/announcements/{id?}', 'getAnnouncements');
+        
+        Route::prefix('attendance')->group(function (){
+            Route::get('/', 'todayAttendance');
+            Route::get('/history', 'attendanceHistory');
+        });
     });
-    Route::get('/students', 'getStudents');
-    Route::get('/announcements/{id?}', 'getAnnouncements');
-
-    Route::prefix('attendance')->group(function (){
-        Route::get('/', 'todayAttendance');
-        Route::get('/history/{date?}', 'attendanceHistory');
-    });
+    Route::get('/students/{id?}', 'getStudents');
 });

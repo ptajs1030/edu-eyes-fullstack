@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\ChangePasswordData;
+use App\Models\Announcement;
 use App\Models\ShiftingAttendance;
 use Carbon\Carbon;
 
@@ -26,9 +27,9 @@ class ParentService
     }
 
     public function todayAttendance($student){
-
-        $attendance = ShiftingAttendance::where('student_id', $student->id)->where('submit_date', Carbon::now()->timezone('Asia/Jakarta')->format('Y-m-d'))->first();
-        
+        $attendance = ShiftingAttendance::where('student_id', $student->id)
+        ->where('submit_date', Carbon::now('Asia/Jakarta')->format('Y-m-d'))
+        ->first();
         if (!$attendance){
             return [abort(404,'Attendance not found')];
         }
@@ -55,12 +56,13 @@ class ParentService
 
     public function attendanceHistory($date, $student){
 
-        $date = Carbon::parse($date)->format('Y-m-d');
+        
         $query = ShiftingAttendance::query();
         $query->where('student_id', $student->id);
-
+        
         if ($date) {
-            $query->where('submit_date', $date);
+            $date = Carbon::parse($date) ;
+            $query->whereYear('submit_date', $date->year)->whereMonth('submit_date', $date->month);
         }
         
         $attendance = $query->paginate(10);
@@ -94,5 +96,27 @@ class ParentService
             'per_page' => $attendance->perPage(),
             'attendances' => $attendancesWithDay,
         ];
+    }
+
+    public function getAnnouncements($id, $search){
+        if ($id) {
+            $annoucement = Announcement::where('id', $id)->first();
+            if (!$annoucement) {
+                return abort(404,'Announcement not found');
+            }
+            return $annoucement;
+        }else {
+            $query = Announcement::query();
+            if ($search) {
+                $query->where(function($q) use ($search) {
+                    $q->where('title', 'like', "%$search%")
+                      ->orWhere('content', 'like', "%$search%");
+                });
+            }
+
+            $annoucements = $query->paginate(10);
+            return $annoucements;
+        }
+
     }
 }
