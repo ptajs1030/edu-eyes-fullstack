@@ -12,7 +12,7 @@ class Shifting extends Model
         'end_hour'
     ];
 
-    public function classShiftingSchedules()
+    public function shiftingSchedules()
     {
         return $this->hasMany(ClassShiftingSchedule::class);
     }

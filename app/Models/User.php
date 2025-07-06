@@ -51,33 +51,35 @@ class User extends Authenticatable
         ];
     }
 
+    // helper to get teacher
+    public function scopeTeachers($query)
+    {
+        return $query->whereHas('role', fn($q) => $q->where('name', 'teacher'));
+    }
+
+    // relation
     public function role()
     {
-        return $this->belongsTo(Role::class, 'role_id');
+        return $this->belongsTo(Role::class);
     }
 
-    public function students()
+    public function children()
     {
-        return $this->hasMany(Student::class);
+        return $this->hasMany(Student::class, 'parent_id');
     }
 
-    public function teachers()
+    public function classrooms()
     {
-        return $this->hasMany(Classroom::class);
+        return $this->hasMany(Classroom::class, 'main_teacher_id');
     }
 
-    public function academicYears()
+    public function shiftingSchedules()
     {
-        return $this->belongsToMany(AcademicYear::class, 'class_histories', 'class_id', 'academic_year_id');
+        return $this->belongsToMany(ClassShiftingSchedule::class, 'class_shifting_schedule_pics', 'teacher_id', 'class_shifting_schedule_id');
     }
 
-    public function studentHistories()
+    public function teachingSubjects()
     {
-        return $this->belongsToMany(Student::class, 'class_histories', 'class_id', 'student_id');
-    }
-
-    public function classShiftingSchedulePics()
-    {
-        return $this->hasMany(ClassShiftingSchedulePic::class, 'teacher_id');
+        return $this->hasMany(ClassSubjectSchedule::class, 'teacher_id');
     }
 }
