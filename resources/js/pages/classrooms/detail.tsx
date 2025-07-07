@@ -37,13 +37,6 @@ interface Props {
     };
 }
 
-// const breadcrumbs: BreadcrumbItem[] = [
-//     {
-//         title: 'Classrooms',
-//         href: '/classrooms',
-//     },
-// ];
-
 const breadcrumbs = (classroomName: string): BreadcrumbItem[] => [
     {
         title: 'Classrooms',
