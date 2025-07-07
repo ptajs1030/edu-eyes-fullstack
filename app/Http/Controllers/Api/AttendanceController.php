@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\DTOs\EditShiftingAttendanceData;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\EditShiftingAttendanceRequest;
 use App\Http\Requests\Api\ShiftingAttendanceRequest;
 use App\Http\Resources\AttendanceResource;
 use App\Services\AttendanceService;
@@ -43,11 +45,12 @@ class AttendanceController extends BaseApiController
         ]);
     }
 
-    public function shiftingAttendance(?int $student_id){
-        return $this->success( $this->service->shiftingAttendance($student_id));
+    public function shiftingAttendance(ShiftingAttendanceRequest $data){
+        return $this->success( $this->service->shiftingAttendance($data->getDto()));
     }
 
-    public function editAttendance(ShiftingAttendanceRequest $data, ?int $attendance_id ){
+    public function editAttendance(EditShiftingAttendanceRequest $data, ?int $attendance_id ){
+
         return $this->success($this->service->editAttendance($data->getDto(), $attendance_id));
     }
 }
