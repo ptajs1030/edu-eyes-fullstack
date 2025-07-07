@@ -25,6 +25,11 @@ class ClassShiftingSchedule extends Model
         return $this->belongsTo(Classroom::class, 'class_id');
     }
 
+    public function pics()
+    {
+        return $this->hasMany(ClassShiftingSchedulePic::class);
+    }
+
     public function teachers()
     {
         return $this->belongsToMany(User::class, 'class_shifting_schedule_pics', 'class_shifting_schedule_id', 'teacher_id');
