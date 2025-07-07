@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ClassroomController;
+use App\Http\Controllers\ClassroomScheduleController;
 use App\Http\Controllers\SchoolSettingController;
 use App\Http\Controllers\ShiftingController;
 use App\Http\Controllers\StudentController;
@@ -21,6 +22,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('announcements', AnnouncementController::class);
     Route::resource('academic-years', AcademicYearController::class);
     Route::resource('classrooms', ClassroomController::class);
+    Route::get('classrooms/{classroom}/schedule', [ClassroomScheduleController::class, 'showScheduleForm'])->name('classrooms.schedule');
+    Route::post('/classrooms/{classroom}/schedule', [ClassroomScheduleController::class, 'saveSchedule'])->name('classrooms.schedule.save');
     Route::resource('students', StudentController::class);
     Route::resource('shiftings', ShiftingController::class);
     Route::resource('school-settings', SchoolSettingController::class);
