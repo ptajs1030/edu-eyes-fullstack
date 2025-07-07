@@ -55,7 +55,7 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
     Route::prefix('attendance')->controller(AttendanceController::class)->group(function () {
         Route::get('/history/in/', 'clockInHistory');
         Route::get('/history/out/', 'clockOutHistory');
-        Route::post('/shifting/{id}', 'shiftingAttendance');
+        Route::post('/shifting', 'shiftingAttendance');
         Route::post('/edit/{id}', 'editAttendance');
     });
 });
