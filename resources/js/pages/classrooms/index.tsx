@@ -173,6 +173,12 @@ export default function ClassroomIndex() {
                                 >
                                     Schedule
                                 </Link>
+                                <Link
+                                    href={route('classrooms.history', classroom.id)}
+                                    className="rounded bg-purple-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
+                                >
+                                    History
+                                </Link>
                                 <button
                                     onClick={() => setClassroomToDelete(classroom)}
                                     className="rounded bg-red-500 px-3 py-1 text-sm text-white hover:cursor-pointer"

@@ -21,9 +21,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
     Route::resource('announcements', AnnouncementController::class);
     Route::resource('academic-years', AcademicYearController::class);
+    Route::get('classrooms/{classroom}/history', [ClassroomController::class, 'history'])->name('classrooms.history');
     Route::resource('classrooms', ClassroomController::class);
-    Route::get('classrooms/{classroom}/schedule', [ClassroomScheduleController::class, 'showScheduleForm'])->name('classrooms.schedule');
-    Route::post('/classrooms/{classroom}/schedule', [ClassroomScheduleController::class, 'saveSchedule'])->name('classrooms.schedule.save');
+    Route::prefix('classrooms/{classroom}')->group(function () {
+        Route::get('schedule', [ClassroomScheduleController::class, 'showScheduleForm'])
+            ->name('classrooms.schedule');
+        Route::post('schedule', [ClassroomScheduleController::class, 'saveSchedule'])
+            ->name('classrooms.schedule.save');
+    });
     Route::resource('students', StudentController::class);
     Route::resource('shiftings', ShiftingController::class);
     Route::resource('school-settings', SchoolSettingController::class);

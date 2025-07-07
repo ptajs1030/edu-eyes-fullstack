@@ -87,9 +87,6 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
         setData('days', cleanedDays);
     }, []);
 
-    console.log('cekkk');
-    console.log({ days, teachers });
-
     const handleShiftingChange = (dayIndex: number, shiftingId: number | null) => {
         const newDays = [...data.days];
         newDays[dayIndex] = {

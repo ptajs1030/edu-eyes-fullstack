@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AcademicYearStatus;
 use App\Models\AcademicYear;
+use App\Models\ClassHistory;
 use App\Models\Classroom;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -120,5 +123,57 @@ class ClassroomController extends Controller
                     ? 'Failed to delete classroom'
                     : 'Failed to delete classroom: ' . $e->getMessage());
         }
+    }
+
+    public function history(Classroom $classroom, Request $request)
+    {
+        $academicYears = AcademicYear::orderBy('start_year', 'desc')->get();
+
+        // Get seleted academicYear or active academic year
+        $selectedAcademicYearId = $request->input('academic_year');
+        $academicYear = $selectedAcademicYearId
+            ? AcademicYear::find($selectedAcademicYearId)
+            : AcademicYear::where('status', AcademicYearStatus::Active->value)->first();
+
+        $students = [];
+        if ($academicYear) {
+            // Ambil data class histories dengan relasi
+            $classHistories = ClassHistory::with(['student.parent'])
+                ->where('academic_year_id', $academicYear->id)
+                ->where('class_id', $classroom->id)
+                ->get();
+
+            // Format data untuk komponen Table
+            $students = $classHistories->map(function ($history) use ($academicYear) {
+                $student = $history->student;
+                $birthDate = $student->date_of_birth;
+                $age = null;
+
+                // Hitung umur berdasarkan tahun akademik
+                if ($birthDate && $academicYear->start_year) {
+                    $birthYear = Carbon::parse($birthDate)->year;
+                    $age = $academicYear->start_year - $birthYear;
+                }
+
+                return [
+                    'id' => $student->id,
+                    'full_name' => $student->full_name,
+                    'age' => $age,
+                    'parent' => $student->parent ? [
+                        'id' => $student->parent->id,
+                        'full_name' => $student->parent->full_name,
+                        'phone' => $student->parent->phone
+                    ] : null
+                ];
+            })->toArray();
+        }
+
+        return Inertia::render('classrooms/history', [
+            'classroom' => $classroom,
+            'academicYears' => $academicYears,
+            'selectedAcademicYear' => $academicYear,
+            'students' => $students,
+            'filters' => $request->only(['sort', 'direction']),
+        ]);
     }
 }
