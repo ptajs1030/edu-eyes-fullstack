@@ -25,20 +25,30 @@ class Student extends Model
         static::created(function (self $student) {
             if (!is_null($student->class_id)) {
                 $activeAcademicYear = AcademicYear::where('status', 'active')->first();
+                $classroom = Classroom::findOrFail($student->class_id);
 
                 ClassHistory::updateOrCreate(
                     ['academic_year_id' => $activeAcademicYear->id, 'student_id' => $student->id],
-                    ['class_id' => $student->class_id]
+                    [
+                        'class_id' => $student->class_id,
+                        'class_name' => $classroom->name,
+                        'class_level' => $classroom->level,
+                    ]
                 );
             }
         });
         static::updated(function (self $student) {
             if ($student->isDirty('class_id')) {
                 $activeAcademicYear = AcademicYear::where('status', 'active')->first();
+                $classroom = Classroom::findOrFail($student->class_id);
 
                 ClassHistory::updateOrCreate(
                     ['academic_year_id' => $activeAcademicYear->id, 'student_id' => $student->id],
-                    ['class_id' => $student->class_id]
+                    [
+                        'class_id' => $student->class_id,
+                        'class_name' => $classroom->name,
+                        'class_level' => $classroom->level,
+                    ]
                 );
             }
         });
