@@ -37,10 +37,20 @@ interface Props {
     };
 }
 
-const breadcrumbs: BreadcrumbItem[] = [
+// const breadcrumbs: BreadcrumbItem[] = [
+//     {
+//         title: 'Classrooms',
+//         href: '/classrooms',
+//     },
+// ];
+
+const breadcrumbs = (classroomName: string): BreadcrumbItem[] => [
     {
         title: 'Classrooms',
         href: '/classrooms',
+    },
+    {
+        title: classroomName,
     },
 ];
 
@@ -70,7 +80,7 @@ export default function ClassroomDetail({ classroom, academicYear, filters }: Pr
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <AppLayout breadcrumbs={breadcrumbs(classroom.name)}>
             <Head title={`Classroom: ${classroom.name}`} />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
