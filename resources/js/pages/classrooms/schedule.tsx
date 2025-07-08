@@ -47,7 +47,7 @@ interface Props {
 const breadcrumbs = (classroomName: string, classroomId: number): BreadcrumbItem[] => [
     { title: 'Classrooms', href: '/classrooms' },
     { title: classroomName, href: `/classrooms/${classroomId}` },
-    { title: 'Schedule' },
+    { title: 'Schedule', href: '' },
 ];
 
 export default function ClassroomSchedule({ classroom, days, shiftings, teachers, academicYear }: Props) {

@@ -136,6 +136,7 @@ class ClassroomController extends Controller
             : AcademicYear::where('status', AcademicYearStatus::Active->value)->first();
 
         $students = [];
+        $studentCount = 0;
         if ($academicYear) {
             // Ambil data class histories dengan relasi
             $classHistories = ClassHistory::with(['student.parent'])
@@ -166,6 +167,8 @@ class ClassroomController extends Controller
                     ] : null
                 ];
             })->toArray();
+
+            $studentCount = count($students);
         }
 
         return Inertia::render('classrooms/history', [
@@ -173,6 +176,7 @@ class ClassroomController extends Controller
             'academicYears' => $academicYears,
             'selectedAcademicYear' => $academicYear,
             'students' => $students,
+            'studentCount' => $studentCount,
             'filters' => $request->only(['sort', 'direction']),
         ]);
     }
