@@ -77,7 +77,7 @@ export default function Announcement() {
             onSuccess: () => {
                 // Do nothing here – let the flash message logic handle it
                 router.reload();
-            }
+            },
         });
     };
 
@@ -134,13 +134,16 @@ export default function Announcement() {
                             className="w-64 rounded border px-3 py-1"
                         />
                         <SortDropdown options={sortOptions} onSortChange={handleSortChange} />
-                        <button onClick={exportSelected} className="rounded bg-indigo-600 px-3 py-1 text-sm text-white hover:cursor-pointer">
+                        <button
+                            onClick={exportSelected}
+                            className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                        >
                             Export Selected
                         </button>
                     </div>
                     <button
                         onClick={() => openModal()}
-                        className="rounded bg-green-600 px-3 py-1 text-sm text-white transition hover:cursor-pointer hover:bg-green-700"
+                        className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
                         Add Announcement
                     </button>
@@ -184,7 +187,7 @@ export default function Announcement() {
                                     <td className="flex gap-2 p-3">
                                         <button
                                             onClick={() => openModal(announcement)}
-                                            className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
+                                            className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                         >
                                             Edit
                                         </button>
@@ -193,7 +196,7 @@ export default function Announcement() {
                                                 setAnnouncementToDelete(announcement);
                                                 setIsDeleteModalOpen(true);
                                             }}
-                                            className="rounded bg-red-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
+                                            className="rounded bg-red-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                         >
                                             Delete
                                         </button>

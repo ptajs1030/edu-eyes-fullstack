@@ -104,7 +104,10 @@ export default function SettingIndex() {
                             onChange={(e) => router.get(route('school-settings.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
                         />
-                        <button onClick={exportSelected} className="rounded bg-indigo-600 px-3 py-1 text-sm text-white hover:cursor-pointer">
+                        <button
+                            onClick={exportSelected}
+                            className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                        >
                             Export Selected
                         </button>
                     </div>
@@ -129,7 +132,7 @@ export default function SettingIndex() {
                             <td className="flex gap-2 p-3">
                                 <button
                                     onClick={() => openForm(setting)}
-                                    className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
+                                    className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
                                     Edit
                                 </button>

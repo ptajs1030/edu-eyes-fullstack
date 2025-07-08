@@ -142,13 +142,16 @@ export default function StudentIndex() {
                             onChange={(e) => router.get(route('students.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
                         />
-                        <button onClick={exportSelected} className="rounded bg-indigo-600 px-3 py-1 text-sm text-white hover:cursor-pointer">
+                        <button
+                            onClick={exportSelected}
+                            className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                        >
                             Export Selected
                         </button>
                     </div>
                     <button
                         onClick={() => openForm(null)}
-                        className="rounded bg-green-600 px-3 py-1 text-sm text-white transition hover:cursor-pointer hover:bg-green-700"
+                        className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
                         Add Student
                     </button>
@@ -183,13 +186,13 @@ export default function StudentIndex() {
                             <td className="flex justify-center gap-2 p-3">
                                 <button
                                     onClick={() => openForm(student)}
-                                    className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
+                                    className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
                                     Edit
                                 </button>
                                 <button
                                     onClick={() => setStudentToDelete(student)}
-                                    className="rounded bg-red-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
+                                    className="rounded bg-red-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
                                     Delete
                                 </button>
