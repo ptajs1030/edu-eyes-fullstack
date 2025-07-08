@@ -9,12 +9,14 @@ class ShiftingAttendanceData
     /**
      * Sample data
      */
-     private ?string $status;
+     private ?string $submit_hour;
+     private ?int $student_id;
 
 
     public function __construct(array $data)
     {
-        $this->status = $data['status'] ?? 'alpha'; 
+        $this->submit_hour = $data['submit_hour'];
+        $this->student_id = $data['student_id']; 
        
     }
 
@@ -23,11 +25,11 @@ class ShiftingAttendanceData
      */
     public function getStudent(): ?int
     {
-        return $this->stuent_id;
+        return $this->student_id;
     }
 
-    public function getStatus(): ?string
+    public function getSubmitHour(): ?string
     {
-        return $this->status;
+        return $this->submit_hour;
     }
 }
