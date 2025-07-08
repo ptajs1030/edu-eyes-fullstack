@@ -17,12 +17,17 @@ class ClassShiftingSchedule extends Model
 
     public function shifting()
     {
-        return $this->belongsTo(Shifting::class);
+        return $this->belongsTo(Shifting::class, 'shifting_id');
     }
 
     public function classroom()
     {
         return $this->belongsTo(Classroom::class, 'class_id');
+    }
+
+    public function pics()
+    {
+        return $this->hasMany(ClassShiftingSchedulePic::class);
     }
 
     public function teachers()
