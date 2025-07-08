@@ -37,13 +37,6 @@ interface Props {
     };
 }
 
-// const breadcrumbs: BreadcrumbItem[] = [
-//     {
-//         title: 'Classrooms',
-//         href: '/classrooms',
-//     },
-// ];
-
 const breadcrumbs = (classroomName: string): BreadcrumbItem[] => [
     {
         title: 'Classrooms',
@@ -51,6 +44,7 @@ const breadcrumbs = (classroomName: string): BreadcrumbItem[] => [
     },
     {
         title: classroomName,
+        href: '',
     },
 ];
 
@@ -81,12 +75,12 @@ export default function ClassroomDetail({ classroom, academicYear, filters }: Pr
 
     return (
         <AppLayout breadcrumbs={breadcrumbs(classroom.name)}>
-            <Head title={`Classroom: ${classroom.name}`} />
+            <Head title={`Classroom - ${classroom.name}`} />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
                 {/* Section 1: Classroom Info */}
                 <div className="rounded-lg border p-4">
-                    <h2 className="mb-6 text-xl font-bold">Classroom Information</h2>
+                    <h1 className="mb-6 text-2xl font-bold">Classroom Information</h1>
                     <div className="grid w-2/5 grid-cols-1 gap-5 md:grid-cols-2">
                         <div>
                             <p className="mb-1 text-sm text-gray-500">Class Name</p>
@@ -109,7 +103,7 @@ export default function ClassroomDetail({ classroom, academicYear, filters }: Pr
 
                 {/* Section 2: Students Table */}
                 <div className="rounded-lg border p-4">
-                    <h2 className="mb-6 text-xl font-bold">Students</h2>
+                    <h1 className="mb-6 text-2xl font-bold">Students</h1>
                     <Table
                         headers={[
                             { key: 'no', label: 'No.', sortable: false },

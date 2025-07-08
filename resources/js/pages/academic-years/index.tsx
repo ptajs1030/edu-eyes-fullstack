@@ -123,13 +123,16 @@ export default function AcademicYearIndex() {
                             placeholder="Search by title..."
                             className="w-64 rounded border px-3 py-1"
                         />
-                        <button onClick={exportSelected} className="rounded bg-indigo-600 px-3 py-1 text-sm text-white hover:cursor-pointer">
+                        <button
+                            onClick={exportSelected}
+                            className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                        >
                             Export Selected
                         </button>
                     </div>
                     <button
                         onClick={() => openModal()}
-                        className="rounded bg-green-600 px-3 py-1 text-sm text-white transition hover:cursor-pointer hover:bg-green-700"
+                        className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
                         Add Accademic Year
                     </button>
@@ -160,7 +163,7 @@ export default function AcademicYearIndex() {
                             <td className="flex gap-2 p-3">
                                 <button
                                     onClick={() => openModal(academicYear)}
-                                    className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
+                                    className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
                                     Edit
                                 </button>
