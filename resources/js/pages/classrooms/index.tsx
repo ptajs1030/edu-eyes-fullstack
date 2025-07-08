@@ -157,7 +157,7 @@ export default function ClassroomIndex() {
                             <td className="flex gap-2 p-3">
                                 <button
                                     onClick={() => openForm(classroom)}
-                                    className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
+                                    className="rounded bg-yellow-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
                                 >
                                     Edit
                                 </button>
@@ -166,6 +166,12 @@ export default function ClassroomIndex() {
                                     className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
                                 >
                                     Detail
+                                </Link>
+                                <Link
+                                    href={route('classrooms.schedule', classroom.id)}
+                                    className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
+                                >
+                                    Schedule
                                 </Link>
                                 <button
                                     onClick={() => setClassroomToDelete(classroom)}
