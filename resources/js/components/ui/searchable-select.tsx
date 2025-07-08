@@ -12,6 +12,8 @@ interface SearchableSelectProps {
     placeholder?: string;
     endpoint?: string;
     initialOption?: Option;
+    showInitialOptions?: boolean;
+    maxInitialOptions?: number;
 }
 
 export default function SearchableSelect({
@@ -19,7 +21,9 @@ export default function SearchableSelect({
     onChange,
     placeholder = 'Search...',
     endpoint,
-    initialOption
+    initialOption,
+    showInitialOptions = false, 
+    maxInitialOptions = 10
 }: SearchableSelectProps) {
     const [inputValue, setInputValue] = useState('');
     const [options, setOptions] = useState<Option[]>([]);
@@ -27,6 +31,7 @@ export default function SearchableSelect({
     const [isLoading, setIsLoading] = useState(false);
     const [selectedOption, setSelectedOption] = useState<Option | null>(initialOption || null);
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
+    const wrapperRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         if (initialOption) {
@@ -35,20 +40,29 @@ export default function SearchableSelect({
         }
     }, [initialOption]);
 
-    const fetchOptions = async (query: string) => {
-        if (!endpoint || query.length < 2) {
-            setOptions([]);
-            setIsOpen(false);
-            return;
-        }
-        setIsLoading(true);
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
 
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    const fetchOptions = async (query: string) => {
+        if (!endpoint) return;
+        
+        setIsLoading(true);
         try {
             const response = await axios.get(endpoint, { 
                 params: { query },
                 withCredentials: true,
             });
-            setOptions(response.data);
+
+            const limitedOptions = response.data.slice(0, maxInitialOptions);
+            setOptions(limitedOptions);
             setIsOpen(true);
         } catch (error) {
             console.error('Error fetching options:', error);
@@ -66,10 +80,21 @@ export default function SearchableSelect({
         if (debounceRef.current) {
             clearTimeout(debounceRef.current);
         }
+
+        // If showInitialOptions is enabled and query is empty, show initial options
+        if (showInitialOptions && value === '') {
+            fetchOptions('');
+            return;
+        }
         
-        // Set debounce baru (300ms)
+        // Set new debounce
         debounceRef.current = setTimeout(() => {
-            fetchOptions(value);
+            if (value.length >= 1 || (showInitialOptions && value.length === 0)) {
+                fetchOptions(value);
+            } else {
+                setOptions([]);
+                setIsOpen(false);
+            }
         }, 300);
     };
 
@@ -87,8 +112,15 @@ export default function SearchableSelect({
         setOptions([]);
     };
 
+    const handleFocus = () => {
+        // If showInitialOptions is enabled and input is empty, show initial options
+        if (showInitialOptions && inputValue === '') {
+            fetchOptions('');
+        }
+    };
+
     return (
-        <div className="relative">
+        <div className="relative" ref={wrapperRef}>
             <div className="flex items-center border rounded">
                 <input
                     type="text"
@@ -96,7 +128,7 @@ export default function SearchableSelect({
                     onChange={handleInputChange}
                     placeholder={placeholder}
                     className="flex-1 px-3 py-2 outline-none"
-                    onFocus={() => inputValue.length >= 2 && fetchOptions(inputValue)}
+                    onFocus={handleFocus}
                 />
                 {selectedOption && (
                     <button 
