@@ -63,7 +63,7 @@ class ClassroomController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255|unique:classrooms,name',
                 'level' => 'required|integer|min:1',
-                'main_teacher_id' => 'required|exists:users,id',
+                'main_teacher_id' => 'nullable|exists:users,id',
             ]);
 
             Classroom::create($validated);
@@ -90,7 +90,7 @@ class ClassroomController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255|unique:classrooms,name,' . $classroom->id,
                 'level' => 'required|integer|min:1',
-                'main_teacher_id' => 'required|exists:users,id',
+                'main_teacher_id' => 'nullable|exists:users,id',
             ]);
 
             $classroom->update($validated);
