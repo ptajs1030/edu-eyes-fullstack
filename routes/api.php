@@ -61,6 +61,8 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
         Route::prefix('subject')->group(function () {
             Route::get('/history/{id?}', 'subjectAttendanceHistory');
             Route::get('/{class_id}/{subject}', 'getSubjectAttendance');
+            Route::post('/', 'subjectAttendance');
+            Route::post('/edit/{id}', 'editSubjectAttendance');
         });
     });
 });
