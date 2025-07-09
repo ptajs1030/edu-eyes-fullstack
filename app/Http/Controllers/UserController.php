@@ -120,6 +120,22 @@ class UserController extends Controller
         }
     }
 
+    public function destroy($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $user->delete();
+
+            return redirect()->back()
+                ->with('success', 'User deleted successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', app()->environment('production')
+                    ? 'Failed to delete user'
+                    : 'Failed to delete user: ' . $e->getMessage());
+        }
+    }
+
     public function searchParents(Request $request)
     {
         $request->validate([
@@ -151,21 +167,5 @@ class UserController extends Controller
         }
 
         return $query->limit(10)->get();
-    }
-
-    public function destroy($id)
-    {
-        try {
-            $user = User::findOrFail($id);
-            $user->delete();
-
-            return redirect()->back()
-                ->with('success', 'User deleted successfully');
-        } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', app()->environment('production')
-                    ? 'Failed to delete user'
-                    : 'Failed to delete user: ' . $e->getMessage());
-        }
     }
 }
