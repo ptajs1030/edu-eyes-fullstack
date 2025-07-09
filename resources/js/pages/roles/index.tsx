@@ -125,7 +125,7 @@ export default function RoleIndex() {
                     </div>
                     <button
                         onClick={() => openForm(null)}
-                        className="rounded bg-green-600 px-3 py-1 text-sm text-white transition hover:cursor-pointer hover:bg-green-700"
+                        className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
                         Add Role
                     </button>
@@ -145,13 +145,16 @@ export default function RoleIndex() {
                                 <input type="checkbox" checked={selectedIds.includes(role.id)} onChange={() => toggleSelect(role.id)} />
                             </td>
                             <td className="p-3 text-sm">{role.name}</td>
-                            <td className="flex justify-center gap-2 p-3 text-sm">
-                                <button onClick={() => openForm(role)} className="rounded bg-blue-500 px-3 py-1 text-white hover:cursor-pointer">
+                            <td className="flex gap-2 p-3 text-sm">
+                                <button
+                                    onClick={() => openForm(role)}
+                                    className="rounded bg-blue-500 px-3 py-1 font-medium text-white hover:cursor-pointer"
+                                >
                                     Edit
                                 </button>
                                 <button
                                     onClick={() => setRoleToDelete(role)}
-                                    className="rounded bg-red-500 px-3 py-1 text-white hover:cursor-pointer"
+                                    className="rounded bg-red-500 px-3 py-1 font-medium text-white hover:cursor-pointer"
                                 >
                                     Delete
                                 </button>

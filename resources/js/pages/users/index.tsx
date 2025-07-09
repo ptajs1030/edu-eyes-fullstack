@@ -70,6 +70,7 @@ export default function UserIndex() {
 
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
     const openForm = (user: User | null = null) => {
@@ -81,6 +82,22 @@ export default function UserIndex() {
         router.delete(`/users/${id}`, {
             onSuccess: () => router.reload(),
         });
+    };
+
+    const toggleSelect = (id: number) => {
+        setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
+    };
+
+    const exportSelected = () => {
+        const selectedData = users.data.filter((a) => selectedIds.includes(a.id));
+        const headers = `Name,Username,Role,Phone,Email,Status\n`;
+        const csv = selectedData.map((a) => `${a.full_name},${a.username},${a.role.name},${a.phone},${a.email},${a.status}`).join('\n');
+        const blob = new Blob([headers, csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'users.csv';
+        link.click();
     };
 
     const handleSortChange = (column: string) => {
@@ -98,6 +115,8 @@ export default function UserIndex() {
         { key: 'full_name', label: 'Full Name', sortable: true },
         { key: 'username', label: 'Username', sortable: true },
         { key: 'role_id', label: 'Role', sortable: true },
+        { key: 'phone', label: 'Phone', sortable: true },
+        { key: 'email', label: 'Email', sortable: true },
         { key: 'status', label: 'Status', sortable: true },
         { key: 'actions', label: 'Actions', sortable: false },
     ];
@@ -117,10 +136,16 @@ export default function UserIndex() {
                             onChange={(e) => router.get(route('users.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
                         />
+                        <button
+                            onClick={exportSelected}
+                            className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                        >
+                            Export Selected
+                        </button>
                     </div>
                     <button
                         onClick={() => openForm(null)}
-                        className="rounded bg-green-600 px-3 py-1 text-sm text-white transition hover:cursor-pointer hover:bg-green-700"
+                        className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
                         Add User
                     </button>
@@ -132,19 +157,29 @@ export default function UserIndex() {
                     sortColumn={filters.sort ?? ''}
                     sortDirection={filters.direction === 'asc' || filters.direction === 'desc' ? filters.direction : 'asc'}
                     onSort={handleSortChange}
+                    onSelectAll={(checked) => setSelectedIds(checked ? users.data.map((a) => a.id) : [])}
+                    selectedIds={selectedIds}
                     rowRender={(user) => (
                         <tr key={user.id} className="border-b">
+                            <td className="w-[10px] p-3 text-sm">
+                                <input type="checkbox" checked={selectedIds.includes(user.id)} onChange={() => toggleSelect(user.id)} />
+                            </td>
                             <td className="p-3 text-sm">{user.full_name}</td>
                             <td className="p-3 text-sm">{user.username}</td>
                             <td className="p-3 text-sm">{user.role?.name || '-'}</td>
+                            <td className="p-3 text-sm">{user.phone || '-'}</td>
+                            <td className="p-3 text-sm">{user.email || '-'}</td>
                             <td className="p-3 text-sm">{user.status}</td>
-                            <td className="flex justify-center gap-2 p-3 text-sm">
-                                <button onClick={() => openForm(user)} className="rounded bg-blue-500 px-3 py-1 text-white hover:cursor-pointer">
+                            <td className="flex gap-2 p-3 text-sm">
+                                <button
+                                    onClick={() => openForm(user)}
+                                    className="rounded bg-blue-500 px-3 py-1 font-medium text-white hover:cursor-pointer"
+                                >
                                     Edit
                                 </button>
                                 <button
                                     onClick={() => setUserToDelete(user)}
-                                    className="rounded bg-red-500 px-3 py-1 text-white hover:cursor-pointer"
+                                    className="rounded bg-red-500 px-3 py-1 font-medium text-white hover:cursor-pointer"
                                 >
                                     Delete
                                 </button>
@@ -161,7 +196,11 @@ export default function UserIndex() {
                     isOpen={!!userToDelete}
                     onClose={() => setUserToDelete(null)}
                     title="Confirm Deletion"
-                    message={`Are you sure you want to delete "${userToDelete?.full_name}"?`}
+                    message={
+                        <span>
+                            Are you sure you want to delete user <strong>{userToDelete?.full_name}</strong>?
+                        </span>
+                    }
                     buttons={[
                         {
                             label: 'Cancel',
