@@ -21,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
     Route::resource('roles', RoleController::class);
+    Route::resource('users', UserController::class);
     Route::resource('announcements', AnnouncementController::class);
     Route::resource('academic-years', AcademicYearController::class);
     Route::get('classrooms/{classroom}/history', [ClassroomController::class, 'history'])->name('classrooms.history');

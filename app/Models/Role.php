@@ -17,9 +17,6 @@ class Role extends Model
         'name'
     ];
 
-    // not used timestamps
-    public $timestamps = false;
-
     public function users()
     {
         return $this->hasMany(User::class);
