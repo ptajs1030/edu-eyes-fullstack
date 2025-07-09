@@ -202,7 +202,11 @@ export default function ClassroomIndex() {
                     isOpen={!!classroomToDelete}
                     onClose={() => setClassroomToDelete(null)}
                     title="Confirm Deletion"
-                    message={`Are you sure you want to delete "${classroomToDelete?.name}"?`}
+                    message={
+                        <span>
+                            Are you sure you want to delete classroom <strong>{classroomToDelete?.name}</strong>?
+                        </span>
+                    }
                     buttons={[
                         {
                             label: 'Cancel',
