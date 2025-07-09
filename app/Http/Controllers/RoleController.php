@@ -23,4 +23,29 @@ class RoleController extends Controller
             'filters' => $request->only(['search', 'sort', 'direction']),
         ]);
     }
+
+    public function store(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'name' => 'required|string|max:255|unique:roles,name',
+            ]);
+
+            $validated['name'] = strtolower($validated['name']);
+
+            Role::create($validated);
+
+            return redirect()->back()
+                ->with('success', 'New roles successfully added.');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->with('error', 'Validation error: ' . implode(' ', $e->validator->errors()->all()))
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to create role: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
 }
