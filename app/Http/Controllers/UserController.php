@@ -71,6 +71,55 @@ class UserController extends Controller
         }
     }
 
+    public function update(Request $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            $validationRules = [
+                'full_name' => 'required|string|max:255',
+                'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+                'phone' => 'nullable|string|max:20|unique:users,phone,' . $user->id,
+                'email' => 'nullable|email|max:255|unique:users,email,' . $user->id,
+                'role_id' => 'required|exists:roles,id',
+                'status' => 'required|in:' . implode(',', UserStatus::getValues()),
+            ];
+
+            if ($request->password) {
+                $validationRules['password'] = 'string|min:8|confirmed';
+            }
+
+            $validated = $request->validate($validationRules);
+
+            $updateData = [
+                'full_name' => $validated['full_name'],
+                'username' => $validated['username'],
+                'phone' => $validated['phone'] ?? null,
+                'email' => $validated['email'] ?? null,
+                'role_id' => $validated['role_id'],
+                'status' => $validated['status'],
+            ];
+
+            if (!empty($validated['password'])) {
+                $updateData['password'] = Hash::make($validated['password']);
+            }
+
+            $user->update($updateData);
+
+            return redirect()->back()
+                ->with('success', 'User updated successfully');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->with('error', 'Validation error: ' . implode(' ', $e->validator->errors()->all()))
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to update user: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
     public function searchParents(Request $request)
     {
         $request->validate([
