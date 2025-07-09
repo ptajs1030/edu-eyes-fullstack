@@ -6,6 +6,7 @@ use App\Enums\UserStatus;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -31,6 +32,43 @@ class UserController extends Controller
             'statuses' => $statuses,
             'filters' => $request->only(['search', 'sort', 'direction']),
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'full_name' => 'required|string|max:255',
+                'username' => 'required|string|max:255|unique:users,username',
+                'phone' => 'nullable|string|unique:users,phone',
+                'email' => 'nullable|email|max:255|unique:users,email',
+                'password' => 'required|string|min:8|confirmed',
+                'role_id' => 'required|exists:roles,id',
+                'status' => 'required|in:' . implode(',', UserStatus::getValues()),
+            ]);
+
+            User::create([
+                'full_name' => $validated['full_name'],
+                'username' => $validated['username'],
+                'phone' => $validated['phone'] ?? null,
+                'email' => $validated['email'] ?? null,
+                'password' => Hash::make($validated['password']),
+                'role_id' => $validated['role_id'],
+                'status' => $validated['status'],
+            ]);
+
+            return redirect()->back()
+                ->with('success', 'New user successfully added.');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->with('error', 'Validation error: ' . implode(' ', $e->validator->errors()->all()))
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to create user: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     public function searchParents(Request $request)
