@@ -73,4 +73,20 @@ class RoleController extends Controller
                 ->withInput();
         }
     }
+
+    public function destroy($id)
+    {
+        try {
+            $role = Role::findOrFail($id);
+            $role->delete();
+
+            return redirect()->back()
+                ->with('success', 'Role deleted successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', app()->environment('production')
+                    ? 'Failed to delete role'
+                    : 'Failed to delete role: ' . $e->getMessage());
+        }
+    }
 }

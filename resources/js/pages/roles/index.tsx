@@ -168,7 +168,11 @@ export default function RoleIndex() {
                     isOpen={!!roleToDelete}
                     onClose={() => setRoleToDelete(null)}
                     title="Confirm Deletion"
-                    message={`Are you sure you want to delete "${roleToDelete?.name}"?`}
+                    message={
+                        <span>
+                            Are you sure you want to delete role <strong>{roleToDelete?.name}</strong>?
+                        </span>
+                    }
                     buttons={[
                         {
                             label: 'Cancel',
