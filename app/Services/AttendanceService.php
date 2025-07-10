@@ -4,7 +4,9 @@ namespace App\Services;
 
 
 use App\DTOs\EditShiftingAttendanceData;
+use App\DTOs\EditSubjectAttendanceData;
 use App\DTOs\ShiftingAttendanceData;
+use App\DTOs\SubjectAttendanceData;
 use App\Models\Classroom;
 use App\Models\ClassShiftingSchedule;
 use App\Models\ClassShiftingSchedulePic;
@@ -18,7 +20,7 @@ use Carbon\Carbon;
 
 class AttendanceService
 {
-    public function shiftingAttendanceHistory($date, $class_id, $type = 'in')
+    public function shiftingAttendanceHistory($date, $class_id, $type = 'in', $search)
     {
         $query=ShiftingAttendance::query();
         if ($date) {
@@ -32,6 +34,11 @@ class AttendanceService
             $query->whereNotNull('clock_in_hour')
                   ->whereNotNull('clock_out_hour');
         }
+        if ($search) {
+            $query->whereHas('student', function($q) use ($search){
+                $q->where('full_name', 'like', "%$search%");
+            });
+        }
         $attendances = $query->with('classroom', 'student')->paginate(10);
         
         if ($attendances->isEmpty()) {
@@ -42,7 +49,7 @@ class AttendanceService
         foreach ($attendances->items() as $attendance) {
             $attendancesWithClassroom[] = [
                 'id' => $attendance->id,
-                'student_id' => optional($attendance->student)->full_name,
+                'student_name' => optional($attendance->student)->full_name,
                 'classroom' => optional($attendance->classroom)->name,
                 'class_shifting_schedule_id' => $attendance->class_shifting_schedule_id,
                 'submit_date' => $attendance->submit_date,
@@ -184,10 +191,56 @@ class AttendanceService
     }
 
     public function getSubjectAttendance($class_id, $subject){
-        $attendances=SubjectAttendance::where('class_id', $class_id)->where('subject_name', $subject)->where('submit_date', Carbon::now()->format('Y-m-d'))->get();
-        if (!$attendances) {
+        $attendances=SubjectAttendance::where('class_id', $class_id)->where('subject_name', $subject)->where('submit_date', Carbon::now()->format('Y-m-d'))->with('classroom', 'student', 'academicYear')->get();
+        if ($attendances->isEmpty()) {
             abort(204, 'Attendance not found');
         }
-        return $attendances;
+        $attendancesWithRelations=[];
+        foreach ($attendances as $attendance) {
+            $attendancesWithRelations[]=[
+                'id' => $attendance->id,
+                'student' => optional($attendance->student)->full_name,
+                'classroom' => optional($attendance->classroom)->name,
+                'accademic_year'=> optional($attendance->academicYear)->title,
+                'subject_name' => $attendance->subject_name,
+                'subject_start_hour' => $attendance->subject_start_hour,
+                'subject_end_hour' => $attendance->subject_end_hour,
+                'submit_date' => $attendance->submit_date,
+                'submit_hour'=> $attendance->submit_hour,
+                'status' => $attendance->status,
+                'note'=>$attendance->note,
+            ];
+        }
+        return $attendancesWithRelations;
+    }
+
+    public function subjectAttendance(SubjectAttendanceData $data){
+        $attedances=SubjectAttendance::whereIn('id', $data->getAttendanceIdList())->where('submit_date', Carbon::now()->format('Y-m-d'))->get();
+        
+        foreach ($attedances as $attedance) {
+            $attedance->update([
+               'status'=>'present',
+               'submit_hour'=>Carbon::parse($data->getSubmitHour())->format('H:i:s') 
+            ]);
+        }
+
+        return [
+            'message' => 'Attendance updated successfully',
+            'attendance' => $attedances,
+        ];
+    }
+
+    public function editSubjectAttendance(EditSubjectAttendanceData $data, $id){
+        $attendance=SubjectAttendance::where('id', $id)->where('submit_date', Carbon::now()->format('Y-m-d'))->first();
+        if (!$attendance) {
+            abort(404, 'Attendance not found');
+        }
+        $attendance->update([
+            'status' => $data->getStatus(),
+        ]);
+        return [
+            'message' => 'Attendance updated successfully',
+            'attendance' => $attendance,
+        ];
     }
 }
