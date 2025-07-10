@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\DTOs\EditShiftingAttendanceData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\EditShiftingAttendanceRequest;
+use App\Http\Requests\Api\EditSubjectAttendanceRequest;
 use App\Http\Requests\Api\ShiftingAttendanceRequest;
+use App\Http\Requests\Api\SubjectAttendanceRequest;
 use App\Http\Resources\AttendanceResource;
 use App\Services\AttendanceService;
 use Illuminate\Http\Request;
@@ -18,8 +20,9 @@ class AttendanceController extends BaseApiController
     public function clockInHistory(Request $request)
     {
         $class_id = $request->query('class_id');
+        $search = $request->query('search');
         $date = $request->query('date');
-        $data = $this->service->shiftingAttendanceHistory($date, $class_id, 'in');
+        $data = $this->service->shiftingAttendanceHistory($date, $class_id, 'in', $search);
 
         return $this->success([
             'number_of_attendances' => $data['number_of_attendances'],
@@ -33,8 +36,9 @@ class AttendanceController extends BaseApiController
     public function clockOutHistory(Request $request)
     {
         $class_id = $request->query('class_id');
+        $search = $request->query('search');
         $date = $request->query('date');
-        $data = $this->service->shiftingAttendanceHistory($date, $class_id, 'out');
+        $data = $this->service->shiftingAttendanceHistory($date, $class_id, 'out', $search);
 
         return $this->success([
             'number_of_attendances' => $data['number_of_attendances'],
@@ -70,5 +74,13 @@ class AttendanceController extends BaseApiController
 
     public function getSubjectAttendance(int $class_id, string $subject){
         return $this->success($this->service->getSubjectAttendance($class_id, $subject));
+    }
+
+    public function subjectAttendance(SubjectAttendanceRequest $data){
+        return $this->success($this->service->subjectAttendance($data->getDto()));
+    }
+
+    public function editSubjectAttendance(EditSubjectAttendanceRequest $data, int $id){
+        return $this->success($this->service->editSubjectAttendance($data->getDto(), $id));
     }
 }

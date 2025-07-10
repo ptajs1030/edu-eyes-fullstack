@@ -48,7 +48,7 @@ class ParentService
     
        return [
         'date'=>$hari . ', ' . $carbon->format('d-m-Y'),
-        $attendance
+        'attendance'=>$attendance
        ] ;
             
        
