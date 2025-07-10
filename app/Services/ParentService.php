@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTOs\ChangePasswordData;
 use App\Models\Announcement;
 use App\Models\ShiftingAttendance;
+use App\Models\SubjectAttendance;
 use Carbon\Carbon;
 
 class ParentService
@@ -95,6 +96,45 @@ class ParentService
             'last_page' => $attendance->lastPage(),
             'per_page' => $attendance->perPage(),
             'attendances' => $attendancesWithDay,
+        ];
+    }
+
+    public function subjectAttendanceHistory($date, $student){
+        $query = SubjectAttendance::query();
+        $query->where('student_id', $student->id);
+        if ($date) {
+            $parsedDate = Carbon::parse($date)->format('Y-m-d');
+            $query->where('submit_date', $parsedDate);
+        }
+        $attendances = $query->with('classroom', 'student')->paginate(10);
+        if ($attendances->isEmpty()) {
+            return [
+                abort(404,'Data Tidak Ditemukan'),
+            ];
+        }
+
+        $attendancesWithRelations = [];
+        foreach ($attendances->items() as $item) {
+            $attendancesWithRelations[] = [
+                'id' => $item->id,
+                'student' => optional($item->student)->full_name,
+                'classroom' => optional($item->classroom)->name,
+                'accademic_year'=> optional($item->academicYear)->title,
+                'subject_name' => $item->subject_name,
+                'subject_start_hour' => $item->subject_start_hour,
+                'subject_end_hour' => $item->subject_end_hour,
+                'submit_date' => $item->submit_date,
+                'submit_hour'=> $item->submit_hour,
+                'status' => $item->status,
+                'note'=>$item->note,
+            ];
+        };
+        return[
+            'number_of_attendances' => $attendances->total(),
+            'current_page' => $attendances->currentPage(),
+            'last_page' => $attendances->lastPage(),
+            'per_page' => $attendances->perPage(),
+            'attendances' => $attendancesWithRelations,
         ];
     }
 
