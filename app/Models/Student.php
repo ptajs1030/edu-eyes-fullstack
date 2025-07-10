@@ -78,4 +78,14 @@ class Student extends Model
     {
         return $this->hasMany(SubjectAttendance::class);
     }
+
+    public function eventParticipants()
+    {
+        return $this->hasMany(EventParticipant::class);
+    }
+
+    public function eventAttendances()
+    {
+        return $this->hasMany(EventAttendance::class);
+    }
 }

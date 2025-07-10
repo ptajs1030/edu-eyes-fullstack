@@ -33,6 +33,10 @@ class DatabaseSeeder extends Seeder
                 SubjectSeeder::class,
                 ClassSubjectScheduleSeeder::class,
                 SubjectAttendanceSeeder::class,
+                EventSeeder::class,
+                EventPicSeeder::class,
+                EventParticipantSeeder::class,
+                EventAttendanceSeeder::class,
             ]);
 
             DB::commit();
