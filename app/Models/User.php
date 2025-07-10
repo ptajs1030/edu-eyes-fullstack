@@ -85,4 +85,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(ClassSubjectSchedule::class, 'teacher_id');
     }
+
+    public function eventPics()
+    {
+        return $this->hasMany(EventPic::class, 'pic_id');
+    }
 }
