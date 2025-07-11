@@ -29,7 +29,7 @@ class SubjectController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'curriculum_year' => 'required|integer',
+                'curriculum_year' => 'required|string',
                 'is_archived' => 'required|boolean'
             ]);
 
@@ -46,6 +46,33 @@ class SubjectController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to create subject: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            $subject = Subject::findOrFail($id);
+
+            $validated = $request->validate([
+                'name' => 'required|string|max:255',
+                'curriculum_year' => 'required|string',
+                'is_archived' => 'required|boolean'
+            ]);
+
+            $subject->update($validated);
+
+            return redirect()->back()
+                ->with('success', 'Subject updated successfully');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->with('error', 'Validation error: ' . implode(' ', $e->validator->errors()->all()))
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to update subject: ' . $e->getMessage())
                 ->withInput();
         }
     }

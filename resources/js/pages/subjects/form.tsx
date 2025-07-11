@@ -110,7 +110,7 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
                 <input
                     id="curriculum_year"
                     name="curriculum_year"
-                    type="number"
+                    type="text"
                     value={formData.curriculum_year}
                     onChange={handleChange}
                     className="w-full rounded border p-2"
