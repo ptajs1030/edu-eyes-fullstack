@@ -34,7 +34,7 @@ class TeacherController extends BaseApiController
             return $this->resource(StudentResource::make(Student::findOrFail($id)));
         }
         return $this->resource(
-            StudentResource::collection(Student::get())
+            StudentResource::collection(Student::get()->paginate(10))
         );
     }
 
