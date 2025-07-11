@@ -195,7 +195,7 @@ class AttendanceService
         if ($search) {
             $query->where('name', 'like', "%$search%");
         }
-        $classrooms = $query->paginate(10);
+        $classrooms = $query->get();
         if ($classrooms->isEmpty()) {
             abort(204, 'Classroom not found');
         }
