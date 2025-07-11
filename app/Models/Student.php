@@ -15,6 +15,7 @@ class Student extends Model
 
     protected $guarded = [
         'id',
+        'uuid',
         'qr_code_url',
         'created_at',
         'updated_at'
