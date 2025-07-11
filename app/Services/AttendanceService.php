@@ -189,21 +189,35 @@ class AttendanceService
             'attendances' => $attendancesWithRelations,
         ];
     }
+
+    public function getClassroomByTeacher($search){
+        $query= Classroom::where('main_teacher_id', auth()->user()->id);
+        if ($search) {
+            $query->where('name', 'like', "%$search%");
+        }
+        $classrooms = $query->paginate(10);
+        if ($classrooms->isEmpty()) {
+            abort(204, 'Classroom not found');
+        }
+        return $classrooms;
+
+    }
+
     public function getClassromSubject($class_id, $search = null){
         $query = SubjectAttendance::where('class_id', $class_id)
         ->where('submit_date', Carbon::now()->format('Y-m-d'));
 
-    // Tambahkan fitur search
-    if ($search) {
-        $query->where('subject_name', 'like', "%$search%");
-    }
 
-    $schedules = $query->distinct()->pluck('subject_name');
+        if ($search) {
+            $query->where('subject_name', 'like', "%$search%");
+        }
 
-    if ($schedules->isEmpty()) {
-        abort(204, 'Schedule not found');
-    }
-    return $schedules;
+        $schedules = $query->distinct()->pluck('subject_name');
+
+        if ($schedules->isEmpty()) {
+            abort(204, 'Schedule not found');
+        }
+        return $schedules;
     }
     public function getSubjectAttendance($class_id, $subject){
         $attendances=SubjectAttendance::where('class_id', $class_id)->where('subject_name', $subject)->where('submit_date', Carbon::now()->format('Y-m-d'))->with('classroom', 'student', 'academicYear')->get();
