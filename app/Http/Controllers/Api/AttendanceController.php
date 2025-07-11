@@ -71,10 +71,17 @@ class AttendanceController extends BaseApiController
             'attendances' => $data['attendances'],
         ]);
     }
+
+    public function getClassroomByTeacher(Request $request){
+        $search = $request->query('search');
+        return $this->success($this->service->getClassroomByTeacher($search));
+    }
+
     public function getClassroomSubject(Request $request, int $class_id){
         $search = $request->query('search');
         return $this->success($this->service->getClassromSubject($class_id, $search));
     }
+    
     public function getSubjectAttendance(int $class_id, string $subject){
         return $this->success($this->service->getSubjectAttendance($class_id, $subject));
     }

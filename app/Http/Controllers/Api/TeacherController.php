@@ -16,13 +16,6 @@ use Illuminate\Http\Request;
 
 class TeacherController extends BaseApiController
 {
-/*************  ✨ Windsurf Command ⭐  *************/
-    /**
-     * TeacherController constructor.
-     *
-     * @param TeacherService $service
-     */
-/*******  0f0cb5bc-c783-47e5-aeff-8874c7e0bfda  *******/
     public function __construct(protected TeacherService $service)
     {
        
@@ -45,20 +38,12 @@ class TeacherController extends BaseApiController
         );
     }
 
-    public function getClassrooms(Request $request, ?int $id = null){
+    public function getClassrooms(?int $id = null){
         if ($id) {
             return $this->resource(ClassroomResource::make(Classroom::findOrFail($id)));
         }
-        
-        $query = Classroom::query();
-        $query->where('main_teacher_id', auth()->user()->id);
-        if ($request->has('search') && $request->search) {
-            $search = $request->search;
-            $query->where('name', 'like', "%$search%");
-        }
-        $classrooms = $query->get();
         return $this->resource(
-            ClassroomResource::collection($classrooms)
+            ClassroomResource::collection(Classroom::get())
         );
     }
 
