@@ -2,9 +2,10 @@
 
 namespace App\Http\Requests\Api;
 
+use App\DTOs\EditSubjectAttendanceData;
 use Illuminate\Foundation\Http\FormRequest;
 
-class ShiftingAttendanceRequest extends FormRequest
+class EditSubjectAttendanceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,13 +23,11 @@ class ShiftingAttendanceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'submit_hour' => 'required|date_format:H:i',
-            'student_id' => 'required|exists:students,id',
+            'status' => 'required|string|in:present,alpha',
         ];
     }
 
-    public function getDto()
-    {
-        return new \App\DTOs\ShiftingAttendanceData($this->validated());
+    public function getDto(){
+        return new EditSubjectAttendanceData($this->validated());
     }
 }
