@@ -76,4 +76,20 @@ class SubjectController extends Controller
                 ->withInput();
         }
     }
+
+    public function destroy($id)
+    {
+        try {
+            $subject = Subject::findOrFail($id);
+            $subject->delete();
+
+            return redirect()->back()
+                ->with('success', 'Subject deleted successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', app()->environment('production')
+                    ? 'Failed to delete subject'
+                    : 'Failed to delete subject: ' . $e->getMessage());
+        }
+    }
 }
