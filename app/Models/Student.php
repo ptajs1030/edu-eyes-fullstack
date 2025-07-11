@@ -15,6 +15,7 @@ class Student extends Model
 
     protected $guarded = [
         'id',
+        'uuid',
         'qr_code_url',
         'created_at',
         'updated_at'
@@ -77,5 +78,15 @@ class Student extends Model
     public function subjectAttendances()
     {
         return $this->hasMany(SubjectAttendance::class);
+    }
+
+    public function eventParticipants()
+    {
+        return $this->hasMany(EventParticipant::class);
+    }
+
+    public function eventAttendances()
+    {
+        return $this->hasMany(EventAttendance::class);
     }
 }

@@ -36,4 +36,9 @@ class AcademicYear extends Model
     {
         return $this->hasMany(ShiftingAttendance::class);
     }
+
+    public function eventAttendances()
+    {
+        return $this->hasMany(EventAttendance::class);
+    }
 }

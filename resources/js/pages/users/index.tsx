@@ -3,20 +3,27 @@ import Pagination from '@/components/ui/pagination';
 import Table from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
-import ClassroomFormModal from './form';
+import UserFormModal from './form';
 
-type Classroom = {
+type User = {
+    id: number;
+    full_name: string;
+    username: string;
+    phone?: string;
+    email?: string;
+    status: string;
+    role: {
+        id: number;
+        name: string;
+    };
+};
+
+type Role = {
     id: number;
     name: string;
-    level: number;
-    main_teacher_id: number;
-    main_teacher?: {
-        id: number;
-        full_name: string;
-    };
 };
 
 type PaginatedResponse<T, L> = {
@@ -36,14 +43,16 @@ type Link = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Classrooms',
-        href: '/classrooms',
+        title: 'Users',
+        href: '/users',
     },
 ];
 
-export default function ClassroomIndex() {
-    const { classrooms, filters } = usePage<{
-        classrooms: PaginatedResponse<Classroom, Link>;
+export default function UserIndex() {
+    const { users, roles, statuses, filters } = usePage<{
+        users: PaginatedResponse<User, Link>;
+        roles: Role[];
+        statuses: { value: string; label: string }[];
         filters: { search?: string; sort?: string; direction?: string };
     }>().props;
 
@@ -60,17 +69,17 @@ export default function ClassroomIndex() {
     }, [flash]);
 
     const [isFormOpen, setIsFormOpen] = useState(false);
-    const [selectedClassroom, setSelectedClassroom] = useState<Classroom | null>(null);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
-    const [classroomToDelete, setClassroomToDelete] = useState<Classroom | null>(null);
+    const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
-    const openForm = (classroom: Classroom | null = null) => {
-        setSelectedClassroom(classroom);
+    const openForm = (user: User | null = null) => {
+        setSelectedUser(user);
         setIsFormOpen(true);
     };
 
     const handleDelete = async (id: number) => {
-        router.delete(`/classrooms/${id}`, {
+        router.delete(`/users/${id}`, {
             onSuccess: () => router.reload(),
         });
     };
@@ -80,20 +89,20 @@ export default function ClassroomIndex() {
     };
 
     const exportSelected = () => {
-        const selectedData = classrooms.data.filter((a) => selectedIds.includes(a.id));
-        const headers = `Name,level,Main teacher\n`;
-        const csv = selectedData.map((a) => `${a.name},${a.level},${a.main_teacher?.full_name}`).join('\n');
+        const selectedData = users.data.filter((a) => selectedIds.includes(a.id));
+        const headers = `Name,Username,Role,Phone,Email,Status\n`;
+        const csv = selectedData.map((a) => `${a.full_name},${a.username},${a.role.name},${a.phone},${a.email},${a.status}`).join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'classrooms.csv';
+        link.download = 'users.csv';
         link.click();
     };
 
     const handleSortChange = (column: string) => {
         router.get(
-            route('classrooms.index'),
+            route('users.index'),
             {
                 sort: column,
                 direction: filters.direction === 'asc' ? 'desc' : 'asc',
@@ -103,26 +112,28 @@ export default function ClassroomIndex() {
     };
 
     const tableHeaders = [
-        { key: 'name', label: 'Class Name', sortable: true },
-        { key: 'level', label: 'Level', sortable: true },
-        { key: 'main_teacher', label: 'Main Teacher', sortable: false },
+        { key: 'full_name', label: 'Full Name', sortable: true },
+        { key: 'username', label: 'Username', sortable: true },
+        { key: 'role_id', label: 'Role', sortable: true },
+        { key: 'phone', label: 'Phone', sortable: true },
+        { key: 'email', label: 'Email', sortable: true },
+        { key: 'status', label: 'Status', sortable: true },
         { key: 'actions', label: 'Actions', sortable: false },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Classrooms" />
+            <Head title="Users" />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
                 <div className="flex items-center justify-between">
-                    {/* Search and Add Button */}
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
-                            placeholder="Search classrooms..."
+                            placeholder="Search users..."
                             defaultValue={filters.search || ''}
-                            onChange={(e) => router.get(route('classrooms.index'), { search: e.target.value }, { preserveState: true })}
+                            onChange={(e) => router.get(route('users.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
                         />
                         <button
@@ -136,55 +147,39 @@ export default function ClassroomIndex() {
                         onClick={() => openForm(null)}
                         className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
-                        Add Classroom
+                        Add User
                     </button>
                 </div>
 
-                {/* Table */}
                 <Table
                     headers={tableHeaders}
-                    data={classrooms.data}
+                    data={users.data}
                     sortColumn={filters.sort ?? ''}
                     sortDirection={filters.direction === 'asc' || filters.direction === 'desc' ? filters.direction : 'asc'}
                     onSort={handleSortChange}
-                    onSelectAll={(checked) => setSelectedIds(checked ? classrooms.data.map((a) => a.id) : [])}
+                    onSelectAll={(checked) => setSelectedIds(checked ? users.data.map((a) => a.id) : [])}
                     selectedIds={selectedIds}
-                    rowRender={(classroom) => (
-                        <tr key={classroom.id} className="border-b">
+                    rowRender={(user) => (
+                        <tr key={user.id} className="border-b">
                             <td className="w-[10px] p-3 text-sm">
-                                <input type="checkbox" checked={selectedIds.includes(classroom.id)} onChange={() => toggleSelect(classroom.id)} />
+                                <input type="checkbox" checked={selectedIds.includes(user.id)} onChange={() => toggleSelect(user.id)} />
                             </td>
-                            <td className="p-3 text-sm">{classroom.name}</td>
-                            <td className="p-3 text-sm">Level {classroom.level}</td>
-                            <td className="p-3 text-sm">{classroom.main_teacher ? classroom.main_teacher.full_name : '-- Not assigned --'}</td>
-                            <td className="flex gap-2 p-3">
+                            <td className="p-3 text-sm">{user.full_name}</td>
+                            <td className="p-3 text-sm">{user.username}</td>
+                            <td className="p-3 text-sm">{user.role?.name || '-'}</td>
+                            <td className="p-3 text-sm">{user.phone || '-'}</td>
+                            <td className="p-3 text-sm">{user.email || '-'}</td>
+                            <td className="p-3 text-sm">{user.status}</td>
+                            <td className="flex gap-2 p-3 text-sm">
                                 <button
-                                    onClick={() => openForm(classroom)}
-                                    className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                                    onClick={() => openForm(user)}
+                                    className="rounded bg-blue-500 px-3 py-1 font-medium text-white hover:cursor-pointer"
                                 >
                                     Edit
                                 </button>
-                                <Link
-                                    href={route('classrooms.show', classroom.id)}
-                                    className="rounded bg-sky-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
-                                >
-                                    Detail
-                                </Link>
-                                <Link
-                                    href={route('classrooms.schedule', classroom.id)}
-                                    className="rounded bg-sky-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
-                                >
-                                    Schedule
-                                </Link>
-                                <Link
-                                    href={route('classrooms.history', classroom.id)}
-                                    className="rounded bg-sky-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
-                                >
-                                    History
-                                </Link>
                                 <button
-                                    onClick={() => setClassroomToDelete(classroom)}
-                                    className="rounded bg-red-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                                    onClick={() => setUserToDelete(user)}
+                                    className="rounded bg-red-500 px-3 py-1 font-medium text-white hover:cursor-pointer"
                                 >
                                     Delete
                                 </button>
@@ -193,32 +188,31 @@ export default function ClassroomIndex() {
                     )}
                 />
 
-                <Pagination links={classrooms.links} />
+                <Pagination links={users.links} />
 
-                {/* Modals */}
-                <ClassroomFormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} classroom={selectedClassroom} />
+                <UserFormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} user={selectedUser} roles={roles} statuses={statuses} />
 
                 <ActionModal
-                    isOpen={!!classroomToDelete}
-                    onClose={() => setClassroomToDelete(null)}
+                    isOpen={!!userToDelete}
+                    onClose={() => setUserToDelete(null)}
                     title="Confirm Deletion"
                     message={
                         <span>
-                            Are you sure you want to delete classroom <strong>{classroomToDelete?.name}</strong>?
+                            Are you sure you want to delete user <strong>{userToDelete?.full_name}</strong>?
                         </span>
                     }
                     buttons={[
                         {
                             label: 'Cancel',
-                            onClick: () => setClassroomToDelete(null),
+                            onClick: () => setUserToDelete(null),
                             variant: 'neutral',
                         },
                         {
                             label: 'Delete',
                             onClick: () => {
-                                if (classroomToDelete) {
-                                    handleDelete(classroomToDelete.id);
-                                    setClassroomToDelete(null);
+                                if (userToDelete) {
+                                    handleDelete(userToDelete.id);
+                                    setUserToDelete(null);
                                 }
                             },
                             variant: 'danger',

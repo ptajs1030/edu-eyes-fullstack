@@ -47,7 +47,7 @@ interface Props {
 const breadcrumbs = (classroomName: string, classroomId: number): BreadcrumbItem[] => [
     { title: 'Classrooms', href: '/classrooms' },
     { title: classroomName, href: `/classrooms/${classroomId}` },
-    { title: 'Schedule' },
+    { title: 'Schedule', href: '' },
 ];
 
 export default function ClassroomSchedule({ classroom, days, shiftings, teachers, academicYear }: Props) {
@@ -86,9 +86,6 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
 
         setData('days', cleanedDays);
     }, []);
-
-    console.log('cekkk');
-    console.log({ days, teachers });
 
     const handleShiftingChange = (dayIndex: number, shiftingId: number | null) => {
         const newDays = [...data.days];
@@ -172,8 +169,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                             <Tab
                                 key={tab}
                                 className={({ selected }) =>
-                                    `flex-1 rounded-lg py-3 text-center text-sm font-medium transition-all hover:cursor-pointer ${
-                                        selected ? 'bg-white text-blue-700 shadow' : 'text-gray-600 hover:bg-blue-200'
+                                    `flex-1 rounded-lg py-3 text-center text-sm font-medium transition-all hover:cursor-pointer ${selected ? 'bg-white text-blue-700 shadow' : 'text-gray-600 hover:bg-blue-200'
                                     }`
                                 }
                             >

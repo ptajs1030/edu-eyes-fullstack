@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Faker\Factory as Faker;
+use Illuminate\Support\Str;
 
 class StudentSeeder extends Seeder
 {
@@ -27,6 +28,7 @@ class StudentSeeder extends Seeder
         // Seed 10 students for Class V A
         for ($i = 0; $i < 10; $i++) {
             Student::create([
+                'uuid' => (string) Str::uuid(),
                 'parent_id' => $parentData->id,
                 'class_id' => $classV->id,
                 'full_name' => $faker->name,
@@ -43,6 +45,7 @@ class StudentSeeder extends Seeder
         // Seed 10 students for Class VI A
         for ($i = 0; $i < 10; $i++) {
             Student::create([
+                'uuid' => (string) Str::uuid(),
                 'parent_id' => User::where('role_id', 3)->first()->id,
                 'class_id' => $classVI->id,
                 'full_name' => $faker->name,
