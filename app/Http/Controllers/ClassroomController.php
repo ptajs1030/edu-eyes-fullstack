@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\AcademicYear;
+use App\Models\ClassHistory;
 use App\Models\Classroom;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -60,7 +62,7 @@ class ClassroomController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255|unique:classrooms,name',
                 'level' => 'required|integer|min:1',
-                'main_teacher_id' => 'required|exists:users,id',
+                'main_teacher_id' => 'nullable|exists:users,id',
             ]);
 
             Classroom::create($validated);
@@ -87,7 +89,7 @@ class ClassroomController extends Controller
             $validated = $request->validate([
                 'name' => 'required|string|max:255|unique:classrooms,name,' . $classroom->id,
                 'level' => 'required|integer|min:1',
-                'main_teacher_id' => 'required|exists:users,id',
+                'main_teacher_id' => 'nullable|exists:users,id',
             ]);
 
             $classroom->update($validated);
@@ -120,5 +122,61 @@ class ClassroomController extends Controller
                     ? 'Failed to delete classroom'
                     : 'Failed to delete classroom: ' . $e->getMessage());
         }
+    }
+
+    public function history(Classroom $classroom, Request $request)
+    {
+        $academicYears = AcademicYear::orderBy('start_year', 'desc')->get();
+
+        // Get seleted academicYear or active academic year
+        $selectedAcademicYearId = $request->input('academic_year');
+        $academicYear = $selectedAcademicYearId
+            ? AcademicYear::find($selectedAcademicYearId)
+            : AcademicYear::where('status', AcademicYearStatus::Active->value)->first();
+
+        $students = [];
+        $studentCount = 0;
+        if ($academicYear) {
+            // Ambil data class histories dengan relasi
+            $classHistories = ClassHistory::with(['student.parent'])
+                ->where('academic_year_id', $academicYear->id)
+                ->where('class_id', $classroom->id)
+                ->get();
+
+            // Format data untuk komponen Table
+            $students = $classHistories->map(function ($history) use ($academicYear) {
+                $student = $history->student;
+                $birthDate = $student->date_of_birth;
+                $age = null;
+
+                // Hitung umur berdasarkan tahun akademik
+                if ($birthDate && $academicYear->start_year) {
+                    $birthYear = Carbon::parse($birthDate)->year;
+                    $age = $academicYear->start_year - $birthYear;
+                }
+
+                return [
+                    'id' => $student->id,
+                    'full_name' => $student->full_name,
+                    'age' => $age,
+                    'parent' => $student->parent ? [
+                        'id' => $student->parent->id,
+                        'full_name' => $student->parent->full_name,
+                        'phone' => $student->parent->phone
+                    ] : null
+                ];
+            })->toArray();
+
+            $studentCount = count($students);
+        }
+
+        return Inertia::render('classrooms/history', [
+            'classroom' => $classroom,
+            'academicYears' => $academicYears,
+            'selectedAcademicYear' => $academicYear,
+            'students' => $students,
+            'studentCount' => $studentCount,
+            'filters' => $request->only(['sort', 'direction']),
+        ]);
     }
 }

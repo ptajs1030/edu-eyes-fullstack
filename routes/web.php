@@ -6,6 +6,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\AnnouncementController;
 use App\Http\Controllers\ClassroomController;
 use App\Http\Controllers\ClassroomScheduleController;
+use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SchoolSettingController;
 use App\Http\Controllers\ShiftingController;
 use App\Http\Controllers\StudentController;
@@ -19,11 +20,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+    Route::resource('roles', RoleController::class);
+    Route::resource('users', UserController::class);
     Route::resource('announcements', AnnouncementController::class);
     Route::resource('academic-years', AcademicYearController::class);
+    Route::get('classrooms/{classroom}/history', [ClassroomController::class, 'history'])->name('classrooms.history');
     Route::resource('classrooms', ClassroomController::class);
-    Route::get('classrooms/{classroom}/schedule', [ClassroomScheduleController::class, 'showScheduleForm'])->name('classrooms.schedule');
-    Route::post('/classrooms/{classroom}/schedule', [ClassroomScheduleController::class, 'saveSchedule'])->name('classrooms.schedule.save');
+    Route::prefix('classrooms/{classroom}')->group(function () {
+        Route::get('schedule', [ClassroomScheduleController::class, 'showScheduleForm'])
+            ->name('classrooms.schedule');
+        Route::post('schedule', [ClassroomScheduleController::class, 'saveSchedule'])
+            ->name('classrooms.schedule.save');
+    });
     Route::resource('students', StudentController::class);
     Route::resource('shiftings', ShiftingController::class);
     Route::resource('school-settings', SchoolSettingController::class);

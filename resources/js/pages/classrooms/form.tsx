@@ -138,6 +138,8 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
                     placeholder="Search teacher by name..."
                     endpoint={route('teachers.search')}
                     initialOption={initialTeacher}
+                    showInitialOptions={true}
+                    maxInitialOptions={10}
                 />
             </div>
             <div className="flex justify-end">
