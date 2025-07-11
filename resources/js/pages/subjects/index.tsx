@@ -77,8 +77,8 @@ export default function SubjectIndex() {
 
     const exportSelected = () => {
         const selectedData = subjects.data.filter((a) => selectedIds.includes(a.id));
-        const headers = `Name,Curriculum Year,is Archived\n`;
-        const csv = selectedData.map((a) => `${a.name},${a.curriculum_year},${a.is_archived}`).join('\n');
+        const headers = `Name,Curriculum Year,Archived Status\n`;
+        const csv = selectedData.map((a) => `${a.name},${a.curriculum_year},${a.is_archived ? 'Archived' : 'Active'}`).join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -152,7 +152,15 @@ export default function SubjectIndex() {
                             </td>
                             <td className="p-3 text-sm">{subject.name}</td>
                             <td className="p-3 text-sm">{subject.curriculum_year}</td>
-                            <td className="p-3 text-sm">{subject.is_archived}</td>
+                            <td className="p-3 text-sm">
+                                <span
+                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                        subject.is_archived ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                                    }`}
+                                >
+                                    {subject.is_archived ? 'Archived' : 'Active'}
+                                </span>
+                            </td>
                             <td className="flex gap-2 p-3">
                                 <button
                                     onClick={() => openForm(subject)}

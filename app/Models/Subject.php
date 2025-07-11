@@ -11,6 +11,10 @@ class Subject extends Model
 
     protected $fillable = ['name', 'curriculum_year', 'is_archived'];
 
+    protected $casts = [
+        'is_archived' => 'boolean',
+    ];
+
     public function classSchedules()
     {
         return $this->hasMany(ClassSubjectSchedule::class);

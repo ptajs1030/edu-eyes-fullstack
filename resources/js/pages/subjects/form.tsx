@@ -44,6 +44,11 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, checked } = e.target;
+        setFormData((prev) => ({ ...prev, [name]: checked }));
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -98,35 +103,39 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
                     required
                 />
             </div>
-            <div className="mb-3 flex flex-row justify-between gap-4">
-                <div className="basis-1/2">
-                    <label htmlFor="curriculum_year" className="block text-sm font-medium text-gray-700">
-                        Curriculum Year
-                    </label>
-                    <input
-                        id="curriculum_year"
-                        name="curriculum_year"
-                        type="time"
-                        value={formData.curriculum_year}
-                        onChange={handleChange}
-                        className="w-full rounded border p-2"
-                        required
-                    />
-                </div>
-                <div className="basis-1/2">
-                    <label htmlFor="is_archived" className="block text-sm font-medium text-gray-700">
-                        Is Archived
-                    </label>
-                    <input
-                        id="is_archived"
-                        name="is_archived"
-                        type="time"
-                        value={formData.is_archived}
-                        onChange={handleChange}
-                        className="w-full rounded border p-2"
-                        required
-                    />
-                </div>
+            <div className="mb-3">
+                <label htmlFor="curriculum_year" className="block text-sm font-medium text-gray-700">
+                    Curriculum Year
+                </label>
+                <input
+                    id="curriculum_year"
+                    name="curriculum_year"
+                    type="number"
+                    value={formData.curriculum_year}
+                    onChange={handleChange}
+                    className="w-full rounded border p-2"
+                    required
+                />
+            </div>
+            <div className="mb-4">
+                <label className="flex items-start gap-3">
+                    <div className="flex h-5 items-center">
+                        <input
+                            type="checkbox"
+                            id="is_archived"
+                            name="is_archived"
+                            checked={formData.is_archived}
+                            onChange={handleCheckboxChange}
+                            className="h-4 w-4 rounded border-gray-300 text-blue-600 transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 focus:ring-offset-white"
+                        />
+                    </div>
+                    <div className="flex flex-col">
+                        <span className="block text-sm font-medium text-gray-700">Archive this subject</span>
+                        <span className="mt-0.5 block text-xs text-gray-500">
+                            Archived subjects will be hidden from default views but remain accessible
+                        </span>
+                    </div>
+                </label>
             </div>
             <div className="flex justify-end">
                 <button type="button" onClick={onClose} className="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:cursor-pointer">
