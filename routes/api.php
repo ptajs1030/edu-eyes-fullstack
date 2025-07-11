@@ -50,13 +50,22 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
         Route::post('/profile/change-password', 'changePassword');
         Route::get('/students/{id?}', 'getStudents');
         Route::get('/classrooms/{id?}', 'getClassrooms');
+        Route::get('/subjects/{id?}', 'getSubjects');
     });
    
     Route::prefix('attendance')->controller(AttendanceController::class)->group(function () {
         Route::get('/history/in/', 'clockInHistory');
         Route::get('/history/out/', 'clockOutHistory');
-        Route::post('/shifting/{id}', 'shiftingAttendance');
+        Route::post('/shifting', 'shiftingAttendance');
         Route::post('/edit/{id}', 'editAttendance');
+        Route::prefix('subject')->group(function () {
+            Route::get('/classroom', 'getClassroomByTeacher');
+            Route::get('/{class_id}/subjects', 'getClassroomSubject');
+            Route::get('/{class_id}/{subject}', 'getSubjectAttendance');
+            Route::post('/', 'subjectAttendance');
+            Route::get('/history/{id?}', 'subjectAttendanceHistory');
+            Route::post('/edit/{id}', 'editSubjectAttendance');
+        });
     });
 });
 
@@ -71,7 +80,10 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
         
         Route::prefix('attendance')->group(function (){
             Route::get('/', 'todayAttendance');
-            Route::get('/history', 'attendanceHistory');
+            Route::prefix('history')->group(function () {
+                Route::get('/', 'attendanceHistory');
+                Route::get('/subject', 'subjectAttendanceHistory');
+            });
         });
     });
     Route::get('/students/{id?}', 'getStudents');
