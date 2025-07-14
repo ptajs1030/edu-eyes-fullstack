@@ -23,7 +23,7 @@ class EditSubjectAttendanceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'required|string|in:present,alpha',
+            'status' => 'required|string|in:present,alpha,late,leave,sick_leave,day_off',
         ];
     }
 
