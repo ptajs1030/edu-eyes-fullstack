@@ -74,9 +74,13 @@ class AttendanceService
     
 
     public function shiftingAttendance(ShiftingAttendanceData $data){
-        $student=Student::where('id', $data->getStudent())->first();
+        $student=Student::where('uuid', $data->getStudent())->first();
         if (!$student) {
             abort(404, 'Student not found');
+        }
+        $attendance=ShiftingAttendance::where('student_id', $student->id)->where('submit_date', Carbon::now()->format('Y-m-d'))->first();
+        if (!$attendance) {
+            abort(404, 'Attendance not found');
         }
         $day=ClassShiftingSchedule::where('class_id', $student->class_id)->where('day', Carbon::now()->dayOfWeek())->first();
         if(!$day){
@@ -86,37 +90,41 @@ class AttendanceService
         if (!$pic) {
             abort(404, 'PIC not found');
         }
-        $attendace=ShiftingAttendance::where('student_id', $data->getStudent())->where('submit_date', Carbon::now()->format('Y-m-d'))->first();
-        if (!$attendace) {
-            abort(404, 'Attendance not found');
-        }
+        
 
         $late_tolerance = (int)Setting::where('key', 'late_tolerance')->value        ('value');
-        $deadline = Carbon::parse($attendace->shifting_start_hour)->addMinutes($late_tolerance);
+        $deadline = Carbon::parse($attendance->shifting_start_hour)->addMinutes($late_tolerance);
         $submit_hour = Carbon::parse($data->getSubmitHour());
         $minutes_of_late = $deadline->diffInMinutes($data->getSubmitHour());
         if ($pic->teacher_id != auth()->user()->id) {
             abort(403, 'You are not assigned to this class schedule.');
         }
-        if ($attendace->clock_out_hour) {
+        if ($attendance->clock_out_hour) {
             return abort(400, 'attendance already submitted');
         }
 
-        if ($submit_hour <= $deadline && !$attendace->clock_in_hour) {
-            $attendace->update([
+        if ($attendance->clock_in_hour && !$attendance->clock_out_hour) {
+            $minClockOut = Carbon::parse($attendance->clock_in_hour)->addMinutes(2);
+
+            if ($submit_hour->lt($minClockOut)) {
+                abort(400, 'Clock out must be at least 2 minutes after clock in');
+            }
+        }
+        if ($submit_hour <= $deadline && !$attendance->clock_in_hour) {
+            $attendance->update([
                 'status' => 'present',
                 'clock_in_hour' => $submit_hour
             ]);
             
-        }else if ($submit_hour > $deadline && !$attendace->clock_in_hour) {
-            $attendace->update([
+        }else if ($submit_hour > $deadline && !$attendance->clock_in_hour) {
+            $attendance->update([
                 'status' => 'late',
                 'minutes_of_late' => (int) $minutes_of_late,
                 'clock_in_hour' => $submit_hour,
             ]);
             
         }else {
-            $attendace->update([
+            $attendance->update([
                 'clock_out_hour' => $submit_hour,
             ]);
             
@@ -124,7 +132,7 @@ class AttendanceService
 
         return [
             'message' => 'Attendance updated successfully',
-            'attendance' => $attendace,
+            'attendance' => $attendance,
         ];
     }
  
@@ -200,7 +208,7 @@ class AttendanceService
             abort(204, 'Classroom not found');
         }
         return $classrooms;
-
+        
     }
 
     public function getClassromSubject($class_id, $search = null){

@@ -10,22 +10,22 @@ class ShiftingAttendanceData
      * Sample data
      */
      private ?string $submit_hour;
-     private ?int $student_id;
+     private ?string $qr_code;
 
 
     public function __construct(array $data)
     {
         $this->submit_hour = $data['submit_hour'];
-        $this->student_id = $data['student_id']; 
+        $this->qr_code = $data['qr_code']; 
        
     }
 
     /**
      * Get the value of student_id
      */
-    public function getStudent(): ?int
+    public function getStudent(): ?string
     {
-        return $this->student_id;
+        return $this->qr_code;
     }
 
     public function getSubmitHour(): ?string
