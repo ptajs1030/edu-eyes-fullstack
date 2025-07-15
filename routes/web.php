@@ -10,6 +10,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SchoolSettingController;
 use App\Http\Controllers\ShiftingController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\UserController;
 
 Route::get('/', function () {
@@ -37,6 +38,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('classrooms.schedule.save');
     });
     Route::resource('students', StudentController::class);
+    Route::resource('subjects', SubjectController::class);
     Route::resource('shiftings', ShiftingController::class);
     Route::resource('school-settings', SchoolSettingController::class);
 });
