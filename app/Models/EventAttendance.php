@@ -20,12 +20,12 @@ class EventAttendance extends Model
 
     public function student()
     {
-        $this->belongsTo(Student::class);
+        return $this->belongsTo(Student::class);
     }
 
     public function event()
     {
-        $this->belongsTo(Event::class);
+        return $this->belongsTo(Event::class);
     }
 
     public function academicYear()

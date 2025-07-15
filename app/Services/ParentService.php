@@ -119,7 +119,7 @@ class ParentService
                 'id' => $item->id,
                 'student' => optional($item->student)->full_name,
                 'classroom' => optional($item->classroom)->name,
-                'accademic_year'=> optional($item->academicYear)->title,
+                'academic_year'=> optional($item->academicYear)->title,
                 'subject_name' => $item->subject_name,
                 'subject_start_hour' => $item->subject_start_hour,
                 'subject_end_hour' => $item->subject_end_hour,
@@ -140,11 +140,11 @@ class ParentService
 
     public function getAnnouncements($id, $search){
         if ($id) {
-            $annoucement = Announcement::where('id', $id)->first();
-            if (!$annoucement) {
+            $announcement = Announcement::where('id', $id)->first();
+            if (!$announcement) {
                 return abort(404,'Announcement not found');
             }
-            return $annoucement;
+            return $announcement;
         }else {
             $query = Announcement::query();
             if ($search) {
@@ -154,8 +154,8 @@ class ParentService
                 });
             }
 
-            $annoucements = $query->paginate(10);
-            return $annoucements;
+            $announcement = $query->paginate(10);
+            return $announcement;
         }
 
     }

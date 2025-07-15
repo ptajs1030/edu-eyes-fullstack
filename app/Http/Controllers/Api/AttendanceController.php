@@ -6,6 +6,7 @@ use App\DTOs\EditShiftingAttendanceData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\EditShiftingAttendanceRequest;
 use App\Http\Requests\Api\EditSubjectAttendanceRequest;
+use App\Http\Requests\Api\EventAttendanceRequest;
 use App\Http\Requests\Api\ShiftingAttendanceRequest;
 use App\Http\Requests\Api\SubjectAttendanceRequest;
 use App\Http\Resources\AttendanceResource;
@@ -79,7 +80,7 @@ class AttendanceController extends BaseApiController
 
     public function getClassroomSubject(Request $request, int $class_id){
         $search = $request->query('search');
-        return $this->success($this->service->getClassromSubject($class_id, $search));
+        return $this->success($this->service->getClassroomSubject($class_id, $search));
     }
     
     public function getSubjectAttendance(int $class_id, string $subject){
@@ -92,5 +93,28 @@ class AttendanceController extends BaseApiController
 
     public function editSubjectAttendance(EditSubjectAttendanceRequest $data, int $id){
         return $this->success($this->service->editSubjectAttendance($data->getDto(), $id));
+    }
+
+    public function getEvent( Request $request, ?int $id = null){
+        $date = $request->query('date');
+        return $this->success($this->service->getEvent($id, $date));
+    }
+
+    public function eventAttendanceHistory(Request $request){
+        $search = $request->query('search');
+        $date = $request->query('date');
+        $event_id = $request->query('event_id');
+        $data= $this->service->eventAttendanceHistory($search, $date, $event_id);
+        return $this->success([
+            'number_of_attendances' => $data['number_of_attendances'],
+            'current_page' => $data['current_page'],
+            'last_page' => $data['last_page'],
+            'per_page' => $data['per_page'],
+            'attendances' => $data['attendances'],
+        ]);
+    }
+    
+    public function eventAttendance(EventAttendanceRequest $data){
+        return $this->success($this->service->eventAttendance($data->getDto()));
     }
 }

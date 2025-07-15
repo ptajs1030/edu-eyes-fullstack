@@ -58,6 +58,7 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
         Route::get('/history/out/', 'clockOutHistory');
         Route::post('/shifting', 'shiftingAttendance');
         Route::post('/edit/{id}', 'editAttendance');
+
         Route::prefix('subject')->group(function () {
             Route::get('/classroom', 'getClassroomByTeacher');
             Route::get('/{class_id}/subjects', 'getClassroomSubject');
@@ -65,6 +66,12 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
             Route::post('/', 'subjectAttendance');
             Route::get('/history/{id?}', 'subjectAttendanceHistory');
             Route::post('/edit/{id}', 'editSubjectAttendance');
+        });
+
+        Route::prefix('event')->group(function () {
+            Route::get('/history', 'eventAttendanceHistory');
+            Route::get('/{id?}', 'getEvent');
+            Route::post('/', 'eventAttendance');
         });
     });
 });
