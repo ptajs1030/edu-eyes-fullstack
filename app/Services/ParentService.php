@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\ChangePasswordData;
 use App\Models\Announcement;
+use App\Models\ClassSubjectSchedule;
 use App\Models\ShiftingAttendance;
 use App\Models\SubjectAttendance;
 use Carbon\Carbon;
@@ -158,5 +159,28 @@ class ParentService
             return $announcement;
         }
 
+    }
+
+    public function getSubjectSchedule($student){
+        $schedules=ClassSubjectSchedule::where('class_id', $student->class_id)->get();
+        if ($schedules->isEmpty()) {
+            abort(204, 'Schedule not found');
+        }
+        
+        $scheduleWithRelations = [];
+        foreach ($schedules as $schedule) {
+            $scheduleWithRelations[] = [
+                'id' => $schedule->id,
+                'subject' => $schedule->subject->name,
+                'classroom' => $schedule->classroom->name,
+                'academic_year'=> optional($schedule->academicYear)->title,
+                'day' => $schedule->day,
+                'start_hour' => $schedule->start_hour,
+                'end_hour' => $schedule->end_hour,
+                'teacher' => optional($schedule->teacher)->full_name,
+            ];
+        };
+
+        return $scheduleWithRelations;
     }
 }

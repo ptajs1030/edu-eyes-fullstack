@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\DTOs\EditShiftingAttendanceData;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\EditEventAttendanceRequest;
 use App\Http\Requests\Api\EditShiftingAttendanceRequest;
 use App\Http\Requests\Api\EditSubjectAttendanceRequest;
 use App\Http\Requests\Api\EventAttendanceRequest;
@@ -116,5 +117,9 @@ class AttendanceController extends BaseApiController
     
     public function eventAttendance(EventAttendanceRequest $data){
         return $this->success($this->service->eventAttendance($data->getDto()));
+    }
+
+    public function editEventAttendance(EditEventAttendanceRequest $data, int $id){
+        return $this->success($this->service->editEventAttendance($data->getDto(), $id));
     }
 }
