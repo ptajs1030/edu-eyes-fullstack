@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ForgotPassword;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\ParentController;
+use App\Http\Controllers\Api\QRCodeController;
 use App\Http\Controllers\Api\SampleAuthTeacherController;
 use App\Http\Controllers\Api\TeacherController;
 use Illuminate\Http\Request;
@@ -44,7 +45,11 @@ Route::controller(ForgotPasswordController::class)->group(function () {
 });
 
 Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(function (){
-
+    // test
+    Route::controller(QRCodeController::class)->group(function () {
+        Route::get('/qrcode', 'generate');
+    });
+    // end
     Route::controller(TeacherController::class)->group(function (){
         Route::get('/profile', 'profile');
         Route::post('/profile/change-password', 'changePassword');
