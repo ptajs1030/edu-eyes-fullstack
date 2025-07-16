@@ -3,6 +3,7 @@
 namespace App\Services;
 
 
+use App\DTOs\EditEventAttendanceData;
 use App\DTOs\EditShiftingAttendanceData;
 use App\DTOs\EditSubjectAttendanceData;
 use App\DTOs\EventAttendanceData;
@@ -380,12 +381,15 @@ class AttendanceService
 
     }
 
-    public function eventAttendanceHistory($search=null, $date=null, $event_id=null){
+    public function eventAttendanceHistory($search, $date, $event_id){
         $query=EventAttendance::query();
        
         if ($date) {
-            $parsedDate = Carbon::parse($date)->format('Y-m');
-            $query->where('submit_date', $parsedDate);
+            if (!preg_match('/^\d{4}-\d{2}$/', $date)) {
+                abort(400, 'Format tanggal harus YYYY-MM');
+            }
+        
+            $query->whereRaw("DATE_FORMAT(submit_date, '%Y-%m') = ?", [$date]);
         }
         if ($event_id) {
             $query->where('event_id', $event_id);
@@ -423,6 +427,23 @@ class AttendanceService
             'last_page' => $attendances->lastPage(),
             'per_page' => $attendances->perPage(),
             'attendances' => $attendancesWithRelations,
+        ];
+    }
+
+    public function editEventAttendance(EditEventAttendanceData $data, $id){
+        $attendance = EventAttendance::where('id', $id)->first();
+        if (!$attendance) {
+            abort(404, 'Attendance not found');
+        }
+        if(!Carbon::parse($attendance->submit_date)->isToday()){
+            abort(403, 'You are not allowed to edit this attendance');
+        } 
+        $attendance->update([
+            'status' => $data->getStatus(),
+        ]);
+        return [
+            'message' => 'Attendance updated successfully',
+            'attendance' => $attendance,
         ];
     }
 }
