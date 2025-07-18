@@ -6,38 +6,38 @@ use App\Models\Student;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Str;
 
 class QRCodeService
 {
-    public function generate()
+    public function generate($student)
     {
-        $students = Student::all();
-        $generated = [];
-        $skipped = [];
-
-        foreach ($students as $student) {
-            $filename = 'qrcode_' . $student->full_name . '.pdf';
-            $path = 'qrcodes/' . $filename;
-
-            if (Storage::disk('public')->exists($path)) {
-                $skipped[] = asset('storage/'.$path);
-                continue;
-            }
-
-            $qrcode = QrCode::size(300)->generate($student->id)->format('svg');
-            $pdf = Pdf::loadView('qrcode_pdf', [
-                'qrcode' => $qrcode,
-                'name'   => $student->full_name,
-            ]);
-
-            Storage::disk('public')->put($path, $pdf->output());
-            $generated[] = asset('storage/'.$path);
+        $student = Student::find($student->id);
+        if (!$student) {
+            return response()->json(['message' => 'Student not found.'], 404);
         }
+        $pdfFileName = 'qrcode_' . Str::slug($student->full_name) . '.pdf';
+        $pdfPath = 'qrcodes/' . $pdfFileName;
 
-        return response()->json([
-            'message'   => 'QR codes process completed',
-            'generated' => $generated,
-            'skipped'   => $skipped,
+
+        if (Storage::disk('public')->exists($pdfPath)) {
+            return response()->download(storage_path('app/public/' . $pdfPath), $pdfFileName);
+        }
+        $svg = QrCode::size(200)->generate($student->uuid);
+
+       
+        $svgBase64 = base64_encode($svg);
+        $svgDataUri = 'data:image/svg+xml;base64,' . $svgBase64;
+        $pdf = Pdf::loadView('qrcode_pdf', [
+            'qrcode_image' => $svgDataUri,
+            'name' => $student->full_name,
         ]);
+
+        
+        
+        Storage::disk('public')->put('qrcodes/' . $pdfFileName, $pdf->output());
+
+        
+        return response()->download(storage_path('app/public/' . $pdfPath), $pdfFileName);
     }
 }

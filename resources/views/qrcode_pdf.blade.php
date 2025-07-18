@@ -9,12 +9,7 @@
 </head>
 <body>
     
-   <div class="qrcode">
-        <!-- Gunakan direktif @php untuk embed SVG -->
-        @php
-            echo $qrcode;
-        @endphp
-    </div>
+    <img src="{{ $qrcode_image }}" alt="QR Code">
     <div class="name">{{ $name }}</div>
 </body>
 </html>

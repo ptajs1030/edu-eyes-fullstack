@@ -45,11 +45,7 @@ Route::controller(ForgotPasswordController::class)->group(function () {
 });
 
 Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(function (){
-    // test
-    Route::controller(QRCodeController::class)->group(function () {
-        Route::get('/qrcode', 'generate');
-    });
-    // end
+   
     Route::controller(TeacherController::class)->group(function (){
         Route::get('/profile', 'profile');
         Route::post('/profile/change-password', 'changePassword');
@@ -90,7 +86,8 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
             Route::post('/change-password', 'changePassword');
         });
         Route::get('/announcements/{id?}', 'getAnnouncements');
-        
+        Route::get('/subject-schedule', 'getSubjectSchedule');
+        Route::get('/event-schedule', 'getEventSchedule');
         Route::prefix('attendance')->group(function (){
             Route::get('/', 'todayAttendance');
             Route::prefix('history')->group(function () {
@@ -98,6 +95,11 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
                 Route::get('/subject', 'subjectAttendanceHistory');
             });
         });
+        
+        Route::controller(QRCodeController::class)->group(function () {
+            Route::get('/kartu-siswa', 'generate');
+        });
+  
     });
     Route::get('/students/{id?}', 'getStudents');
 });

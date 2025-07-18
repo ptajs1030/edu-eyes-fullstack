@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTOs\ChangePasswordData;
 use App\Models\Announcement;
 use App\Models\ClassSubjectSchedule;
+use App\Models\EventParticipant;
 use App\Models\ShiftingAttendance;
 use App\Models\SubjectAttendance;
 use Carbon\Carbon;
@@ -182,5 +183,29 @@ class ParentService
         };
 
         return $scheduleWithRelations;
+    }
+
+    public function getEventSchedule($student){
+        $schedules = EventParticipant::where('student_id', $student->id)
+            ->with('event')
+            ->get();
+        if ($schedules->isEmpty()) {
+            abort(204, 'Event schedule not found');
+        }
+        
+      $schedulesWithRelations = [];
+        foreach ($schedules as $schedule) {
+            $schedulesWithRelations[] = [
+                'id' => $schedule->id,
+                'name' => $schedule->event->name,
+                'description' => $schedule->event->description,
+                'date' => $schedule->event->date,
+                'start_time' => $schedule->event->Start_hour,
+                'end_time' => $schedule->event->end_hour,
+            ];
+        }
+        
+        return $schedulesWithRelations;
+        
     }
 }
