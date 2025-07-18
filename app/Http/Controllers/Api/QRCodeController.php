@@ -11,8 +11,9 @@ class QRCodeController extends BaseApiController
     public function __construct(protected QRCodeService $service)
     {
     }
-    public function generate(){
-        return $this->success($this->service->generate());
+    public function generate(Request $request){
+        $student = $request->attributes->get('current_student');
+        return $this->service->generate($student);
     }
 
 
