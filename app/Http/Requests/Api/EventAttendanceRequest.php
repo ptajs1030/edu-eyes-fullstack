@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\Api;
 
-use App\DTOs\EditSubjectAttendanceData;
+use App\DTOs\EventAttendanceData;
 use Illuminate\Foundation\Http\FormRequest;
 
-class EditSubjectAttendanceRequest extends FormRequest
+class EventAttendanceRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,11 +23,13 @@ class EditSubjectAttendanceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => 'required|string|in:present,alpha,late,leave,sick_leave,day_off',
+            'qr_code' => 'required',
+            'submit_hour' => 'required|date_format:H:i',
+            'event_id' => 'required|exists:events,id',
         ];
     }
 
-    public function getDto(){
-        return new EditSubjectAttendanceData($this->validated());
-    }
+public function getDto(){
+    return new EventAttendanceData($this->validated());
+}
 }
