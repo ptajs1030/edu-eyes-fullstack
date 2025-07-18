@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ForgotPassword;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\ParentController;
+use App\Http\Controllers\Api\QRCodeController;
 use App\Http\Controllers\Api\SampleAuthTeacherController;
 use App\Http\Controllers\Api\TeacherController;
 use Illuminate\Http\Request;
@@ -44,7 +45,7 @@ Route::controller(ForgotPasswordController::class)->group(function () {
 });
 
 Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(function (){
-
+   
     Route::controller(TeacherController::class)->group(function (){
         Route::get('/profile', 'profile');
         Route::post('/profile/change-password', 'changePassword');
@@ -58,6 +59,7 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
         Route::get('/history/out/', 'clockOutHistory');
         Route::post('/shifting', 'shiftingAttendance');
         Route::post('/edit/{id}', 'editAttendance');
+
         Route::prefix('subject')->group(function () {
             Route::get('/classroom', 'getClassroomByTeacher');
             Route::get('/{class_id}/subjects', 'getClassroomSubject');
@@ -65,6 +67,13 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
             Route::post('/', 'subjectAttendance');
             Route::get('/history/{id?}', 'subjectAttendanceHistory');
             Route::post('/edit/{id}', 'editSubjectAttendance');
+        });
+
+        Route::prefix('event')->group(function () {
+            Route::get('/history', 'eventAttendanceHistory');
+            Route::get('/{id?}', 'getEvent');
+            Route::post('/', 'eventAttendance');
+            Route::post('/edit/{id}', 'editEventAttendance');
         });
     });
 });
@@ -77,7 +86,8 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
             Route::post('/change-password', 'changePassword');
         });
         Route::get('/announcements/{id?}', 'getAnnouncements');
-        
+        Route::get('/subject-schedule', 'getSubjectSchedule');
+        Route::get('/event-schedule', 'getEventSchedule');
         Route::prefix('attendance')->group(function (){
             Route::get('/', 'todayAttendance');
             Route::prefix('history')->group(function () {
@@ -85,6 +95,11 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
                 Route::get('/subject', 'subjectAttendanceHistory');
             });
         });
+        
+        Route::controller(QRCodeController::class)->group(function () {
+            Route::get('/kartu-siswa', 'generate');
+        });
+  
     });
     Route::get('/students/{id?}', 'getStudents');
 });

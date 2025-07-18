@@ -55,4 +55,5 @@ class TeacherController extends BaseApiController
             SubjectResource::collection(Subject::get())
         );
     }
+
 }

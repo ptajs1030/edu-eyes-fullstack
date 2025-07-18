@@ -23,7 +23,7 @@ class ShiftingAttendanceRequest extends FormRequest
     {
         return [
             'submit_hour' => 'required|date_format:H:i',
-            'student_id' => 'required|exists:students,id',
+            'qr_code' => 'required',
         ];
     }
 
