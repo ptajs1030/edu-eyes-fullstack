@@ -9,6 +9,7 @@ use App\Models\EventParticipant;
 use App\Models\ShiftingAttendance;
 use App\Models\SubjectAttendance;
 use Carbon\Carbon;
+use DB;
 
 class ParentService
 {
@@ -170,9 +171,10 @@ class ParentService
         
         $scheduleWithRelations = [];
         foreach ($schedules as $schedule) {
+            $subjectName = DB::table('subjects')->where('id', $schedule->subject_id)->value('name');
             $scheduleWithRelations[] = [
                 'id' => $schedule->id,
-                'subject' => $schedule->subject->name,
+                'subject' => $subjectName,
                 'classroom' => $schedule->classroom->name,
                 'academic_year'=> optional($schedule->academicYear)->title,
                 'day' => $schedule->day,
@@ -196,7 +198,7 @@ class ParentService
       $schedulesWithRelations = [];
         foreach ($schedules as $schedule) {
             $schedulesWithRelations[] = [
-                'id' => $schedule->id,
+                'id' => $schedule->event->id,
                 'name' => $schedule->event->name,
                 'description' => $schedule->event->description,
                 'date' => $schedule->event->date,
