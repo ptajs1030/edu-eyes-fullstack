@@ -8,7 +8,7 @@ app()->make(App\Console\Commands\MakeService::class);
 app()->make(App\Console\Commands\MakeDto::class);
 
 Schedule::command('attendance:generate-shifting')
-    ->dailyAt('00:05')
+    ->dailyAt('00:00')
     ->timezone('Asia/Jakarta');
 
 Artisan::command('inspire', function () {
