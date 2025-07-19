@@ -34,10 +34,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('classrooms/{classroom}/history', [ClassroomController::class, 'history'])->name('classrooms.history');
     Route::resource('classrooms', ClassroomController::class);
     Route::prefix('classrooms/{classroom}')->group(function () {
+        Route::post('schedule/subject', [ClassroomScheduleController::class, 'saveSubjectSchedule'])
+            ->name('classrooms.schedule.subject.save');
+        Route::post('schedule', [ClassroomScheduleController::class, 'saveSchedule'])
+            ->name('classrooms.schedule.shift.save');
         Route::get('schedule', [ClassroomScheduleController::class, 'showScheduleForm'])
             ->name('classrooms.schedule');
-        Route::post('schedule', [ClassroomScheduleController::class, 'saveSchedule'])
-            ->name('classrooms.schedule.save');
     });
     Route::resource('students', StudentController::class);
     Route::resource('subjects', SubjectController::class);
