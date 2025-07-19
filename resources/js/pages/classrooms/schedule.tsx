@@ -68,102 +68,84 @@ const breadcrumbs = (classroomName: string, classroomId: number): BreadcrumbItem
 ];
 
 export default function ClassroomSchedule({ classroom, days, shiftings, teachers, academicYear, subjectSchedulesByDay, subjects }: Props) {
+    // Shift Schedule State
     const {
-        data,
-        setData,
+        data: shiftData,
+        setData: setShiftData,
         post: postShift,
-        processing: shiftProcessing,
-        errors,
+        processing: isSavingShift,
     } = useForm({
         days: days,
     });
+
+    // Subject Schedule State
+    const [subjectSchedules, setSubjectSchedules] = useState<Record<number, SubjectSchedule[]>>(() =>
+        initializeSubjectSchedules(subjectSchedulesByDay),
+    );
+    const [isSavingSubject, setIsSavingSubject] = useState(false);
+    const [selectedTab, setSelectedTab] = useState(academicYear.attendance_mode === 'per-shift' ? 0 : 1);
+
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
-    // const [subjectSchedules, setSubjectSchedules] = useState<{ [day: number]: SubjectSchedule[] }>({});
-    const [subjectSchedules, setSubjectSchedules] = useState<{ [day: number]: SubjectSchedule[] }>(() => {
-        const initialSchedules: { [day: number]: SubjectSchedule[] } = {};
-
-        for (let day = 1; day <= 7; day++) {
-            initialSchedules[day] =
-                subjectSchedulesByDay[day]?.map((s) => ({
-                    id: s.id, // Pastikan ID diambil dari props
-                    subject_id: s.subject_id,
-                    teacher_id: s.teacher_id,
-                    start_hour: s.start_hour,
-                    end_hour: s.end_hour,
-                })) || [];
-        }
-
-        return initialSchedules;
-    });
-    const [subjectProcessing, setSubjectProcessing] = useState(false);
     const isShiftMode = academicYear.attendance_mode === 'per-shift';
     const isSubjectMode = academicYear.attendance_mode === 'per-subject';
-    const [selectedTab, setSelectedTab] = useState(isShiftMode ? 0 : 1);
+    const teacherOptions = useMemo(() => formatTeacherOptions(teachers), [teachers]);
 
-    // Initialize subject schedules from props
+    // Effects
     useEffect(() => {
-        const initialSchedules: { [day: number]: SubjectSchedule[] } = {};
-        for (let day = 1; day <= 7; day++) {
-            initialSchedules[day] =
-                subjectSchedulesByDay[day]?.map((schedule) => ({
-                    id: schedule.id,
-                    subject_id: schedule.subject_id,
-                    teacher_id: schedule.teacher_id,
-                    start_hour: schedule.start_hour,
-                    end_hour: schedule.end_hour,
-                })) || [];
-        }
-        setSubjectSchedules(initialSchedules);
-    }, [subjectSchedulesByDay]);
-
-    // Clean initial shift data
-    useEffect(() => {
-        const cleanedDays = days.map((day) => ({
-            ...day,
-            teachers: Array.isArray(day.teachers) ? day.teachers.filter((id) => id !== null) : [],
-            selected_teachers: Array.isArray(day.selected_teachers) ? day.selected_teachers.filter((t) => t.id !== null) : [],
-        }));
-        setData('days', cleanedDays);
-    }, []);
-
-    // Flash message handler
-    useEffect(() => {
-        if (flash?.success) {
-            toast.success(flash.success);
-        }
-
-        if (flash?.error) {
-            toast.error(flash.error);
-        }
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
     }, [flash]);
 
-    // Convert teachers to options format
-    const teacherOptions = useMemo(
-        () =>
-            teachers.map((teacher) => ({
-                id: teacher.id,
-                name: teacher.full_name,
-            })),
-        [teachers],
-    );
+    useEffect(() => {
+        setSelectedTab(isShiftMode ? 0 : 1);
+    }, [academicYear.attendance_mode]);
 
-    // Subject schedule handlers
-    const addSubjectSchedule = (day: number) => {
+    // Handlers
+    const handleTabChange = (index: number) => {
+        if ((index === 0 && isShiftMode) || (index === 1 && isSubjectMode)) {
+            setSelectedTab(index);
+        } else {
+            toast.warning(
+                `Current attendance mode is "${academicYear.attendance_mode}". Switch mode in Academic Year settings to access this feature.`,
+            );
+        }
+    };
+
+    const handleShiftChange = (dayIndex: number, shiftingId: number | null) => {
+        const newDays = [...shiftData.days];
+        newDays[dayIndex] = {
+            ...newDays[dayIndex],
+            shifting_id: shiftingId,
+            teachers: shiftingId ? newDays[dayIndex].teachers : [],
+            selected_teachers: shiftingId ? newDays[dayIndex].selected_teachers : [],
+        };
+        setShiftData('days', newDays);
+    };
+
+    const handleTeachersChange = (dayIndex: number, selectedIds: (number | string)[]) => {
+        const newDays = [...shiftData.days];
+        const teacherIds = selectedIds.filter((id) => id !== null).map(Number);
+        const selectedTeachers = teacherIds.map((id) => ({
+            id,
+            name: teachers.find((t) => t.id === id)?.full_name || 'Unknown',
+        }));
+
+        newDays[dayIndex] = {
+            ...newDays[dayIndex],
+            teachers: teacherIds,
+            selected_teachers: selectedTeachers,
+        };
+        setShiftData('days', newDays);
+    };
+
+    const handleAddSubjectSchedule = (day: number) => {
         setSubjectSchedules((prev) => ({
             ...prev,
-            [day]: [
-                ...(prev[day] || []),
-                {
-                    subject_id: null,
-                    teacher_id: null,
-                    start_hour: '08:00',
-                    end_hour: '09:00',
-                },
-            ],
+            [day]: [...(prev[day] || []), { subject_id: null, teacher_id: null, start_hour: '08:00', end_hour: '09:00' }],
         }));
     };
 
-    const updateSubjectSchedule = (day: number, index: number, field: string, value: any) => {
+    const handleUpdateSubjectSchedule = (day: number, index: number, field: string, value: any) => {
         setSubjectSchedules((prev) => {
             const newSchedules = [...prev[day]];
             newSchedules[index] = { ...newSchedules[index], [field]: value };
@@ -171,7 +153,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
         });
     };
 
-    const removeSubjectSchedule = (day: number, index: number) => {
+    const handleRemoveSubjectSchedule = (day: number, index: number) => {
         setSubjectSchedules((prev) => {
             const newSchedules = [...prev[day]];
             newSchedules.splice(index, 1);
@@ -179,65 +161,56 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
         });
     };
 
-    // Shift schedule handlers
-    const handleShiftingChange = (dayIndex: number, shiftingId: number | null) => {
-        const newDays = [...data.days];
-        newDays[dayIndex] = {
-            ...newDays[dayIndex],
-            shifting_id: shiftingId,
-            teachers: shiftingId ? newDays[dayIndex].teachers : [],
-            selected_teachers: shiftingId ? newDays[dayIndex].selected_teachers : [],
-        };
-        setData('days', newDays);
-    };
-
-    const handleTeachersChange = (dayIndex: number, selectedIds: (number | string)[]) => {
-        const newDays = [...data.days];
-        const teacherIds = selectedIds.filter((id) => id !== null).map((id) => Number(id));
-        const selectedTeachers = teacherIds.map((id) => {
-            const teacher = teachers.find((t) => t.id === id);
-            return { id, name: teacher ? teacher.full_name : 'Unknown' };
-        });
-
-        newDays[dayIndex] = {
-            ...newDays[dayIndex],
-            teachers: teacherIds,
-            selected_teachers: selectedTeachers,
-        };
-        setData('days', newDays);
-    };
-
-    // Tab and submit handlers
-    useEffect(() => {
-        setSelectedTab(isShiftMode ? 0 : 1);
-    }, [academicYear.attendance_mode]);
-
-    const handleTabChange = (index: number) => {
-        if ((index === 0 && isShiftMode) || (index === 1 && isSubjectMode)) {
-            setSelectedTab(index);
-        } else {
-            toast.warning(
-                `Current attendance mode is "${academicYear.attendance_mode}". 
-                Switch mode in Academic Year settings to access this feature.`,
-            );
-        }
-    };
-
     const handleSubmitShift = (e: React.FormEvent) => {
         e.preventDefault();
-
-        // post(route('classrooms.schedule.shift.save', classroom.id), {
-        //     days: data.days,
-        // });
         postShift(route('classrooms.schedule.shift.save', classroom.id));
     };
 
     const handleSubmitSubject = async (e: React.FormEvent) => {
         e.preventDefault();
-        setSubjectProcessing(true);
+        setIsSavingSubject(true);
 
         try {
-            const schedules = Object.entries(subjectSchedules).flatMap(([day, daySchedules]) =>
+            const schedules = prepareSubjectSchedulesForSubmit(subjectSchedules);
+            const validationErrors = validateSubjectSchedules(schedules);
+
+            if (validationErrors.length > 0) {
+                validationErrors.forEach((error) => toast.error(error));
+                return;
+            }
+
+            await axios.post(route('classrooms.schedule.subject.save', classroom.id), { schedules });
+            window.location.reload();
+        } catch (error) {
+            toast.error('Failed to save schedule');
+        } finally {
+            setIsSavingSubject(false);
+        }
+    };
+
+    // Helper functions
+    function initializeSubjectSchedules(data: { [day: number]: any[] }): Record<number, SubjectSchedule[]> {
+        const schedules: Record<number, SubjectSchedule[]> = {};
+        for (let day = 1; day <= 7; day++) {
+            schedules[day] =
+                data[day]?.map((s) => ({
+                    id: s.id,
+                    subject_id: s.subject_id,
+                    teacher_id: s.teacher_id,
+                    start_hour: s.start_hour,
+                    end_hour: s.end_hour,
+                })) || [];
+        }
+        return schedules;
+    }
+
+    function formatTeacherOptions(teachers: Teacher[]) {
+        return teachers.map((t) => ({ id: t.id, name: t.full_name }));
+    }
+
+    function prepareSubjectSchedulesForSubmit(schedules: Record<number, SubjectSchedule[]>) {
+        return Object.entries(schedules)
+            .flatMap(([day, daySchedules]) =>
                 daySchedules
                     .filter((s) => s.subject_id && s.teacher_id)
                     .map((s) => ({
@@ -248,24 +221,46 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                         start_hour: s.start_hour,
                         end_hour: s.end_hour,
                     })),
-            );
+            )
+            .sort((a, b) => a.day - b.day || a.start_hour.localeCompare(b.start_hour));
+    }
 
-            await axios.post(route('classrooms.schedule.subject.save', classroom.id), { schedules });
+    function validateSubjectSchedules(schedules: any[]): string[] {
+        const errors: string[] = [];
+        const daySchedules: Record<number, any[]> = {};
 
-            window.location.reload(); // Optional: untuk refresh data
-        } catch (error) {
-            toast.error('Failed to save subject schedule');
-        } finally {
-            setSubjectProcessing(false);
-        }
-    };
+        // Group by day and check time validity
+        schedules.forEach((schedule) => {
+            if (!daySchedules[schedule.day]) {
+                daySchedules[schedule.day] = [];
+            }
 
-    const getSaveButtonLabel = () => {
-        // if (processing) return 'Saving...';
-        if (selectedTab === 0) return 'Save Shift Schedule';
-        if (selectedTab === 1) return 'Save Subject Schedule';
-        return 'Save Schedule';
-    };
+            // Check end time > start time
+            if (schedule.end_hour <= schedule.start_hour) {
+                errors.push(`Day ${schedule.day}: End time must be after start time`);
+            }
+
+            daySchedules[schedule.day].push(schedule);
+        });
+
+        // Check for overlaps per day
+        Object.entries(daySchedules).forEach(([day, schedules]) => {
+            schedules.sort((a, b) => a.start_hour.localeCompare(b.start_hour));
+
+            for (let i = 1; i < schedules.length; i++) {
+                const prev = schedules[i - 1];
+                const current = schedules[i];
+
+                if (current.start_hour < prev.end_hour) {
+                    errors.push(
+                        `Day ${day}: Schedule overlaps between ${prev.start_hour}-${prev.end_hour} and ${current.start_hour}-${current.end_hour}`,
+                    );
+                }
+            }
+        });
+
+        return errors;
+    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs(classroom.name, classroom.id)}>
@@ -278,11 +273,16 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                     <button
                         type="submit"
                         form={selectedTab === 0 ? 'shift-form' : 'subject-form'}
-                        // disabled={processing}
-                        disabled={selectedTab === 0 ? shiftProcessing : subjectProcessing}
+                        disabled={selectedTab === 0 ? isSavingShift : isSavingSubject}
                         className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-700 disabled:opacity-50"
                     >
-                        {getSaveButtonLabel()}
+                        {selectedTab === 0
+                            ? isSavingShift
+                                ? 'Saving...'
+                                : 'Save Shift Schedule'
+                            : isSavingSubject
+                              ? 'Saving...'
+                              : 'Save Subject Schedule'}
                     </button>
                 </div>
 
@@ -309,54 +309,41 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
 
                     <Tab.Panels>
                         <Tab.Panel>
-                            {isShiftMode ? (
-                                <form id="shift-form" onSubmit={handleSubmitShift} className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                    {data.days.map((daySchedule, index) => (
-                                        <div key={daySchedule.day} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-                                            <h3 className="mb-3 text-lg font-semibold text-gray-800">{daySchedule.day_name}</h3>
+                            <form id="shift-form" onSubmit={handleSubmitShift} className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                {shiftData.days.map((daySchedule, index) => (
+                                    <div key={daySchedule.day} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                                        <h3 className="mb-3 text-lg font-semibold text-gray-800">{daySchedule.day_name}</h3>
 
-                                            <div className="mb-4">
-                                                <label className="mb-1 block text-sm font-medium text-gray-700">Shifting:</label>
-                                                <select
-                                                    value={daySchedule.shifting_id || ''}
-                                                    onChange={(e) => handleShiftingChange(index, e.target.value ? parseInt(e.target.value) : null)}
-                                                    className="w-full rounded-md border border-gray-300 bg-gray-50 p-2 text-sm focus:border-blue-500 focus:ring-blue-500"
-                                                >
-                                                    <option value="">-- No Schedule --</option>
-                                                    {shiftings.map((shifting) => (
-                                                        <option key={shifting.id} value={shifting.id}>
-                                                            {shifting.name} ({shifting.start_hour} - {shifting.end_hour})
-                                                        </option>
-                                                    ))}
-                                                </select>
-                                            </div>
-
-                                            {daySchedule.shifting_id && (
-                                                <div>
-                                                    <label className="mb-1 block text-sm font-medium text-gray-700">Teacher responsible:</label>
-                                                    <MultiSearchableSelect
-                                                        value={daySchedule.teachers}
-                                                        onChange={(value) => handleTeachersChange(index, value)}
-                                                        placeholder="Search teachers..."
-                                                        options={teacherOptions}
-                                                    />
-                                                </div>
-                                            )}
+                                        <div className="mb-4">
+                                            <label className="mb-1 block text-sm font-medium text-gray-700">Shifting:</label>
+                                            <select
+                                                value={daySchedule.shifting_id || ''}
+                                                onChange={(e) => handleShiftChange(index, e.target.value ? parseInt(e.target.value) : null)}
+                                                className="w-full rounded-md border border-gray-300 bg-gray-50 p-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+                                            >
+                                                <option value="">-- No Schedule --</option>
+                                                {shiftings.map((shifting) => (
+                                                    <option key={shifting.id} value={shifting.id}>
+                                                        {shifting.name} ({shifting.start_hour} - {shifting.end_hour})
+                                                    </option>
+                                                ))}
+                                            </select>
                                         </div>
-                                    ))}
-                                </form>
-                            ) : (
-                                <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
-                                    <div className="mx-auto max-w-md">
-                                        <div className="mb-4 text-5xl">⚠️</div>
-                                        <h3 className="mb-2 text-xl font-semibold">Attendance Mode Mismatch</h3>
-                                        <p className="text-gray-600">
-                                            Currently active attendance mode is "Per Subject". Switch to "Per Shift" mode in Academic Year settings to
-                                            use this feature.
-                                        </p>
+
+                                        {daySchedule.shifting_id && (
+                                            <div>
+                                                <label className="mb-1 block text-sm font-medium text-gray-700">Teacher responsible:</label>
+                                                <MultiSearchableSelect
+                                                    value={daySchedule.teachers}
+                                                    onChange={(value) => handleTeachersChange(index, value)}
+                                                    placeholder="Search teachers..."
+                                                    options={teacherOptions}
+                                                />
+                                            </div>
+                                        )}
                                     </div>
-                                </div>
-                            )}
+                                ))}
+                            </form>
                         </Tab.Panel>
 
                         <Tab.Panel>
@@ -370,7 +357,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                 </h3>
                                                 <button
                                                     type="button"
-                                                    onClick={() => addSubjectSchedule(day)}
+                                                    onClick={() => handleAddSubjectSchedule(day)}
                                                     className="inline-flex items-center rounded-md bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700"
                                                 >
                                                     + Add Subject
@@ -386,7 +373,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                         <label className="mb-1 block text-sm font-medium text-gray-700">Subject</label>
                                                         <SearchableSelect
                                                             value={schedule.subject_id}
-                                                            onChange={(value) => updateSubjectSchedule(day, index, 'subject_id', value)}
+                                                            onChange={(value) => handleUpdateSubjectSchedule(day, index, 'subject_id', value)}
                                                             placeholder="Select subject..."
                                                             endpoint={route('subjects.search')}
                                                             initialOption={
@@ -405,7 +392,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                         <label className="mb-1 block text-sm font-medium text-gray-700">Teacher</label>
                                                         <SearchableSelect
                                                             value={schedule.teacher_id}
-                                                            onChange={(value) => updateSubjectSchedule(day, index, 'teacher_id', value)}
+                                                            onChange={(value) => handleUpdateSubjectSchedule(day, index, 'teacher_id', value)}
                                                             placeholder="Select teacher..."
                                                             endpoint={route('teachers.search')}
                                                             initialOption={
@@ -426,7 +413,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                         <input
                                                             type="time"
                                                             value={schedule.start_hour}
-                                                            onChange={(e) => updateSubjectSchedule(day, index, 'start_hour', e.target.value)}
+                                                            onChange={(e) => handleUpdateSubjectSchedule(day, index, 'start_hour', e.target.value)}
                                                             className="w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:ring-blue-500"
                                                         />
                                                     </div>
@@ -436,7 +423,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                         <input
                                                             type="time"
                                                             value={schedule.end_hour}
-                                                            onChange={(e) => updateSubjectSchedule(day, index, 'end_hour', e.target.value)}
+                                                            onChange={(e) => handleUpdateSubjectSchedule(day, index, 'end_hour', e.target.value)}
                                                             className="w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:ring-blue-500"
                                                         />
                                                     </div>
@@ -444,7 +431,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                     <div className="flex items-end md:col-span-1">
                                                         <button
                                                             type="button"
-                                                            onClick={() => removeSubjectSchedule(day, index)}
+                                                            onClick={() => handleRemoveSubjectSchedule(day, index)}
                                                             className="text-red-600 hover:text-red-800"
                                                         >
                                                             × Remove
