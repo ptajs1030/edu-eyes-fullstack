@@ -36,7 +36,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('classrooms/{classroom}')->group(function () {
         Route::post('schedule/subject', [ClassroomScheduleController::class, 'saveSubjectSchedule'])
             ->name('classrooms.schedule.subject.save');
-        Route::post('schedule', [ClassroomScheduleController::class, 'saveSchedule'])
+        Route::post('schedule/shift', [ClassroomScheduleController::class, 'saveSchedule'])
             ->name('classrooms.schedule.shift.save');
         Route::get('schedule', [ClassroomScheduleController::class, 'showScheduleForm'])
             ->name('classrooms.schedule');

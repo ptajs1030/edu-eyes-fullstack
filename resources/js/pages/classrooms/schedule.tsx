@@ -4,6 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Tab } from '@headlessui/react';
 import { Head, useForm, usePage } from '@inertiajs/react';
+import axios from 'axios';
 import { useEffect, useMemo, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 
@@ -67,11 +68,34 @@ const breadcrumbs = (classroomName: string, classroomId: number): BreadcrumbItem
 ];
 
 export default function ClassroomSchedule({ classroom, days, shiftings, teachers, academicYear, subjectSchedulesByDay, subjects }: Props) {
-    const { data, setData, post, processing, errors } = useForm({
+    const {
+        data,
+        setData,
+        post: postShift,
+        processing: shiftProcessing,
+        errors,
+    } = useForm({
         days: days,
     });
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
-    const [subjectSchedules, setSubjectSchedules] = useState<{ [day: number]: SubjectSchedule[] }>({});
+    // const [subjectSchedules, setSubjectSchedules] = useState<{ [day: number]: SubjectSchedule[] }>({});
+    const [subjectSchedules, setSubjectSchedules] = useState<{ [day: number]: SubjectSchedule[] }>(() => {
+        const initialSchedules: { [day: number]: SubjectSchedule[] } = {};
+
+        for (let day = 1; day <= 7; day++) {
+            initialSchedules[day] =
+                subjectSchedulesByDay[day]?.map((s) => ({
+                    id: s.id, // Pastikan ID diambil dari props
+                    subject_id: s.subject_id,
+                    teacher_id: s.teacher_id,
+                    start_hour: s.start_hour,
+                    end_hour: s.end_hour,
+                })) || [];
+        }
+
+        return initialSchedules;
+    });
+    const [subjectProcessing, setSubjectProcessing] = useState(false);
     const isShiftMode = academicYear.attendance_mode === 'per-shift';
     const isSubjectMode = academicYear.attendance_mode === 'per-subject';
     const [selectedTab, setSelectedTab] = useState(isShiftMode ? 0 : 1);
@@ -199,35 +223,45 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
         }
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmitShift = (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (selectedTab === 0 && isShiftMode) {
-            post(route('classrooms.schedule.shift.save', classroom.id), {
-                days: data.days,
-            });
-        } else if (selectedTab === 1 && isSubjectMode) {
+        // post(route('classrooms.schedule.shift.save', classroom.id), {
+        //     days: data.days,
+        // });
+        postShift(route('classrooms.schedule.shift.save', classroom.id));
+    };
+
+    const handleSubmitSubject = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setSubjectProcessing(true);
+
+        try {
             const schedules = Object.entries(subjectSchedules).flatMap(([day, daySchedules]) =>
                 daySchedules
-                    .filter((schedule) => schedule.subject_id && schedule.teacher_id)
-                    .map((schedule) => ({
-                        id: schedule.id,
+                    .filter((s) => s.subject_id && s.teacher_id)
+                    .map((s) => ({
+                        id: s.id || undefined,
                         day: parseInt(day),
-                        subject_id: schedule.subject_id,
-                        teacher_id: schedule.teacher_id,
-                        start_hour: schedule.start_hour,
-                        end_hour: schedule.end_hour,
+                        subject_id: s.subject_id,
+                        teacher_id: s.teacher_id,
+                        start_hour: s.start_hour,
+                        end_hour: s.end_hour,
                     })),
             );
 
-            post(route('classrooms.schedule.subject.save', classroom.id), {
-                schedules,
-            });
+            await axios.post(route('classrooms.schedule.subject.save', classroom.id), { schedules });
+
+            window.location.reload(); // Optional: untuk refresh data
+        } catch (error) {
+            toast.error('Failed to save subject schedule');
+        } finally {
+            setSubjectProcessing(false);
         }
     };
 
     const getSaveButtonLabel = () => {
-        if (processing) return 'Saving...';
+        // if (processing) return 'Saving...';
         if (selectedTab === 0) return 'Save Shift Schedule';
         if (selectedTab === 1) return 'Save Subject Schedule';
         return 'Save Schedule';
@@ -243,8 +277,9 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                     <h1 className="text-2xl font-bold">Classroom Schedule: {classroom.name}</h1>
                     <button
                         type="submit"
-                        form={selectedTab === 0 ? 'schedule-form' : 'subject-schedule-form'}
-                        disabled={processing}
+                        form={selectedTab === 0 ? 'shift-form' : 'subject-form'}
+                        // disabled={processing}
+                        disabled={selectedTab === 0 ? shiftProcessing : subjectProcessing}
                         className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-700 disabled:opacity-50"
                     >
                         {getSaveButtonLabel()}
@@ -274,46 +309,59 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
 
                     <Tab.Panels>
                         <Tab.Panel>
-                            <form id="schedule-form" onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                {data.days.map((daySchedule, index) => (
-                                    <div key={daySchedule.day} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-                                        <h3 className="mb-3 text-lg font-semibold text-gray-800">{daySchedule.day_name}</h3>
+                            {isShiftMode ? (
+                                <form id="shift-form" onSubmit={handleSubmitShift} className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                    {data.days.map((daySchedule, index) => (
+                                        <div key={daySchedule.day} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
+                                            <h3 className="mb-3 text-lg font-semibold text-gray-800">{daySchedule.day_name}</h3>
 
-                                        <div className="mb-4">
-                                            <label className="mb-1 block text-sm font-medium text-gray-700">Shifting:</label>
-                                            <select
-                                                value={daySchedule.shifting_id || ''}
-                                                onChange={(e) => handleShiftingChange(index, e.target.value ? parseInt(e.target.value) : null)}
-                                                className="w-full rounded-md border border-gray-300 bg-gray-50 p-2 text-sm focus:border-blue-500 focus:ring-blue-500"
-                                            >
-                                                <option value="">-- No Schedule --</option>
-                                                {shiftings.map((shifting) => (
-                                                    <option key={shifting.id} value={shifting.id}>
-                                                        {shifting.name} ({shifting.start_hour} - {shifting.end_hour})
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </div>
-
-                                        {daySchedule.shifting_id && (
-                                            <div>
-                                                <label className="mb-1 block text-sm font-medium text-gray-700">Teacher responsible:</label>
-                                                <MultiSearchableSelect
-                                                    value={daySchedule.teachers}
-                                                    onChange={(value) => handleTeachersChange(index, value)}
-                                                    placeholder="Search teachers..."
-                                                    options={teacherOptions}
-                                                />
+                                            <div className="mb-4">
+                                                <label className="mb-1 block text-sm font-medium text-gray-700">Shifting:</label>
+                                                <select
+                                                    value={daySchedule.shifting_id || ''}
+                                                    onChange={(e) => handleShiftingChange(index, e.target.value ? parseInt(e.target.value) : null)}
+                                                    className="w-full rounded-md border border-gray-300 bg-gray-50 p-2 text-sm focus:border-blue-500 focus:ring-blue-500"
+                                                >
+                                                    <option value="">-- No Schedule --</option>
+                                                    {shiftings.map((shifting) => (
+                                                        <option key={shifting.id} value={shifting.id}>
+                                                            {shifting.name} ({shifting.start_hour} - {shifting.end_hour})
+                                                        </option>
+                                                    ))}
+                                                </select>
                                             </div>
-                                        )}
+
+                                            {daySchedule.shifting_id && (
+                                                <div>
+                                                    <label className="mb-1 block text-sm font-medium text-gray-700">Teacher responsible:</label>
+                                                    <MultiSearchableSelect
+                                                        value={daySchedule.teachers}
+                                                        onChange={(value) => handleTeachersChange(index, value)}
+                                                        placeholder="Search teachers..."
+                                                        options={teacherOptions}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </form>
+                            ) : (
+                                <div className="rounded-lg border border-gray-200 bg-white p-8 text-center">
+                                    <div className="mx-auto max-w-md">
+                                        <div className="mb-4 text-5xl">⚠️</div>
+                                        <h3 className="mb-2 text-xl font-semibold">Attendance Mode Mismatch</h3>
+                                        <p className="text-gray-600">
+                                            Currently active attendance mode is "Per Subject". Switch to "Per Shift" mode in Academic Year settings to
+                                            use this feature.
+                                        </p>
                                     </div>
-                                ))}
-                            </form>
+                                </div>
+                            )}
                         </Tab.Panel>
 
                         <Tab.Panel>
                             {isSubjectMode ? (
-                                <form id="subject-schedule-form" onSubmit={handleSubmit} className="space-y-6">
+                                <form id="subject-form" onSubmit={handleSubmitSubject} className="space-y-6">
                                     {[1, 2, 3, 4, 5, 6, 7].map((day) => (
                                         <div key={day} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                                             <div className="mb-4 flex items-center justify-between">
