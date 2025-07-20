@@ -3,8 +3,7 @@ import SearchableSelect from '@/components/ui/searchable-select';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Tab } from '@headlessui/react';
-import { Head, useForm, usePage } from '@inertiajs/react';
-import axios from 'axios';
+import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useMemo, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 
@@ -79,7 +78,6 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
         days: days,
     });
 
-    // Subject Schedule State
     const [subjectSchedules, setSubjectSchedules] = useState<Record<number, SubjectSchedule[]>>(() =>
         initializeSubjectSchedules(subjectSchedulesByDay),
     );
@@ -192,26 +190,36 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
         postShift(route('classrooms.schedule.shift.save', classroom.id));
     };
 
-    const handleSubmitSubject = async (e: React.FormEvent) => {
+    const handleSubmitSubject = (e: React.FormEvent) => {
         e.preventDefault();
+
+        const schedules = prepareSubjectSchedulesForSubmit(subjectSchedules);
+        const validationErrors = validateSubjectSchedules(schedules);
+
+        if (validationErrors.length > 0) {
+            validationErrors.forEach((err) => toast.error(err));
+            return;
+        }
+
         setIsSavingSubject(true);
 
-        try {
-            const schedules = prepareSubjectSchedulesForSubmit(subjectSchedules);
-            const validationErrors = validateSubjectSchedules(schedules);
-
-            if (validationErrors.length > 0) {
-                validationErrors.forEach((error) => toast.error(error));
-                return;
-            }
-
-            await axios.post(route('classrooms.schedule.subject.save', classroom.id), { schedules });
-            window.location.reload();
-        } catch (error) {
-            toast.error('Failed to save schedule');
-        } finally {
-            setIsSavingSubject(false);
-        }
+        router.post(
+            route('classrooms.schedule.subject.save', classroom.id),
+            { schedules },
+            {
+                onError: (errors) => {
+                    Object.values(errors)
+                        .flat()
+                        .forEach((msg: string) => toast.error(msg));
+                },
+                onSuccess: () => {
+                    window.location.reload();
+                },
+                onFinish: () => {
+                    setIsSavingSubject(false);
+                },
+            },
+        );
     };
 
     // Helper functions
@@ -237,16 +245,14 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
     function prepareSubjectSchedulesForSubmit(schedules: Record<number, SubjectSchedule[]>) {
         return Object.entries(schedules)
             .flatMap(([day, daySchedules]) =>
-                daySchedules
-                    .filter((s) => s.subject_id && s.teacher_id)
-                    .map((s) => ({
-                        id: s.id || undefined,
-                        day: parseInt(day),
-                        subject_id: s.subject_id,
-                        teacher_id: s.teacher_id,
-                        start_hour: s.start_hour,
-                        end_hour: s.end_hour,
-                    })),
+                daySchedules.map((s) => ({
+                    id: s.id || undefined,
+                    day: parseInt(day),
+                    subject_id: s.subject_id ?? null,
+                    teacher_id: s.teacher_id ?? null,
+                    start_hour: s.start_hour ?? '',
+                    end_hour: s.end_hour ?? '',
+                })),
             )
             .sort((a, b) => a.day - b.day || a.start_hour.localeCompare(b.start_hour));
     }
@@ -256,27 +262,35 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
         const daySchedules: Record<number, any[]> = {};
 
         // Group by day and check time validity
-        schedules.forEach((schedule) => {
-            if (!daySchedules[schedule.day]) {
-                daySchedules[schedule.day] = [];
+        schedules.forEach((schedule, index) => {
+            if (!schedule.day) {
+                errors.push(`Schedule at index ${index + 1} is missing day`);
             }
-
-            // Check end time > start time
+            if (!schedule.subject_id) {
+                errors.push(`Schedule on day ${schedule.day} is missing subject`);
+            }
+            if (!schedule.teacher_id) {
+                errors.push(`Schedule on day ${schedule.day} is missing teacher`);
+            }
+            if (!schedule.start_hour || !schedule.end_hour) {
+                errors.push(`Schedule on day ${schedule.day} is missing start or end time`);
+            }
             if (schedule.end_hour <= schedule.start_hour) {
                 errors.push(`Day ${schedule.day}: End time must be after start time`);
             }
 
+            if (!daySchedules[schedule.day]) {
+                daySchedules[schedule.day] = [];
+            }
             daySchedules[schedule.day].push(schedule);
         });
 
         // Check for overlaps per day
         Object.entries(daySchedules).forEach(([day, schedules]) => {
             schedules.sort((a, b) => a.start_hour.localeCompare(b.start_hour));
-
             for (let i = 1; i < schedules.length; i++) {
                 const prev = schedules[i - 1];
                 const current = schedules[i];
-
                 if (current.start_hour < prev.end_hour) {
                     errors.push(
                         `Day ${day}: Schedule overlaps between ${prev.start_hour}-${prev.end_hour} and ${current.start_hour}-${current.end_hour}`,
