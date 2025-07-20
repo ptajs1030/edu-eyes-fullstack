@@ -9,11 +9,14 @@ use App\DTOs\EditSubjectAttendanceData;
 use App\DTOs\EventAttendanceData;
 use App\DTOs\ShiftingAttendanceData;
 use App\DTOs\SubjectAttendanceData;
+use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\ClassShiftingSchedule;
 use App\Models\ClassShiftingSchedulePic;
+use App\Models\ClassSubjectSchedule;
 use App\Models\Event;
 use App\Models\EventAttendance;
+use App\Models\EventParticipant;
 use App\Models\EventPic;
 use App\Models\Setting;
 use App\Models\Shifting;
@@ -218,20 +221,23 @@ class AttendanceService
     }
 
     public function getClassroomSubject($class_id, $search = null){
-        $query = SubjectAttendance::where('class_id', $class_id)
-        ->where('submit_date', Carbon::now()->format('Y-m-d'));
+        $query = ClassSubjectSchedule::where('class_id', $class_id)->where('teacher_id', auth()->user()->id)->with('subject');
 
 
         if ($search) {
-            $query->where('subject_name', 'like', "%$search%");
+            $query->whereHas('subject', function($q) use ($search) {
+            $q->where('name', 'like', "%$search%");
+        });
         }
 
-        $schedules = $query->distinct()->pluck('subject_name');
+        $schedules = $query->get();
 
         if ($schedules->isEmpty()) {
             abort(204, 'Schedule not found');
         }
-        return $schedules;
+        $subjectNames = $schedules->pluck('subject.name')->unique()->values();
+
+        return $subjectNames;
     }
     public function getSubjectAttendance($class_id, $subject){
         $attendances=SubjectAttendance::where('class_id', $class_id)->where('subject_name', $subject)->where('submit_date', Carbon::now()->format('Y-m-d'))->with('classroom', 'student', 'academicYear')->get();
@@ -297,7 +303,7 @@ class AttendanceService
         ];
     }
 
-    public function getEvent($id=null, $date=null){
+    public function getEvent($id=null, $date){
         if ($id) {
             $event=Event::where('id', $id)->first();
             if(!$event){
@@ -305,91 +311,96 @@ class AttendanceService
             }
             return $event;
         }
+        
         if ($date) {
-            $event=Event::where('date', $date)->first();
+            if (!preg_match('/^\d{4}-\d{2}$/', $date)) {
+                abort(400, 'Format tanggal harus YYYY-MM');
+            }
+            $event=Event::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$date])->paginate(10);
             if(!$event){
                 abort(404, 'Event not found');
             }
             return $event;
         }
-        $events=Event::all();
+
+        $events=Event::paginate(10);
+        
         if ($events->isEmpty()) {
             abort(204, 'Event not found');
         }
         return $events;
     }
-
     public function eventAttendance(EventAttendanceData $data){
         $student=Student::where('uuid', $data->getStudent())->first();
         if (!$student) {
             abort(404, 'Student not found');
         }
-
-        $attendance=EventAttendance::where('student_id', $student->id)->where('event_id', $data->getEvent())->whereDate('submit_date', Carbon::now()->format('Y-m-d'))->with('event')->first();
-        if (!$attendance) {
-            abort(404, 'Attendance not found');
+        
+       $participant=EventParticipant::where('student_id', $student->id)
+            ->where('event_id', $data->getEvent())->with('event')
+            ->first();
+           
+        if (!$participant) {
+            abort(404, 'Participant not found');
         }
 
         $pics=EventPic::where('event_id', $data->getEvent())->get();
         if ($pics->isEmpty()) {
             abort(404, 'PIC not found');
         } 
-
+        $attendance=EventAttendance::where('student_id', $student->id)
+            ->where('event_id', $data->getEvent())
+            ->where('submit_date', Carbon::now()->format('Y-m-d'))
+            ->first();
         $late_tolerance = (int)Setting::where('key', 'late_tolerance')->value        ('value');
-        $deadline = Carbon::parse($attendance->event->start_hour)->addMinutes($late_tolerance);
+        $deadline = Carbon::parse($participant->event->start_hour)->addMinutes($late_tolerance);
         $submit_hour = Carbon::parse($data->getSubmitHour());
         $minutes_of_late = $deadline->diffInMinutes($data->getSubmitHour());
         $isPic = $pics->contains('pic_id', auth()->user()->id);
         if (!$isPic) {
             abort(403, 'You are not assigned to this event.');
         }
-        if ($attendance->clock_in_hour && $attendance->clock_out_hour) {
-            return abort(400, 'attendance already submitted');
-        }
-        
-        if ($attendance->clock_in_hour && !$attendance->clock_out_hour) {
+       
+        if ($attendance) {
+            if ($attendance->clock_in_hour && $attendance->clock_out_hour == '00:00:00') {
             $minClockOut = Carbon::parse($attendance->clock_in_hour)->addMinutes(2);
-
             if ($submit_hour->lt($minClockOut)) {
                 abort(400, 'Clock out must be at least 2 minutes after clock in');
             }
+            $attendance->update([
+                'clock_out_hour' => $submit_hour->format('H:i:s'),
+            ]);
+            return $attendance;
+        } else {
+           
+            abort(400, 'Attendance already submitted');
         }
-        if ($submit_hour <= $deadline && !$attendance->clock_in_hour) {
-            $attendance->update([
-                'status' => 'present',
-                'clock_in_hour' => $submit_hour
+        } else {
+        
+            $status = $submit_hour <= $deadline ? 'present' : 'late';
+            $attendance = EventAttendance::create([
+                'student_id' => $student->id,
+                'event_id' => $data->getEvent(),
+                'academic_year_id' => AcademicYear::where('status', true)->first()->id,
+                'submit_date' => Carbon::now()->format('Y-m-d'),
+                'clock_in_hour' => $submit_hour->format('H:i:s'),
+                'clock_out_hour' => '00:00:00', 
+                'status' => $status,
+                'minutes_of_late' => $status == 'late' ? (int) $minutes_of_late : 0,
             ]);
-            
-        }else if ($submit_hour > $deadline && !$attendance->clock_in_hour) {
-            $attendance->update([
-                'status' => 'late',
-                'minutes_of_late' => (int) $minutes_of_late,
-                'clock_in_hour' => $submit_hour,
-            ]);
-            
-        }else {
-            $attendance->update([
-                'clock_out_hour' => $submit_hour,
-            ]);
-            
+            return $attendance;
         }
-
-        return [
-            'message' => 'Attendance updated successfully',
-            'attendance' => $attendance,
-        ];
-
     }
 
     public function eventAttendanceHistory($search, $date, $event_id){
         $query=EventAttendance::query();
        
         if ($date) {
-            if (!preg_match('/^\d{4}-\d{2}$/', $date)) {
+            if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
                 abort(400, 'Format tanggal harus YYYY-MM');
             }
         
-            $query->whereRaw("DATE_FORMAT(submit_date, '%Y-%m') = ?", [$date]);
+            $query->whereRaw("DATE_FORMAT(submit_date, '%Y-%m-%d') = ?", [$date]);
         }
         if ($event_id) {
             $query->where('event_id', $event_id);
