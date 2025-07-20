@@ -4,9 +4,12 @@ namespace App\Services;
 
 use App\DTOs\ChangePasswordData;
 use App\Models\Announcement;
+use App\Models\ClassSubjectSchedule;
+use App\Models\EventParticipant;
 use App\Models\ShiftingAttendance;
 use App\Models\SubjectAttendance;
 use Carbon\Carbon;
+use DB;
 
 class ParentService
 {
@@ -119,7 +122,7 @@ class ParentService
                 'id' => $item->id,
                 'student' => optional($item->student)->full_name,
                 'classroom' => optional($item->classroom)->name,
-                'accademic_year'=> optional($item->academicYear)->title,
+                'academic_year'=> optional($item->academicYear)->title,
                 'subject_name' => $item->subject_name,
                 'subject_start_hour' => $item->subject_start_hour,
                 'subject_end_hour' => $item->subject_end_hour,
@@ -140,11 +143,11 @@ class ParentService
 
     public function getAnnouncements($id, $search){
         if ($id) {
-            $annoucement = Announcement::where('id', $id)->first();
-            if (!$annoucement) {
+            $announcement = Announcement::where('id', $id)->first();
+            if (!$announcement) {
                 return abort(404,'Announcement not found');
             }
-            return $annoucement;
+            return $announcement;
         }else {
             $query = Announcement::query();
             if ($search) {
@@ -154,9 +157,57 @@ class ParentService
                 });
             }
 
-            $annoucements = $query->paginate(10);
-            return $annoucements;
+            $announcement = $query->paginate(10);
+            return $announcement;
         }
 
+    }
+
+    public function getSubjectSchedule($student){
+        $schedules=ClassSubjectSchedule::where('class_id', $student->class_id)->get();
+        if ($schedules->isEmpty()) {
+            abort(204, 'Schedule not found');
+        }
+        
+        $scheduleWithRelations = [];
+        foreach ($schedules as $schedule) {
+            $subjectName = DB::table('subjects')->where('id', $schedule->subject_id)->value('name');
+            $scheduleWithRelations[] = [
+                'id' => $schedule->id,
+                'subject' => $subjectName,
+                'classroom' => $schedule->classroom->name,
+                'academic_year'=> optional($schedule->academicYear)->title,
+                'day' => $schedule->day,
+                'start_hour' => $schedule->start_hour,
+                'end_hour' => $schedule->end_hour,
+                'teacher' => optional($schedule->teacher)->full_name,
+            ];
+        };
+
+        return $scheduleWithRelations;
+    }
+
+    public function getEventSchedule($student){
+        $schedules = EventParticipant::where('student_id', $student->id)
+            ->with('event')
+            ->get();
+        if ($schedules->isEmpty()) {
+            abort(204, 'Event schedule not found');
+        }
+        
+      $schedulesWithRelations = [];
+        foreach ($schedules as $schedule) {
+            $schedulesWithRelations[] = [
+                'id' => $schedule->event->id,
+                'name' => $schedule->event->name,
+                'description' => $schedule->event->description,
+                'date' => $schedule->event->date,
+                'start_time' => $schedule->event->Start_hour,
+                'end_time' => $schedule->event->end_hour,
+            ];
+        }
+        
+        return $schedulesWithRelations;
+        
     }
 }
