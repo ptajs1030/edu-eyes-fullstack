@@ -19,6 +19,7 @@ interface SubjectSchedule {
     teacher_id: number | null;
     start_hour: string;
     end_hour: string;
+    editable?: boolean;
 }
 
 interface Classroom {
@@ -84,7 +85,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
     );
     const [isSavingSubject, setIsSavingSubject] = useState(false);
     const [selectedTab, setSelectedTab] = useState(academicYear.attendance_mode === 'per-shift' ? 0 : 1);
-
+    const [editingSchedule, setEditingSchedule] = useState<{ day: number; index: number; original: SubjectSchedule } | null>(null);
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
     const isShiftMode = academicYear.attendance_mode === 'per-shift';
     const isSubjectMode = academicYear.attendance_mode === 'per-subject';
@@ -138,10 +139,35 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
         setShiftData('days', newDays);
     };
 
+    const handleEditSchedule = (day: number, index: number) => {
+        const original = { ...subjectSchedules[day][index] };
+        setEditingSchedule({ day, index, original });
+    };
+
+    const handleCancelEdit = (day: number, index: number) => {
+        if (editingSchedule) {
+            setSubjectSchedules((prev) => {
+                const updated = [...prev[day]];
+                updated[index] = editingSchedule.original;
+                return { ...prev, [day]: updated };
+            });
+            setEditingSchedule(null);
+        }
+    };
+
     const handleAddSubjectSchedule = (day: number) => {
         setSubjectSchedules((prev) => ({
             ...prev,
-            [day]: [...(prev[day] || []), { subject_id: null, teacher_id: null, start_hour: '08:00', end_hour: '09:00' }],
+            [day]: [
+                ...(prev[day] || []),
+                {
+                    subject_id: null,
+                    teacher_id: null,
+                    start_hour: '08:00',
+                    end_hour: '09:00',
+                    editable: true,
+                },
+            ],
         }));
     };
 
@@ -358,87 +384,153 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                 <button
                                                     type="button"
                                                     onClick={() => handleAddSubjectSchedule(day)}
-                                                    className="inline-flex items-center rounded-md bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700"
+                                                    className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-green-700"
                                                 >
                                                     + Add Subject
                                                 </button>
                                             </div>
 
-                                            {subjectSchedules[day]?.map((schedule, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="mb-4 grid grid-cols-1 gap-4 rounded-lg border bg-gray-50 p-3 md:grid-cols-12"
-                                                >
-                                                    <div className="md:col-span-4">
-                                                        <label className="mb-1 block text-sm font-medium text-gray-700">Subject</label>
-                                                        <SearchableSelect
-                                                            value={schedule.subject_id}
-                                                            onChange={(value) => handleUpdateSubjectSchedule(day, index, 'subject_id', value)}
-                                                            placeholder="Select subject..."
-                                                            endpoint={route('subjects.search')}
-                                                            initialOption={
-                                                                schedule.subject_id
-                                                                    ? {
-                                                                          id: schedule.subject_id,
-                                                                          full_name: subjects.find((s) => s.id === schedule.subject_id)?.name || '',
-                                                                      }
-                                                                    : undefined
-                                                            }
-                                                            showInitialOptions={true}
-                                                        />
-                                                    </div>
+                                            <div className="grid gap-4 md:grid-cols-1">
+                                                {subjectSchedules[day]?.map((schedule, index) => {
+                                                    const isEditing = editingSchedule?.day === day && editingSchedule?.index === index;
+                                                    const isNew = !schedule.id;
 
-                                                    <div className="md:col-span-4">
-                                                        <label className="mb-1 block text-sm font-medium text-gray-700">Teacher</label>
-                                                        <SearchableSelect
-                                                            value={schedule.teacher_id}
-                                                            onChange={(value) => handleUpdateSubjectSchedule(day, index, 'teacher_id', value)}
-                                                            placeholder="Select teacher..."
-                                                            endpoint={route('teachers.search')}
-                                                            initialOption={
-                                                                schedule.teacher_id
-                                                                    ? {
-                                                                          id: schedule.teacher_id,
-                                                                          full_name:
-                                                                              teachers.find((t) => t.id === schedule.teacher_id)?.full_name || '',
-                                                                      }
-                                                                    : undefined
-                                                            }
-                                                            showInitialOptions={true}
-                                                        />
-                                                    </div>
+                                                    return (
+                                                        <div key={index} className="relative rounded-md border border-gray-300 bg-gray-50 p-4">
+                                                            <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
+                                                                <div>
+                                                                    <label className="mb-1 block text-sm font-medium text-gray-700">Start Time</label>
+                                                                    <input
+                                                                        type="time"
+                                                                        value={schedule.start_hour}
+                                                                        onChange={(e) =>
+                                                                            handleUpdateSubjectSchedule(day, index, 'start_hour', e.target.value)
+                                                                        }
+                                                                        className={`w-full rounded-md border p-2 text-sm ${!isEditing && !isNew ? 'bg-gray-100' : 'bg-white'}`}
+                                                                        disabled={!isEditing && !isNew}
+                                                                    />
+                                                                </div>
 
-                                                    <div className="md:col-span-2">
-                                                        <label className="mb-1 block text-sm font-medium text-gray-700">Start Time</label>
-                                                        <input
-                                                            type="time"
-                                                            value={schedule.start_hour}
-                                                            onChange={(e) => handleUpdateSubjectSchedule(day, index, 'start_hour', e.target.value)}
-                                                            className="w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:ring-blue-500"
-                                                        />
-                                                    </div>
+                                                                <div>
+                                                                    <label className="mb-1 block text-sm font-medium text-gray-700">End Time</label>
+                                                                    <input
+                                                                        type="time"
+                                                                        value={schedule.end_hour}
+                                                                        onChange={(e) =>
+                                                                            handleUpdateSubjectSchedule(day, index, 'end_hour', e.target.value)
+                                                                        }
+                                                                        className={`w-full rounded-md border p-2 text-sm ${!isEditing && !isNew ? 'bg-gray-100' : 'bg-white'}`}
+                                                                        disabled={!isEditing && !isNew}
+                                                                    />
+                                                                </div>
 
-                                                    <div className="md:col-span-2">
-                                                        <label className="mb-1 block text-sm font-medium text-gray-700">End Time</label>
-                                                        <input
-                                                            type="time"
-                                                            value={schedule.end_hour}
-                                                            onChange={(e) => handleUpdateSubjectSchedule(day, index, 'end_hour', e.target.value)}
-                                                            className="w-full rounded-md border border-gray-300 p-2 focus:border-blue-500 focus:ring-blue-500"
-                                                        />
-                                                    </div>
+                                                                <div>
+                                                                    <label className="mb-1 block text-sm font-medium text-gray-700">Subject</label>
+                                                                    <SearchableSelect
+                                                                        value={schedule.subject_id}
+                                                                        onChange={(value) =>
+                                                                            handleUpdateSubjectSchedule(day, index, 'subject_id', value)
+                                                                        }
+                                                                        placeholder="Select subject..."
+                                                                        endpoint={route('subjects.search')}
+                                                                        initialOption={
+                                                                            schedule.subject_id
+                                                                                ? {
+                                                                                      id: schedule.subject_id,
+                                                                                      full_name:
+                                                                                          subjects.find((s) => s.id === schedule.subject_id)?.name ||
+                                                                                          '',
+                                                                                  }
+                                                                                : undefined
+                                                                        }
+                                                                        showInitialOptions={true}
+                                                                        disabled={!isEditing && !isNew}
+                                                                    />
+                                                                </div>
 
-                                                    <div className="flex items-end md:col-span-1">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => handleRemoveSubjectSchedule(day, index)}
-                                                            className="text-red-600 hover:text-red-800"
-                                                        >
-                                                            × Remove
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            ))}
+                                                                <div>
+                                                                    <label className="mb-1 block text-sm font-medium text-gray-700">Teacher</label>
+                                                                    <SearchableSelect
+                                                                        value={schedule.teacher_id}
+                                                                        onChange={(value) =>
+                                                                            handleUpdateSubjectSchedule(day, index, 'teacher_id', value)
+                                                                        }
+                                                                        placeholder="Select teacher..."
+                                                                        endpoint={route('teachers.search')}
+                                                                        initialOption={
+                                                                            schedule.teacher_id
+                                                                                ? {
+                                                                                      id: schedule.teacher_id,
+                                                                                      full_name:
+                                                                                          teachers.find((t) => t.id === schedule.teacher_id)
+                                                                                              ?.full_name || '',
+                                                                                  }
+                                                                                : undefined
+                                                                        }
+                                                                        showInitialOptions={true}
+                                                                        disabled={!isEditing && !isNew}
+                                                                    />
+                                                                </div>
+
+                                                                <div className="flex h-full items-center justify-start space-x-2 pt-6 md:pt-0">
+                                                                    {isNew ? (
+                                                                        <>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleRemoveSubjectSchedule(day, index)}
+                                                                                className="rounded-md bg-gray-400 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-gray-600"
+                                                                            >
+                                                                                Cancel
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => setEditingSchedule(null)}
+                                                                                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-800"
+                                                                            >
+                                                                                Done
+                                                                            </button>
+                                                                        </>
+                                                                    ) : isEditing ? (
+                                                                        <>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleCancelEdit(day, index)}
+                                                                                className="rounded-md bg-gray-400 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-gray-600"
+                                                                            >
+                                                                                Cancel
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => setEditingSchedule(null)}
+                                                                                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer"
+                                                                            >
+                                                                                Done
+                                                                            </button>
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleEditSchedule(day, index)}
+                                                                                className="rounded-md bg-yellow-400 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-yellow-600"
+                                                                            >
+                                                                                Edit
+                                                                            </button>
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleRemoveSubjectSchedule(day, index)}
+                                                                                className="rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-red-700"
+                                                                            >
+                                                                                Remove
+                                                                            </button>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
 
                                             {subjectSchedules[day]?.length === 0 && (
                                                 <div className="py-4 text-center text-gray-500">No subjects scheduled for this day</div>
