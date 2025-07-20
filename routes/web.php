@@ -17,6 +17,12 @@ Route::get('/', function () {
     return redirect('/login');
 })->name('home');
 
+Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
+    Route::get('/parents/search', [UserController::class, 'searchParents'])->name('parents.search');
+    Route::get('/teachers/search', [UserController::class, 'searchTeachers'])->name('teachers.search');
+    Route::get('/subjects/search', [SubjectController::class, 'searchSubject'])->name('subjects.search');
+});
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
@@ -28,20 +34,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('classrooms/{classroom}/history', [ClassroomController::class, 'history'])->name('classrooms.history');
     Route::resource('classrooms', ClassroomController::class);
     Route::prefix('classrooms/{classroom}')->group(function () {
+        Route::post('schedule/subject', [ClassroomScheduleController::class, 'saveSubjectSchedule'])
+            ->name('classrooms.schedule.subject.save');
+        Route::post('schedule/shift', [ClassroomScheduleController::class, 'saveShiftSchedule'])
+            ->name('classrooms.schedule.shift.save');
         Route::get('schedule', [ClassroomScheduleController::class, 'showScheduleForm'])
             ->name('classrooms.schedule');
-        Route::post('schedule', [ClassroomScheduleController::class, 'saveSchedule'])
-            ->name('classrooms.schedule.save');
     });
     Route::resource('students', StudentController::class);
     Route::resource('subjects', SubjectController::class);
     Route::resource('shiftings', ShiftingController::class);
     Route::resource('school-settings', SchoolSettingController::class);
-});
-
-Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
-    Route::get('/parents/search', [UserController::class, 'searchParents'])->name('parents.search');
-    Route::get('/teachers/search', [UserController::class, 'searchTeachers'])->name('teachers.search');
 });
 
 require __DIR__ . '/settings.php';

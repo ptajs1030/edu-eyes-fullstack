@@ -92,4 +92,22 @@ class SubjectController extends Controller
                     : 'Failed to delete subject: ' . $e->getMessage());
         }
     }
+
+    public function searchSubject(Request $request)
+    {
+        $request->validate([
+            'query' => 'nullable|string'
+        ]);
+
+        $query = $request->input('query', '');
+
+        $subjects = Subject::where('is_archived', false)
+            ->when($query, function ($q) use ($query) {
+                $q->where('name', 'like', "%{$query}%");
+            })
+            ->limit(10)
+            ->get(['id', 'name as full_name']);
+
+        return response()->json($subjects);
+    }
 }
