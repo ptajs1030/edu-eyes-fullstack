@@ -187,10 +187,20 @@ class ParentService
         return $scheduleWithRelations;
     }
 
-    public function getEventSchedule($student){
-        $schedules = EventParticipant::where('student_id', $student->id)
-            ->with('event')
-            ->get();
+
+    public function getEventSchedule($student, $date){
+        if ($date) {
+            $parsedDate = Carbon::parse($date);
+            $schedules = EventParticipant::where('student_id', $student->id)
+            ->whereHas('event', function($query) use ($parsedDate) {
+            $query->whereYear('date', $parsedDate->year)
+                  ->whereMonth('date', $parsedDate->month);
+            })->with('event')->paginate(10);
+        } else {
+            $schedules = EventParticipant::where('student_id', $student->id)
+                ->with('event')
+                ->paginate(10);
+        }
         if ($schedules->isEmpty()) {
             abort(204, 'Event schedule not found');
         }

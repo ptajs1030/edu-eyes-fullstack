@@ -63,8 +63,9 @@ class ParentController extends BaseApiController
         $student = $request->attributes->get('current_student');
         return $this->success($this->service->getSubjectSchedule($student));
     }
-    public function getEventSchedule(Request $request){
+    public function getEventSchedule(Request $request, ){
         $student = $request->attributes->get('current_student');
-        return $this->success($this->service->getEventSchedule($student));
+        $date = $request->query('date');
+        return $this->success($this->service->getEventSchedule($student, $date));
     }
 }
