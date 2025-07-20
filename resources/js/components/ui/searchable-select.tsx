@@ -14,6 +14,7 @@ interface SearchableSelectProps {
     initialOption?: Option;
     showInitialOptions?: boolean;
     maxInitialOptions?: number;
+    disabled?: boolean;
 }
 
 export default function SearchableSelect({
@@ -23,7 +24,8 @@ export default function SearchableSelect({
     endpoint,
     initialOption,
     showInitialOptions = false, 
-    maxInitialOptions = 10
+    maxInitialOptions = 10,
+    disabled= false,
 }: SearchableSelectProps) {
     const [inputValue, setInputValue] = useState('');
     const [options, setOptions] = useState<Option[]>([]);
@@ -73,6 +75,8 @@ export default function SearchableSelect({
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (disabled) return;
+
         const value = e.target.value;
         setInputValue(value);
         
@@ -113,7 +117,8 @@ export default function SearchableSelect({
     };
 
     const handleFocus = () => {
-        // If showInitialOptions is enabled and input is empty, show initial options
+        if (disabled) return; 
+        
         if (showInitialOptions && inputValue === '') {
             fetchOptions('');
         }
@@ -121,16 +126,17 @@ export default function SearchableSelect({
 
     return (
         <div className="relative" ref={wrapperRef}>
-            <div className="flex items-center border rounded">
+            <div className="flex items-center border rounded bg-white">
                 <input
                     type="text"
                     value={inputValue}
                     onChange={handleInputChange}
                     placeholder={placeholder}
-                    className="flex-1 px-3 py-2 outline-none"
                     onFocus={handleFocus}
+                    disabled={disabled}
+                    className={`flex-1 px-3 py-2 outline-none w-full ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                 />
-                {selectedOption && (
+                {selectedOption && !disabled && (
                     <button 
                         type="button"
                         onClick={handleClear}
@@ -141,7 +147,7 @@ export default function SearchableSelect({
                 )}
             </div>
 
-            {isOpen && (
+            {!disabled && isOpen && (
                 <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border max-h-60 overflow-auto">
                     {isLoading ? (
                         <div className="py-2 px-3 text-gray-500">Loading...</div>
