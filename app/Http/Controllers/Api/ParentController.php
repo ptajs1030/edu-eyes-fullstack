@@ -68,6 +68,7 @@ class ParentController extends BaseApiController
         $date = $request->query('date');
         $data= $this->service->getEventSchedule($student, $date);
         return $this->success([
+            'number_of_schedules' => $data['number_of_schedules'],
             'current_page' => $data['current_page'],
             'last_page' => $data['last_page'],
             'per_page' => $data['per_page'],
