@@ -30,7 +30,7 @@ type Link = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Settings',
+        title: 'Pengaturan',
         href: '/school-settings',
     },
 ];
@@ -85,12 +85,12 @@ export default function SettingIndex() {
     const tableHeaders = [
         { key: 'key', label: 'Key', sortable: true },
         { key: 'value', label: 'Value', sortable: false },
-        { key: 'actions', label: 'Actions', sortable: false },
+        { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Settings" />
+            <Head title="Pengaturan" />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">

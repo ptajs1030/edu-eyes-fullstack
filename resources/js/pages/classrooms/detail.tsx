@@ -39,7 +39,7 @@ interface Props {
 
 const breadcrumbs = (classroomName: string): BreadcrumbItem[] => [
     {
-        title: 'Classrooms',
+        title: 'Kelas',
         href: '/classrooms',
     },
     {
@@ -75,15 +75,15 @@ export default function ClassroomDetail({ classroom, academicYear, filters }: Pr
 
     return (
         <AppLayout breadcrumbs={breadcrumbs(classroom.name)}>
-            <Head title={`Classroom - ${classroom.name}`} />
+            <Head title={`Kelas - ${classroom.name}`} />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
                 {/* Section 1: Classroom Info */}
                 <div className="rounded-lg border p-4">
-                    <h1 className="mb-6 text-2xl font-bold">Classroom Information</h1>
+                    <h1 className="mb-6 text-2xl font-bold">Informasi Kelas</h1>
                     <div className="grid w-2/5 grid-cols-1 gap-5 md:grid-cols-2">
                         <div>
-                            <p className="mb-1 text-sm text-gray-500">Class Name</p>
+                            <p className="mb-1 text-sm text-gray-500">Nama Kelas</p>
                             <p className="font-semibold">{classroom.name}</p>
                         </div>
                         <div>
@@ -95,7 +95,7 @@ export default function ClassroomDetail({ classroom, academicYear, filters }: Pr
                             <p className="font-semibold">{classroom.students_count} students</p>
                         </div>
                         <div>
-                            <p className="mb-1 text-sm text-gray-500">Academic Year</p>
+                            <p className="mb-1 text-sm text-gray-500">Tahun Akademik</p>
                             <p className="font-semibold">{academicYear?.title || 'Not set'}</p>
                         </div>
                     </div>
@@ -103,15 +103,15 @@ export default function ClassroomDetail({ classroom, academicYear, filters }: Pr
 
                 {/* Section 2: Students Table */}
                 <div className="rounded-lg border p-4">
-                    <h1 className="mb-6 text-2xl font-bold">Students</h1>
+                    <h1 className="mb-6 text-2xl font-bold">Siswa</h1>
                     <Table
                         headers={[
                             { key: 'no', label: 'No.', sortable: false },
-                            { key: 'full_name', label: 'Name', sortable: true },
-                            { key: 'date_of_birth', label: 'Age', sortable: true },
-                            { key: 'parent', label: 'Parent', sortable: false },
-                            { key: 'phone', label: 'Parent Phone', sortable: false },
-                            { key: 'actions', label: 'Actions', sortable: false },
+                            { key: 'full_name', label: 'Nama', sortable: true },
+                            { key: 'date_of_birth', label: 'Usia', sortable: true },
+                            { key: 'parent', label: 'Orang Tua', sortable: false },
+                            { key: 'phone', label: 'Telepon Orang Tua', sortable: false },
+                            { key: 'actions', label: 'Aksi', sortable: false },
                         ]}
                         data={classroom.students}
                         sortColumn={filters.sort ?? ''}
