@@ -31,7 +31,7 @@ type Link = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Announcements',
+        title: 'Pengumuman',
         href: '/announcements',
     },
 ];
@@ -145,7 +145,7 @@ export default function Announcement() {
                         onClick={() => openModal()}
                         className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
-                        Add Announcement
+                        Tambah Pengumuman
                     </button>
                 </div>
 
@@ -158,7 +158,7 @@ export default function Announcement() {
                                     onChange={(e) => setSelectedIds(e.target.checked ? announcements.data.map((a) => a.id) : [])}
                                 />
                             </th>
-                            <th className="p-4 text-sm font-semibold">Picture</th>
+                            {/*<th className="p-4 text-sm font-semibold">Picture</th>*/}
                             <th className="p-4 text-sm font-semibold">Title</th>
                             <th className="p-4 text-sm font-semibold">Content</th>
                             <th className="p-4 text-sm font-semibold">Actions</th>
@@ -175,13 +175,13 @@ export default function Announcement() {
                                             onChange={() => toggleSelect(announcement.id)}
                                         />
                                     </td>
-                                    <td className="p-3">
-                                        {announcement.picture ? (
-                                            <img src={announcement.picture} alt="announcement" className="h-16 w-16 rounded-full object-cover" />
-                                        ) : (
-                                            'No Picture'
-                                        )}
-                                    </td>
+                                    {/*<td className="p-3">*/}
+                                    {/*    {announcement.picture ? (*/}
+                                    {/*        <img src={announcement.picture} alt="announcement" className="h-16 w-16 rounded-full object-cover" />*/}
+                                    {/*    ) : (*/}
+                                    {/*        'No Picture'*/}
+                                    {/*    )}*/}
+                                    {/*</td>*/}
                                     <td className="p-3">{announcement.title}</td>
                                     <td className="p-3">{announcement.content}</td>
                                     <td className="flex gap-2 p-3">

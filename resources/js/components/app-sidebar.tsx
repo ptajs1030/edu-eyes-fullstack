@@ -14,37 +14,37 @@ const mainNavItems: NavItem[] = [
         icon: LayoutGrid,
     },
     {
-        title: 'Roles',
+        title: 'Hak Akses',
         href: '/roles',
         icon: UserCog,
     },
     {
-        title: 'Users',
+        title: 'Pengguna',
         href: '/users',
         icon: UserPen,
     },
     {
-        title: 'Announcements',
+        title: 'Pengumuman',
         href: '/announcements',
         icon: BadgeInfo,
     },
     {
-        title: 'Academic Years',
+        title: 'Tahun Akademik',
         href: '/academic-years',
         icon: GraduationCap,
     },
     {
-        title: 'Classrooms',
+        title: 'Kelas',
         href: '/classrooms',
         icon: School,
     },
     {
-        title: 'Students',
+        title: 'Siswa',
         href: '/students',
         icon: UserSearch,
     },
     {
-        title: 'Subjects',
+        title: 'Mata Pelajaran',
         href: '/subjects',
         icon: BookText,
     },
@@ -54,7 +54,7 @@ const mainNavItems: NavItem[] = [
         icon: TimerReset,
     },
     {
-        title: 'School Settings',
+        title: 'Pengaturan',
         href: '/school-settings',
         icon: Settings2,
     },

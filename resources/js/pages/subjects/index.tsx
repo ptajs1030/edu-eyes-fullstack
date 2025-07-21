@@ -32,7 +32,7 @@ type Link = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Subjects',
+        title: 'Mata Pelajaran',
         href: '/subjects',
     },
 ];
@@ -99,15 +99,15 @@ export default function SubjectIndex() {
     };
 
     const tableHeaders = [
-        { key: 'name', label: 'Name', sortable: true },
-        { key: 'curriculum_year', label: 'Curriculum Year', sortable: true },
+        { key: 'name', label: 'Nama', sortable: true },
+        { key: 'curriculum_year', label: 'Nama Kurikulum', sortable: true },
         { key: 'is_archived', label: 'Archived Status', sortable: true },
-        { key: 'actions', label: 'Actions', sortable: false },
+        { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Subjects" />
+            <Head title="Mata Pelajaran" />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
@@ -132,7 +132,7 @@ export default function SubjectIndex() {
                         onClick={() => openForm(null)}
                         className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
-                        Add Subjects
+                        Tambah Mata Pelajaran
                     </button>
                 </div>
 
@@ -172,7 +172,7 @@ export default function SubjectIndex() {
                                     onClick={() => setSubjectToDelete(subject)}
                                     className="rounded bg-red-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
-                                    Delete
+                                    Hapus
                                 </button>
                             </td>
                         </tr>
