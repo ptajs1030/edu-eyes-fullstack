@@ -20,7 +20,7 @@ interface Student {
     parent?: Parent | null;
     class_id?: number | null;
     full_name: string;
-    code: string | null;
+    nis: string | null;
     entry_year: number;
     gender: string;
     status: string;
@@ -45,7 +45,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
         parent_id: null,
         class_id: null,
         full_name: '',
-        code: '',
+        nis: '',
         entry_year: new Date().getFullYear(),
         gender: '',
         status: '',
@@ -62,7 +62,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                 parent_id: student.parent_id,
                 class_id: student.class_id,
                 full_name: student.full_name,
-                code: student.code || '',
+                nis: student.nis || '',
                 entry_year: student.entry_year,
                 gender: student.gender,
                 status: student.status,
@@ -85,7 +85,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                 parent_id: null,
                 class_id: null,
                 full_name: '',
-                code: '',
+                nis: '',
                 entry_year: new Date().getFullYear(),
                 gender: '',
                 status: '',
@@ -147,7 +147,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
         <FormModal isOpen={isOpen} onClose={onClose} title={student ? 'Edit Student' : 'Add New Student'} onSubmit={handleSubmit}>
             <div className="mb-3">
                 <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
-                    Full Name
+                    Nama Lengkap
                 </label>
                 <input
                     id="full_name"
@@ -160,33 +160,37 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                 />
             </div>
             <div className="mb-3">
-                <label htmlFor="code" className="block text-sm font-medium text-gray-700">
-                    Student Code
+                <label htmlFor="nis" className="block text-sm font-medium text-gray-700">
+                    NIS
                 </label>
                 <input
-                    id="code"
-                    name="code"
+                    id="nis"
+                    name="nis"
                     type="text"
-                    value={formData.code}
-                    onChange={(e) => handleChange('code', e.target.value)}
+                    value={formData.nis ?? ''}
+                    onChange={(e) => handleChange('nis', e.target.value)}
                     className="w-full rounded border p-2"
                 />
             </div>
             <div className="mb-3">
                 <label htmlFor="parent_id" className="block text-sm font-medium text-gray-700">
-                    Parent/Guardian
+                    Orang Tua/Wali
                 </label>
                 <SearchableSelect
-                    value={formData.parent_id}
+                    value={formData.parent_id ?? null}
                     onChange={(value) => handleChange('parent_id', value ? Number(value) : null)}
                     placeholder="Search parent by name..."
                     endpoint={route('parents.search')}
-                    initialOption={initialParent}
+                    initialOption={
+                        initialParent
+                            ? { id: initialParent.id, full_name: initialParent.full_name }
+                            : undefined
+                    }
                 />
             </div>
             <div className="mb-3">
                 <label htmlFor="class_id" className="block text-sm font-medium text-gray-700">
-                    Classroom
+                    Kelas
                 </label>
                 <select
                     id="class_id"
@@ -206,7 +210,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
             <div className="mb-3 flex flex-row justify-between gap-4">
                 <div className="basis-1/2">
                     <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
-                        Gender
+                        Jenis Kelamin
                     </label>
                     <select
                         id="gender"
@@ -227,7 +231,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
 
                 <div className="basis-1/2">
                     <label htmlFor="religion" className="block text-sm font-medium text-gray-700">
-                        Religion
+                        Agama
                     </label>
                     <select
                         id="religion"
@@ -249,7 +253,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
             <div className="mb-3 flex flex-row justify-between gap-4">
                 <div className="basis-1/2">
                     <label htmlFor="entry_year" className="block text-sm font-medium text-gray-700">
-                        Entry Year
+                        Tahun Masuk
                     </label>
                     <input
                         id="entry_year"
@@ -295,7 +299,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
             <div className="mb-3 flex flex-row justify-between gap-4">
                 <div className="basis-1/2">
                     <label htmlFor="birth_place" className="block text-sm font-medium text-gray-700">
-                        Birth Place
+                        Tempat Lahir
                     </label>
                     <input
                         id="birth_place"
@@ -309,7 +313,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                 </div>
                 <div className="basis-1/2">
                     <label htmlFor="date_of_birth" className="block text-sm font-medium text-gray-700">
-                        Date of Birth
+                        Tanggal Lahir
                     </label>
                     <input
                         id="date_of_birth"
@@ -326,7 +330,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
             <div className="mb-3"></div>
             <div className="mb-3">
                 <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                    Addresss
+                    Alamat
                 </label>
                 <textarea
                     name="address"
