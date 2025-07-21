@@ -10,15 +10,15 @@ class TeacherService
         $user=auth()->user();
 
         if (!$user){
-            return abort(404, 'User not found');
+            return abort(404, 'Pengguna tidak ditemukan');
         }else if (!password_verify($data->getOldPassword(), $user->password)) {
-            return abort(400, 'Old Password is Incorrect');
+            return abort(400, 'Password lama salah');
         }
 
         $user->password = bcrypt($data->getNewPassword());
         $user->save();
         return [
-            'message' => 'Password changed successfully',
+            'message' => 'Password berhasil diubah',
         ];
 
     }
