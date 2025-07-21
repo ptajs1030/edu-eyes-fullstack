@@ -30,7 +30,11 @@ export default function FormModal({
                 className="w-full max-w-xl rounded-lg bg-white p-6 shadow-xl"
             >
                 <h2 className="mb-4 text-center text-lg font-semibold">{title}</h2>
-                <form onSubmit={onSubmit} encType="multipart/form-data">
+                <form
+                    onSubmit={onSubmit}
+                    encType="multipart/form-data"
+                    className="max-h-[75vh] overflow-y-auto space-y-4"
+                >
                     {children}
                 </form>
             </motion.div>

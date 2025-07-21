@@ -15,7 +15,7 @@ type Student = {
     gender: string;
     religion: string;
     status: string;
-    code: string;
+    nis: string;
     birth_place: string;
     date_of_birth: string;
     address: string;
@@ -147,7 +147,7 @@ export default function StudentIndex() {
         { key: 'full_name', label: 'Name', sortable: true },
         { key: 'parent.full_name', label: 'Parent Name', sortable: false },
         { key: 'classroom.name', label: 'Classroom', sortable: false },
-        { key: 'code', label: 'Code', sortable: true },
+        { key: 'nis', label: 'NIS', sortable: true },
         { key: 'status', label: 'Status', sortable: true },
         { key: 'entry_year', label: 'Entry year', sortable: true },
         { key: 'gender', label: 'Gender', sortable: true },
@@ -212,7 +212,7 @@ export default function StudentIndex() {
                             <td className="p-3 text-sm">{student.full_name}</td>
                             <td className="p-3 text-sm">{student.parent?.full_name || '-'}</td>
                             <td className="p-3 text-sm">{student.classroom?.name || '-'}</td>
-                            <td className="p-3 text-sm">{student.code || '-'}</td>
+                            <td className="p-3 text-sm">{student.nis || '-'}</td>
                             <td className="p-3 text-sm">{student.status}</td>
                             <td className="p-3 text-sm">{student.entry_year}</td>
                             <td className="p-3 text-sm">{student.gender}</td>

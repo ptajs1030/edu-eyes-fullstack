@@ -14,6 +14,11 @@ type User = {
     username: string;
     phone?: string;
     email?: string;
+    nip?: string;
+    job?: string;
+    position?: string;
+    profile_picture?: string;
+    address?: string;
     status: string;
     role: {
         id: number;
@@ -113,6 +118,7 @@ export default function UserIndex() {
 
     const tableHeaders = [
         { key: 'full_name', label: 'Full Name', sortable: true },
+        { key: 'nip', label: 'NIP', sortable: true },
         { key: 'username', label: 'Username', sortable: true },
         { key: 'role_id', label: 'Role', sortable: true },
         { key: 'phone', label: 'Phone', sortable: true },
@@ -165,6 +171,7 @@ export default function UserIndex() {
                                 <input type="checkbox" checked={selectedIds.includes(user.id)} onChange={() => toggleSelect(user.id)} />
                             </td>
                             <td className="p-3 text-sm">{user.full_name}</td>
+                            <td className="p-3 text-sm">{user.nip}</td>
                             <td className="p-3 text-sm">{user.username}</td>
                             <td className="p-3 text-sm">{user.role?.name || '-'}</td>
                             <td className="p-3 text-sm">{user.phone || '-'}</td>
@@ -190,7 +197,20 @@ export default function UserIndex() {
 
                 <Pagination links={users.links} />
 
-                <UserFormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} user={selectedUser} roles={roles} statuses={statuses} />
+                <UserFormModal
+                    isOpen={isFormOpen}
+                    onClose={() => setIsFormOpen(false)}
+                    user={
+                        selectedUser
+                            ? {
+                                ...selectedUser,
+                                role_id: selectedUser.role?.id ?? null,
+                            }
+                            : null
+                    }
+                    roles={roles}
+                    statuses={statuses}
+                />
 
                 <ActionModal
                     isOpen={!!userToDelete}

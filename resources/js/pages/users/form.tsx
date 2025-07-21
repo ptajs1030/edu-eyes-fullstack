@@ -14,6 +14,10 @@ interface User {
     username: string;
     phone?: string;
     email?: string;
+    nip?: string;
+    job?: string;
+    position?: string;
+    address?: string;
     password?: string;
     password_confirmation?: string;
     role_id: number | null;
@@ -34,6 +38,10 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
         username: '',
         phone: '',
         email: '',
+        nip: '',
+        job: '',
+        position: '',
+        address: '',
         password: '',
         password_confirmation: '',
         role_id: null,
@@ -48,6 +56,10 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                 username: user.username,
                 phone: user.phone || '',
                 email: user.email || '',
+                nip: user.nip || '',
+                job: user.job || '',
+                position: user.position || '',
+                address: user.address || '',
                 password: '',
                 password_confirmation: '',
                 role_id: user.role_id,
@@ -59,6 +71,10 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                 username: '',
                 phone: '',
                 email: '',
+                nip: '',
+                job: '',
+                position: '',
+                address: '',
                 password: '',
                 password_confirmation: '',
                 role_id: null,
@@ -110,7 +126,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
         <FormModal isOpen={isOpen} onClose={onClose} title={user ? 'Edit User' : 'Add New User'} onSubmit={handleSubmit}>
             <div className="mb-3">
                 <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
-                    Full Name*
+                    Nama Lengkap*
                 </label>
                 <input
                     id="full_name"
@@ -160,6 +176,57 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                     value={formData.email}
                     onChange={(e) => handleChange('email', e.target.value)}
                     className="w-full rounded border p-2"
+                />
+            </div>
+            <div className="mb-3">
+                <label htmlFor="nip" className="block text-sm font-medium text-gray-700">
+                    NIP
+                </label>
+                <input
+                    id="nip"
+                    name="nip"
+                    type="text"
+                    value={formData.nip}
+                    onChange={(e) => handleChange('nip', e.target.value)}
+                    className="w-full rounded border p-2"
+                />
+            </div>
+            <div className="mb-3">
+                <label htmlFor="position" className="block text-sm font-medium text-gray-700">
+                    Jabatan (Guru)
+                </label>
+                <input
+                    id="position"
+                    name="position"
+                    type="text"
+                    value={formData.position}
+                    onChange={(e) => handleChange('position', e.target.value)}
+                    className="w-full rounded border p-2"
+                />
+            </div>
+            <div className="mb-3">
+                <label htmlFor="job" className="block text-sm font-medium text-gray-700">
+                    Pekerjaan (Orang Tua)
+                </label>
+                <input
+                    id="job"
+                    name="job"
+                    type="text"
+                    value={formData.job}
+                    onChange={(e) => handleChange('job', e.target.value)}
+                    className="w-full rounded border p-2"
+                />
+            </div>
+            <div className="mb-3">
+                <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                    Alamat
+                </label>
+                <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={(e) => handleChange('address', e.target.value)}
+                    className="w-full rounded border p-2"
+                    rows={3}
                 />
             </div>
             <div className="mb-3">
