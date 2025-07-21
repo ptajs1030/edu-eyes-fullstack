@@ -216,6 +216,7 @@ class ParentService
         }
         
         return  [
+            'number_of_schedules' => $schedules->total(),
             'current_page' => $schedules->currentPage(),
             'last_page' => $schedules->lastPage(),
             'per_page' => $schedules->perPage(),
