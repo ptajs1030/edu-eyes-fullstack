@@ -33,7 +33,7 @@ type Link = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Academic Years',
+        title: 'Tahun Akademik',
         href: '/academic-years',
     },
 ];
@@ -104,13 +104,13 @@ export default function AcademicYearIndex() {
         { key: 'title', label: 'Title', sortable: true },
         { key: 'status', label: 'Status', sortable: true },
         { key: 'attendance_mode', label: 'Attendance Mode', sortable: true },
-        { key: 'note', label: 'Notes', sortable: true },
-        { key: 'actions', label: 'Actions', sortable: false },
+        { key: 'note', label: 'Catatan', sortable: true },
+        { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Academic Years" />
+            <Head title="Tahun Akademik" />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
@@ -134,7 +134,7 @@ export default function AcademicYearIndex() {
                         onClick={() => openModal()}
                         className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
-                        Add Accademic Year
+                        Tambah Tahun Akademik
                     </button>
                 </div>
 

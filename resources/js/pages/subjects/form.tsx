@@ -88,10 +88,10 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
     };
 
     return (
-        <FormModal isOpen={isOpen} onClose={onClose} title={subject ? 'Edit Subject' : 'Add New Subject'} onSubmit={handleSubmit}>
+        <FormModal isOpen={isOpen} onClose={onClose} title={subject ? 'Edit Mata Pelajaran' : 'Tambah Mata Pelajaran'} onSubmit={handleSubmit}>
             <div className="mb-3">
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Name
+                    Nama
                 </label>
                 <input
                     id="name"
@@ -105,7 +105,7 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
             </div>
             <div className="mb-3">
                 <label htmlFor="curriculum_year" className="block text-sm font-medium text-gray-700">
-                    Curriculum Year
+                    Nama Kurikulum
                 </label>
                 <input
                     id="curriculum_year"
@@ -139,10 +139,10 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
             </div>
             <div className="flex justify-end">
                 <button type="button" onClick={onClose} className="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:cursor-pointer">
-                    Cancel
+                    Batal
                 </button>
                 <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:cursor-pointer">
-                    {subject ? 'Update' : 'Create'}
+                    {subject ? 'Update' : 'Simpan'}
                 </button>
             </div>
         </FormModal>

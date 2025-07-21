@@ -99,9 +99,9 @@ export default function ShiftingIndex() {
     };
 
     const tableHeaders = [
-        { key: 'name', label: 'Name', sortable: true },
-        { key: 'start_hour', label: 'Hours', sortable: true },
-        { key: 'actions', label: 'Actions', sortable: false },
+        { key: 'name', label: 'Nama', sortable: true },
+        { key: 'start_hour', label: 'Jam', sortable: true },
+        { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
     return (
@@ -131,7 +131,7 @@ export default function ShiftingIndex() {
                         onClick={() => openForm(null)}
                         className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
-                        Add Shifting
+                        Tambah Shifting
                     </button>
                 </div>
 
@@ -164,7 +164,7 @@ export default function ShiftingIndex() {
                                     onClick={() => setShiftingToDelete(shifting)}
                                     className="rounded bg-red-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
-                                    Delete
+                                    Hapus
                                 </button>
                             </td>
                         </tr>
