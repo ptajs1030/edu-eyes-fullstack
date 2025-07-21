@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ChangePasswordRequest;
 use App\Http\Resources\ClassroomResource;
+use App\Http\Resources\EventResource;
 use App\Http\Resources\StudentResource;
 use App\Http\Resources\SubjectResource;
 use App\Http\Resources\UserResource;
 use App\Models\Classroom;
+use App\Models\Event;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Services\TeacherService;
@@ -53,6 +55,16 @@ class TeacherController extends BaseApiController
         }
         return $this->resource(
             SubjectResource::collection(Subject::get())
+        );
+    }
+
+    public function getEvent(?int $id = null)
+    {
+        if ($id) {
+            return $this->resource(EventResource::make(Event::findOrFail($id)));
+        }
+        return $this->resource(
+            EventResource::collection(Event::get())
         );
     }
 

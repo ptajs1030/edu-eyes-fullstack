@@ -23,7 +23,7 @@ class AuthService
         $user = User::where('username', $data->getUsername())->first();
 
         if (!$user || !Hash::check($data->getPassword(), $user->password)) {
-            abort(400, 'username or password is incorrect');
+            abort(400, 'Username atau password salah');
         }
 
         Auth::login($user);
@@ -49,7 +49,7 @@ class AuthService
             }
 
             if (!$student) {
-                abort(404, 'No student found for this parent');
+                abort(404, 'Tidak ada siswa yang ditemukan untuk orang tua ini');
             }
 
             $response['student_id'] = $student->id;
@@ -76,7 +76,7 @@ class AuthService
 
         $user->tokens()->delete();
         return [
-            'message' => 'Logged out successfully',
+            'message' => 'Log-out berhasil',
         ];
     }
 }

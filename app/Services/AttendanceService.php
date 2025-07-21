@@ -84,19 +84,19 @@ class AttendanceService
     public function shiftingAttendance(ShiftingAttendanceData $data){
         $student=Student::where('uuid', $data->getStudent())->first();
         if (!$student) {
-            abort(404, 'Student not found');
+            abort(404, 'Murid tidak ditemukan');
         }
         $attendance=ShiftingAttendance::where('student_id', $student->id)->where('submit_date', Carbon::now()->format('Y-m-d'))->first();
         if (!$attendance) {
-            abort(404, 'Attendance not found');
+            abort(404, 'Absensi tidak ditemukan');
         }
         $day=ClassShiftingSchedule::where('class_id', $student->class_id)->where('day', Carbon::now()->dayOfWeek())->first();
         if(!$day){
-            abort(404, 'No class schedule found for today.');
+            abort(404, 'Jadwal kelas tidak ditemukan untuk hari ini.');
         }
         $pics=ClassShiftingSchedulePic::where('class_shifting_schedule_id', $day->id)->get();
         if ($pics->isEmpty()) {
-            abort(404, 'PIC not found');
+            abort(404, 'PIC tidak ditemukan');
         }
         
 
@@ -106,17 +106,17 @@ class AttendanceService
         $minutes_of_late = $deadline->diffInMinutes($data->getSubmitHour());
         $isPic = $pics->contains('teacher_id', auth()->user()->id);
         if (!$isPic) {
-            abort(403, 'You are not assigned to this class schedule.');
+            abort(403, 'Anda tidak ditugaskan untuk jadwal kelas ini.');
         }
         if ($attendance->clock_out_hour && $attendance->clock_in_hour) {
-            return abort(400, 'attendance already submitted');
+            return abort(400, 'Absensi sudah diisi');
         }
 
         if ($attendance->clock_in_hour && !$attendance->clock_out_hour) {
             $minClockOut = Carbon::parse($attendance->clock_in_hour)->addMinutes(2);
 
             if ($submit_hour->lt($minClockOut)) {
-                abort(400, 'Clock out must be at least 2 minutes after clock in');
+                abort(400, 'Absen keluar harus minimal 2 menit setelah absen masuk');
             }
         }
         if ($submit_hour <= $deadline && !$attendance->clock_in_hour) {
@@ -140,7 +140,7 @@ class AttendanceService
         }
 
         return [
-            'message' => 'Attendance updated successfully',
+            'message' => 'Absensi berhasil diupdate',
             'attendance' => $attendance,
         ];
     }
@@ -148,17 +148,17 @@ class AttendanceService
     public function editShiftingAttendance(EditShiftingAttendanceData $data, $attendance_id){
         $attendance=ShiftingAttendance::where('id', $attendance_id)->where('submit_date', Carbon::now()->format('Y-m-d'))->first();
         if (!$attendance) {
-            abort(404, 'Attendance not found');
+            abort(404, 'Absensi tidak ditemukan');
         }
         if($attendance->submit_date != Carbon::now()->format('Y-m-d')){
-            abort(403, 'You are not allowed to edit this attendance');
+            abort(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
         }
         $attendance->update([
             'status' => $data->getStatus(),
         ]);
 
         return [
-            'message' => 'Attendance updated successfully',
+            'message' => 'Absensi berhasil diupdate',
             'attendance' => $attendance,
         ];
     }
@@ -214,7 +214,7 @@ class AttendanceService
         }
         $classrooms = $query->get();
         if ($classrooms->isEmpty()) {
-            abort(204, 'Classroom not found');
+            abort(204, 'Kelas tidak ditemukan');
         }
         return $classrooms;
         
@@ -233,7 +233,7 @@ class AttendanceService
         $schedules = $query->get();
 
         if ($schedules->isEmpty()) {
-            abort(204, 'Schedule not found');
+            abort(204, 'Jadwal tidak ditemukan');
         }
         $subjectNames = $schedules->pluck('subject.name')->unique()->values();
 
@@ -242,7 +242,7 @@ class AttendanceService
     public function getSubjectAttendance($class_id, $subject){
         $attendances=SubjectAttendance::where('class_id', $class_id)->where('subject_name', $subject)->where('submit_date', Carbon::now()->format('Y-m-d'))->with('classroom', 'student', 'academicYear')->get();
         if ($attendances->isEmpty()) {
-            abort(204, 'Attendance not found');
+            abort(204, 'Absensi tidak ditemukan');
         }
         $attendancesWithRelations=[];
         foreach ($attendances as $attendance) {
@@ -268,7 +268,7 @@ class AttendanceService
         
         foreach ($attendances as $attendance) {
             if($attendance->classroom->main_teacher_id != auth()->user()->id){
-                abort(403, 'You are not assigned to this class schedule.');
+                abort(403, 'Anda tidak ditugaskan untuk jadwal kelas ini.');
             }
             $attendance->update([
                'status'=>'present',
@@ -285,55 +285,60 @@ class AttendanceService
     public function editSubjectAttendance(EditSubjectAttendanceData $data, $id){
         $attendance=SubjectAttendance::where('id', $id)->where('submit_date', Carbon::now()->format('Y-m-d'))->first();
         if (!$attendance) {
-            abort(404, 'Attendance not found');
+            abort(404, 'Absensi tidak ditemukan');
         }
         if($attendance->submit_date != Carbon::now()->format('Y-m-d')){
-            abort(403, 'You are not allowed to edit this attendance');
+            abort(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
         }
         $teacher=$attendance->classroom->main_teacher;
         if($teacher->id != auth()->user()->id){
-            abort(403, 'You are not allowed to edit this attendance');
+            abort(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
         }
         $attendance->update([
             'status' => $data->getStatus(),
         ]);
         return [
-            'message' => 'Attendance updated successfully',
+            'message' => 'Absensi berhasil diupdate',
             'attendance' => $attendance,
         ];
     }
 
     public function getEvent($id=null, $date){
+        $query = Event::query();
         if ($id) {
-            $event=Event::where('id', $id)->first();
-            if(!$event){
-                abort(404, 'Event not found');
-            }
-            return $event;
+            $query->where('id', $id);
         }
-        
         if ($date) {
-            if (!preg_match('/^\d{4}-\d{2}$/', $date)) {
-                abort(400, 'Format tanggal harus YYYY-MM');
-            }
-            $event=Event::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$date])->paginate(10);
-            if(!$event){
-                abort(404, 'Event not found');
-            }
-            return $event;
+            $parsedDate = Carbon::parse($date);
+            $query->whereYear('date', $parsedDate->year)
+              ->whereMonth('date', $parsedDate->month);
         }
-
-        $events=Event::paginate(10);
-        
+        $events = $query->paginate(10);
         if ($events->isEmpty()) {
-            abort(204, 'Event not found');
+            abort(204, 'Kegiatan tidak ditemukan');
         }
-        return $events;
+        $eventsWithRelations = [];
+        foreach ($events as $event) {
+            $eventsWithRelations[] = [
+                'id' => $event->id,
+                'name' => $event->name,
+                'description' => $event->description,
+                'date' => $event->date,
+                'start_time' => $event->Start_hour,
+                'end_time' => $event->end_hour,
+            ];
+        }
+        return [
+            'current_page' => $events->currentPage(),
+            'last_page' => $events->lastPage(),
+            'per_page' => $events->perPage(),
+            'events' => $eventsWithRelations,
+        ];
     }
     public function eventAttendance(EventAttendanceData $data){
         $student=Student::where('uuid', $data->getStudent())->first();
         if (!$student) {
-            abort(404, 'Student not found');
+            abort(404, 'Siswa tidak ditemukan');
         }
         
        $participant=EventParticipant::where('student_id', $student->id)
@@ -341,12 +346,12 @@ class AttendanceService
             ->first();
            
         if (!$participant) {
-            abort(404, 'Participant not found');
+            abort(404, 'Peserta tidak ditemukan');
         }
 
         $pics=EventPic::where('event_id', $data->getEvent())->get();
         if ($pics->isEmpty()) {
-            abort(404, 'PIC not found');
+            abort(404, 'PIC tidak ditemukan');
         } 
         $attendance=EventAttendance::where('student_id', $student->id)
             ->where('event_id', $data->getEvent())
@@ -358,14 +363,14 @@ class AttendanceService
         $minutes_of_late = $deadline->diffInMinutes($data->getSubmitHour());
         $isPic = $pics->contains('pic_id', auth()->user()->id);
         if (!$isPic) {
-            abort(403, 'You are not assigned to this event.');
+            abort(403, 'Anda tidak ditugaskan untuk kegiatan ini.');
         }
        
         if ($attendance) {
             if ($attendance->clock_in_hour && $attendance->clock_out_hour == '00:00:00') {
             $minClockOut = Carbon::parse($attendance->clock_in_hour)->addMinutes(2);
             if ($submit_hour->lt($minClockOut)) {
-                abort(400, 'Clock out must be at least 2 minutes after clock in');
+                abort(400, 'Absen keluar harus minimal 2 menit setelah absen masuk');
             }
             $attendance->update([
                 'clock_out_hour' => $submit_hour->format('H:i:s'),
@@ -373,7 +378,7 @@ class AttendanceService
             return $attendance;
         } else {
            
-            abort(400, 'Attendance already submitted');
+            abort(400, 'Absensi sudah diisi');
         }
         } else {
         
@@ -444,16 +449,16 @@ class AttendanceService
     public function editEventAttendance(EditEventAttendanceData $data, $id){
         $attendance = EventAttendance::where('id', $id)->first();
         if (!$attendance) {
-            abort(404, 'Attendance not found');
+            abort(404, 'Absensi tidak ditemukan');
         }
         if(!Carbon::parse($attendance->submit_date)->isToday()){
-            abort(403, 'You are not allowed to edit this attendance');
+            abort(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
         } 
         $attendance->update([
             'status' => $data->getStatus(),
         ]);
         return [
-            'message' => 'Attendance updated successfully',
+            'message' => 'Absensi berhasil diupdate',
             'attendance' => $attendance,
         ];
     }
