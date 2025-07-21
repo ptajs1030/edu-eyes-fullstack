@@ -17,15 +17,15 @@ class ParentService
         $user=auth()->user();
 
         if (!$user){
-            return abort(404, 'User not found');
+            return abort(404, 'Pengguna tidak ditemukan');
         }else if (!password_verify($data->getOldPassword(), $user->password)) {
-            return abort(400, 'Old Password is Incorrect');
+            return abort(400, 'Password lama salah');
         }
 
         $user->password = bcrypt($data->getNewPassword());
         $user->save();
         return [
-            'message' => 'Password changed successfully',
+            'message' => 'Password berhasil diubah',
         ];
 
     }
@@ -35,7 +35,7 @@ class ParentService
         ->where('submit_date', Carbon::now('Asia/Jakarta')->format('Y-m-d'))
         ->first();
         if (!$attendance){
-            return [abort(404,'Attendance not found')];
+            return [abort(404,'Absensi tidak ditemukan')];
         }
 
         $days = [
@@ -145,7 +145,7 @@ class ParentService
         if ($id) {
             $announcement = Announcement::where('id', $id)->first();
             if (!$announcement) {
-                return abort(404,'Announcement not found');
+                return abort(404,'Pengumuman tidak ditemukan');
             }
             return $announcement;
         }else {
@@ -166,7 +166,7 @@ class ParentService
     public function getSubjectSchedule($student){
         $schedules=ClassSubjectSchedule::where('class_id', $student->class_id)->get();
         if ($schedules->isEmpty()) {
-            abort(204, 'Schedule not found');
+            abort(204, 'Jadwal tidak ditemukan');
         }
         
         $scheduleWithRelations = [];
@@ -189,20 +189,18 @@ class ParentService
 
 
     public function getEventSchedule($student, $date){
+        $query = EventParticipant::query();
+        $query->where('student_id', $student->id);
         if ($date) {
             $parsedDate = Carbon::parse($date);
-            $schedules = EventParticipant::where('student_id', $student->id)
-            ->whereHas('event', function($query) use ($parsedDate) {
-            $query->whereYear('date', $parsedDate->year)
+            $query->whereHas('event', function($q) use ($parsedDate) {
+                $q->whereYear('date', $parsedDate->year)
                   ->whereMonth('date', $parsedDate->month);
-            })->with('event')->paginate(10);
-        } else {
-            $schedules = EventParticipant::where('student_id', $student->id)
-                ->with('event')
-                ->paginate(10);
+            });
         }
+        $schedules = $query->with('event')->paginate(10);
         if ($schedules->isEmpty()) {
-            abort(204, 'Event schedule not found');
+            abort(204, 'Kegiatan tidak ditemukan');
         }
         
       $schedulesWithRelations = [];
@@ -217,7 +215,12 @@ class ParentService
             ];
         }
         
-        return $schedulesWithRelations;
+        return  [
+            'current_page' => $schedules->currentPage(),
+            'last_page' => $schedules->lastPage(),
+            'per_page' => $schedules->perPage(),
+            'attendances' => $schedulesWithRelations,
+        ];
         
     }
 }
