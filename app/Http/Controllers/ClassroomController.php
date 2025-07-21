@@ -145,28 +145,32 @@ class ClassroomController extends Controller
                 ->get();
 
             // Format data untuk komponen Table
-            $students = $classHistories->map(function ($history) use ($academicYear) {
-                $student = $history->student;
-                $birthDate = $student->date_of_birth;
-                $age = null;
+            $students = $classHistories
+                ->filter(fn($history) => $history->student) // buang jika student null
+                ->map(function ($history) use ($academicYear) {
+                    $student = $history->student;
+                    $birthDate = $student->date_of_birth;
+                    $age = null;
 
-                // Hitung umur berdasarkan tahun akademik
-                if ($birthDate && $academicYear->start_year) {
-                    $birthYear = Carbon::parse($birthDate)->year;
-                    $age = $academicYear->start_year - $birthYear;
-                }
+                    // Hitung umur berdasarkan tahun akademik
+                    if ($birthDate && $academicYear->start_year) {
+                        $birthYear = Carbon::parse($birthDate)->year;
+                        $age = $academicYear->start_year - $birthYear;
+                    }
 
-                return [
-                    'id' => $student->id,
-                    'full_name' => $student->full_name,
-                    'age' => $age,
-                    'parent' => $student->parent ? [
-                        'id' => $student->parent->id,
-                        'full_name' => $student->parent->full_name,
-                        'phone' => $student->parent->phone
-                    ] : null
-                ];
-            })->toArray();
+                    return [
+                        'id' => $student->id,
+                        'full_name' => $student->full_name,
+                        'age' => $age,
+                        'parent' => $student->parent ? [
+                            'id' => $student->parent->id,
+                            'full_name' => $student->parent->full_name,
+                            'phone' => $student->parent->phone
+                        ] : null
+                    ];
+                })
+                ->values() // reset index 
+                ->toArray();
 
             $studentCount = count($students);
         }
