@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 class Student extends Model
 {
@@ -23,6 +24,10 @@ class Student extends Model
 
     protected static function booted()
     {
+        static::creating(function ($student) {
+            $student->uuid = $student->uuid ?: (string) Str::uuid();
+        });
+
         static::created(function (self $student) {
             if (!is_null($student->class_id)) {
                 $activeAcademicYear = AcademicYear::where('status', 'active')->first();

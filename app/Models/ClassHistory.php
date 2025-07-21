@@ -11,8 +11,10 @@ class ClassHistory extends Model
 
     protected $fillable = [
         'academic_year_id',
-        'class_id',
         'student_id',
+        'class_id',
+        'class_name',
+        'class_level',
     ];
 
     public function academicYear()
