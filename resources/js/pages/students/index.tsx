@@ -77,6 +77,10 @@ export default function StudentIndex() {
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
+    const [qrModalOpen, setQrModalOpen] = useState(false);
+    const [qrStudent, setQrStudent] = useState<Student | null>(null);
+    const [qrDownloadUrl, setQrDownloadUrl] = useState<string>('');
+    const [qrSvgHtml, setQrSvgHtml] = useState<string>('');
 
     const openForm = (student: Student | null = null) => {
         setSelectedStudent(student);
@@ -111,6 +115,33 @@ export default function StudentIndex() {
     const handleSortChange = (column: string) => {
         router.get(route('students.index'), { sort: column, direction: filters.direction === 'asc' ? 'desc' : 'asc' }, { preserveState: true });
     };
+
+    const handleBulkPrint = async () => {
+        if (selectedIds.length === 0) return;
+
+        try {
+            const response = await fetch('/bulk-kartu-siswa', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
+                },
+                body: JSON.stringify({ student_ids: selectedIds }),
+            });
+
+            if (!response.ok) throw new Error('Failed to download PDF');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'kumpulan-kartu-siswa.pdf';
+            link.click();
+        } catch (error) {
+            toast.error('Gagal download kartu siswa.');
+        }
+    };
+
 
     const tableHeaders = [
         { key: 'full_name', label: 'Name', sortable: true },
@@ -147,6 +178,13 @@ export default function StudentIndex() {
                             className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                         >
                             Export Selected
+                        </button>
+                        <button
+                            disabled={selectedIds.length === 0}
+                            onClick={handleBulkPrint}
+                            className="rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Bulk Print Kartu Siswa
                         </button>
                     </div>
                     <button
@@ -196,6 +234,21 @@ export default function StudentIndex() {
                                 >
                                     Delete
                                 </button>
+                                <button
+                                    onClick={async () => {
+                                        setQrStudent(student);
+                                        setQrModalOpen(true);
+
+                                        const response = await fetch(route('student.qrcode.preview', { student: student.id }));
+                                        const html = await response.text();
+                                        setQrSvgHtml(html);
+
+                                        setQrDownloadUrl(route('kartu-siswa', { student_id: student.id }));
+                                    }}
+                                    className="rounded bg-purple-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                                >
+                                    Kartu
+                                </button>
                             </td>
                         </tr>
                     )}
@@ -238,6 +291,39 @@ export default function StudentIndex() {
                                 }
                             },
                             variant: 'danger',
+                        },
+                    ]}
+                />
+
+                <ActionModal
+                    isOpen={qrModalOpen}
+                    onClose={() => {
+                        setQrModalOpen(false);
+                        setQrStudent(null);
+                        setQrSvgHtml('');
+                        setQrDownloadUrl('');
+                    }}
+                    title={`Kartu Pelajar - ${qrStudent?.full_name}`}
+                    message={
+                        <div className="flex flex-col items-center gap-4">
+                            <div
+                                dangerouslySetInnerHTML={{ __html: qrSvgHtml }}
+                                className="w-[200px] h-[200px]"
+                            />
+                            <a
+                                href={qrDownloadUrl}
+                                download
+                                className="mt-2 rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
+                            >
+                                Download PDF
+                            </a>
+                        </div>
+                    }
+                    buttons={[
+                        {
+                            label: 'Close',
+                            onClick: () => setQrModalOpen(false),
+                            variant: 'neutral',
                         },
                     ]}
                 />

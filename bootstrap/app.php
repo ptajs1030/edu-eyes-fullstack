@@ -28,7 +28,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'teacher'=> App\Http\Middleware\TeacherAuth::class,
             'parent'=> App\Http\Middleware\ParentAuth::class,
-            'getCurrentStudent'=> App\Http\Middleware\GetCurrentStudent::class
+            'getCurrentStudent'=> App\Http\Middleware\GetCurrentStudent::class,
+            'inject.student' => App\Http\Middleware\InjectStudentByQuery::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

@@ -12,6 +12,9 @@ use App\Http\Controllers\ShiftingController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\QRCodeController;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use App\Models\Student;
 
 Route::get('/', function () {
     return redirect('/login');
@@ -42,6 +45,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             ->name('classrooms.schedule');
     });
     Route::resource('students', StudentController::class);
+    Route::get('/students/{student}/qrcode-preview', function (Student $student) {
+        return QrCode::size(200)->generate($student->uuid); // returns SVG as raw HTML
+    })->name('student.qrcode.preview');
+    Route::get('/kartu-siswa', [QRCodeController::class, 'generate'])->middleware('inject.student')->name('kartu-siswa');
+    Route::post('/bulk-kartu-siswa', [QRCodeController::class, 'bulkGenerate'])->name('qrcode.bulk');
     Route::resource('subjects', SubjectController::class);
     Route::resource('shiftings', ShiftingController::class);
     Route::resource('school-settings', SchoolSettingController::class);
