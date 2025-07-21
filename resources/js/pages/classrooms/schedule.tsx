@@ -62,9 +62,9 @@ interface Props {
 }
 
 const breadcrumbs = (classroomName: string, classroomId: number): BreadcrumbItem[] => [
-    { title: 'Classrooms', href: '/classrooms' },
+    { title: 'Kelas', href: '/classrooms' },
     { title: classroomName, href: `/classrooms/${classroomId}` },
-    { title: 'Schedule', href: '' },
+    { title: 'Jadwal', href: '' },
 ];
 
 export default function ClassroomSchedule({ classroom, days, shiftings, teachers, academicYear, subjectSchedulesByDay, subjects }: Props) {
@@ -304,12 +304,12 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
 
     return (
         <AppLayout breadcrumbs={breadcrumbs(classroom.name, classroom.id)}>
-            <Head title={`Classroom Schedule - ${classroom.name}`} />
+            <Head title={`Jadwal - ${classroom.name}`} />
             <Toaster position="top-right" richColors />
 
             <div className="rounded-xl bg-white p-6 shadow-lg">
                 <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <h1 className="text-2xl font-bold">Classroom Schedule: {classroom.name}</h1>
+                    <h1 className="text-2xl font-bold">Jadwal: {classroom.name}</h1>
                     <button
                         type="submit"
                         form={selectedTab === 0 ? 'shift-form' : 'subject-form'}
