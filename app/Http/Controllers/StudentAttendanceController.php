@@ -63,7 +63,7 @@ class StudentAttendanceController extends Controller
         // Hitung alpha (total hari - hari yang punya data)
         // $statistics['alpha'] = $daysCounted - count($attendances);
 
-        return Inertia::render('students/history', [
+        return Inertia::render('students/attendanceHistory', [
             'student' => $student,
             'attendances' => $attendances,
             'academicYears' => $academicYears,
