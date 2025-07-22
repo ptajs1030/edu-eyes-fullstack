@@ -37,6 +37,10 @@ interface ShiftingAttendance {
     minutes_of_late?: number;
     note?: string;
     day_off_reason?: string;
+    shifting_start_hour_formatted: string;
+    shifting_end_hour_formatted: string;
+    clock_in_hour_formatted?: string;
+    clock_out_hour_formatted?: string;
 }
 
 interface AcademicYear {
@@ -266,10 +270,10 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                                     <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.academic_year?.title}</td>
                                     <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.shifting_name}</td>
                                     <td className="px-4 py-3 text-sm whitespace-nowrap">
-                                        {attendance.shifting_start_hour} - {attendance.shifting_end_hour}
+                                        {attendance.shifting_start_hour_formatted} - {attendance.shifting_end_hour_formatted}
                                     </td>
-                                    <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.clock_in_hour || '-'}</td>
-                                    <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.clock_out_hour || '-'}</td>
+                                    <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.clock_in_hour_formatted || '-'}</td>
+                                    <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.clock_out_hour_formatted || '-'}</td>
                                     <td className="px-4 py-3 text-sm whitespace-nowrap capitalize">
                                         {attendance.status.replace(/_/g, ' ')}
                                         {attendance.day_off_reason && <div className="text-xs text-gray-500">({attendance.day_off_reason})</div>}

@@ -14,10 +14,16 @@ use Inertia\Inertia;
 
 class StudentAttendanceController extends Controller
 {
-    private function formatTime($time)
+    // private function formatTime($time)
+    // {
+    //     return Carbon::createFromFormat('H:i:s', $time)->format('H:i');
+    // }
+
+    private function formatTime(?string $time): ?string
     {
-        return Carbon::createFromFormat('H:i:s', $time)->format('H:i');
+        return $time ? Carbon::parse($time)->format('H:i') : null;
     }
+
 
     public function showAttendanceHistory($studentId, Request $request)
     {
@@ -55,13 +61,6 @@ class StudentAttendanceController extends Controller
                 $statistics[$attendance->status]++;
             }
         }
-
-        // $currentDay = date('d');
-        // $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-        // $daysCounted = min($daysInMonth, $month == date('m') ? $currentDay : $daysInMonth);
-
-        // Hitung alpha (total hari - hari yang punya data)
-        // $statistics['alpha'] = $daysCounted - count($attendances);
 
         return Inertia::render('students/attendanceHistory', [
             'student' => $student,
