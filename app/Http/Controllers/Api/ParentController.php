@@ -24,6 +24,10 @@ class ParentController extends BaseApiController
         return $this->success($this->service->changePassword($data->getDto()));
     }
 
+    public function setNotificationKey(Request $request){
+        return $this->success($this->service->setNotificationKey($request->input('notification_key')));
+    }
+
     public function getStudents(?int $id = null){
         if ($id) {
             return $this->resource(
