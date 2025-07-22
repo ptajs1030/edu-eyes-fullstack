@@ -22,6 +22,10 @@ class ShiftingAttendance extends Model
         'day_off_reason',
     ];
 
+    protected $casts = [
+        'submit_date' => 'date',
+    ];
+
     public function student()
     {
         return $this->belongsTo(Student::class, 'student_id');

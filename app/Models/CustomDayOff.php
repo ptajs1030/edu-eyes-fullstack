@@ -6,8 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class CustomDayOff extends Model
 {
-    protected $fillable = [
-        'date',
-        'description'
-    ];
+    protected $fillable = ['date', 'description'];
 }
