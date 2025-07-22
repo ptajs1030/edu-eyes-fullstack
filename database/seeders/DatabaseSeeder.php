@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
                 EventPicSeeder::class,
                 EventParticipantSeeder::class,
                 EventAttendanceSeeder::class,
+                CustomDayOffSeeder::class,
             ]);
 
             DB::commit();
