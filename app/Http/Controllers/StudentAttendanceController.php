@@ -2,22 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\AcademicYearStatus;
+use App\Enums\ShiftAttendanceStatus;
 use App\Models\AcademicYear;
 use App\Models\CustomDayOff;
 use App\Models\ShiftingAttendance;
 use App\Models\Student;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class StudentAttendanceController extends Controller
 {
+    private function formatTime($time)
+    {
+        return Carbon::createFromFormat('H:i:s', $time)->format('H:i');
+    }
+
     public function showAttendanceHistory($studentId, Request $request)
     {
         $student = Student::with(['classroom', 'classroom.mainTeacher'])->findOrFail($studentId);
         $academicYears = AcademicYear::orderBy('start_year', 'desc')->get();
 
         // Default filter: tahun akademik aktif dan bulan saat ini
-        $activeAcademicYear = AcademicYear::where('status', 'active')->first();
+        $activeAcademicYear = AcademicYear::where('status', AcademicYearStatus::Active->value)->first();
         $academicYearId = $request->input('academic_year_id', $activeAcademicYear->id ?? null);
         $month = $request->input('month', date('m'));
         $year = $request->input('year', date('Y'));
@@ -37,19 +45,10 @@ class StudentAttendanceController extends Controller
         $attendances = $query->get();
 
         // Hitung statistik
-        $statistics = [
-            'present' => 0,
-            'present_in_tolerance' => 0,
-            'alpha' => 0,
-            'late' => 0,
-            'leave' => 0,
-            'sick_leave' => 0,
-            'day_off' => 0,
-        ];
-
-        $currentDay = date('d');
-        $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
-        $daysCounted = min($daysInMonth, $month == date('m') ? $currentDay : $daysInMonth);
+        $statistics = [];
+        foreach (ShiftAttendanceStatus::cases() as $status) {
+            $statistics[$status->value] = 0;
+        }
 
         foreach ($attendances as $attendance) {
             if (isset($statistics[$attendance->status])) {
@@ -57,8 +56,12 @@ class StudentAttendanceController extends Controller
             }
         }
 
+        // $currentDay = date('d');
+        // $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+        // $daysCounted = min($daysInMonth, $month == date('m') ? $currentDay : $daysInMonth);
+
         // Hitung alpha (total hari - hari yang punya data)
-        $statistics['alpha'] = $daysCounted - count($attendances);
+        // $statistics['alpha'] = $daysCounted - count($attendances);
 
         return Inertia::render('students/history', [
             'student' => $student,
