@@ -105,18 +105,18 @@ export default function AttendanceHistory({ student, attendances, academicYears,
     ];
 
     const months = [
-        { value: 1, label: 'January' },
-        { value: 2, label: 'February' },
-        { value: 3, label: 'March' },
+        { value: 1, label: 'Januari' },
+        { value: 2, label: 'Februari' },
+        { value: 3, label: 'Maret' },
         { value: 4, label: 'April' },
-        { value: 5, label: 'May' },
-        { value: 6, label: 'June' },
-        { value: 7, label: 'July' },
-        { value: 8, label: 'August' },
+        { value: 5, label: 'Mei' },
+        { value: 6, label: 'Juni' },
+        { value: 7, label: 'Juli' },
+        { value: 8, label: 'Agustus' },
         { value: 9, label: 'September' },
-        { value: 10, label: 'October' },
+        { value: 10, label: 'Oktober' },
         { value: 11, label: 'November' },
-        { value: 12, label: 'December' },
+        { value: 12, label: 'Desember' },
     ];
 
     useEffect(() => {
@@ -166,23 +166,23 @@ export default function AttendanceHistory({ student, attendances, academicYears,
 
     return (
         <AppLayout breadcrumbs={breadcrumbs(student.full_name, student.id)}>
-            <Head title={`Attendance History - ${student.full_name}`} />
+            <Head title={`Riwayat Kehadiran - ${student.full_name}`} />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
                 {/* Student Info */}
                 <div className="rounded-lg border p-4">
-                    <h2 className="mb-4 text-xl font-bold">Student Information</h2>
+                    <h2 className="mb-4 text-xl font-bold">Informasi Siswa</h2>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                         <div>
-                            <p className="font-semibold">Name</p>
+                            <p className="font-semibold">Nama</p>
                             <p>{student.full_name}</p>
                         </div>
                         <div>
-                            <p className="font-semibold">Class</p>
+                            <p className="font-semibold">Kelas</p>
                             <p>{student.classroom.name}</p>
                         </div>
                         <div>
-                            <p className="font-semibold">Homeroom Teacher</p>
+                            <p className="font-semibold">Wali Kelas</p>
                             <p>{student.classroom.main_teacher.full_name}</p>
                         </div>
                     </div>
@@ -190,16 +190,16 @@ export default function AttendanceHistory({ student, attendances, academicYears,
 
                 {/* Filter Section */}
                 <div className="rounded-lg border p-4">
-                    <h2 className="mb-4 text-xl font-bold">Filters</h2>
+                    <h2 className="mb-4 text-xl font-bold">Filter</h2>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Academic Year</label>
+                            <label className="block text-sm font-medium text-gray-700">Tahun Ajaran</label>
                             <select
                                 value={filters.academic_year_id}
                                 onChange={(e) => handleFilterChange('academic_year_id', e.target.value)}
                                 className="w-full rounded border p-2"
                             >
-                                <option value="">Select Academic Year</option>
+                                <option value="">Pilih Tahun Ajaran</option>
                                 {academicYears.map((ay) => (
                                     <option key={ay.id} value={ay.id}>
                                         {ay.title}
@@ -208,7 +208,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Month</label>
+                            <label className="block text-sm font-medium text-gray-700">Bulan</label>
                             <select
                                 value={filters.month}
                                 onChange={(e) => handleFilterChange('month', e.target.value)}
@@ -222,7 +222,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Year</label>
+                            <label className="block text-sm font-medium text-gray-700">Tahun</label>
                             <input
                                 type="number"
                                 value={filters.year}
@@ -235,7 +235,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
 
                 {/* Statistics */}
                 <div className="rounded-lg border p-4">
-                    <h2 className="mb-4 text-xl font-bold">Attendance Statistics (This Month)</h2>
+                    <h2 className="mb-4 text-xl font-bold">Statistik Kehadiran (Bulan Ini)</h2>
                     <div className="grid grid-cols-2 gap-4 md:grid-cols-7">
                         {Object.entries(statistics).map(([status, count]) => (
                             <div key={status} className="rounded bg-gray-100 p-3 text-center">
@@ -251,21 +251,21 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-100">
                             <tr>
-                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Date</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Academic Year</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Shifting</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Time</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Clock In</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Clock Out</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Tanggal</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Tahun Ajaran</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Shift</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Waktu</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Masuk</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Pulang</th>
                                 <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Status</th>
-                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Actions</th>
+                                <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Aksi</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 bg-white">
                             {attendances.map((attendance) => (
                                 <tr key={attendance.id}>
                                     <td className="px-4 py-3 text-sm whitespace-nowrap">
-                                        {format(parseISO(attendance.submit_date), 'dd MMM yyyy', { locale: id })}
+                                        {format(parseISO(attendance.submit_date), 'EEE, dd MMM yyyy', { locale: id })}
                                     </td>
                                     <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.academic_year?.title}</td>
                                     <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.shifting_name}</td>
@@ -283,7 +283,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                                             onClick={() => handleEdit(attendance)}
                                             className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                         >
-                                            Edit
+                                            Ubah
                                         </button>
                                     </td>
                                 </tr>
@@ -291,7 +291,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                             {attendances.length === 0 && (
                                 <tr>
                                     <td colSpan={8} className="px-4 py-4 text-center text-sm text-gray-500">
-                                        No attendance records found for this month
+                                        Tidak ada data kehadiran untuk bulan ini
                                     </td>
                                 </tr>
                             )}
@@ -300,9 +300,9 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                 </div>
 
                 {/* Edit Attendance Modal */}
-                <FormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title="Edit Attendance Record" onSubmit={handleSubmit}>
+                <FormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title="Ubah Data Kehadiran" onSubmit={handleSubmit}>
                     <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700">Date</label>
+                        <label className="block text-sm font-medium text-gray-700">Tanggal</label>
                         <input
                             type="text"
                             value={selectedAttendance?.submit_date ? format(parseISO(selectedAttendance.submit_date), 'dd MMM yyyy') : ''}
@@ -312,7 +312,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                     </div>
 
                     <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700">Shifting</label>
+                        <label className="block text-sm font-medium text-gray-700">Shift</label>
                         <input
                             type="text"
                             value={`${selectedAttendance?.shifting_name} (${selectedAttendance?.shifting_start_hour} - ${selectedAttendance?.shifting_end_hour})`}
@@ -323,7 +323,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
 
                     <div className="mb-4 grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Clock In</label>
+                            <label className="block text-sm font-medium text-gray-700">Jam Masuk</label>
                             <input
                                 type="time"
                                 value={formData.clock_in_hour || ''}
@@ -332,7 +332,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Clock Out</label>
+                            <label className="block text-sm font-medium text-gray-700">Jam Pulang</label>
                             <input
                                 type="time"
                                 value={formData.clock_out_hour || ''}
@@ -359,11 +359,11 @@ export default function AttendanceHistory({ student, attendances, academicYears,
 
                     {formData.status === 'day_off' && (
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Day Off Reason</label>
+                            <label className="block text-sm font-medium text-gray-700">Alasan Izin</label>
                             <SearchableSelect
                                 value={formData.day_off_reason}
                                 onChange={(value) => handleChange('day_off_reason', value)}
-                                placeholder="Select reason..."
+                                placeholder="Pilih alasan..."
                                 options={dayOffOptions.map((option) => ({
                                     value: option.id.toString(),
                                     label: option.description,
@@ -373,7 +373,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                     )}
 
                     <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700">Minutes of Late</label>
+                        <label className="block text-sm font-medium text-gray-700">Menit Terlambat</label>
                         <input
                             type="number"
                             min="0"
@@ -384,7 +384,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                     </div>
 
                     <div className="mb-4">
-                        <label className="block text-sm font-medium text-gray-700">Note</label>
+                        <label className="block text-sm font-medium text-gray-700">Catatan</label>
                         <textarea
                             value={formData.note || ''}
                             onChange={(e) => handleChange('note', e.target.value)}
@@ -399,13 +399,13 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                             onClick={() => setIsFormOpen(false)}
                             className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
                         >
-                            Cancel
+                            Batal
                         </button>
                         <button
                             type="submit"
                             className="rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
                         >
-                            Update
+                            Simpan
                         </button>
                     </div>
                 </FormModal>
