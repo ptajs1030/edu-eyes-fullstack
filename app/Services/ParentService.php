@@ -30,6 +30,20 @@ class ParentService
 
     }
 
+    public function setNotificationKey($notification_key){
+        $user = auth()->user();
+        if (!$user) {
+            return abort(404, 'Pengguna tidak ditemukan');
+        }
+
+        $user->notification_key = $notification_key;
+        $user->save();
+
+        return [
+            'message' => 'Notification key berhasil disimpan',
+        ];
+    }
+
     public function todayAttendance($student){
         $attendance = ShiftingAttendance::where('student_id', $student->id)
         ->where('submit_date', Carbon::now('Asia/Jakarta')->format('Y-m-d'))
