@@ -13,6 +13,7 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Api\QRCodeController;
+use App\Http\Controllers\StudentAttendanceController;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Models\Student;
 
@@ -42,6 +43,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('history', [ClassroomController::class, 'history'])->name('classrooms.history');
     });
     Route::resource('students', StudentController::class);
+    Route::prefix('students/{student}')->group(function () {
+        Route::get('attendance', [StudentAttendanceController::class, 'showAttendanceHistory'])->name('students.attendance');
+    });
     Route::get('/students/{student}/qrcode-preview', function (Student $student) {
         return QrCode::size(200)->generate($student->uuid); // returns SVG as raw HTML
     })->name('student.qrcode.preview');

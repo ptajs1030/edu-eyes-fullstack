@@ -3,7 +3,7 @@ import Pagination from '@/components/ui/pagination';
 import Table from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 import StudentFormModal from './form';
@@ -142,7 +142,6 @@ export default function StudentIndex() {
         }
     };
 
-
     const tableHeaders = [
         { key: 'full_name', label: 'Name', sortable: true },
         { key: 'parent.full_name', label: 'Parent Name', sortable: false },
@@ -182,7 +181,7 @@ export default function StudentIndex() {
                         <button
                             disabled={selectedIds.length === 0}
                             onClick={handleBulkPrint}
-                            className="rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             Bulk Print Kartu Siswa
                         </button>
@@ -228,6 +227,12 @@ export default function StudentIndex() {
                                 >
                                     Edit
                                 </button>
+                                <Link
+                                    href={route('students.attendance', student.id)}
+                                    className="rounded bg-sky-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                                >
+                                    Detail
+                                </Link>
                                 <button
                                     onClick={() => setStudentToDelete(student)}
                                     className="rounded bg-red-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
@@ -306,15 +311,8 @@ export default function StudentIndex() {
                     title={`Kartu Pelajar - ${qrStudent?.full_name}`}
                     message={
                         <div className="flex flex-col items-center gap-4">
-                            <div
-                                dangerouslySetInnerHTML={{ __html: qrSvgHtml }}
-                                className="w-[200px] h-[200px]"
-                            />
-                            <a
-                                href={qrDownloadUrl}
-                                download
-                                className="mt-2 rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
-                            >
+                            <div dangerouslySetInnerHTML={{ __html: qrSvgHtml }} className="h-[200px] w-[200px]" />
+                            <a href={qrDownloadUrl} download className="mt-2 rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700">
                                 Download PDF
                             </a>
                         </div>
