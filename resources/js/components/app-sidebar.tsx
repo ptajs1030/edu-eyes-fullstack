@@ -25,7 +25,7 @@ const mainNavItems: NavItem[] = [
         icon: UserPen,
     },
     {
-        title: 'Students',
+        title: 'Siswa',
         href: '/students',
         icon: UserSearch,
     },
@@ -40,7 +40,7 @@ const mainNavItems: NavItem[] = [
         icon: School,
     },
     {
-        title: 'Subjects',
+        title: 'Mata Pelajaran',
         href: '/subjects',
         icon: BookText,
     },
@@ -50,12 +50,12 @@ const mainNavItems: NavItem[] = [
         icon: TimerReset,
     },
     {
-        title: 'Announcements',
+        title: 'Pengumuman',
         href: '/announcements',
         icon: BadgeInfo,
     },
     {
-        title: 'General Settings',
+        title: 'Pengaturan',
         href: '/school-settings',
         icon: Settings2,
     },
