@@ -41,7 +41,7 @@ interface Props {
 
 const breadcrumbs = (classroomName: string, classroomId: number): BreadcrumbItem[] => [
     {
-        title: 'Classrooms',
+        title: 'Kelas',
         href: '/classrooms',
     },
     {
@@ -49,7 +49,7 @@ const breadcrumbs = (classroomName: string, classroomId: number): BreadcrumbItem
         href: `/classrooms/${classroomId}`,
     },
     {
-        title: 'History',
+        title: 'Riwayat',
         href: '',
     },
 ];
@@ -73,18 +73,18 @@ export default function ClassroomHistory({ classroom, academicYears, selectedAca
 
     return (
         <AppLayout breadcrumbs={breadcrumbs(classroom.name, classroom.id)}>
-            <Head title={`Classroom History - ${classroom.name}`} />
+            <Head title={`Riwayat - ${classroom.name}`} />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
                 <div className="rounded-lg border p-4">
                     <h1 className="mb-6 text-2xl font-bold">Classroom History</h1>
                     <div className="grid w-2/5 grid-cols-1 gap-5 md:grid-cols-2">
                         <div>
-                            <p className="mb-1 text-sm font-medium text-gray-500">Class Name</p>
+                            <p className="mb-1 text-sm font-medium text-gray-500">Nama Kelas</p>
                             <p className="font-semibold">{classroom.name}</p>
                         </div>
                         <div>
-                            <p className="mb-1 text-sm font-medium text-gray-500">Class level</p>
+                            <p className="mb-1 text-sm font-medium text-gray-500">Level</p>
                             <p className="font-semibold">{classroom.level}</p>
                         </div>
                         <div>
@@ -92,7 +92,7 @@ export default function ClassroomHistory({ classroom, academicYears, selectedAca
                             <p className="font-semibold">{studentCount} students</p>
                         </div>
                         <div>
-                            <label className="mb-1 block text-sm font-medium text-gray-500">Academic Year</label>
+                            <label className="mb-1 block text-sm font-medium text-gray-500">Tahun Akademik</label>
                             <select
                                 value={selectedAcademicYear?.id || ''}
                                 onChange={handleYearChange}
@@ -109,15 +109,15 @@ export default function ClassroomHistory({ classroom, academicYears, selectedAca
                 </div>
 
                 <div className="rounded-lg border p-4">
-                    <h1 className="mb-6 text-2xl font-bold">Students</h1>
+                    <h1 className="mb-6 text-2xl font-bold">Siswa</h1>
                     <Table
                         headers={[
                             { key: 'no', label: 'No.', sortable: false },
-                            { key: 'full_name', label: 'Student Name', sortable: false },
-                            { key: 'age', label: 'Age', sortable: false },
-                            { key: 'parent', label: 'Parent Name', sortable: false },
-                            { key: 'phone', label: 'Parent Phone', sortable: false },
-                            { key: 'actions', label: 'Action', sortable: false },
+                            { key: 'full_name', label: 'Nama', sortable: false },
+                            { key: 'age', label: 'Usia', sortable: false },
+                            { key: 'parent', label: 'Nama Orang Tua', sortable: false },
+                            { key: 'phone', label: 'Telepon Orang Tua', sortable: false },
+                            { key: 'actions', label: 'Aksi', sortable: false },
                         ]}
                         data={students}
                         sortColumn={filters.sort ?? ''}

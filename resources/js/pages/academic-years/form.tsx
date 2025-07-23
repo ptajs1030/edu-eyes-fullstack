@@ -105,7 +105,7 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
             <FormModal
                 isOpen={isOpen}
                 onClose={closeModal}
-                title={academicYear ? 'Edit Academic Year' : 'Adding Academic Year'}
+                title={academicYear ? 'Edit Tahun Akademik' : 'Tambah Tahun Akademik'}
                 onSubmit={handleSubmit}
             >
                 <div className="mb-3 flex flex-wrap justify-between">
@@ -143,16 +143,16 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                 </div>
                 <div className="mb-3">
                     <label htmlFor="note" className="block text-sm font-medium text-gray-700">
-                        Notes (optional)
+                        Catatan (optional)
                     </label>
                     <textarea name="note" value={formData.note} onChange={handleChange} className="w-full rounded border p-2" />
                 </div>
                 <div className="flex justify-end">
                     <button type="button" onClick={closeModal} className="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:cursor-pointer">
-                        Cancel
+                        Batal
                     </button>
                     <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:cursor-pointer">
-                        {academicYear ? 'Update' : 'Create'}
+                        {academicYear ? 'Update' : 'Simpan'}
                     </button>
                 </div>
             </FormModal>
