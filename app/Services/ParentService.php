@@ -114,6 +114,9 @@ class ParentService
             'current_page' => $attendance->currentPage(),
             'last_page' => $attendance->lastPage(),
             'per_page' => $attendance->perPage(),
+            'present' => $attendance->where('status', 'present')->count(),
+            'absent' => $attendance->where('status', 'alpha')->count(),
+            'late' => $attendance->where('status', 'late')->count(),
             'attendances' => $attendancesWithDay,
         ];
     }
@@ -182,7 +185,7 @@ class ParentService
     public function getSubjectSchedule($student){
         $schedules=ClassSubjectSchedule::where('class_id', $student->class_id)->get();
         if ($schedules->isEmpty()) {
-            throw new SilentHttpException(204, 'Jadwal tidak ditemukan');
+            throw new SilentHttpException(404, 'Jadwal tidak ditemukan');
         }
         
         $scheduleWithRelations = [];
@@ -216,7 +219,7 @@ class ParentService
         }
         $schedules = $query->with('event')->paginate(10);
         if ($schedules->isEmpty()) {
-            throw new SilentHttpException(204, 'Kegiatan tidak ditemukan');
+            throw new SilentHttpException(404, 'Kegiatan tidak ditemukan');
         }
         
       $schedulesWithRelations = [];

@@ -33,22 +33,18 @@ class AttendanceService
 {
 
     public function todayAttendance(){
-        $in=ShiftingAttendance::where('clock_in_hour', '!=', null)
-            ->where('clock_out_hour', null)
-            ->where('submit_date', Carbon::now()->format('Y-m-d'))
+        $today = Carbon::now()->format('Y-m-d');
+        $attendances = ShiftingAttendance::where('submit_date', $today)
+            ->with('student', 'classroom')
             ->get();
-        $out=ShiftingAttendance::where('clock_in_hour', '!=', null)
-            ->where('clock_out_hour', '!=', null)
-            ->where('submit_date', Carbon::now()->format('Y-m-d'))
-            ->get();
-
-        if ($in->isEmpty() && $out->isEmpty()) {
+        if ($attendances->isEmpty()) {
             throw new SilentHttpException(404, 'Data Kosong');
         }
 
         return[
-            'in' => $in,
-            'out' => $out
+            'date' => $today,
+            'number_of_in' => $attendances->whereNull('clock_out_hour')->count(),
+            'number_of_out' => $attendances->whereNotNull('clock_out_hour')->count(),
         ];
     }
     public function shiftingAttendanceHistory($date, $class_id, $type = 'in', $search)
@@ -73,7 +69,7 @@ class AttendanceService
         $attendances = $query->with('classroom', 'student')->paginate(10);
         
         if ($attendances->isEmpty()) {
-            throw new SilentHttpException(204, "Data Kosong");
+            throw new SilentHttpException(404, "Data Kosong");
         }
         
         $attendancesWithClassroom = [];
@@ -202,7 +198,7 @@ class AttendanceService
         $attendances = $query->with('classroom', 'student')->paginate(10);
         
         if ($attendances->isEmpty()) {
-            throw new SilentHttpException(204, "Data Kosong");
+            throw new SilentHttpException(404, "Data Kosong");
         }
 
         $attendancesWithRelations=[];
@@ -237,7 +233,7 @@ class AttendanceService
         }
         $classrooms = $query->get();
         if ($classrooms->isEmpty()) {
-            throw new SilentHttpException(204, 'Kelas tidak ditemukan');
+            throw new SilentHttpException(404, 'Kelas tidak ditemukan');
         }
         return $classrooms;
         
@@ -256,7 +252,7 @@ class AttendanceService
         $schedules = $query->get();
 
         if ($schedules->isEmpty()) {
-            throw new SilentHttpException(204, 'Jadwal tidak ditemukan');
+            throw new SilentHttpException(404, 'Jadwal tidak ditemukan');
         }
         $subjectNames = $schedules->pluck('subject.name')->unique()->values();
 
@@ -272,6 +268,7 @@ class AttendanceService
 
         $classSchedule = ClassSubjectSchedule::where('class_id', $class_id)
             ->where('subject_id', $subject->id)
+            ->where('teacher_id', auth()->user()->id)
             ->first();
 
         if (!$classSchedule) {
@@ -279,7 +276,7 @@ class AttendanceService
         } 
         $attendances = Student::where('class_id', $classSchedule->class_id)->get();
         if ($attendances->isEmpty()) {
-            throw new SilentHttpException(204, 'Absensi tidak ditemukan');
+            throw new SilentHttpException(404, 'Absensi tidak ditemukan');
         }
         return $attendances;
     }
@@ -376,7 +373,7 @@ class AttendanceService
         }
         $events = $query->paginate(10);
         if ($events->isEmpty()) {
-            throw new SilentHttpException(204, 'Kegiatan tidak ditemukan');
+            throw new SilentHttpException(404, 'Kegiatan tidak ditemukan');
         }
         $eventsWithRelations = [];
         foreach ($events as $event) {
@@ -479,7 +476,7 @@ class AttendanceService
         $attendances = $query->with('event', 'student.classroom', 'academicYear')->paginate(10);
         
         if ($attendances->isEmpty()) {
-            throw new SilentHttpException(204, "Data Kosong");
+            throw new SilentHttpException(404, "Data Kosong");
         }
         
         $attendancesWithRelations=[];
