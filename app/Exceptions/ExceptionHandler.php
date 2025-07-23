@@ -18,6 +18,8 @@ class ExceptionHandler
                 return self::error(2001, 'Unauthorized.', 401);
             case NotFoundHttpException::class:
                 return self::error(2002, $exception->getMessage(), 404);
+            case SilentHttpException::class:
+                return self::error(2003, $exception->getMessage(), $exception->getStatusCode());
             case ValidationException::class:
                 return self::error(2002, $exception->getMessage(), 422, $exception->validator->errors());
             default:
