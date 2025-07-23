@@ -6,7 +6,7 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { format, parseISO } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 
 interface Student {
     id: number;
@@ -29,28 +29,20 @@ interface ShiftingAttendance {
         title: string;
     };
     shifting_name: string;
-    shifting_start_hour: string;
-    shifting_end_hour: string;
-    clock_in_hour?: string;
-    clock_out_hour?: string;
-    status: string;
-    minutes_of_late?: number;
-    note?: string;
-    day_off_reason?: string;
     shifting_start_hour_formatted: string;
     shifting_end_hour_formatted: string;
     clock_in_hour_formatted?: string;
     clock_out_hour_formatted?: string;
+    status: string;
+    minutes_of_late?: number;
+    note?: string;
+    day_off_reason_id?: number;
+    day_off_reason?: string;
 }
 
 interface AcademicYear {
     id: number;
     title: string;
-}
-
-interface DayOffOption {
-    id: number;
-    description: string;
 }
 
 interface Props {
@@ -71,7 +63,7 @@ interface Props {
         sick_leave: number;
         day_off: number;
     };
-    dayOffOptions: DayOffOption[];
+    dayOffOptions: Array<{ id: number; description: string }>;
 }
 
 const breadcrumbs = (studentName: string, studentId: number): BreadcrumbItem[] => [
@@ -120,10 +112,18 @@ export default function AttendanceHistory({ student, attendances, academicYears,
     ];
 
     useEffect(() => {
-        if (flash?.success) {
-            toast.success(flash.success);
-        }
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
     }, [flash]);
+
+    const handleDayOffReasonChange = (id: string) => {
+        const selected = dayOffOptions.find((option) => option.id === parseInt(id));
+        setFormData((prev) => ({
+            ...prev,
+            day_off_reason: selected?.description,
+            day_off_reason_id: selected?.id,
+        }));
+    };
 
     const handleFilterChange = (key: string, value: any) => {
         router.get(
@@ -152,14 +152,20 @@ export default function AttendanceHistory({ student, attendances, academicYears,
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        router.patch(`/attendances/${selectedAttendance?.id}`, formData, {
+        const payload = {
+            clock_in_hour: formData.clock_in_hour_formatted || null,
+            clock_out_hour: formData.clock_out_hour_formatted || null,
+            status: formData.status,
+            minutes_of_late: formData.minutes_of_late || null,
+            note: formData.note || null,
+            day_off_reason: formData.day_off_reason || null,
+        };
+
+        router.patch(route('students.attendance.shift.save', selectedAttendance?.id), payload, {
             preserveScroll: true,
             onSuccess: () => {
                 setIsFormOpen(false);
                 router.reload();
-            },
-            onError: (errors) => {
-                console.error('Error updating attendance:', errors);
             },
         });
     };
@@ -167,6 +173,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
     return (
         <AppLayout breadcrumbs={breadcrumbs(student.full_name, student.id)}>
             <Head title={`Riwayat Kehadiran - ${student.full_name}`} />
+            <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
                 {/* Student Info */}
@@ -315,7 +322,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                         <label className="block text-sm font-medium text-gray-700">Shift</label>
                         <input
                             type="text"
-                            value={`${selectedAttendance?.shifting_name} (${selectedAttendance?.shifting_start_hour} - ${selectedAttendance?.shifting_end_hour})`}
+                            value={`${selectedAttendance?.shifting_name} (${selectedAttendance?.shifting_start_hour_formatted} - ${selectedAttendance?.shifting_end_hour_formatted})`}
                             disabled
                             className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 p-2 shadow-sm"
                         />
@@ -326,7 +333,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                             <label className="block text-sm font-medium text-gray-700">Jam Masuk</label>
                             <input
                                 type="time"
-                                value={formData.clock_in_hour || ''}
+                                value={formData.clock_in_hour_formatted || ''}
                                 onChange={(e) => handleChange('clock_in_hour', e.target.value)}
                                 className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                             />
@@ -335,7 +342,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                             <label className="block text-sm font-medium text-gray-700">Jam Pulang</label>
                             <input
                                 type="time"
-                                value={formData.clock_out_hour || ''}
+                                value={formData.clock_out_hour_formatted || ''}
                                 onChange={(e) => handleChange('clock_out_hour', e.target.value)}
                                 className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                             />
@@ -361,13 +368,15 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700">Alasan Izin</label>
                             <SearchableSelect
-                                value={formData.day_off_reason}
-                                onChange={(value) => handleChange('day_off_reason', value)}
+                                value={formData.day_off_reason_id?.toString() || ''}
+                                onChange={handleDayOffReasonChange}
                                 placeholder="Pilih alasan..."
-                                options={dayOffOptions.map((option) => ({
-                                    value: option.id.toString(),
-                                    label: option.description,
+                                endpoint={route('dayOff.search')}
+                                initialOptions={dayOffOptions.map((option) => ({
+                                    id: option.id,
+                                    full_name: option.description,
                                 }))}
+                                showInitialOptions={true}
                             />
                         </div>
                     )}
@@ -397,13 +406,13 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                         <button
                             type="button"
                             onClick={() => setIsFormOpen(false)}
-                            className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                            className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
                         >
                             Batal
                         </button>
                         <button
                             type="submit"
-                            className="rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
+                            className="rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
                         >
                             Simpan
                         </button>

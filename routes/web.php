@@ -13,7 +13,9 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Api\QRCodeController;
+use App\Http\Controllers\CustomDayOffController;
 use App\Http\Controllers\StudentAttendanceController;
+use App\Models\CustomDayOff;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Models\Student;
 
@@ -25,6 +27,7 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/parents/search', [UserController::class, 'searchParents'])->name('parents.search');
     Route::get('/teachers/search', [UserController::class, 'searchTeachers'])->name('teachers.search');
     Route::get('/subjects/search', [SubjectController::class, 'searchSubject'])->name('subjects.search');
+    Route::get('/day-off/search', [CustomDayOffController::class, 'searchDayOff'])->name('dayOff.search');
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -45,6 +48,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('students', StudentController::class);
     Route::prefix('students/{student}')->group(function () {
         Route::get('attendance', [StudentAttendanceController::class, 'showAttendanceHistory'])->name('students.attendance');
+        Route::patch('attendance/shift', [StudentAttendanceController::class, 'updateAttendance'])->name('students.attendance.shift.save');
     });
     Route::get('/students/{student}/qrcode-preview', function (Student $student) {
         return QrCode::size(200)->generate($student->uuid); // returns SVG as raw HTML

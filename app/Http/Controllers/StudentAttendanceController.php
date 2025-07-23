@@ -8,23 +8,12 @@ use App\Models\AcademicYear;
 use App\Models\CustomDayOff;
 use App\Models\ShiftingAttendance;
 use App\Models\Student;
-use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class StudentAttendanceController extends Controller
 {
-    // private function formatTime($time)
-    // {
-    //     return Carbon::createFromFormat('H:i:s', $time)->format('H:i');
-    // }
-
-    private function formatTime(?string $time): ?string
-    {
-        return $time ? Carbon::parse($time)->format('H:i') : null;
-    }
-
-
     public function showAttendanceHistory($studentId, Request $request)
     {
         $student = Student::with(['classroom', 'classroom.mainTeacher'])->findOrFail($studentId);
@@ -72,7 +61,31 @@ class StudentAttendanceController extends Controller
                 'year' => (int)$year,
             ],
             'statistics' => $statistics,
-            'dayOffOptions' => CustomDayOff::limit(10)->pluck('description', 'id'),
+            'dayOffOptions' => CustomDayOff::limit(10)->get(['id', 'description'])->toArray(),
         ]);
+    }
+
+    public function updateAttendance(Request $request, $attendanceId)
+    {
+        try {
+
+            $attendance = ShiftingAttendance::findOrFail($attendanceId);
+
+            $validated = $request->validate([
+                'clock_in_hour' => 'nullable|date_format:H:i',
+                'clock_out_hour' => 'nullable|date_format:H:i|after:clock_in_hour',
+                // 'status' => 'required|in:' . implode(',', ShiftAttendanceStatus::getValues()),
+                'status' => 'required|in:present,present_in_tolerance,alpha,late,leave,sick_leave,day_off',
+                'minutes_of_late' => 'nullable|integer|min:0',
+                'note' => 'nullable|string|max:255',
+                'day_off_reason' => 'required_if:status,' . ShiftAttendanceStatus::DayOff->value . '|nullable|exists:custom_day_offs,description',
+            ]);
+
+            $attendance->update($validated);
+
+            return redirect()->back()->with('success', 'Attendance updated successfully');
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+        }
     }
 }
