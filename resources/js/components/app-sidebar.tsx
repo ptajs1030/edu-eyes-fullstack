@@ -13,20 +13,21 @@ const mainNavItems: NavItem[] = [
         href: '/dashboard',
         icon: LayoutGrid,
     },
-    {
-        title: 'Roles',
-        href: '/roles',
-        icon: UserCog,
-    },
+    //TODO hide temporarily
+    // {
+    //     title: 'Roles',
+    //     href: '/roles',
+    //     icon: UserCog,
+    // },
     {
         title: 'Users',
         href: '/users',
         icon: UserPen,
     },
     {
-        title: 'Announcements',
-        href: '/announcements',
-        icon: BadgeInfo,
+        title: 'Students',
+        href: '/students',
+        icon: UserSearch,
     },
     {
         title: 'Academic Years',
@@ -39,11 +40,6 @@ const mainNavItems: NavItem[] = [
         icon: School,
     },
     {
-        title: 'Students',
-        href: '/students',
-        icon: UserSearch,
-    },
-    {
         title: 'Subjects',
         href: '/subjects',
         icon: BookText,
@@ -54,7 +50,12 @@ const mainNavItems: NavItem[] = [
         icon: TimerReset,
     },
     {
-        title: 'School Settings',
+        title: 'Announcements',
+        href: '/announcements',
+        icon: BadgeInfo,
+    },
+    {
+        title: 'General Settings',
         href: '/school-settings',
         icon: Settings2,
     },

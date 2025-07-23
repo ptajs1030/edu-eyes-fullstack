@@ -74,16 +74,16 @@ export default function SettingIndex() {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'school-settngs.csv';
+        link.download = 'general-settngs.csv';
         link.click();
     };
 
     const handleSortChange = (column: string) => {
-        router.get(route('settings.index'), { sort: column, direction: filters.direction === 'asc' ? 'desc' : 'asc' }, { preserveState: true });
+        router.get(route('school-settings.index'), { sort: column, direction: filters.direction === 'asc' ? 'desc' : 'asc' }, { preserveState: true });
     };
 
     const tableHeaders = [
-        { key: 'key', label: 'Key', sortable: true },
+        { key: 'title', label: 'Pengaturan', sortable: true },
         { key: 'value', label: 'Value', sortable: false },
         { key: 'actions', label: 'Actions', sortable: false },
     ];
@@ -127,7 +127,7 @@ export default function SettingIndex() {
                             <td className="w-[10px] p-3 text-sm">
                                 <input type="checkbox" checked={selectedIds.includes(setting.id)} onChange={() => toggleSelect(setting.id)} />
                             </td>
-                            <td className="p-3 text-sm">{setting.key}</td>
+                            <td className="p-3 text-sm">{setting.title}</td>
                             <td className="p-3 text-sm">{setting.value}</td>
                             <td className="flex gap-2 p-3">
                                 <button

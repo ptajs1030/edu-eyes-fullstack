@@ -12,7 +12,8 @@ class SchoolSettingController extends Controller
     public function index(Request $request): Response
     {
         $settings = Setting::query()
-            ->when($request->search, fn($q) => $q->where('key', 'like', "%{$request->search}%"))
+            ->where('key', 'not like', 'school\_%') // exclude school_ prefix
+            ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
             ->orderBy($request->sort ?? 'created_at', $request->direction ?? 'desc')
             ->paginate(10)
             ->withQueryString();
