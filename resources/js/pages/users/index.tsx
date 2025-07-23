@@ -48,7 +48,7 @@ type Link = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Users',
+        title: 'Pengguna',
         href: '/users',
     },
 ];
@@ -153,7 +153,7 @@ export default function UserIndex() {
                         onClick={() => openForm(null)}
                         className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
-                        Add User
+                        Tambah Pengguna
                     </button>
                 </div>
 
