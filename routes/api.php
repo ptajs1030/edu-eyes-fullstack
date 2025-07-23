@@ -86,6 +86,7 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
             Route::get('/', 'profile');
             Route::post('/change-password', 'changePassword');
         });
+        Route::post('/set-notification-key', 'setNotificationKey');
         Route::get('/announcements/{id?}', 'getAnnouncements');
         Route::get('/subject-schedule', 'getSubjectSchedule');
         Route::get('/event-schedule', 'getEventSchedule');
