@@ -20,7 +20,7 @@ const mainNavItems: NavItem[] = [
     //     icon: UserCog,
     // },
     {
-        title: 'Users',
+        title: 'Pengguna',
         href: '/users',
         icon: UserPen,
     },
@@ -30,12 +30,12 @@ const mainNavItems: NavItem[] = [
         icon: UserSearch,
     },
     {
-        title: 'Academic Years',
+        title: 'Tahun Akademik',
         href: '/academic-years',
         icon: GraduationCap,
     },
     {
-        title: 'Classrooms',
+        title: 'Kelas',
         href: '/classrooms',
         icon: School,
     },

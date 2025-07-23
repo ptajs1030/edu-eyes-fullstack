@@ -19,7 +19,7 @@ class ForgotPasswordService
         );
 
         return [
-            'message' => 'Password reset link sent to your email address.',
+            'message' => 'Link reset password telah dikirim ke alamat email Anda.',
         ];
     }
 }

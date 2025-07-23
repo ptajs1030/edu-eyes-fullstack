@@ -36,7 +36,7 @@ type Link = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Classrooms',
+        title: 'Kelas',
         href: '/classrooms',
     },
 ];
@@ -103,15 +103,15 @@ export default function ClassroomIndex() {
     };
 
     const tableHeaders = [
-        { key: 'name', label: 'Class Name', sortable: true },
+        { key: 'name', label: 'Nama', sortable: true },
         { key: 'level', label: 'Level', sortable: true },
         { key: 'main_teacher', label: 'Main Teacher', sortable: false },
-        { key: 'actions', label: 'Actions', sortable: false },
+        { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Classrooms" />
+            <Head title="Kelas" />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
@@ -174,19 +174,19 @@ export default function ClassroomIndex() {
                                     href={route('classrooms.schedule', classroom.id)}
                                     className="rounded bg-sky-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
-                                    Schedule
+                                    Jadwal
                                 </Link>
                                 <Link
                                     href={route('classrooms.history', classroom.id)}
                                     className="rounded bg-sky-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
-                                    History
+                                    Riwayat
                                 </Link>
                                 <button
                                     onClick={() => setClassroomToDelete(classroom)}
                                     className="rounded bg-red-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
-                                    Delete
+                                    Hapus
                                 </button>
                             </td>
                         </tr>
