@@ -22,12 +22,34 @@ use App\Models\Setting;
 use App\Models\Shifting;
 use App\Models\ShiftingAttendance;
 use App\Models\Student;
+use App\Models\Subject;
 use App\Models\SubjectAttendance;
 use Carbon\Carbon;
+use Illuminate\Console\Scheduling\Schedule;
 
 
 class AttendanceService
 {
+
+    public function todayAttendance(){
+        $in=ShiftingAttendance::where('clock_in_hour', '!=', null)
+            ->where('clock_out_hour', null)
+            ->where('submit_date', Carbon::now()->format('Y-m-d'))
+            ->get();
+        $out=ShiftingAttendance::where('clock_in_hour', '!=', null)
+            ->where('clock_out_hour', '!=', null)
+            ->where('submit_date', Carbon::now()->format('Y-m-d'))
+            ->get();
+
+        if ($in->isEmpty() && $out->isEmpty()) {
+            abort(204, 'Data Kosong');
+        }
+
+        return[
+            'in' => $in,
+            'out' => $out
+        ];
+    }
     public function shiftingAttendanceHistory($date, $class_id, $type = 'in', $search)
     {
         $query=ShiftingAttendance::query();
@@ -240,45 +262,71 @@ class AttendanceService
         return $subjectNames;
     }
     public function getSubjectAttendance($class_id, $subject){
-        $attendances=SubjectAttendance::where('class_id', $class_id)->where('subject_name', $subject)->where('submit_date', Carbon::now()->format('Y-m-d'))->with('classroom', 'student', 'academicYear')->get();
+        $subject = Subject::where('name', $subject)->first();
+    
+        if (!$subject) {
+            abort(404, 'Mata pelajaran tidak ditemukan');
+        }
+
+
+        $classSchedule = ClassSubjectSchedule::where('class_id', $class_id)
+            ->where('subject_id', $subject->id)
+            ->first();
+
+        if (!$classSchedule) {
+            abort(404, 'Jadwal pelajaran tidak ditemukan untuk kelas ini');
+        } 
+        $attendances = Student::where('class_id', $classSchedule->class_id)->get();
         if ($attendances->isEmpty()) {
             abort(204, 'Absensi tidak ditemukan');
         }
-        $attendancesWithRelations=[];
-        foreach ($attendances as $attendance) {
-            $attendancesWithRelations[]=[
-                'id' => $attendance->id,
-                'student' => optional($attendance->student)->full_name,
-                'classroom' => optional($attendance->classroom)->name,
-                'academic_year'=> optional($attendance->academicYear)->title,
-                'subject_name' => $attendance->subject_name,
-                'subject_start_hour' => $attendance->subject_start_hour,
-                'subject_end_hour' => $attendance->subject_end_hour,
-                'submit_date' => $attendance->submit_date,
-                'submit_hour'=> $attendance->submit_hour,
-                'status' => $attendance->status,
-                'note'=>$attendance->note,
-            ];
-        }
-        return $attendancesWithRelations;
+        return $attendances;
     }
 
     public function subjectAttendance(SubjectAttendanceData $data){ 
-        $attendances=SubjectAttendance::whereIn('id', $data->getAttendanceIdList())->where('submit_date', Carbon::now()->format('Y-m-d'))->with('classroom')->get();
-        
-        foreach ($attendances as $attendance) {
-            if($attendance->classroom->main_teacher_id != auth()->user()->id){
-                abort(403, 'Anda tidak ditugaskan untuk jadwal kelas ini.');
+        $subject = Subject::where('name', $data->getSubjectName())->firstOrFail();
+        $allStudents = Student::where('class_id', $data->getClassId())->get();
+  
+        $schedule = ClassSubjectSchedule::where('class_id', $data->getClassId())
+        ->where('subject_id', $subject->id)
+        ->firstOrFail();
+
+        $presentIds = $data->getAttendanceIdList();
+        $today = Carbon::now()->format('Y-m-d');
+
+        foreach ($allStudents as $student) {
+             $attendance = SubjectAttendance::where('student_id', $student->id)
+            ->where('submit_date', $today)
+            ->where('subject_name', $subject->name)
+            ->first();
+
+            $isPresent = in_array($student->id, $presentIds);
+            if ($attendance) {
+                if ($attendance->status === 'alpha' && $isPresent) {
+                $attendance->update([
+                    'status' => 'present',
+                    'submit_hour' => $data->getSubmitHour()
+                ]);
             }
-            $attendance->update([
-               'status'=>'present',
-               'submit_hour'=>Carbon::parse($data->getSubmitHour())->format('H:i:s') 
+             continue;
+            }
+            $status = in_array($student->id, $presentIds) ? 'present' : 'alpha';
+
+            SubjectAttendance::create([
+                'student_id' => $student->id,
+                'class_id' => $student->class_id,
+                'academic_year_id' => AcademicYear::where('status', true)->first()->id,
+                'subject_name' => $subject->name,
+                'subject_start_hour' => $schedule->start_hour,
+                'subject_end_hour' => $schedule->end_hour,
+                'submit_date' => $today,
+                'submit_hour' => $data->getSubmitHour(),
+                'status' => $status,
             ]);
         }
 
         return [
-            'message' => 'Attendance updated successfully',
-            'attendance' => $attendances,
+            'message' => 'Absensi berhasil dibuat',
         ];
     }
 
