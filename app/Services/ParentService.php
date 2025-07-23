@@ -5,6 +5,7 @@ namespace App\Services;
 use App\DTOs\ChangePasswordData;
 use App\Models\Announcement;
 use App\Models\ClassSubjectSchedule;
+use App\Models\EventAttendance;
 use App\Models\EventParticipant;
 use App\Models\ShiftingAttendance;
 use App\Models\SubjectAttendance;
@@ -237,5 +238,45 @@ class ParentService
             'attendances' => $schedulesWithRelations,
         ];
         
+    }
+
+    public function eventAttendanceHistory ($date, $student){
+        $query = EventAttendance::query();
+        $query->where('student_id', $student->id);
+
+        if ($date) {
+            $parsedDate = Carbon::parse($date)->format('Y-m-d');
+            $query->where('submit_date', $parsedDate);
+        }
+        $attendances = $query->with('student', 'event', 'academicYear')->paginate(10);
+        if ($attendances->isEmpty()) {
+            return [
+                abort(404,'Data Tidak Ditemukan'),
+            ];
+        }
+
+        $attendancesWithRelations = [];
+        foreach ($attendances->items() as $item) {
+            $attendancesWithRelations[] = [
+                'id' => $item->id,
+                'student' => optional($item->student)->full_name,
+                'event'=> optional($item->event)->name,
+                'academic_year'=> optional($item->academicYear)->title,
+                'submit_date' => $item->submit_date,
+                'clock_in_hour' => $item->clock_in_hour,
+                'clock_out_hour' => $item->clock_out_hour,
+                'status' => $item->status,
+                'minutes_late' => $item->minutes_late,
+                'note' => $item->note,
+            ];
+        };
+        return [
+            'number_of_attendances' => $attendances->total(),
+            'current_page' => $attendances->currentPage(),
+            'last_page' => $attendances->lastPage(),
+            'per_page' => $attendances->perPage(),
+            'attendances' => $attendancesWithRelations, 
+        ];
+
     }
 }

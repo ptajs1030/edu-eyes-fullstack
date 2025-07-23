@@ -9,11 +9,15 @@ class SubjectAttendanceData
      */
      private ?array $attendance_id_list;
     private ?string $submit_hour;
+    private ?string $subject_name;
+    private ?int $class_id;
 
     public function __construct(array $data)
     {
         $this->attendance_id_list = $data['attendance_id_list'] ?? null;
         $this->submit_hour = $data['submit_hour'] ?? null;
+        $this->subject_name = $data['subject_name'] ?? null;
+        $this->class_id = $data['class_id'] ?? null;
     }
 
     /**
@@ -27,5 +31,15 @@ class SubjectAttendanceData
     public function getSubmitHour(): ?string
     {
         return $this->submit_hour;
+    }
+
+    public function getSubjectName(): ?string
+    {
+        return $this->subject_name;
+    }
+
+    public function getClassId(): ?int
+    {
+        return $this->class_id;
     }
 }

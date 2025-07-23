@@ -60,6 +60,7 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
         Route::get('/history/out/', 'clockOutHistory');
         Route::post('/shifting', 'shiftingAttendance');
         Route::post('/edit/{id}', 'editAttendance');
+        Route::get('/today-attendance', 'todayAttendance');
 
         Route::prefix('subject')->group(function () {
             Route::get('/classroom', 'getClassroomByTeacher');
@@ -95,6 +96,7 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
             Route::prefix('history')->group(function () {
                 Route::get('/', 'attendanceHistory');
                 Route::get('/subject', 'subjectAttendanceHistory');
+                Route::get('/event', 'eventAttendanceHistory');
             });
         });
         
