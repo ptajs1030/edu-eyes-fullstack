@@ -3,8 +3,10 @@
 namespace App\Services;
 
 use App\DTOs\ChangePasswordData;
+use App\Exceptions\SilentHttpException;
 use App\Models\Announcement;
 use App\Models\ClassSubjectSchedule;
+use App\Models\EventAttendance;
 use App\Models\EventParticipant;
 use App\Models\ShiftingAttendance;
 use App\Models\SubjectAttendance;
@@ -17,9 +19,9 @@ class ParentService
         $user=auth()->user();
 
         if (!$user){
-            return abort(404, 'Pengguna tidak ditemukan');
+            return throw new SilentHttpException(404, 'Pengguna tidak ditemukan');
         }else if (!password_verify($data->getOldPassword(), $user->password)) {
-            return abort(400, 'Password lama salah');
+            return throw new SilentHttpException(400, 'Password lama salah');
         }
 
         $user->password = bcrypt($data->getNewPassword());
@@ -33,7 +35,7 @@ class ParentService
     public function setNotificationKey($notification_key){
         $user = auth()->user();
         if (!$user) {
-            return abort(404, 'Pengguna tidak ditemukan');
+            return throw new SilentHttpException(404, 'Pengguna tidak ditemukan');
         }
 
         $user->notification_key = $notification_key;
@@ -49,7 +51,7 @@ class ParentService
         ->where('submit_date', Carbon::now('Asia/Jakarta')->format('Y-m-d'))
         ->first();
         if (!$attendance){
-            return [abort(404,'Absensi tidak ditemukan')];
+            return [throw new SilentHttpException(404,'Absensi tidak ditemukan')];
         }
 
         $days = [
@@ -87,7 +89,7 @@ class ParentService
 
         if ($attendance->isEmpty()) {
             return [
-                abort(404,'Data Tidak Ditemukan'),
+                throw new SilentHttpException(404,'Data Tidak Ditemukan'),
             ];
         }
         $days = [
@@ -112,6 +114,9 @@ class ParentService
             'current_page' => $attendance->currentPage(),
             'last_page' => $attendance->lastPage(),
             'per_page' => $attendance->perPage(),
+            'present' => $attendance->where('status', 'present')->count(),
+            'absent' => $attendance->where('status', 'alpha')->count(),
+            'late' => $attendance->where('status', 'late')->count(),
             'attendances' => $attendancesWithDay,
         ];
     }
@@ -126,7 +131,7 @@ class ParentService
         $attendances = $query->with('classroom', 'student')->paginate(10);
         if ($attendances->isEmpty()) {
             return [
-                abort(404,'Data Tidak Ditemukan'),
+                throw new SilentHttpException(404,'Data Tidak Ditemukan'),
             ];
         }
 
@@ -159,7 +164,7 @@ class ParentService
         if ($id) {
             $announcement = Announcement::where('id', $id)->first();
             if (!$announcement) {
-                return abort(404,'Pengumuman tidak ditemukan');
+                return throw new SilentHttpException(404,'Pengumuman tidak ditemukan');
             }
             return $announcement;
         }else {
@@ -180,7 +185,7 @@ class ParentService
     public function getSubjectSchedule($student){
         $schedules=ClassSubjectSchedule::where('class_id', $student->class_id)->get();
         if ($schedules->isEmpty()) {
-            abort(204, 'Jadwal tidak ditemukan');
+            throw new SilentHttpException(404, 'Jadwal tidak ditemukan');
         }
         
         $scheduleWithRelations = [];
@@ -214,7 +219,7 @@ class ParentService
         }
         $schedules = $query->with('event')->paginate(10);
         if ($schedules->isEmpty()) {
-            abort(204, 'Kegiatan tidak ditemukan');
+            throw new SilentHttpException(404, 'Kegiatan tidak ditemukan');
         }
         
       $schedulesWithRelations = [];
@@ -237,5 +242,45 @@ class ParentService
             'attendances' => $schedulesWithRelations,
         ];
         
+    }
+
+    public function eventAttendanceHistory ($date, $student){
+        $query = EventAttendance::query();
+        $query->where('student_id', $student->id);
+
+        if ($date) {
+            $parsedDate = Carbon::parse($date)->format('Y-m-d');
+            $query->where('submit_date', $parsedDate);
+        }
+        $attendances = $query->with('student', 'event', 'academicYear')->paginate(10);
+        if ($attendances->isEmpty()) {
+            return [
+                throw new SilentHttpException(404,'Data Tidak Ditemukan'),
+            ];
+        }
+
+        $attendancesWithRelations = [];
+        foreach ($attendances->items() as $item) {
+            $attendancesWithRelations[] = [
+                'id' => $item->id,
+                'student' => optional($item->student)->full_name,
+                'event'=> optional($item->event)->name,
+                'academic_year'=> optional($item->academicYear)->title,
+                'submit_date' => $item->submit_date,
+                'clock_in_hour' => $item->clock_in_hour,
+                'clock_out_hour' => $item->clock_out_hour,
+                'status' => $item->status,
+                'minutes_late' => $item->minutes_late,
+                'note' => $item->note,
+            ];
+        };
+        return [
+            'number_of_attendances' => $attendances->total(),
+            'current_page' => $attendances->currentPage(),
+            'last_page' => $attendances->lastPage(),
+            'per_page' => $attendances->perPage(),
+            'attendances' => $attendancesWithRelations, 
+        ];
+
     }
 }

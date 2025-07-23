@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\AuthData;
+use App\Exceptions\SilentHttpException;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -11,26 +12,24 @@ use Illuminate\Support\Facades\Hash;
 class AuthService
 {
     /**
-     * Attempt to login a user with the given credentials.
+     * Handle an authentication attempt.
      *
      * @param  \App\DTOs\AuthData  $data
-     * @return \App\Models\User
-     *
-     * @throws \Illuminate\Auth\AuthenticationException
+     * @return array
      */
     public function login(AuthData $data)
     {
         $user = User::where('username', $data->getUsername())->first();
 
         if (!$user || !Hash::check($data->getPassword(), $user->password)) {
-            abort(400, 'Username atau password salah');
+           throw new SilentHttpException(400, 'Username atau password salah');
         }
 
         Auth::login($user);
         $token = $user->createToken('authToken')->plainTextToken;
 
         $response = [
-            'user' => $user->load('role'), 
+            'user' => $user->load('role'),
             'token' => $token,
         ];
 
@@ -49,7 +48,7 @@ class AuthService
             }
 
             if (!$student) {
-                abort(404, 'Tidak ada siswa yang ditemukan untuk orang tua ini');
+                throw new SilentHttpException(404, 'Tidak ada siswa yang ditemukan untuk orang tua ini.');
             }
 
             $response['student_id'] = $student->id;
@@ -59,19 +58,20 @@ class AuthService
     }
 
 
+
     /**
-     * Logout the current user.
+     * Logout user and delete all personal access token.
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return array
      *
-     * @throws \Illuminate\Auth\AuthenticationException
+     * @throws \App\Exceptions\SilentHttpException
      */
     public function logout()
     {
         $user = Auth::user();
 
         if (!$user) {
-            abort(401, 'Unauthorized');
+            throw new SilentHttpException(401, 'Unauthorized');
         }
 
         $user->tokens()->delete();
