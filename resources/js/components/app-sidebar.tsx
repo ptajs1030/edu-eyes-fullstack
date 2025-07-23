@@ -20,43 +20,16 @@ const mainNavItems: NavItem[] = [
     //     icon: UserCog,
     // },
     {
-<<<<<<< HEAD
-=======
-        title: 'Hak Akses',
-        href: '/roles',
-        icon: UserCog,
-    },
-    {
->>>>>>> 6354894504f68f4a9f063d6e1b7b4b2d7fcf11af
         title: 'Pengguna',
         href: '/users',
         icon: UserPen,
     },
     {
-<<<<<<< HEAD
-=======
-        title: 'Pengumuman',
-        href: '/announcements',
-        icon: BadgeInfo,
-    },
-    {
-        title: 'Tahun Akademik',
-        href: '/academic-years',
-        icon: GraduationCap,
-    },
-    {
-        title: 'Kelas',
-        href: '/classrooms',
-        icon: School,
-    },
-    {
->>>>>>> 6354894504f68f4a9f063d6e1b7b4b2d7fcf11af
         title: 'Siswa',
         href: '/students',
         icon: UserSearch,
     },
     {
-<<<<<<< HEAD
         title: 'Tahun Akademik',
         href: '/academic-years',
         icon: GraduationCap,
@@ -67,8 +40,6 @@ const mainNavItems: NavItem[] = [
         icon: School,
     },
     {
-=======
->>>>>>> 6354894504f68f4a9f063d6e1b7b4b2d7fcf11af
         title: 'Mata Pelajaran',
         href: '/subjects',
         icon: BookText,
@@ -79,14 +50,11 @@ const mainNavItems: NavItem[] = [
         icon: TimerReset,
     },
     {
-<<<<<<< HEAD
         title: 'Pengumuman',
         href: '/announcements',
         icon: BadgeInfo,
     },
     {
-=======
->>>>>>> 6354894504f68f4a9f063d6e1b7b4b2d7fcf11af
         title: 'Pengaturan',
         href: '/school-settings',
         icon: Settings2,
