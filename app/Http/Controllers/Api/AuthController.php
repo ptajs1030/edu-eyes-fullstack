@@ -11,12 +11,23 @@ class AuthController extends BaseApiController
 {
     public function __construct(protected AuthService $service){}
 
+    /**
+     * Handle an authentication attempt.
+     *
+     * @param  \App\Http\Requests\Api\AuthRequest  $data
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function login(AuthRequest $data){
         $response = $this->service->login($data->getDto());
 
         return $this->success($response);
     }
 
+    /**
+     * Logout the current user.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function logout(){
         return $this->success($this->service->logout());
     }
