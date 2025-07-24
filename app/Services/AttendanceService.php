@@ -258,13 +258,12 @@ class AttendanceService
 
         return $subjectNames;
     }
-    public function getSubjectAttendance($class_id, $subject){
+    public function getSubjectAttendance($class_id, $subject)
+    {
         $subject = Subject::where('name', $subject)->first();
-    
         if (!$subject) {
             throw new SilentHttpException(404, 'Mata pelajaran tidak ditemukan');
         }
-
 
         $classSchedule = ClassSubjectSchedule::where('class_id', $class_id)
             ->where('subject_id', $subject->id)
@@ -273,14 +272,38 @@ class AttendanceService
 
         if (!$classSchedule) {
             throw new SilentHttpException(404, 'Jadwal pelajaran tidak ditemukan untuk kelas ini');
-        } 
-        $attendances = Student::where('class_id', $classSchedule->class_id)->get();
-        if ($attendances->isEmpty()) {
-            throw new SilentHttpException(404, 'Absensi tidak ditemukan');
         }
-        return $attendances;
-    }
 
+        $students = Student::where('class_id', $classSchedule->class_id)
+            ->with('classroom', 'parent')
+            ->get();
+
+        if ($students->isEmpty()) {
+            throw new SilentHttpException(404, 'Tidak ada murid di kelas ini');
+        }
+
+        $today = Carbon::now()->format('Y-m-d');
+        $attendanceWithRelations = [];
+        foreach ($students as $student) {
+            $attendance = SubjectAttendance::where('student_id', $student->id)
+                ->where('class_id', $classSchedule->class_id)
+                ->where('subject_name', $subject->name)
+                ->where('submit_date', $today)
+                ->first();
+
+            $status = $attendance ? $attendance->status : 'alpha';
+
+            $attendanceWithRelations[] = [
+                'id' => $student->id,
+                'student_name' => $student->full_name,
+                'classroom' => optional($student->classroom)->name,
+                'uuid' => $student->uuid,
+                'status' => $status,
+            ];
+        }
+
+        return $attendanceWithRelations;
+    }
     public function subjectAttendance(SubjectAttendanceData $data){ 
         $subject = Subject::where('name', $data->getSubjectName())->firstOrFail();
         $allStudents = Student::where('class_id', $data->getClassId())->get();
@@ -289,7 +312,11 @@ class AttendanceService
             ->where('subject_id', $subject->id)
             ->firstOrFail();
 
-        $presentIds = $data->getAttendanceIdList();
+        if($schedule->teacher_id != auth()->user()->id){
+            throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengabsen mata pelajaran ini');
+        }
+
+        $presentIds = $data->getStudentIdList();
         $today = Carbon::now()->format('Y-m-d');
         $results = []; 
 
@@ -302,14 +329,17 @@ class AttendanceService
             $isPresent = in_array($student->id, $presentIds);
 
             if ($attendance) {
-                if ($attendance->status === 'alpha' && $isPresent) {
+                if ($attendance->status === 'alpha' && !$isPresent) {
+        
+                    $results[] = $student->full_name . ' tetap alpha';
+                } elseif ($attendance->status === 'alpha' && $isPresent) {
                     $attendance->update([
-                        'status' => 'present',
-                        'submit_hour' => $data->getSubmitHour()
+                    'status' => 'present',
+                    'submit_hour' => $data->getSubmitHour()
                     ]);
                     $results[] = $student->full_name . ' berhasil absen (status diupdate)';
                 } else {
-                    $results[] = $student->full_name . ' gagal absen (sudah absen)';
+                    $results[] = $student->full_name . ' sudah absen';
                 }
                 continue;
             }
@@ -325,10 +355,10 @@ class AttendanceService
                     'subject_start_hour' => $schedule->start_hour,
                     'subject_end_hour' => $schedule->end_hour,
                     'submit_date' => $today,
-                'submit_hour' => $data->getSubmitHour(),
+                    'submit_hour' => $data->getSubmitHour(),
                     'status' => $status,
                 ]);
-                $results[] = $student->full_name. ' berhasil absen';
+                $results[] = $student->full_name." ".$status;
             } catch (\Exception $e) {
                 $results[] = $student->full_name. ' gagal absen';
             }
@@ -341,15 +371,16 @@ class AttendanceService
     }
 
     public function editSubjectAttendance(EditSubjectAttendanceData $data, $id){
-        $attendance=SubjectAttendance::where('id', $id)->where('submit_date', Carbon::now()->format('Y-m-d'))->first();
+        $attendance=SubjectAttendance::where('id', $id)->where('submit_date', Carbon::now()->format('Y-m-d'))->with('classroom')->first();
         if (!$attendance) {
             throw new SilentHttpException(404, 'Absensi tidak ditemukan');
         }
-        if($attendance->submit_date != Carbon::now()->format('Y-m-d')){
+        $submit_date=Carbon::parse($attendance->submit_date)->format('Y-m-d');
+        if($submit_date != Carbon::now()->format('Y-m-d')){
             throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
         }
-        $teacher=$attendance->classroom->main_teacher;
-        if($teacher->id != auth()->user()->id){
+        $teacher=$attendance->classroom->main_teacher_id;
+        if($teacher != auth()->user()->id){
             throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
         }
         $attendance->update([

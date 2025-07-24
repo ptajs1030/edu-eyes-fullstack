@@ -8,7 +8,9 @@ use App\Models\Announcement;
 use App\Models\ClassSubjectSchedule;
 use App\Models\EventAttendance;
 use App\Models\EventParticipant;
+use App\Models\Setting;
 use App\Models\ShiftingAttendance;
+use App\Models\Student;
 use App\Models\SubjectAttendance;
 use Carbon\Carbon;
 use DB;
@@ -84,7 +86,10 @@ class ParentService
             $date = Carbon::parse($date) ;
             $query->whereYear('submit_date', $date->year)->whereMonth('submit_date', $date->month);
         }
-        
+        $allAttendance = $query->get();
+        $presentCount = $allAttendance->where('status', 'present')->count();
+        $absentCount = $allAttendance->where('status', 'alpha')->count();
+        $lateCount = $allAttendance->where('status', 'late')->count();
         $attendance = $query->paginate(10);
 
         if ($attendance->isEmpty()) {
@@ -114,9 +119,9 @@ class ParentService
             'current_page' => $attendance->currentPage(),
             'last_page' => $attendance->lastPage(),
             'per_page' => $attendance->perPage(),
-            'present' => $attendance->where('status', 'present')->count(),
-            'absent' => $attendance->where('status', 'alpha')->count(),
-            'late' => $attendance->where('status', 'late')->count(),
+            'present' => $presentCount,
+            'absent' => $absentCount,
+            'late' => $lateCount,
             'attendances' => $attendancesWithDay,
         ];
     }
@@ -282,5 +287,23 @@ class ParentService
             'attendances' => $attendancesWithRelations, 
         ];
 
+    }
+
+    public function studentIdCard($student){
+        $student = Student::find($student->id);
+        if (!$student) {
+            return throw new SilentHttpException(404, 'Siswa tidak ditemukan');
+        }
+        
+        $school = Setting::where('key', 'school_name')->value('value');
+        $schoolAddress = Setting::where('key', 'school_address')->value('value');
+        $schoolLogo = Setting::where('key', 'school_logo')->value('value');
+
+        return[
+            'school_name' => $school,
+            'school_address' => $schoolAddress,
+            'school_logo' => $schoolLogo,
+            'student' => $student,
+        ];
     }
 }

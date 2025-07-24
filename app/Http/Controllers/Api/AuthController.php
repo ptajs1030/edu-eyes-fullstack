@@ -31,4 +31,8 @@ class AuthController extends BaseApiController
     public function logout(){
         return $this->success($this->service->logout());
     }
+
+    public function helpCenter(){
+        return $this->success($this->service->helpCenter());
+    }
 }

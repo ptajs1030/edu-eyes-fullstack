@@ -17,6 +17,7 @@ class SettingSeeder extends Seeder
             ['key' => 'late_tolerance', 'title' => 'Toleransi Keterlambatan', 'value' => '15'],
             ['key' => 'school_name', 'title' => 'Nama Sekolah', 'value' => 'Sekolah Cemerlang'],
             ['key' => 'school_address', 'title' => 'Alamat Sekolah', 'value' => 'Jl. Baru No.123'],
+            ['key' => 'school_admin_phone', 'title' => 'Telepon Admin Sekolah', 'value' => '021-12345678'],
             ['key' => 'school_logo', 'title' => 'Logo Sekolah', 'value' => 'https://png.pngtree.com/png-vector/20230725/ourmid/pngtree-school-logo-design-template-vector-png-image_8668651.png'],
         ];
 
