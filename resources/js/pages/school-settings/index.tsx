@@ -79,12 +79,16 @@ export default function SettingIndex() {
     };
 
     const handleSortChange = (column: string) => {
-        router.get(route('school-settings.index'), { sort: column, direction: filters.direction === 'asc' ? 'desc' : 'asc' }, { preserveState: true });
+        router.get(
+            route('school-settings.index'),
+            { sort: column, direction: filters.direction === 'asc' ? 'desc' : 'asc' },
+            { preserveState: true },
+        );
     };
 
     const tableHeaders = [
-        { key: 'title', label: 'Pengaturan', sortable: true },
-        { key: 'value', label: 'Value', sortable: false },
+        { key: 'key', label: 'Pengaturan', sortable: true },
+        { key: 'value', label: 'Nilai', sortable: false },
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
@@ -99,7 +103,7 @@ export default function SettingIndex() {
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
-                            placeholder="Search settings by key..."
+                            placeholder="Cari pengaturan..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('school-settings.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
@@ -108,7 +112,7 @@ export default function SettingIndex() {
                             onClick={exportSelected}
                             className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                         >
-                            Export Selected
+                            Ekspor data yang dipilih
                         </button>
                     </div>
                 </div>
@@ -127,7 +131,7 @@ export default function SettingIndex() {
                             <td className="w-[10px] p-3 text-sm">
                                 <input type="checkbox" checked={selectedIds.includes(setting.id)} onChange={() => toggleSelect(setting.id)} />
                             </td>
-                            <td className="p-3 text-sm">{setting.title}</td>
+                            <td className="p-3 text-sm">{setting.key}</td>
                             <td className="p-3 text-sm">{setting.value}</td>
                             <td className="flex gap-2 p-3">
                                 <button
