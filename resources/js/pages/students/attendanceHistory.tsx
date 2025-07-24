@@ -21,49 +21,51 @@ interface Student {
     };
 }
 
-interface ShiftingAttendance {
+interface AcademicYear {
+    id: number;
+    title: string;
+}
+
+interface DayOffOption {
+    id: number;
+    description: string;
+}
+
+interface BaseAttendance {
     id: number;
     submit_date: string;
     academic_year_id: number;
     academic_year: {
         title: string;
     };
+    status: string;
+    note?: string;
+    day_off_reason?: string;
+}
+
+interface ShiftingAttendance extends BaseAttendance {
     shifting_name: string;
     shifting_start_hour_formatted: string;
     shifting_end_hour_formatted: string;
     clock_in_hour_formatted?: string;
     clock_out_hour_formatted?: string;
-    status: string;
     minutes_of_late?: number;
-    note?: string;
-    day_off_reason_id?: number;
-    day_off_reason?: string;
-}
-
-interface AcademicYear {
-    id: number;
-    title: string;
 }
 
 interface Props {
     student: Student;
-    attendances: ShiftingAttendance[];
     academicYears: AcademicYear[];
     filters: {
         academic_year_id: number;
         month: number;
         year: number;
     };
-    statistics: {
-        present: number;
-        present_in_tolerance: number;
-        alpha: number;
-        late: number;
-        leave: number;
-        sick_leave: number;
-        day_off: number;
-    };
-    dayOffOptions: Array<{ id: number; description: string }>;
+    dayOffOptions: DayOffOption[];
+    attendanceMode: 'per-shift' | 'per-subject';
+
+    // shift attendance data
+    shiftAttendances: ShiftingAttendance[];
+    shiftStatistics?: Record<string, number>;
 }
 
 const breadcrumbs = (studentName: string, studentId: number): BreadcrumbItem[] => [
@@ -80,13 +82,8 @@ const breadcrumbs = (studentName: string, studentId: number): BreadcrumbItem[] =
     },
 ];
 
-export default function AttendanceHistory({ student, attendances, academicYears, filters, statistics, dayOffOptions }: Props) {
-    const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
-    const [isFormOpen, setIsFormOpen] = useState(false);
-    const [selectedAttendance, setSelectedAttendance] = useState<ShiftingAttendance | null>(null);
-    const [formData, setFormData] = useState<Partial<ShiftingAttendance>>({});
-
-    const statusOptions = [
+const statusOptions = {
+    shift: [
         { value: 'present', label: 'Present' },
         { value: 'present_in_tolerance', label: 'Present in Tolerance' },
         { value: 'alpha', label: 'Alpha' },
@@ -94,27 +91,103 @@ export default function AttendanceHistory({ student, attendances, academicYears,
         { value: 'leave', label: 'Leave' },
         { value: 'sick_leave', label: 'Sick Leave' },
         { value: 'day_off', label: 'Day Off' },
-    ];
+    ],
+};
 
-    const months = [
-        { value: 1, label: 'Januari' },
-        { value: 2, label: 'Februari' },
-        { value: 3, label: 'Maret' },
-        { value: 4, label: 'April' },
-        { value: 5, label: 'Mei' },
-        { value: 6, label: 'Juni' },
-        { value: 7, label: 'Juli' },
-        { value: 8, label: 'Agustus' },
-        { value: 9, label: 'September' },
-        { value: 10, label: 'Oktober' },
-        { value: 11, label: 'November' },
-        { value: 12, label: 'Desember' },
-    ];
+const months = [
+    { value: 1, label: 'Januari' },
+    { value: 2, label: 'Februari' },
+    { value: 3, label: 'Maret' },
+    { value: 4, label: 'April' },
+    { value: 5, label: 'Mei' },
+    { value: 6, label: 'Juni' },
+    { value: 7, label: 'Juli' },
+    { value: 8, label: 'Agustus' },
+    { value: 9, label: 'September' },
+    { value: 10, label: 'Oktober' },
+    { value: 11, label: 'November' },
+    { value: 12, label: 'Desember' },
+];
+
+// ============ COMPONENTS ============
+const ShiftAttendanceTable = ({
+    shiftAttendances,
+    onEdit,
+}: {
+    shiftAttendances: ShiftingAttendance[];
+    onEdit: (attendance: ShiftingAttendance) => void;
+}) => (
+    <div className="overflow-x-auto rounded-lg border">
+        <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-100">
+                <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Tanggal</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Tahun Ajaran</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Shift</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Waktu</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Masuk</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Pulang</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Aksi</th>
+                </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-200 bg-white">
+                {shiftAttendances.map((attendance) => (
+                    <tr key={attendance.id}>
+                        <td className="px-4 py-3 text-sm whitespace-nowrap">
+                            {format(parseISO(attendance.submit_date), 'EEE, dd MMM yyyy', { locale: id })}
+                        </td>
+                        <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.academic_year?.title}</td>
+                        <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.shifting_name}</td>
+                        <td className="px-4 py-3 text-sm whitespace-nowrap">
+                            {attendance.shifting_start_hour_formatted} - {attendance.shifting_end_hour_formatted}
+                        </td>
+                        <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.clock_in_hour_formatted || '-'}</td>
+                        <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.clock_out_hour_formatted || '-'}</td>
+                        <td className="px-4 py-3 text-sm whitespace-nowrap capitalize">
+                            {attendance.status.replace(/_/g, ' ')}
+                            {attendance.day_off_reason && <div className="text-xs text-gray-500">({attendance.day_off_reason})</div>}
+                        </td>
+                        <td className="px-4 py-3 text-sm whitespace-nowrap">
+                            <button
+                                onClick={() => onEdit(attendance)}
+                                className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                            >
+                                Ubah
+                            </button>
+                        </td>
+                    </tr>
+                ))}
+                {shiftAttendances.length === 0 && (
+                    <tr>
+                        <td colSpan={8} className="px-4 py-4 text-center text-sm text-gray-500">
+                            Tidak ada data kehadiran untuk bulan ini
+                        </td>
+                    </tr>
+                )}
+            </tbody>
+        </table>
+    </div>
+);
+
+const EditShiftModal = ({
+    attendance,
+    dayOffOptions,
+    onClose,
+    onSubmit,
+}: {
+    attendance: ShiftingAttendance | null;
+    dayOffOptions: DayOffOption[];
+    onClose: () => void;
+    onSubmit: (formData: Partial<ShiftingAttendance>) => void;
+}) => {
+    const [formData, setFormData] = useState<Partial<ShiftingAttendance>>(attendance || {});
 
     useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.error) toast.error(flash.error);
-    }, [flash]);
+        if (attendance) {
+            setFormData({ ...attendance });
+        }
+    }, [attendance]);
 
     const handleDayOffReasonChange = (id: string) => {
         const selected = dayOffOptions.find((option) => option.id === parseInt(id));
@@ -124,6 +197,153 @@ export default function AttendanceHistory({ student, attendances, academicYears,
             day_off_reason_id: selected?.id,
         }));
     };
+
+    const handleChange = (field: keyof ShiftingAttendance, value: any) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSubmit(formData);
+    };
+
+    if (!attendance) return null;
+
+    return (
+        <FormModal isOpen={true} onClose={onClose} title="Ubah Data Kehadiran" onSubmit={handleSubmit}>
+            <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Tanggal</label>
+                <input
+                    type="text"
+                    value={attendance.submit_date ? format(parseISO(attendance.submit_date), 'dd MMM yyyy') : ''}
+                    disabled
+                    className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 p-2 shadow-sm"
+                />
+            </div>
+
+            <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Shift</label>
+                <input
+                    type="text"
+                    value={`${attendance.shifting_name} (${attendance.shifting_start_hour_formatted} - ${attendance.shifting_end_hour_formatted})`}
+                    disabled
+                    className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 p-2 shadow-sm"
+                />
+            </div>
+
+            <div className="mb-4 grid grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Jam Masuk</label>
+                    <input
+                        type="time"
+                        value={formData.clock_in_hour_formatted || ''}
+                        onChange={(e) => handleChange('clock_in_hour_formatted', e.target.value)}
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Jam Pulang</label>
+                    <input
+                        type="time"
+                        value={formData.clock_out_hour_formatted || ''}
+                        onChange={(e) => handleChange('clock_out_hour_formatted', e.target.value)}
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                    />
+                </div>
+            </div>
+
+            <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Status</label>
+                <select
+                    value={formData.status || ''}
+                    onChange={(e) => handleChange('status', e.target.value)}
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                >
+                    {statusOptions.shift.map((option) => (
+                        <option key={option.value} value={option.value}>
+                            {option.label}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            {formData.status === 'day_off' && (
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700">Alasan Izin</label>
+                    <SearchableSelect
+                        value={formData.day_off_reason_id?.toString() || ''}
+                        onChange={handleDayOffReasonChange}
+                        placeholder="Pilih alasan..."
+                        endpoint={route('dayOff.search')}
+                        initialOptions={dayOffOptions.map((option) => ({
+                            id: option.id,
+                            full_name: option.description,
+                        }))}
+                        showInitialOptions={true}
+                    />
+                </div>
+            )}
+
+            <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Menit Terlambat</label>
+                <input
+                    type="number"
+                    min="0"
+                    value={formData.minutes_of_late || ''}
+                    onChange={(e) => handleChange('minutes_of_late', parseInt(e.target.value) || 0)}
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                />
+            </div>
+
+            <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">Catatan</label>
+                <textarea
+                    value={formData.note || ''}
+                    onChange={(e) => handleChange('note', e.target.value)}
+                    rows={3}
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                ></textarea>
+            </div>
+
+            <div className="flex justify-end">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
+                >
+                    Batal
+                </button>
+                <button
+                    type="submit"
+                    className="rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
+                >
+                    Simpan
+                </button>
+            </div>
+        </FormModal>
+    );
+};
+
+// ============ MAIN COMPONENT ============
+export default function AttendanceHistory({
+    student,
+    academicYears,
+    filters,
+    dayOffOptions,
+    attendanceMode,
+    shiftAttendances = [],
+    shiftStatistics = {},
+}: Props) {
+    const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
+
+    // State for modals
+    const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
+    const [selectedShiftAttendance, setSelectedShiftAttendance] = useState<ShiftingAttendance | null>(null);
+
+    useEffect(() => {
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
+    }, [flash]);
 
     const handleFilterChange = (key: string, value: any) => {
         router.get(
@@ -136,22 +356,12 @@ export default function AttendanceHistory({ student, attendances, academicYears,
         );
     };
 
-    const handleEdit = (attendance: ShiftingAttendance) => {
-        setSelectedAttendance(attendance);
-        setFormData({
-            ...attendance,
-            day_off_reason: attendance.day_off_reason,
-        });
-        setIsFormOpen(true);
+    const handleEditShift = (attendance: ShiftingAttendance) => {
+        setSelectedShiftAttendance(attendance);
+        setIsShiftModalOpen(true);
     };
 
-    const handleChange = (field: keyof ShiftingAttendance, value: any) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
-    };
-
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-
+    const handleSubmitShift = (formData: Partial<ShiftingAttendance>) => {
         const payload = {
             clock_in_hour: formData.clock_in_hour_formatted || null,
             clock_out_hour: formData.clock_out_hour_formatted || null,
@@ -161,14 +371,19 @@ export default function AttendanceHistory({ student, attendances, academicYears,
             day_off_reason: formData.day_off_reason || null,
         };
 
-        router.patch(route('students.attendance.shift.save', selectedAttendance?.id), payload, {
+        router.patch(route('students.attendance.shift.save', selectedShiftAttendance?.id), payload, {
             preserveScroll: true,
             onSuccess: () => {
-                setIsFormOpen(false);
+                setIsShiftModalOpen(false);
                 router.reload();
             },
         });
     };
+
+    // const statistics = attendanceMode === 'per-shift' ? shiftStatistics : subjectStatistics;
+    const statistics = attendanceMode === 'per-shift' ? shiftStatistics : shiftStatistics;
+    console.log(shiftAttendances);
+    console.log(shiftStatistics);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs(student.full_name, student.id)}>
@@ -254,7 +469,17 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                 </div>
 
                 {/* Attendance Table */}
-                <div className="overflow-x-auto rounded-lg border">
+                <ShiftAttendanceTable shiftAttendances={shiftAttendances} onEdit={handleEditShift} />
+
+                {isShiftModalOpen && (
+                    <EditShiftModal
+                        attendance={selectedShiftAttendance}
+                        dayOffOptions={dayOffOptions}
+                        onClose={() => setIsShiftModalOpen(false)}
+                        onSubmit={handleSubmitShift}
+                    />
+                )}
+                {/* <div className="overflow-x-auto rounded-lg border">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-100">
                             <tr>
@@ -269,7 +494,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-200 bg-white">
-                            {attendances.map((attendance) => (
+                            {shiftAttendances.map((attendance) => (
                                 <tr key={attendance.id}>
                                     <td className="px-4 py-3 text-sm whitespace-nowrap">
                                         {format(parseISO(attendance.submit_date), 'EEE, dd MMM yyyy', { locale: id })}
@@ -295,7 +520,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                                     </td>
                                 </tr>
                             ))}
-                            {attendances.length === 0 && (
+                            {shiftAttendances.length === 0 && (
                                 <tr>
                                     <td colSpan={8} className="px-4 py-4 text-center text-sm text-gray-500">
                                         Tidak ada data kehadiran untuk bulan ini
@@ -304,10 +529,10 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                             )}
                         </tbody>
                     </table>
-                </div>
+                </div> */}
 
                 {/* Edit Attendance Modal */}
-                <FormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title="Ubah Data Kehadiran" onSubmit={handleSubmit}>
+                {/* <FormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} title="Ubah Data Kehadiran" onSubmit={handleSubmit}>
                     <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700">Tanggal</label>
                         <input
@@ -417,7 +642,7 @@ export default function AttendanceHistory({ student, attendances, academicYears,
                             Simpan
                         </button>
                     </div>
-                </FormModal>
+                </FormModal> */}
             </div>
         </AppLayout>
     );

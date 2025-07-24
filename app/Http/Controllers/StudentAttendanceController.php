@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\AcademicYearStatus;
+use App\Enums\AttendanceMode;
 use App\Enums\ShiftAttendanceStatus;
 use App\Models\AcademicYear;
 use App\Models\CustomDayOff;
@@ -19,31 +20,57 @@ class StudentAttendanceController extends Controller
         $student = Student::with(['classroom', 'classroom.mainTeacher'])->findOrFail($studentId);
         $academicYears = AcademicYear::orderBy('start_year', 'desc')->get();
 
-        // Default filter: tahun akademik aktif dan bulan saat ini
-        $activeAcademicYear = AcademicYear::where('status', AcademicYearStatus::Active->value)->first();
-        $academicYearId = $request->input('academic_year_id', $activeAcademicYear->id ?? null);
+        // get academic year with attendance mode
+        $academicYearId = $this->getAcademicYearId($request);
+        $selectedAcademicYear = AcademicYear::find($academicYearId);
+        $attendanceMode = $selectedAcademicYear->attendance_mode ?? null;
+
+        // date filters
         $month = $request->input('month', date('m'));
         $year = $request->input('year', date('Y'));
 
-        // Query attendance
-        $query = ShiftingAttendance::where('student_id', $studentId)
-            ->with('academicYear');
+        $responseData = [
+            'student' => $student,
+            'academicYears' => $academicYears,
+            'filters' => [
+                'academic_year_id' => $academicYearId,
+                'month' => (int)$month,
+                'year' => (int)$year,
+            ],
+            'dayOffOptions' => CustomDayOff::limit(10)->get(['id', 'description'])->toArray(),
+            'attendanceMode' => $attendanceMode,
+        ];
 
-        if ($academicYearId) {
-            $query->where('academic_year_id', $academicYearId);
+        if ($attendanceMode === AttendanceMode::PerShift->value) {
+            $responseData =  array_merge($responseData, $this->getShiftAttendanceData(
+                $studentId,
+                $academicYearId,
+                $year,
+                $month
+            ));
         }
+        // elseif ($attendanceMode === AttendanceMode::PerSubject->value) {
+        //     $responseData = array_merge($responseData, $this->getSubjectAttendanceData(
+        //         $studentId,
+        //         $academicYearId,
+        //         $year,
+        //         $month
+        //     ));
+        // }
 
-        $query->whereYear('submit_date', $year)
-            ->whereMonth('submit_date', $month)
-            ->orderBy('submit_date', 'desc');
+        // dd($responseData);
+        return Inertia::render('students/attendanceHistory', $responseData);
+    }
+    private function getAcademicYearId(Request $request): ?int
+    {
+        // default active academic year if not set
+        $activeAcademicYear = AcademicYear::where('status', AcademicYearStatus::Active->value)->first();
+        return $request->input('academic_year_id', $activeAcademicYear->id ?? null);
+    }
 
-        $attendances = $query->get();
-
-        // Hitung statistik
-        $statistics = [];
-        foreach (ShiftAttendanceStatus::cases() as $status) {
-            $statistics[$status->value] = 0;
-        }
+    private function calculateShiftStatistics($attendances)
+    {
+        $statistics = array_fill_keys(ShiftAttendanceStatus::getValues(), 0);
 
         foreach ($attendances as $attendance) {
             if (isset($statistics[$attendance->status])) {
@@ -51,18 +78,27 @@ class StudentAttendanceController extends Controller
             }
         }
 
-        return Inertia::render('students/attendanceHistory', [
-            'student' => $student,
-            'attendances' => $attendances,
-            'academicYears' => $academicYears,
-            'filters' => [
-                'academic_year_id' => $academicYearId,
-                'month' => (int)$month,
-                'year' => (int)$year,
-            ],
-            'statistics' => $statistics,
-            'dayOffOptions' => CustomDayOff::limit(10)->get(['id', 'description'])->toArray(),
-        ]);
+        return $statistics;
+    }
+
+    private function getShiftAttendanceData($studentId, $academicYearId, $year, $month)
+    {
+        $query = ShiftingAttendance::where('student_id', $studentId)
+            ->with('academicYear');
+
+        if ($academicYearId) {
+            $query->where('academic_year_id', $academicYearId);
+        }
+
+        $attendances = $query->whereYear('submit_date', $year)
+            ->whereMonth('submit_date', $month)
+            ->orderBy('submit_date', 'desc')
+            ->get();
+
+        return [
+            'shiftAttendances' => $attendances,
+            'shiftStatistics' => $this->calculateShiftStatistics($attendances),
+        ];
     }
 
     public function updateAttendance(Request $request, $attendanceId)
