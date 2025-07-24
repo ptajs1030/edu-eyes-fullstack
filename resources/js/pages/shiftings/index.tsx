@@ -100,7 +100,7 @@ export default function ShiftingIndex() {
 
     const tableHeaders = [
         { key: 'name', label: 'Nama', sortable: true },
-        { key: 'start_hour', label: 'Jam', sortable: true },
+        { key: 'start_hour', label: 'Waktu', sortable: true },
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
@@ -124,7 +124,7 @@ export default function ShiftingIndex() {
                             onClick={exportSelected}
                             className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                         >
-                            Export Selected
+                            Ekspor data yang dipilih
                         </button>
                     </div>
                     <button

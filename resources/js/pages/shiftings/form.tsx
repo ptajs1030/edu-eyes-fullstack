@@ -83,10 +83,10 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
     };
 
     return (
-        <FormModal isOpen={isOpen} onClose={onClose} title={shifting ? 'Edit Shifting' : 'Add New Shifting'} onSubmit={handleSubmit}>
+        <FormModal isOpen={isOpen} onClose={onClose} title={shifting ? 'Edit Shift' : 'Tambah Shift Baru'} onSubmit={handleSubmit}>
             <div className="mb-3">
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Name
+                    Nama Shift
                 </label>
                 <input
                     id="name"
@@ -101,7 +101,7 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
             <div className="mb-3 flex flex-row justify-between gap-4">
                 <div className="basis-1/2">
                     <label htmlFor="start_hour" className="block text-sm font-medium text-gray-700">
-                        Start Hour
+                        Waktu Mulai
                     </label>
                     <input
                         id="start_hour"
@@ -115,7 +115,7 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
                 </div>
                 <div className="basis-1/2">
                     <label htmlFor="end_hour" className="block text-sm font-medium text-gray-700">
-                        End Hour
+                        Waktu Selesai
                     </label>
                     <input
                         id="end_hour"
@@ -129,10 +129,17 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
                 </div>
             </div>
             <div className="flex justify-end">
-                <button type="button" onClick={onClose} className="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:cursor-pointer">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
+                >
                     Cancel
                 </button>
-                <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:cursor-pointer">
+                <button
+                    type="submit"
+                    className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
+                >
                     {shifting ? 'Update' : 'Create'}
                 </button>
             </div>
