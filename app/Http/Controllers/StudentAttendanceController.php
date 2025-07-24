@@ -158,4 +158,23 @@ class StudentAttendanceController extends Controller
             return redirect()->back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
         }
     }
+
+    public function updateSubjectAttendance(Request $request, $attendanceId)
+    {
+        try {
+            $attendance = SubjectAttendance::findOrFail($attendanceId);
+
+            $validated = $request->validate([
+                'submit_hour' => 'nullable|date_format:H:i',
+                'status' => 'required|in:' . implode(',', SubjectAttendanceStatus::getValues()),
+                'note' => 'nullable|string|max:255',
+            ]);
+
+            $attendance->update($validated);
+
+            return redirect()->back()->with('success', 'Data kehadiran mata pelajaran berhasil diperbarui');
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
+        }
+    }
 }

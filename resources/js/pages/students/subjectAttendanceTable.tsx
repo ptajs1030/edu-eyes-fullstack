@@ -167,7 +167,7 @@ const SubjectAttendanceTable = ({
                                                                         <td className="px-4 py-2 text-sm">
                                                                             <button
                                                                                 onClick={() => onEdit(att)}
-                                                                                className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:bg-blue-600"
+                                                                                className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer hover:bg-blue-600"
                                                                             >
                                                                                 Ubah
                                                                             </button>

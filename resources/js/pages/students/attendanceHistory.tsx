@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 import { months } from './constants';
 import EditShiftModal from './editShiftModal';
+import EditSubjectModal from './editSubjectModal';
 import ShiftAttendanceTable from './shiftAttendanceTable';
 import SubjectAttendanceTable from './subjectAttendanceTable';
 import { AcademicYear, DayOffOption, ShiftingAttendance, Student, SubjectAttendance } from './types';
@@ -222,6 +223,14 @@ export default function AttendanceHistory({
                         dayOffOptions={dayOffOptions}
                         onClose={() => setIsShiftModalOpen(false)}
                         onSubmit={handleSubmitShift}
+                    />
+                )}
+                {isSubjectModalOpen && (
+                    <EditSubjectModal
+                        attendance={selectedSubjectAttendance}
+                        dayOffOptions={dayOffOptions}
+                        onClose={() => setIsSubjectModalOpen(false)}
+                        onSubmit={handleSubmitSubject}
                     />
                 )}
             </div>

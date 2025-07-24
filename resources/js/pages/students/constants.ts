@@ -8,6 +8,14 @@ export const statusOptions = {
         { value: 'sick_leave', label: 'Sick Leave' },
         { value: 'day_off', label: 'Day Off' },
     ],
+    subject: [
+        { value: 'present', label: 'Hadir' },
+        { value: 'alpha', label: 'Alpha' },
+        { value: 'leave', label: 'Izin' },
+        { value: 'sick_leave', label: 'Sakit' },
+        { value: 'day_off', label: 'Libur' },
+        { value: 'late', label: 'Terlambat' },
+    ],
 };
 
 export const months = [
