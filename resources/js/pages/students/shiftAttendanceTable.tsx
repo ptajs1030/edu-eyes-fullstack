@@ -20,12 +20,13 @@ const ShiftAttendanceTable = ({
                     <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Masuk</th>
                     <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Pulang</th>
                     <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Catatan</th>
                     <th className="px-4 py-3 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">Aksi</th>
                 </tr>
             </thead>
             <tbody className="divide-y divide-gray-200 bg-white">
                 {shiftAttendances.map((attendance) => (
-                    <tr key={attendance.id}>
+                    <tr key={attendance.id} className="transition-colors hover:bg-gray-50">
                         <td className="px-4 py-3 text-sm whitespace-nowrap">
                             {format(parseISO(attendance.submit_date), 'EEE, dd MMM yyyy', { locale: id })}
                         </td>
@@ -40,6 +41,7 @@ const ShiftAttendanceTable = ({
                             {attendance.status.replace(/_/g, ' ')}
                             {attendance.day_off_reason && <div className="text-xs text-gray-500">({attendance.day_off_reason})</div>}
                         </td>
+                        <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.note || '-'}</td>
                         <td className="px-4 py-3 text-sm whitespace-nowrap">
                             <button
                                 onClick={() => onEdit(attendance)}
