@@ -115,7 +115,7 @@ export default function ShiftingIndex() {
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
-                            placeholder="Search shiftings by name..."
+                            placeholder="Cari shift..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('shiftings.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"

@@ -116,7 +116,7 @@ export default function SubjectIndex() {
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
-                            placeholder="Search subjects by name..."
+                            placeholder="Cari mata pelajaran..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('subjects.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"

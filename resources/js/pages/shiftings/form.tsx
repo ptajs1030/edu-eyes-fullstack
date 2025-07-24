@@ -94,7 +94,7 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
                     type="text"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                     required
                 />
             </div>
@@ -109,7 +109,7 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
                         type="time"
                         value={formData.start_hour}
                         onChange={handleChange}
-                        className="w-full rounded border p-2"
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                         required
                     />
                 </div>
@@ -123,7 +123,7 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
                         type="time"
                         value={formData.end_hour}
                         onChange={handleChange}
-                        className="w-full rounded border p-2"
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                         required
                     />
                 </div>

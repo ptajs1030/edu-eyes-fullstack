@@ -120,7 +120,7 @@ export default function AcademicYearIndex() {
                             type="text"
                             defaultValue={filters.search || ''}
                             onChange={handleSearchChange}
-                            placeholder="Search by title..."
+                            placeholder="Cari berdasarkan judul..."
                             className="w-64 rounded border px-3 py-1"
                         />
                         <button
