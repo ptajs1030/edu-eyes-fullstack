@@ -48,7 +48,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('students', StudentController::class);
     Route::prefix('students/{student}')->group(function () {
         Route::get('attendance', [StudentAttendanceController::class, 'showAttendanceHistory'])->name('students.attendance');
-        Route::patch('attendance/shift', [StudentAttendanceController::class, 'updateAttendance'])->name('students.attendance.shift.save');
+        Route::patch('attendance/shift', [StudentAttendanceController::class, 'updateShiftAttendance'])->name('students.attendance.shift.save');
     });
     Route::get('/students/{student}/qrcode-preview', function (Student $student) {
         return QrCode::size(200)->generate($student->uuid); // returns SVG as raw HTML

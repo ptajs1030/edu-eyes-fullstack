@@ -231,14 +231,8 @@ export default function StudentIndex() {
                                     href={route('students.attendance', student.id)}
                                     className="rounded bg-sky-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
-                                    Detail
+                                    Kehadiran
                                 </Link>
-                                <button
-                                    onClick={() => setStudentToDelete(student)}
-                                    className="rounded bg-red-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
-                                >
-                                    Delete
-                                </button>
                                 <button
                                     onClick={async () => {
                                         setQrStudent(student);
@@ -250,9 +244,15 @@ export default function StudentIndex() {
 
                                         setQrDownloadUrl(route('kartu-siswa', { student_id: student.id }));
                                     }}
-                                    className="rounded bg-purple-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                                    className="rounded bg-sky-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
                                     Kartu
+                                </button>
+                                <button
+                                    onClick={() => setStudentToDelete(student)}
+                                    className="rounded bg-red-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                                >
+                                    Delete
                                 </button>
                             </td>
                         </tr>

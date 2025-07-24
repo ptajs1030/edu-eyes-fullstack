@@ -101,7 +101,7 @@ class StudentAttendanceController extends Controller
         ];
     }
 
-    public function updateAttendance(Request $request, $attendanceId)
+    public function updateShiftAttendance(Request $request, $attendanceId)
     {
         try {
 
@@ -110,8 +110,7 @@ class StudentAttendanceController extends Controller
             $validated = $request->validate([
                 'clock_in_hour' => 'nullable|date_format:H:i',
                 'clock_out_hour' => 'nullable|date_format:H:i|after:clock_in_hour',
-                // 'status' => 'required|in:' . implode(',', ShiftAttendanceStatus::getValues()),
-                'status' => 'required|in:present,present_in_tolerance,alpha,late,leave,sick_leave,day_off',
+                'status' => 'required|in:' . implode(',', ShiftAttendanceStatus::getValues()),
                 'minutes_of_late' => 'nullable|integer|min:0',
                 'note' => 'nullable|string|max:255',
                 'day_off_reason' => 'required_if:status,' . ShiftAttendanceStatus::DayOff->value . '|nullable|exists:custom_day_offs,description',
