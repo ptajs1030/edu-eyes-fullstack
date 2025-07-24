@@ -126,7 +126,7 @@ export default function SearchableSelect({
 
     return (
         <div className="relative" ref={wrapperRef}>
-            <div className="flex items-center border rounded bg-white">
+            <div className="flex items-center">
                 <input
                     type="text"
                     value={inputValue}
@@ -134,7 +134,7 @@ export default function SearchableSelect({
                     placeholder={placeholder}
                     onFocus={handleFocus}
                     disabled={disabled}
-                    className={`flex-1 px-3 py-2 outline-none w-full ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    className={`flex-1 mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm ${disabled ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                 />
                 {selectedOption && !disabled && (
                     <button 

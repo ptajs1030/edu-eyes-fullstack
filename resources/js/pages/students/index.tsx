@@ -102,7 +102,7 @@ export default function StudentIndex() {
 
     const exportSelected = () => {
         const selectedData = students.data.filter((a) => selectedIds.includes(a.id));
-        const headers = `Full name,Classroom,Entry year,Gender,Religion,Status\n`;
+        const headers = `Nama,Kelas,Tahun masuk,Jenis kelamin,Agama,Status\n`;
         const csv = selectedData.map((a) => `${a.full_name},${a.classroom?.name},${a.entry_year},${a.gender},${a.religion},${a.status}`).join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
@@ -143,12 +143,12 @@ export default function StudentIndex() {
     };
 
     const tableHeaders = [
-        { key: 'full_name', label: 'Nama', sortable: true },
-        { key: 'parent.full_name', label: 'Nama Orang Tua', sortable: false },
+        { key: 'full_name', label: 'Nama Siswa', sortable: true },
+        { key: 'parent.full_name', label: 'Nama Orang Tua/wali', sortable: false },
         { key: 'classroom.name', label: 'Kelas', sortable: false },
         { key: 'nis', label: 'NIS', sortable: true },
         { key: 'status', label: 'Status', sortable: true },
-        { key: 'entry_year', label: 'Entry year', sortable: true },
+        { key: 'entry_year', label: 'Tahun Masuk', sortable: true },
         { key: 'gender', label: 'Gender', sortable: true },
         { key: 'religion', label: 'Agama', sortable: true },
         { key: 'date_of_birth', label: 'Tanggal Lahir', sortable: true },
@@ -167,21 +167,21 @@ export default function StudentIndex() {
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
-                            placeholder="Search students..."
+                            placeholder="Cari siswa..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('students.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
                         />
                         <button
                             onClick={exportSelected}
-                            className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                            className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-indigo-700"
                         >
-                            Export Selected
+                            Ekspor data yang dipilih
                         </button>
                         <button
                             disabled={selectedIds.length === 0}
                             onClick={handleBulkPrint}
-                            className="rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+                            className="rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             Bulk Print Kartu Siswa
                         </button>
@@ -252,7 +252,7 @@ export default function StudentIndex() {
                                     onClick={() => setStudentToDelete(student)}
                                     className="rounded bg-red-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
-                                    Delete
+                                    Hapus
                                 </button>
                             </td>
                         </tr>
