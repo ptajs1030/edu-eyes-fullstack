@@ -31,15 +31,15 @@ export interface Props {
 
 const breadcrumbs = (studentName: string, studentId: number): BreadcrumbItem[] => [
     {
-        title: 'Students',
+        title: 'Siswa',
         href: '/students',
     },
     {
         title: studentName,
-        href: `/students/${studentId}/history`,
+        href: `/students/${studentId}/attendance`,
     },
     {
-        title: 'Attendance History',
+        title: 'Histori Kehadiran',
     },
 ];
 

@@ -50,7 +50,7 @@ class ClassroomScheduleController extends Controller
             ->keyBy('day');
 
         $days = [];
-        $dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        $dayNames = ['Senin', 'Selasa', 'Rabu', 'Kamis', "Jum'at", 'Sabtu', 'Minggu'];
 
         for ($day = 1; $day <= 7; $day++) {
             $schedule = $existingSchedules->get($day);

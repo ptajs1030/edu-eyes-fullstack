@@ -134,7 +134,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                     type="text"
                     value={formData.full_name}
                     onChange={(e) => handleChange('full_name', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                     required
                 />
             </div>
@@ -148,7 +148,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                     type="text"
                     value={formData.username}
                     onChange={(e) => handleChange('username', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                     required
                 />
             </div>
@@ -162,7 +162,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                     type="tel"
                     value={formData.phone}
                     onChange={(e) => handleChange('phone', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                 />
             </div>
             <div className="mb-3">
@@ -175,7 +175,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                     type="email"
                     value={formData.email}
                     onChange={(e) => handleChange('email', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                 />
             </div>
             <div className="mb-3">
@@ -188,7 +188,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                     type="text"
                     value={formData.nip}
                     onChange={(e) => handleChange('nip', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                 />
             </div>
             <div className="mb-3">
@@ -201,7 +201,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                     type="text"
                     value={formData.position}
                     onChange={(e) => handleChange('position', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                 />
             </div>
             <div className="mb-3">
@@ -214,7 +214,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                     type="text"
                     value={formData.job}
                     onChange={(e) => handleChange('job', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                 />
             </div>
             <div className="mb-3">
@@ -225,7 +225,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                     name="address"
                     value={formData.address}
                     onChange={(e) => handleChange('address', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                     rows={3}
                 />
             </div>
@@ -238,7 +238,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                     name="role_id"
                     value={formData.role_id || ''}
                     onChange={(e) => handleChange('role_id', e.target.value ? parseInt(e.target.value) : null)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                     required
                 >
                     <option value="">Select Role</option>
@@ -258,7 +258,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                     name="status"
                     value={formData.status}
                     onChange={(e) => handleChange('status', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                     required
                 >
                     {statuses.map((status) => (
@@ -278,7 +278,7 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                     type="password"
                     value={formData.password}
                     onChange={(e) => handleChange('password', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                     placeholder={user ? 'Leave blank to keep current password' : ''}
                 />
             </div>
@@ -292,14 +292,21 @@ export default function UserFormModal({ isOpen, onClose, user, roles, statuses }
                     type="password"
                     value={formData.password_confirmation}
                     onChange={(e) => handleChange('password_confirmation', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                 />
             </div>
             <div className="flex justify-end">
-                <button type="button" onClick={onClose} className="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:cursor-pointer">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
+                >
                     Cancel
                 </button>
-                <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:cursor-pointer">
+                <button
+                    type="submit"
+                    className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
+                >
                     {user ? 'Update' : 'Create'}
                 </button>
             </div>
