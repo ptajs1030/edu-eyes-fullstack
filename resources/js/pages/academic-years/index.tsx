@@ -101,9 +101,9 @@ export default function AcademicYearIndex() {
     };
 
     const tableHeaders = [
-        { key: 'title', label: 'Title', sortable: true },
+        { key: 'title', label: 'Judul', sortable: true },
         { key: 'status', label: 'Status', sortable: true },
-        { key: 'attendance_mode', label: 'Attendance Mode', sortable: true },
+        { key: 'attendance_mode', label: 'Mode Kehadiran', sortable: true },
         { key: 'note', label: 'Catatan', sortable: true },
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
@@ -127,7 +127,7 @@ export default function AcademicYearIndex() {
                             onClick={exportSelected}
                             className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                         >
-                            Export Selected
+                            Ekspor data yang dipilih
                         </button>
                     </div>
                     <button
