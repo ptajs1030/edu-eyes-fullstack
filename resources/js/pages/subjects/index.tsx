@@ -77,7 +77,7 @@ export default function SubjectIndex() {
 
     const exportSelected = () => {
         const selectedData = subjects.data.filter((a) => selectedIds.includes(a.id));
-        const headers = `Name,Curriculum Year,Archived Status\n`;
+        const headers = `Nama,Nama Kurikulum,Status Arsip\n`;
         const csv = selectedData.map((a) => `${a.name},${a.curriculum_year},${a.is_archived ? 'Archived' : 'Active'}`).join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
@@ -101,7 +101,7 @@ export default function SubjectIndex() {
     const tableHeaders = [
         { key: 'name', label: 'Nama', sortable: true },
         { key: 'curriculum_year', label: 'Nama Kurikulum', sortable: true },
-        { key: 'is_archived', label: 'Archived Status', sortable: true },
+        { key: 'is_archived', label: 'Status Arsip', sortable: true },
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
@@ -125,7 +125,7 @@ export default function SubjectIndex() {
                             onClick={exportSelected}
                             className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                         >
-                            Export Selected
+                            Ekspor data yang dipilih
                         </button>
                     </div>
                     <button

@@ -99,7 +99,7 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
                     type="text"
                     value={formData.name}
                     onChange={handleChange}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                     required
                 />
             </div>
@@ -113,7 +113,7 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
                     type="text"
                     value={formData.curriculum_year}
                     onChange={handleChange}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                     required
                 />
             </div>
@@ -138,10 +138,17 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
                 </label>
             </div>
             <div className="flex justify-end">
-                <button type="button" onClick={onClose} className="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:cursor-pointer">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
+                >
                     Batal
                 </button>
-                <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:cursor-pointer">
+                <button
+                    type="submit"
+                    className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
+                >
                     {subject ? 'Update' : 'Simpan'}
                 </button>
             </div>
