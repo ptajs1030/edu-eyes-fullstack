@@ -72,27 +72,29 @@ const SubjectAttendanceTable = ({
                                                     {format(parseISO(date), 'EEE, dd MMM yyyy', { locale: id })}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm whitespace-nowrap text-gray-500">{academicYear}</td>
-                                                <td className="px-4 py-3 text-sm whitespace-nowrap">
-                                                    <div className="flex items-center gap-2">
-                                                        {summary.perfect ? (
-                                                            <div className="flex items-center text-green-600">
-                                                                <CheckCircle className="mr-1 h-5 w-5" />
+                                                <td className="px-4 py-3 text-sm">
+                                                    {summary.perfect ? (
+                                                        <div className="flex items-center gap-3 text-green-600">
+                                                            <CheckCircle className="h-5 w-5 shrink-0" />
+                                                            <div>
                                                                 Hadir sempurna ({summary.presentCount}/{summary.total})
                                                             </div>
-                                                        ) : summary.hasLate ? (
-                                                            <div className="flex items-center text-yellow-600">
-                                                                <TriangleAlert className="mr-1 h-5 w-5" />
+                                                        </div>
+                                                    ) : summary.hasLate ? (
+                                                        <div className="flex items-center gap-3 text-yellow-600">
+                                                            <TriangleAlert className="h-5 w-5 shrink-0" />
+                                                            <div>
                                                                 Terlambat di beberapa mata pelajaran ({summary.presentCount}/{summary.total})
                                                             </div>
-                                                        ) : summary.hasAbsent ? (
-                                                            <div className="flex items-center text-red-600">
-                                                                <CircleX className="mr-1 h-5 w-5" />
-                                                                Tidak hadir di beberapa mata pelajaran ({summary.presentCount}/{summary.total})
-                                                            </div>
-                                                        ) : (
-                                                            <span>Belum ada data kehadiran</span>
-                                                        )}
-                                                    </div>
+                                                        </div>
+                                                    ) : summary.hasAbsent ? (
+                                                        <div className="flex items-center gap-3 text-red-600">
+                                                            <CircleX className="h-5 w-5 shrink-0" />
+                                                            Tidak hadir di beberapa mata pelajaran ({summary.presentCount}/{summary.total})
+                                                        </div>
+                                                    ) : (
+                                                        <span>Belum ada data kehadiran</span>
+                                                    )}
                                                 </td>
                                                 <td className="px-4 py-3 text-sm whitespace-nowrap text-gray-500">
                                                     <Disclosure.Button className="flex items-center text-blue-600 hover:cursor-pointer hover:text-blue-800 focus:outline-none">
