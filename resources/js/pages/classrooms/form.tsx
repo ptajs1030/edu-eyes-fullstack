@@ -98,10 +98,10 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
     };
 
     return (
-        <FormModal isOpen={isOpen} onClose={onClose} title={classroom ? 'Edit Classroom' : 'Add New Classroom'} onSubmit={handleSubmit}>
+        <FormModal isOpen={isOpen} onClose={onClose} title={classroom ? 'Edit Kelas' : 'Tambahkan Kelas Baru'} onSubmit={handleSubmit}>
             <div className="mb-3">
                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Classroom Name
+                    Nama Kelas
                 </label>
                 <input
                     id="name"
@@ -109,7 +109,7 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
                     type="text"
                     value={formData.name}
                     onChange={(e) => handleChange('name', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                     required
                 />
             </div>
@@ -124,13 +124,13 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
                     min="1"
                     value={formData.level}
                     onChange={(e) => handleChange('level', parseInt(e.target.value) || 1)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                     required
                 />
             </div>
             <div className="mb-3">
                 <label htmlFor="main_teacher_id" className="block text-sm font-medium text-gray-700">
-                    Main Teacher
+                    Wali Murid
                 </label>
                 <SearchableSelect
                     value={formData.main_teacher_id}
@@ -143,10 +143,17 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
                 />
             </div>
             <div className="flex justify-end">
-                <button type="button" onClick={onClose} className="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:cursor-pointer">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
+                >
                     Cancel
                 </button>
-                <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:cursor-pointer">
+                <button
+                    type="submit"
+                    className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
+                >
                     {classroom ? 'Update' : 'Create'}
                 </button>
             </div>

@@ -1,7 +1,7 @@
 import Table from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 
 interface Classroom {
     id: number;
@@ -125,15 +125,12 @@ export default function ClassroomDetail({ classroom, academicYear, filters }: Pr
                                 <td className="p-3 text-sm">{student.parent?.full_name || '-'}</td>
                                 <td className="p-3 text-sm">{student.parent?.phone || '-'}</td>
                                 <td className="p-3">
-                                    <button
-                                        className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
-                                        onClick={() => {
-                                            // Akan diimplementasikan nanti
-                                            console.log('View student detail:', student.id);
-                                        }}
+                                    <Link
+                                        href={route('students.attendance', student.id)}
+                                        className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                     >
-                                        Student Detail
-                                    </button>
+                                        Detail Siswa
+                                    </Link>
                                 </td>
                             </tr>
                         )}
