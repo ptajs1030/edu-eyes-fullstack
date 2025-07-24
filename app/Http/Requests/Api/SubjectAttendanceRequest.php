@@ -23,7 +23,7 @@ class SubjectAttendanceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'attendance_id_list' => 'required|array',
+            'student_id_list' => 'required|array',
             'submit_hour' => 'required|date_format:H:i',
             'subject_name' => 'required|string|max:255',
             'class_id' => 'required|integer|exists:classrooms,id',
