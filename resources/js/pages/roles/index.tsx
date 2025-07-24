@@ -30,7 +30,7 @@ type Link = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Roles',
+        title: 'Hak Akses',
         href: '/roles',
     },
 ];
@@ -97,13 +97,13 @@ export default function RoleIndex() {
     };
 
     const tableHeaders = [
-        { key: 'name', label: 'Name', sortable: true },
-        { key: 'actions', label: 'Actions', sortable: false },
+        { key: 'name', label: 'Nama', sortable: true },
+        { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Roles" />
+            <Head title="Hak Akses" />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
@@ -123,12 +123,12 @@ export default function RoleIndex() {
                             Export Selected
                         </button>
                     </div>
-                    <button
-                        onClick={() => openForm(null)}
-                        className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
-                    >
-                        Add Role
-                    </button>
+                    {/*<button*/}
+                    {/*    onClick={() => openForm(null)}*/}
+                    {/*    className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"*/}
+                    {/*>*/}
+                    {/*    Add Role*/}
+                    {/*</button>*/}
                 </div>
 
                 <Table
@@ -152,12 +152,12 @@ export default function RoleIndex() {
                                 >
                                     Edit
                                 </button>
-                                <button
-                                    onClick={() => setRoleToDelete(role)}
-                                    className="rounded bg-red-500 px-3 py-1 font-medium text-white hover:cursor-pointer"
-                                >
-                                    Delete
-                                </button>
+                                {/*<button*/}
+                                {/*    onClick={() => setRoleToDelete(role)}*/}
+                                {/*    className="rounded bg-red-500 px-3 py-1 font-medium text-white hover:cursor-pointer"*/}
+                                {/*>*/}
+                                {/*    Delete*/}
+                                {/*</button>*/}
                             </td>
                         </tr>
                     )}

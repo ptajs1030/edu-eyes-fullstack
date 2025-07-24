@@ -46,7 +46,7 @@ type Link = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Students',
+        title: 'Siswa',
         href: '/students',
     },
 ];
@@ -143,22 +143,22 @@ export default function StudentIndex() {
     };
 
     const tableHeaders = [
-        { key: 'full_name', label: 'Name', sortable: true },
-        { key: 'parent.full_name', label: 'Parent Name', sortable: false },
-        { key: 'classroom.name', label: 'Classroom', sortable: false },
+        { key: 'full_name', label: 'Nama', sortable: true },
+        { key: 'parent.full_name', label: 'Nama Orang Tua', sortable: false },
+        { key: 'classroom.name', label: 'Kelas', sortable: false },
         { key: 'nis', label: 'NIS', sortable: true },
         { key: 'status', label: 'Status', sortable: true },
         { key: 'entry_year', label: 'Entry year', sortable: true },
         { key: 'gender', label: 'Gender', sortable: true },
-        { key: 'religion', label: 'Religion', sortable: true },
-        { key: 'date_of_birth', label: 'Day of birth', sortable: true },
-        { key: 'address', label: 'Address', sortable: false },
-        { key: 'actions', label: 'Actions', sortable: false },
+        { key: 'religion', label: 'Agama', sortable: true },
+        { key: 'date_of_birth', label: 'Tanggal Lahir', sortable: true },
+        { key: 'address', label: 'Alamat', sortable: false },
+        { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Students" />
+            <Head title="Siswa" />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
@@ -190,7 +190,7 @@ export default function StudentIndex() {
                         onClick={() => openForm(null)}
                         className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
-                        Add Student
+                        Tambah Siswa
                     </button>
                 </div>
 

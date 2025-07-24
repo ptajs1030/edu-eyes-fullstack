@@ -2,12 +2,11 @@
 
 namespace App\Http\Requests\Settings;
 
-use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class ProfileUpdateRequest extends FormRequest
+class SchoolUpdateRequest extends FormRequest
 {
     /**
      * Get the validation rules that apply to the request.
@@ -17,16 +16,9 @@ class ProfileUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'full_name' => ['required', 'string', 'max:255'],
-
-            'email' => [
-                'required',
-                'string',
-                'lowercase',
-                'email',
-                'max:255',
-                Rule::unique(User::class)->ignore($this->user()->id),
-            ],
+            'school_name' => ['required', 'string', 'max:255'],
+            'school_address' => ['required', 'string'],
+            'school_logo' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'], // max 2MB
         ];
     }
 }

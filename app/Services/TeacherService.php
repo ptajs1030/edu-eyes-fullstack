@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\DTOs\ChangePasswordData;
+use App\Exceptions\SilentHttpException;
 
 class TeacherService
 {
@@ -10,15 +11,16 @@ class TeacherService
         $user=auth()->user();
 
         if (!$user){
-            return abort(404, 'User not found');
-        }else if (!password_verify($data->getOldPassword(), $user->password)) {
-            return abort(400, 'Old Password is Incorrect');
+            throw new SilentHttpException(404, 'Pengguna tidak ditemukan');
+        }
+        if (!password_verify($data->getOldPassword(), $user->password)) {
+            throw new SilentHttpException(400, 'Password lama salah');
         }
 
         $user->password = bcrypt($data->getNewPassword());
         $user->save();
         return [
-            'message' => 'Password changed successfully',
+            'message' => 'Password berhasil diubah',
         ];
 
     }

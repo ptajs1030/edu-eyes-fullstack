@@ -24,6 +24,10 @@ class ParentController extends BaseApiController
         return $this->success($this->service->changePassword($data->getDto()));
     }
 
+    public function setNotificationKey(Request $request){
+        return $this->success($this->service->setNotificationKey($request->input('notification_key')));
+    }
+
     public function getStudents(?int $id = null){
         if ($id) {
             return $this->resource(
@@ -66,6 +70,19 @@ class ParentController extends BaseApiController
     public function getEventSchedule(Request $request, ){
         $student = $request->attributes->get('current_student');
         $date = $request->query('date');
-        return $this->success($this->service->getEventSchedule($student, $date));
+        $data= $this->service->getEventSchedule($student, $date);
+        return $this->success([
+            'number_of_schedules' => $data['number_of_schedules'],
+            'current_page' => $data['current_page'],
+            'last_page' => $data['last_page'],
+            'per_page' => $data['per_page'],
+            'attendances' => $data['attendances'],
+        ]);
+    }
+
+    public function eventAttendanceHistory(Request $request){
+        $student = $request->attributes->get('current_student');
+        $date = $request->query('date');
+        return $this->success($this->service->eventAttendanceHistory($date, $student));
     }
 }
