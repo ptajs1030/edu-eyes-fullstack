@@ -23,10 +23,6 @@ class ShiftingAttendance extends Model
         'day_off_reason',
     ];
 
-    protected $casts = [
-        'submit_date' => 'date',
-    ];
-
     protected $appends = [
         'shifting_start_hour_formatted',
         'shifting_end_hour_formatted',
@@ -34,6 +30,9 @@ class ShiftingAttendance extends Model
         'clock_out_hour_formatted',
     ];
 
+    protected $casts = [
+        'submit_date' => 'date',
+    ];
 
     public function student()
     {

@@ -6,7 +6,8 @@ import { toast, Toaster } from 'sonner';
 import { months } from './constants';
 import EditShiftModal from './editShiftModal';
 import ShiftAttendanceTable from './shiftAttendanceTable';
-import { AcademicYear, DayOffOption, ShiftingAttendance, Student } from './types';
+import SubjectAttendanceTable from './subjectAttendanceTable';
+import { AcademicYear, DayOffOption, ShiftingAttendance, Student, SubjectAttendance } from './types';
 
 export interface Props {
     student: Student;
@@ -22,6 +23,9 @@ export interface Props {
     // shift attendance data
     shiftAttendances: ShiftingAttendance[];
     shiftStatistics?: Record<string, number>;
+
+    subjectAttendances?: SubjectAttendance[];
+    subjectStatistics?: Record<string, number>;
 }
 
 const breadcrumbs = (studentName: string, studentId: number): BreadcrumbItem[] => [
@@ -46,12 +50,16 @@ export default function AttendanceHistory({
     attendanceMode,
     shiftAttendances = [],
     shiftStatistics = {},
+    subjectAttendances = [],
+    subjectStatistics = {},
 }: Props) {
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
 
     // State for modals
     const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
+    const [isSubjectModalOpen, setIsSubjectModalOpen] = useState(false);
     const [selectedShiftAttendance, setSelectedShiftAttendance] = useState<ShiftingAttendance | null>(null);
+    const [selectedSubjectAttendance, setSelectedSubjectAttendance] = useState<SubjectAttendance | null>(null);
 
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
@@ -74,6 +82,11 @@ export default function AttendanceHistory({
         setIsShiftModalOpen(true);
     };
 
+    const handleEditSubject = (attendance: SubjectAttendance) => {
+        setSelectedSubjectAttendance(attendance);
+        setIsSubjectModalOpen(true);
+    };
+
     const handleSubmitShift = (formData: Partial<ShiftingAttendance>) => {
         const payload = {
             clock_in_hour: formData.clock_in_hour_formatted || null,
@@ -93,10 +106,24 @@ export default function AttendanceHistory({
         });
     };
 
-    // const statistics = attendanceMode === 'per-shift' ? shiftStatistics : subjectStatistics;
-    const statistics = attendanceMode === 'per-shift' ? shiftStatistics : shiftStatistics;
-    console.log(shiftAttendances);
-    console.log(shiftStatistics);
+    const handleSubmitSubject = (formData: Partial<SubjectAttendance>) => {
+        const payload = {
+            submit_hour: formData.submit_hour_formatted || null,
+            status: formData.status,
+            note: formData.note || null,
+            day_off_reason: formData.day_off_reason || null,
+        };
+
+        router.patch(route('students.attendance.subject.save', selectedSubjectAttendance?.id), payload, {
+            preserveScroll: true,
+            onSuccess: () => {
+                setIsSubjectModalOpen(false);
+                router.reload();
+            },
+        });
+    };
+
+    const statistics = attendanceMode === 'per-shift' ? shiftStatistics : subjectStatistics;
 
     return (
         <AppLayout breadcrumbs={breadcrumbs(student.full_name, student.id)}>
@@ -182,8 +209,13 @@ export default function AttendanceHistory({
                 </div>
 
                 {/* Attendance Table */}
-                <ShiftAttendanceTable shiftAttendances={shiftAttendances} onEdit={handleEditShift} />
+                {attendanceMode === 'per-shift' ? (
+                    <ShiftAttendanceTable shiftAttendances={shiftAttendances} onEdit={handleEditShift} />
+                ) : (
+                    <SubjectAttendanceTable subjectAttendances={subjectAttendances} onEdit={handleEditSubject} />
+                )}
 
+                {/* Edit Modals */}
                 {isShiftModalOpen && (
                     <EditShiftModal
                         attendance={selectedShiftAttendance}
