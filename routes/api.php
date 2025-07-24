@@ -33,7 +33,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('auth')->controller(AuthController::class)->group(function (){
     Route::post('/login', 'login');
-
+    Route::get('/help-center', 'helpCenter');
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/logout', 'logout');
     });
@@ -100,8 +100,11 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
             });
         });
         
-        Route::controller(QRCodeController::class)->group(function () {
-            Route::get('/kartu-siswa', 'generate');
+        Route::prefix('kartu-siswa')->group(function () {
+            Route::get('/', 'studentIdCard');
+            Route::controller(QRCodeController::class)->group(function () {
+                Route::get('/download', 'generate');
+            });
         });
   
     });

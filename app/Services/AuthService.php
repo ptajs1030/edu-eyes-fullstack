@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\AuthData;
 use App\Exceptions\SilentHttpException;
+use App\Models\Setting;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -78,5 +79,14 @@ class AuthService
         return [
             'message' => 'Log-out berhasil',
         ];
+    }
+
+    public function helpCenter(){
+        $admin = Setting::where('key', 'school_admin_phone')->first();
+        if (!$admin) {
+            throw new SilentHttpException(404, 'Admin contact not found');
+        }
+        $whatsappLink = 'https://wa.me/' . $admin->value . '?text=Halo%20Admin%20Sekolah%20Cemerlang%2C%20saya%20membutuhkan%20bantuan.';
+        return $whatsappLink;
     }
 }
