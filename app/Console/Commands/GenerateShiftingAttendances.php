@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Enums\AcademicYearStatus;
+use App\Enums\AttendanceMode;
 use App\Enums\AttendanceStatus;
 use App\Models\AcademicYear;
 use App\Models\ClassShiftingSchedule;
@@ -36,7 +37,7 @@ class GenerateShiftingAttendances extends Command
         Log::info('Cron generate attendance running...');
         // 1. check attendance_mode == per-subject
         $academicYear = AcademicYear::where('status', AcademicYearStatus::Active->value)
-            ->where('attendance_mode', 'per-shift')
+            ->where('attendance_mode', AttendanceMode::PerShift->value)
             ->first();
 
         if (!$academicYear) {
