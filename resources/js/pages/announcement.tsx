@@ -11,7 +11,7 @@ type Announcement = {
     id: number;
     title: string;
     content: string;
-    picture?: string;
+    short_content: string;
 };
 
 type PaginatedResponse<T, L> = {

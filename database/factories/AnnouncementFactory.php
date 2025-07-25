@@ -18,7 +18,7 @@ class AnnouncementFactory extends Factory
         return [
             'title' => $this->faker->sentence(),
             'content' => $this->faker->text(),
-            'picture' => $this->faker->imageUrl(),
+            'short_content' => $this->faker->sentence(),
         ];
     }
 }
