@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Enums\AcademicYearStatus;
 use App\Enums\AttendanceMode;
-use App\Enums\AttendanceStatus;
 use App\Enums\ShiftAttendanceStatus;
 use App\Models\AcademicYear;
 use App\Models\Classroom;
