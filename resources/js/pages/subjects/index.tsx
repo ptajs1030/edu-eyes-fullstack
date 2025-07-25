@@ -77,7 +77,7 @@ export default function SubjectIndex() {
 
     const exportSelected = () => {
         const selectedData = subjects.data.filter((a) => selectedIds.includes(a.id));
-        const headers = `Name,Curriculum Year,Archived Status\n`;
+        const headers = `Nama,Nama Kurikulum,Status Arsip\n`;
         const csv = selectedData.map((a) => `${a.name},${a.curriculum_year},${a.is_archived ? 'Archived' : 'Active'}`).join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
@@ -101,7 +101,7 @@ export default function SubjectIndex() {
     const tableHeaders = [
         { key: 'name', label: 'Nama', sortable: true },
         { key: 'curriculum_year', label: 'Nama Kurikulum', sortable: true },
-        { key: 'is_archived', label: 'Archived Status', sortable: true },
+        { key: 'is_archived', label: 'Status Arsip', sortable: true },
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
@@ -116,7 +116,7 @@ export default function SubjectIndex() {
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
-                            placeholder="Search subjects by name..."
+                            placeholder="Cari mata pelajaran..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('subjects.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
@@ -125,7 +125,7 @@ export default function SubjectIndex() {
                             onClick={exportSelected}
                             className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                         >
-                            Export Selected
+                            Ekspor data yang dipilih
                         </button>
                     </div>
                     <button
@@ -154,9 +154,8 @@ export default function SubjectIndex() {
                             <td className="p-3 text-sm">{subject.curriculum_year}</td>
                             <td className="p-3 text-sm">
                                 <span
-                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                        subject.is_archived ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                                    }`}
+                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${subject.is_archived ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                                        }`}
                                 >
                                     {subject.is_archived ? 'Archived' : 'Active'}
                                 </span>

@@ -67,7 +67,7 @@ export default function SettingFormModal({ isOpen, onClose, setting }: Props) {
     };
 
     return (
-        <FormModal isOpen={isOpen} onClose={onClose} title="Edit Setting" onSubmit={handleSubmit}>
+        <FormModal isOpen={isOpen} onClose={onClose} title="Edit Pengaturan" onSubmit={handleSubmit}>
             <div className="mb-3">
                 <label htmlFor="key" className="block text-sm font-medium text-gray-700">
                     Key
@@ -89,10 +89,17 @@ export default function SettingFormModal({ isOpen, onClose, setting }: Props) {
                 />
             </div>
             <div className="flex justify-end">
-                <button type="button" onClick={onClose} className="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:cursor-pointer">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
+                >
                     Cancel
                 </button>
-                <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:cursor-pointer">
+                <button
+                    type="submit"
+                    className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
+                >
                     Update
                 </button>
             </div>

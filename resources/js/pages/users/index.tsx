@@ -137,7 +137,7 @@ export default function UserIndex() {
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
-                            placeholder="Search users..."
+                            placeholder="Cari pengguna..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('users.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
@@ -146,7 +146,7 @@ export default function UserIndex() {
                             onClick={exportSelected}
                             className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                         >
-                            Export Selected
+                            Ekspor yang dipilih
                         </button>
                     </div>
                     <button
@@ -188,7 +188,7 @@ export default function UserIndex() {
                                     onClick={() => setUserToDelete(user)}
                                     className="rounded bg-red-500 px-3 py-1 font-medium text-white hover:cursor-pointer"
                                 >
-                                    Delete
+                                    Hapus
                                 </button>
                             </td>
                         </tr>
@@ -203,9 +203,9 @@ export default function UserIndex() {
                     user={
                         selectedUser
                             ? {
-                                ...selectedUser,
-                                role_id: selectedUser.role?.id ?? null,
-                            }
+                                  ...selectedUser,
+                                  role_id: selectedUser.role?.id ?? null,
+                              }
                             : null
                     }
                     roles={roles}

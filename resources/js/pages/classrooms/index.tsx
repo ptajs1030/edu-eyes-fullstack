@@ -105,7 +105,7 @@ export default function ClassroomIndex() {
     const tableHeaders = [
         { key: 'name', label: 'Nama', sortable: true },
         { key: 'level', label: 'Level', sortable: true },
-        { key: 'main_teacher', label: 'Main Teacher', sortable: false },
+        { key: 'main_teacher', label: 'Wali Kelas', sortable: false },
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
@@ -120,7 +120,7 @@ export default function ClassroomIndex() {
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
-                            placeholder="Search classrooms..."
+                            placeholder="Cari kelas..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('classrooms.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
@@ -129,14 +129,14 @@ export default function ClassroomIndex() {
                             onClick={exportSelected}
                             className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                         >
-                            Export Selected
+                            Ekspor data yang dipilih
                         </button>
                     </div>
                     <button
                         onClick={() => openForm(null)}
                         className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
-                        Add Classroom
+                        Tambah Kelas
                     </button>
                 </div>
 

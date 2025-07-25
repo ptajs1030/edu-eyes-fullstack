@@ -79,12 +79,16 @@ export default function SettingIndex() {
     };
 
     const handleSortChange = (column: string) => {
-        router.get(route('school-settings.index'), { sort: column, direction: filters.direction === 'asc' ? 'desc' : 'asc' }, { preserveState: true });
+        router.get(
+            route('school-settings.index'),
+            { sort: column, direction: filters.direction === 'asc' ? 'desc' : 'asc' },
+            { preserveState: true },
+        );
     };
 
     const tableHeaders = [
         { key: 'title', label: 'Pengaturan', sortable: true },
-        { key: 'value', label: 'Value', sortable: false },
+        { key: 'value', label: 'Nilai', sortable: false },
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
@@ -99,7 +103,7 @@ export default function SettingIndex() {
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
-                            placeholder="Search settings by key..."
+                            placeholder="Cari pengaturan..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('school-settings.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
@@ -108,7 +112,7 @@ export default function SettingIndex() {
                             onClick={exportSelected}
                             className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                         >
-                            Export Selected
+                            Ekspor data yang dipilih
                         </button>
                     </div>
                 </div>

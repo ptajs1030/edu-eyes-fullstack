@@ -1,7 +1,7 @@
 import Table from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 
 interface Classroom {
     id: number;
@@ -77,7 +77,7 @@ export default function ClassroomHistory({ classroom, academicYears, selectedAca
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
                 <div className="rounded-lg border p-4">
-                    <h1 className="mb-6 text-2xl font-bold">Classroom History</h1>
+                    <h1 className="mb-6 text-2xl font-bold">Riwayat Kelas</h1>
                     <div className="grid w-2/5 grid-cols-1 gap-5 md:grid-cols-2">
                         <div>
                             <p className="mb-1 text-sm font-medium text-gray-500">Nama Kelas</p>
@@ -88,8 +88,8 @@ export default function ClassroomHistory({ classroom, academicYears, selectedAca
                             <p className="font-semibold">{classroom.level}</p>
                         </div>
                         <div>
-                            <p className="mb-1 text-sm font-medium text-gray-500">Number of Students</p>
-                            <p className="font-semibold">{studentCount} students</p>
+                            <p className="mb-1 text-sm font-medium text-gray-500">Jumlah Siswa</p>
+                            <p className="font-semibold">{studentCount} siswa</p>
                         </div>
                         <div>
                             <label className="mb-1 block text-sm font-medium text-gray-500">Tahun Akademik</label>
@@ -132,15 +132,12 @@ export default function ClassroomHistory({ classroom, academicYears, selectedAca
                                 <td className="p-3 text-sm">{student.parent?.full_name || '-'}</td>
                                 <td className="p-3 text-sm">{student.parent?.phone || '-'}</td>
                                 <td className="p-3">
-                                    <button
-                                        className="rounded bg-blue-500 px-3 py-1 text-sm text-white hover:cursor-pointer"
-                                        onClick={() => {
-                                            // Akan diimplementasikan nanti
-                                            console.log('View student detail:', student.id);
-                                        }}
+                                    <Link
+                                        href={route('students.attendance', student.id)}
+                                        className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                     >
-                                        Student Detail
-                                    </button>
+                                        Detail Siswa
+                                    </Link>
                                 </td>
                             </tr>
                         )}

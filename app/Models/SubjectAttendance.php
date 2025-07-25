@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -22,12 +23,15 @@ class SubjectAttendance extends Model
         'note'
     ];
 
+    protected $appends = [
+        'subject_start_hour_formatted',
+        'subject_end_hour_formatted',
+        'submit_hour_formatted',
+    ];
+
     protected $casts = [
         'submit_date' => 'date',
     ];
-
-    // not used timestamps
-    public $timestamps = false;
 
     public function student()
     {
@@ -42,5 +46,27 @@ class SubjectAttendance extends Model
     public function academicYear()
     {
         return $this->belongsTo(AcademicYear::class);
+    }
+
+    // Formatted time
+    public function getSubjectStartHourFormattedAttribute(): ?string
+    {
+        return $this->subject_start_hour
+            ? Carbon::parse($this->subject_start_hour)->format('H:i')
+            : null;
+    }
+
+    public function getSubjectEndHourFormattedAttribute(): ?string
+    {
+        return $this->subject_end_hour
+            ? Carbon::parse($this->subject_end_hour)->format('H:i')
+            : null;
+    }
+
+    public function getSubmitHourFormattedAttribute(): ?string
+    {
+        return $this->submit_hour
+            ? Carbon::parse($this->submit_hour)->format('H:i')
+            : null;
     }
 }
