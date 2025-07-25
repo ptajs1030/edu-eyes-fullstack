@@ -18,7 +18,7 @@ class AnnouncementResource extends JsonResource
             "id"=> $this->id,
             'title' => $this->title,
             'content' => $this->content,
-            'picture' => $this->picture,
+            'short_content' => $this->short_content,
         ];
     }
 }

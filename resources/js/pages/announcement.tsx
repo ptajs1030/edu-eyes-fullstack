@@ -11,7 +11,7 @@ type Announcement = {
     id: number;
     title: string;
     content: string;
-    picture?: string;
+    short_content: string;
 };
 
 type PaginatedResponse<T, L> = {
@@ -159,9 +159,9 @@ export default function Announcement() {
                                 />
                             </th>
                             {/*<th className="p-4 text-sm font-semibold">Picture</th>*/}
-                            <th className="p-4 text-sm font-semibold">Title</th>
-                            <th className="p-4 text-sm font-semibold">Content</th>
-                            <th className="p-4 text-sm font-semibold">Actions</th>
+                            <th className="p-4 text-sm font-semibold">Judul</th>
+                            <th className="p-4 text-sm font-semibold">Isi Pengumuman</th>
+                            <th className="p-4 text-sm font-semibold">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -183,7 +183,7 @@ export default function Announcement() {
                                     {/*    )}*/}
                                     {/*</td>*/}
                                     <td className="p-3">{announcement.title}</td>
-                                    <td className="p-3">{announcement.content}</td>
+                                    <td className="p-3">{announcement.short_content}</td>
                                     <td className="flex gap-2 p-3">
                                         <button
                                             onClick={() => openModal(announcement)}

@@ -161,8 +161,8 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                 {
                     subject_id: null,
                     teacher_id: null,
-                    start_hour: '08:00',
-                    end_hour: '09:00',
+                    start_hour: '',
+                    end_hour: '',
                     editable: true,
                 },
             ],
@@ -316,13 +316,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                         disabled={selectedTab === 0 ? isSavingShift : isSavingSubject}
                         className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-700 disabled:opacity-50"
                     >
-                        {selectedTab === 0
-                            ? isSavingShift
-                                ? 'Saving...'
-                                : 'Save Shift Schedule'
-                            : isSavingSubject
-                              ? 'Saving...'
-                              : 'Save Subject Schedule'}
+                        {isSavingShift || isSavingSubject ? 'Menyimpan...' : 'Simpan Jadwal'}
                     </button>
                 </div>
 
@@ -393,14 +387,14 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                         <div key={day} className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
                                             <div className="mb-4 flex items-center justify-between">
                                                 <h3 className="text-lg font-semibold text-gray-800">
-                                                    {['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'][day - 1]}
+                                                    {['Senin', 'Selasa', 'Rabu', 'Kamis', "Jum'at", 'Sabtu', 'Minggu'][day - 1]}
                                                 </h3>
                                                 <button
                                                     type="button"
                                                     onClick={() => handleAddSubjectSchedule(day)}
                                                     className="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-green-700"
                                                 >
-                                                    + Add Subject
+                                                    + Tambah
                                                 </button>
                                             </div>
 
@@ -413,39 +407,43 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                         <div key={index} className="relative rounded-md border border-gray-300 bg-gray-50 p-4">
                                                             <div className="grid grid-cols-1 gap-3 md:grid-cols-5">
                                                                 <div>
-                                                                    <label className="mb-1 block text-sm font-medium text-gray-700">Start Time</label>
+                                                                    <label className="mb-1 block text-sm font-medium text-gray-700">Jam Mulai</label>
                                                                     <input
                                                                         type="time"
                                                                         value={schedule.start_hour}
                                                                         onChange={(e) =>
                                                                             handleUpdateSubjectSchedule(day, index, 'start_hour', e.target.value)
                                                                         }
-                                                                        className={`w-full rounded-md border p-2 text-sm ${!isEditing && !isNew ? 'bg-gray-100' : 'bg-white'}`}
+                                                                        className={`mt-1 w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm ${!isEditing && !isNew ? 'bg-gray-100' : 'bg-white'}`}
                                                                         disabled={!isEditing && !isNew}
                                                                     />
                                                                 </div>
 
                                                                 <div>
-                                                                    <label className="mb-1 block text-sm font-medium text-gray-700">End Time</label>
+                                                                    <label className="mb-1 block text-sm font-medium text-gray-700">
+                                                                        Jam Selesai
+                                                                    </label>
                                                                     <input
                                                                         type="time"
                                                                         value={schedule.end_hour}
                                                                         onChange={(e) =>
                                                                             handleUpdateSubjectSchedule(day, index, 'end_hour', e.target.value)
                                                                         }
-                                                                        className={`w-full rounded-md border p-2 text-sm ${!isEditing && !isNew ? 'bg-gray-100' : 'bg-white'}`}
+                                                                        className={`mt-1 w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm ${!isEditing && !isNew ? 'bg-gray-100' : 'bg-white'}`}
                                                                         disabled={!isEditing && !isNew}
                                                                     />
                                                                 </div>
 
                                                                 <div>
-                                                                    <label className="mb-1 block text-sm font-medium text-gray-700">Subject</label>
+                                                                    <label className="mb-1 block text-sm font-medium text-gray-700">
+                                                                        Mata Pelajaran
+                                                                    </label>
                                                                     <SearchableSelect
                                                                         value={schedule.subject_id}
                                                                         onChange={(value) =>
                                                                             handleUpdateSubjectSchedule(day, index, 'subject_id', value)
                                                                         }
-                                                                        placeholder="Select subject..."
+                                                                        placeholder="Pilih mata pelajaran..."
                                                                         endpoint={route('subjects.search')}
                                                                         initialOption={
                                                                             schedule.subject_id
@@ -463,7 +461,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                                 </div>
 
                                                                 <div>
-                                                                    <label className="mb-1 block text-sm font-medium text-gray-700">Teacher</label>
+                                                                    <label className="mb-1 block text-sm font-medium text-gray-700">Pengajar</label>
                                                                     <SearchableSelect
                                                                         value={schedule.teacher_id}
                                                                         onChange={(value) =>
@@ -486,20 +484,20 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                                     />
                                                                 </div>
 
-                                                                <div className="flex h-full items-center justify-start space-x-2 pt-6 md:pt-0">
+                                                                <div className="mt-1 flex h-full items-center justify-start space-x-2 pt-6 md:pt-0">
                                                                     {isNew ? (
                                                                         <>
                                                                             <button
                                                                                 type="button"
                                                                                 onClick={() => handleRemoveSubjectSchedule(day, index)}
-                                                                                className="rounded-md bg-gray-400 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-gray-600"
+                                                                                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:cursor-pointer hover:bg-gray-50"
                                                                             >
                                                                                 Cancel
                                                                             </button>
                                                                             <button
                                                                                 type="button"
                                                                                 onClick={() => setEditingSchedule(null)}
-                                                                                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-800"
+                                                                                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-700"
                                                                             >
                                                                                 Done
                                                                             </button>
@@ -509,7 +507,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                                             <button
                                                                                 type="button"
                                                                                 onClick={() => handleCancelEdit(day, index)}
-                                                                                className="rounded-md bg-gray-400 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-gray-600"
+                                                                                className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:cursor-pointer hover:bg-gray-50"
                                                                             >
                                                                                 Cancel
                                                                             </button>

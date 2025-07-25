@@ -33,6 +33,7 @@ class GenerateShiftingAttendances extends Command
      */
     public function handle()
     {
+        Log::info('Cron generate attendance running...');
         // 1. check attendance_mode == per-subject
         $academicYear = AcademicYear::where('status', AcademicYearStatus::Active->value)
             ->where('attendance_mode', 'per-shift')

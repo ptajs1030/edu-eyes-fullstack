@@ -7,7 +7,7 @@ interface Announcement {
     id?: number;
     title: string;
     content: string;
-    picture?: string;
+    short_content: string;
 }
 
 interface Props {
@@ -17,17 +17,17 @@ interface Props {
 }
 
 export default function AnnouncementFormModal({ isOpen, closeModal, announcement }: Props) {
-    const [formData, setFormData] = useState<Announcement>({ title: '', content: '', picture: '' });
+    const [formData, setFormData] = useState<Announcement>({ title: '', content: '', short_content: '' });
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [preview, setPreview] = useState<string>('');
 
     useEffect(() => {
         if (announcement) {
-            setFormData({ title: announcement.title, content: announcement.content, picture: announcement.picture || '' });
-            setPreview(announcement.picture || '');
+            setFormData({ title: announcement.title, content: announcement.content, short_content: announcement.short_content || '' });
+            setPreview(announcement.short_content || '');
             setSelectedFile(null);
         } else {
-            setFormData({ title: '', content: '', picture: '' });
+            setFormData({ title: '', content: '', short_content: '' });
             setPreview('');
             setSelectedFile(null);
         }
@@ -50,9 +50,7 @@ export default function AnnouncementFormModal({ isOpen, closeModal, announcement
         const form = new FormData();
         form.append('title', formData.title);
         form.append('content', formData.content);
-        if (selectedFile) {
-            form.append('picture', selectedFile);
-        }
+        form.append('short_content', formData.short_content);
 
         if (announcement) {
             form.append('_method', 'PUT');
@@ -102,7 +100,7 @@ export default function AnnouncementFormModal({ isOpen, closeModal, announcement
                 <form onSubmit={handleSubmit} encType="multipart/form-data">
                     <div className="mb-3">
                         <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                            Title
+                            Judul
                         </label>
                         <input
                             type="text"
@@ -116,7 +114,7 @@ export default function AnnouncementFormModal({ isOpen, closeModal, announcement
                     </div>
                     <div className="mb-3">
                         <label htmlFor="content" className="block text-sm font-medium text-gray-700">
-                            Content
+                            Isi Pengumuman
                         </label>
                         <textarea
                             id="content"
@@ -128,20 +126,21 @@ export default function AnnouncementFormModal({ isOpen, closeModal, announcement
                         ></textarea>
                     </div>
                     <div className="mb-3">
-                        <label htmlFor="picture" className="block text-sm font-medium text-gray-700">
-                            Picture (optional)
+                        <label htmlFor="short_content" className="block text-sm font-medium text-gray-700">
+                            Ringkasan Pengumuman
                         </label>
-                        <input type="file" id="picture" name="picture" onChange={handleFileChange} accept="image/*" className="w-full"></input>
+                        <textarea
+                            id="short_content"
+                            name="short_content"
+                            value={formData.short_content}
+                            onChange={handleChange}
+                            className="h-50 w-full rounded border p-2"
+                            required
+                        ></textarea>
                     </div>
-                    {preview && (
-                        <div className="mb-3">
-                            <p className="text-small mb-1">Image Preview:</p>
-                            <img src={preview} alt="Preview" className="h-32 w-32 rounded object-cover" />
-                        </div>
-                    )}
                     <div className="flex justify-end">
                         <button type="button" onClick={closeModal} className="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:cursor-pointer">
-                            Cancel
+                            Batal
                         </button>
                         <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:cursor-pointer">
                             {announcement ? 'Update' : 'Create'}

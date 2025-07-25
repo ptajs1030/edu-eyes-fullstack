@@ -34,16 +34,10 @@ class AnnouncementController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'picture' => 'nullable|image|max:2048',
+            'short_content' => 'required|string'
         ]);
 
         $data = $request->all();
-        if($request->hasFile('picture')) {
-            $picture = $request->file('picture');
-            $pictureName = time() . '_' . $picture->getClientOriginalName();
-            $path = $picture->storeAs('uploads/announcements', $pictureName, 'public');
-            $data['picture'] = '/storage/'.$path;
-        }
 
         Announcement::create($data);
 
@@ -58,17 +52,10 @@ class AnnouncementController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
-            'picture' => 'nullable|image|max:2048',
+            'short_content' => 'required|string'
         ]);
 
         $data = $request->all();
-        if($request->hasFile('picture')) {
-            $picture = $request->file('picture');
-            $pictureName = time() . '_' . $picture->getClientOriginalName();
-            $path = $picture->storeAs('uploads/announcements', $pictureName, 'public');
-            $data['picture'] = '/storage/'.$path;
-        }
-
         $announcement->update($data);
 
         return redirect()->route('announcements.index')->with('success', 'Announcement updated successfully.');

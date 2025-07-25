@@ -144,7 +144,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
     };
 
     return (
-        <FormModal isOpen={isOpen} onClose={onClose} title={student ? 'Edit Student' : 'Add New Student'} onSubmit={handleSubmit}>
+        <FormModal isOpen={isOpen} onClose={onClose} title={student ? 'Edit Siswa' : 'Tambah Siswa Baru'} onSubmit={handleSubmit}>
             <div className="mb-3">
                 <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
                     Nama Lengkap
@@ -155,7 +155,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                     type="text"
                     value={formData.full_name}
                     onChange={(e) => handleChange('full_name', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                     required
                 />
             </div>
@@ -169,7 +169,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                     type="text"
                     value={formData.nis ?? ''}
                     onChange={(e) => handleChange('nis', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                 />
             </div>
             <div className="mb-3">
@@ -181,11 +181,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                     onChange={(value) => handleChange('parent_id', value ? Number(value) : null)}
                     placeholder="Search parent by name..."
                     endpoint={route('parents.search')}
-                    initialOption={
-                        initialParent
-                            ? { id: initialParent.id, full_name: initialParent.full_name }
-                            : undefined
-                    }
+                    initialOption={initialParent ? { id: initialParent.id, full_name: initialParent.full_name } : undefined}
                 />
             </div>
             <div className="mb-3">
@@ -197,9 +193,9 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                     name="class_id"
                     value={formData.class_id || ''}
                     onChange={(e) => handleChange('class_id', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                 >
-                    <option value="">Select Classroom</option>
+                    <option value="">--Pilih kelas--</option>
                     {classrooms.map((classroom) => (
                         <option key={classroom.id} value={classroom.id}>
                             {classroom.name}
@@ -217,7 +213,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                         name="gender"
                         value={formData.gender}
                         onChange={(e) => handleChange('gender', e.target.value)}
-                        className="w-full rounded border p-2"
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                         required
                     >
                         <option value="">Select Gender</option>
@@ -238,7 +234,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                         name="religion"
                         value={formData.religion}
                         onChange={(e) => handleChange('religion', e.target.value)}
-                        className="w-full rounded border p-2"
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                         required
                     >
                         <option value="">Select Religion</option>
@@ -268,7 +264,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                                 entry_year: parseInt(e.target.value) || new Date().getFullYear(),
                             })
                         }
-                        className="w-full rounded border p-2"
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                         required
                     />
                 </div>
@@ -282,7 +278,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                             name="status"
                             value={formData.status}
                             onChange={(e) => handleChange('status', e.target.value)}
-                            className="w-full rounded border p-2"
+                            className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                             required
                         >
                             {statuses.map((status) => (
@@ -307,7 +303,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                         type="text"
                         value={formData.birth_place}
                         onChange={(e) => handleChange('birth_place', e.target.value)}
-                        className="w-full rounded border p-2"
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                         required
                     />
                 </div>
@@ -321,7 +317,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                         type="date"
                         value={formData.date_of_birth}
                         onChange={(e) => handleChange('date_of_birth', e.target.value)}
-                        className="w-full rounded border p-2"
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                         required
                     />
                 </div>
@@ -336,16 +332,23 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                     name="address"
                     value={formData.address}
                     onChange={(e) => handleChange('address', e.target.value)}
-                    className="w-full rounded border p-2"
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                     required
                     rows={3}
                 />
             </div>
             <div className="flex justify-end">
-                <button type="button" onClick={onClose} className="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:cursor-pointer">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
+                >
                     Cancel
                 </button>
-                <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:cursor-pointer">
+                <button
+                    type="submit"
+                    className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
+                >
                     {student ? 'Update' : 'Create'}
                 </button>
             </div>

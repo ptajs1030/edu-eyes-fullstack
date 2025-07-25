@@ -110,7 +110,7 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
             >
                 <div className="mb-3 flex flex-wrap justify-between">
                     <label htmlFor="start_year" className="block text-sm font-medium text-gray-700">
-                        Start year
+                        Tahun Mulai
                     </label>
                     <input
                         type="number"
@@ -118,19 +118,19 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                         name="start_year"
                         value={formData.start_year}
                         onChange={handleChange}
-                        className="w-full rounded border p-2"
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                         required
                     ></input>
                 </div>
                 <div className="mb-3">
                     <label htmlFor="attendance_mode" className="block text-sm font-medium text-gray-700">
-                        Attendance Mode
+                        Mode Kehadiran
                     </label>
                     <select
                         name="attendance_mode"
                         value={formData.attendance_mode}
                         onChange={handleChange}
-                        className="w-full rounded border p-2"
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                         required
                     >
                         <option value="">-- Select Mode --</option>
@@ -145,13 +145,25 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                     <label htmlFor="note" className="block text-sm font-medium text-gray-700">
                         Catatan (optional)
                     </label>
-                    <textarea name="note" value={formData.note} onChange={handleChange} className="w-full rounded border p-2" />
+                    <textarea
+                        name="note"
+                        value={formData.note}
+                        onChange={handleChange}
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                    />
                 </div>
                 <div className="flex justify-end">
-                    <button type="button" onClick={closeModal} className="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:cursor-pointer">
+                    <button
+                        type="button"
+                        onClick={closeModal}
+                        className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
+                    >
                         Batal
                     </button>
-                    <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:cursor-pointer">
+                    <button
+                        type="submit"
+                        className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
+                    >
                         {academicYear ? 'Update' : 'Simpan'}
                     </button>
                 </div>
