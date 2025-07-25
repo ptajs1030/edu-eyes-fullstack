@@ -100,7 +100,7 @@ export default function AnnouncementFormModal({ isOpen, closeModal, announcement
                 <form onSubmit={handleSubmit} encType="multipart/form-data">
                     <div className="mb-3">
                         <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                            Title
+                            Judul
                         </label>
                         <input
                             type="text"
@@ -114,7 +114,7 @@ export default function AnnouncementFormModal({ isOpen, closeModal, announcement
                     </div>
                     <div className="mb-3">
                         <label htmlFor="content" className="block text-sm font-medium text-gray-700">
-                            Content
+                            Isi Pengumuman
                         </label>
                         <textarea
                             id="content"
@@ -127,7 +127,7 @@ export default function AnnouncementFormModal({ isOpen, closeModal, announcement
                     </div>
                     <div className="mb-3">
                         <label htmlFor="short_content" className="block text-sm font-medium text-gray-700">
-                            Short Content
+                            Ringkasan Pengumuman
                         </label>
                         <textarea
                             id="short_content"
@@ -138,15 +138,9 @@ export default function AnnouncementFormModal({ isOpen, closeModal, announcement
                             required
                         ></textarea>
                     </div>
-                    {preview && (
-                        <div className="mb-3">
-                            <p className="text-small mb-1">Image Preview:</p>
-                            <img src={preview} alt="Preview" className="h-32 w-32 rounded object-cover" />
-                        </div>
-                    )}
                     <div className="flex justify-end">
                         <button type="button" onClick={closeModal} className="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:cursor-pointer">
-                            Cancel
+                            Batal
                         </button>
                         <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:cursor-pointer">
                             {announcement ? 'Update' : 'Create'}

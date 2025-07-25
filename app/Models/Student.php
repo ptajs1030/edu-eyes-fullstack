@@ -94,4 +94,19 @@ class Student extends Model
     {
         return $this->hasMany(EventAttendance::class);
     }
+
+    public function examAssignments()
+    {
+        return $this->hasMany(ExamAssignment::class);
+    }
+
+    public function paymentAssignments()
+    {
+        return $this->hasMany(PaymentAssignment::class);
+    }
+
+    public function taskAssignments()
+    {
+        return $this->hasMany(TaskAssignment::class);
+    }
 }
