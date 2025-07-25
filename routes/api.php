@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\ForgotPassword;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\ParentController;
@@ -105,6 +106,11 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
             Route::controller(QRCodeController::class)->group(function () {
                 Route::get('/download', 'generate');
             });
+        });
+
+        Route::prefix('exams')->controller(ExamController::class)->group(function () {
+            Route::get('/', 'getSubject');
+            Route::get('/{subject}', 'getExam');
         });
   
     });
