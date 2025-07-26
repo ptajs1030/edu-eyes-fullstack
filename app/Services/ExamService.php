@@ -65,9 +65,9 @@ class ExamService
             $examsWithRelations[] = [
                 'id' => $i->id,
                 'name' => $i->exam->name,
-                'date' => $exams->exam->date,
-
-                'score' => $exams->score,
+                'type' => $i->exam->type,
+                'date' => $i->exam->date,
+                'score' => $i->score,
             ];
         }
 
@@ -80,7 +80,7 @@ class ExamService
             'total_ulangan'=>$totalUlangan,
             'total_nilai'=>$totalNilai,
             'rata-rata'=>$rataRata,
-            'exams'=>$exams
+            'exams'=>$examsWithRelations
         ];
 
     }

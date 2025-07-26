@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\ParentController;
 use App\Http\Controllers\Api\QRCodeController;
 use App\Http\Controllers\Api\SampleAuthTeacherController;
+use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TeacherController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -112,7 +113,11 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
             Route::get('/', 'getSubject');
             Route::get('/{subject}', 'getExam');
         });
-  
+        
+        Route::prefix('tasks')->controller(TaskController::class)->group(function () {
+            Route::get('/', 'getTasks');
+            Route::get('/{id}', 'getTaskDetails');
+        });
     });
     Route::get('/students/{id?}', 'getStudents');
 });
