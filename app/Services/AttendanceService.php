@@ -124,6 +124,7 @@ class AttendanceService
         $submit_hour = Carbon::parse($data->getSubmitHour());
         $minutes_of_late = $deadline->diffInMinutes($data->getSubmitHour());
         $isPic = $pics->contains('teacher_id', auth()->user()->id);
+        $type= $data->getType();
         if (!$isPic) {
             throw new SilentHttpException(403, 'Anda tidak ditugaskan untuk jadwal kelas ini.');
         }
@@ -138,24 +139,26 @@ class AttendanceService
                 throw new SilentHttpException(400, 'Absen keluar harus minimal 2 menit setelah absen masuk');
             }
         }
-        if ($submit_hour <= $deadline && !$attendance->clock_in_hour) {
+        if ($submit_hour <= $deadline && !$attendance->clock_in_hour && $type=='in') {
             $attendance->update([
                 'status' => 'present',
                 'clock_in_hour' => $submit_hour
             ]);
             
-        }else if ($submit_hour > $deadline && !$attendance->clock_in_hour) {
+        }else if ($submit_hour > $deadline && !$attendance->clock_in_hour && $type=='in') {
             $attendance->update([
                 'status' => 'late',
                 'minutes_of_late' => (int) $minutes_of_late,
                 'clock_in_hour' => $submit_hour,
             ]);
             
-        }else {
+        }else if ($submit_hour <= $deadline && $attendance->clock_in_hour && $type=='out') {
             $attendance->update([
                 'clock_out_hour' => $submit_hour,
             ]);
             
+        }else {
+            throw new SilentHttpException(400, 'Anda harus absen masuk terlebih dahulu');
         }
 
         return [

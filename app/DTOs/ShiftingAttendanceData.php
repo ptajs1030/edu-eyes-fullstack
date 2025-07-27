@@ -11,13 +11,13 @@ class ShiftingAttendanceData
      */
      private ?string $submit_hour;
      private ?string $qr_code;
-
+    private ?string $type;
 
     public function __construct(array $data)
     {
         $this->submit_hour = $data['submit_hour'];
         $this->qr_code = $data['qr_code']; 
-       
+       $this->type = $data['type'];
     }
 
     /**
@@ -31,5 +31,10 @@ class ShiftingAttendanceData
     public function getSubmitHour(): ?string
     {
         return $this->submit_hour;
+    }
+
+    public function getType(): ?string
+    {
+        return $this->type;
     }
 }
