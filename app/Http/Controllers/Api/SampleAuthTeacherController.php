@@ -7,8 +7,12 @@ use App\Http\Requests\Api\AuthRequest;
 use App\Http\Requests\Api\UserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\FirebaseService;
 use App\Services\SampleAuthTeacherService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+
+//use Illuminate\Http\Request;
 
 class SampleAuthTeacherController extends BaseApiController
 {
@@ -86,5 +90,15 @@ class SampleAuthTeacherController extends BaseApiController
     public function profile(): JsonResponse
     {
         return $this->resource(UserResource::make(auth()->user()));
+    }
+    public function sendNotification(FirebaseService $firebaseService, Request $request)
+    {
+        return $firebaseService->sendToDevice(
+            $request->input('token'),
+            "halo",
+            "bagaimana progress Edu eyes",
+            ["test" => "Bagaimana progress Edu Eyes?"],
+             []
+        );
     }
 }

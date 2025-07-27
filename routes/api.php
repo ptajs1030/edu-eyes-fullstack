@@ -30,7 +30,7 @@ use Illuminate\Support\Facades\Route;
 
 //     });
 // });
-
+Route::post("testNotification", [SampleAuthTeacherController::class, 'sendNotification']);
 
 
 Route::prefix('auth')->controller(AuthController::class)->group(function (){
@@ -47,7 +47,7 @@ Route::controller(ForgotPasswordController::class)->group(function () {
 });
 
 Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(function (){
-   
+
     Route::controller(TeacherController::class)->group(function (){
         Route::get('/profile', 'profile');
         Route::post('/profile/change-password', 'changePassword');
@@ -56,7 +56,7 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
         Route::get('/subjects/{id?}', 'getSubjects');
         Route::get('/event/{id?}', 'getEvent');
     });
-   
+
     Route::prefix('attendance')->controller(AttendanceController::class)->group(function () {
         Route::get('/history/in/', 'clockInHistory');
         Route::get('/history/out/', 'clockOutHistory');
@@ -101,7 +101,7 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
                 Route::get('/event', 'eventAttendanceHistory');
             });
         });
-        
+
         Route::prefix('kartu-siswa')->group(function () {
             Route::get('/', 'studentIdCard');
             Route::controller(QRCodeController::class)->group(function () {
@@ -113,7 +113,7 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
             Route::get('/', 'getSubject');
             Route::get('/{subject}', 'getExam');
         });
-        
+
         Route::prefix('tasks')->controller(TaskController::class)->group(function () {
             Route::get('/', 'getTasks');
             Route::get('/{id}', 'getTaskDetails');
