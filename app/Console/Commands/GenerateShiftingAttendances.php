@@ -3,8 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Enums\AcademicYearStatus;
-use App\Enums\AttendanceStatus;
+use App\Enums\AttendanceMode;
+use App\Enums\ShiftAttendanceStatus;
 use App\Models\AcademicYear;
+use App\Models\Classroom;
 use App\Models\ClassShiftingSchedule;
 use App\Models\ShiftingAttendance;
 use App\Models\Student;
@@ -34,9 +36,10 @@ class GenerateShiftingAttendances extends Command
     public function handle()
     {
         Log::info('Cron generate attendance running...');
-        // 1. check attendance_mode == per-subject
+
+        // 1. check attendance_mode == per-shift
         $academicYear = AcademicYear::where('status', AcademicYearStatus::Active->value)
-            ->where('attendance_mode', 'per-shift')
+            ->where('attendance_mode', AttendanceMode::PerShift->value)
             ->first();
 
         if (!$academicYear) {
@@ -46,51 +49,71 @@ class GenerateShiftingAttendances extends Command
 
         // 2. Get class shifting schedules
         $today = Carbon::now();
+        $todayDate = $today->toDateString();
         $todayDayOfWeek = $today->dayOfWeek;
-
         $schedules = ClassShiftingSchedule::where('day', $todayDayOfWeek)
             ->with('shifting')
             ->get();
 
-        if ($schedules->isEmpty()) {
-            Log::info('No shifting schedules found for today (Day: ' . $todayDayOfWeek . ')');
-            return;
-        }
-
-        // 3. Generate shifting attendances
+        // 3. Gather every class that has students
+        $classIds = Classroom::pluck('id')->toArray();
         $generatedCount = 0;
 
-        foreach ($schedules as $schedule) {
-            // Check if the data already exists
-            $students = Student::where('class_id', $schedule->class_id)->get();
-            if ($students->isEmpty()) {
-                continue;
-            }
-            foreach ($students as $student) {
-                $existingAttendance  = ShiftingAttendance::where([
-                    'student_id' => $student->id,
-                    'submit_date' => $today,
-                ])->exists();
 
-                if ($existingAttendance) continue;
+        foreach ($classIds as $classId) {
+            $students = Student::where('class_id', $classId)->get();
+            if ($students->isEmpty()) continue;
 
-                // Generate attendance data (status alpha)
-                ShiftingAttendance::create([
-                    'student_id' => $student->id,
-                    'class_id' => $schedule->class_id,
-                    'academic_year_id' => $academicYear->id,
-                    'shifting_name' => $schedule->shifting->name,
-                    'shifting_start_hour' => $schedule->shifting->start_hour,
-                    'shifting_end_hour' => $schedule->shifting->end_hour,
-                    'submit_date' => $today,
-                    'status' => AttendanceStatus::Alpha->value,
-                ]);
+            $schedulesForClass = $schedules->where('class_id', $classId);
 
-                $generatedCount++;
+            if ($schedulesForClass->isEmpty()) {
+                foreach ($students as $student) {
+                    $exists = ShiftingAttendance::where([
+                        'student_id' => $student->id,
+                        'submit_date' => $todayDate,
+                    ])->exists();
+                    if ($exists) continue;
+
+                    ShiftingAttendance::create([
+                        'student_id'          => $student->id,
+                        'class_id'            => $classId,
+                        'academic_year_id'    => $academicYear->id,
+                        'shifting_name'       => '',
+                        'shifting_start_hour' => '',
+                        'shifting_end_hour'   => '',
+                        'submit_date'         => $todayDate,
+                        'status'              => ShiftAttendanceStatus::DayOff->value,
+                    ]);
+
+                    $generatedCount++;
+                }
+            } else {
+                foreach ($schedulesForClass as $schedule) {
+                    foreach ($students as $student) {
+                        $exists = ShiftingAttendance::where([
+                            'student_id'    => $student->id,
+                            'submit_date'   => $todayDate,
+                        ])->exists();
+                        if ($exists) continue;
+
+                        ShiftingAttendance::create([
+                            'student_id'          => $student->id,
+                            'class_id'            => $classId,
+                            'academic_year_id'    => $academicYear->id,
+                            'shifting_name'       => $schedule->shifting->name,
+                            'shifting_start_hour' => $schedule->shifting->start_hour,
+                            'shifting_end_hour'   => $schedule->shifting->end_hour,
+                            'submit_date'         => $todayDate,
+                            'status'              => ShiftAttendanceStatus::Alpha->value,
+                        ]);
+
+                        $generatedCount++;
+                    }
+                }
             }
         }
 
-        Log::info("Generated {$generatedCount} shifting attendances for {$today->toDateString()}");
+        Log::info("Generated {$generatedCount} shifting attendances for {$todayDate}");
         $this->info("Successfully generated {$generatedCount} shifting attendances.");
     }
 }

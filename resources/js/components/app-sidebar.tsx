@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BadgeInfo, BookText, GraduationCap, LayoutGrid, School, Settings2, TimerReset, UserCog, UserPen, UserSearch } from 'lucide-react';
+import { BadgeInfo, BookText, GraduationCap, LayoutGrid, School, Settings2, TimerReset, UserPen, UserSearch } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -20,8 +20,18 @@ const mainNavItems: NavItem[] = [
     //     icon: UserCog,
     // },
     {
-        title: 'Pengguna',
-        href: '/users',
+        title: 'Admin',
+        href: '/admins',
+        icon: UserPen,
+    },
+    {
+        title: 'Guru',
+        href: '/teachers',
+        icon: UserPen,
+    },
+    {
+        title: 'Orang Tua/Wali',
+        href: '/parents',
         icon: UserPen,
     },
     {
