@@ -35,7 +35,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
     Route::resource('roles', RoleController::class);
-    Route::resource('users', UserController::class);
+    Route::prefix('admins')->group(function () {
+        Route::get('/', [UserController::class, 'indexAdmin'])->name('admins.index');
+        Route::post('/', [UserController::class, 'storeAdmin'])->name('admins.store');
+        Route::put('/{user}', [UserController::class, 'updateAdmin'])->name('admins.update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('admins.destroy');
+    });
+    Route::prefix('teachers')->group(function () {
+        Route::get('/', [UserController::class, 'indexTeacher'])->name('teachers.index');
+        Route::post('/', [UserController::class, 'storeTeacher'])->name('teachers.store');
+        Route::put('/{user}', [UserController::class, 'updateTeacher'])->name('teachers.update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('teachers.destroy');
+    });
+    Route::prefix('parents')->group(function () {
+        Route::get('/', [UserController::class, 'indexParent'])->name('parents.index');
+        Route::post('/', [UserController::class, 'storeParent'])->name('parents.store');
+        Route::put('/{user}', [UserController::class, 'updateParent'])->name('parents.update');
+        Route::delete('/{user}', [UserController::class, 'destroy'])->name('parents.destroy');
+    });
     Route::resource('announcements', AnnouncementController::class);
     Route::resource('academic-years', AcademicYearController::class);
     Route::resource('classrooms', ClassroomController::class);
