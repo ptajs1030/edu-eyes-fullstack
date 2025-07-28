@@ -30,6 +30,11 @@ const mainNavItems: NavItem[] = [
         icon: UserPen,
     },
     {
+        title: 'Orang Tua/Wali',
+        href: '/parents',
+        icon: UserPen,
+    },
+    {
         title: 'Siswa',
         href: '/students',
         icon: UserSearch,
