@@ -32,6 +32,15 @@ use Illuminate\Support\Facades\Route;
 // });
 Route::post("testNotification", [SampleAuthTeacherController::class, 'sendNotification']);
 
+Route::get('/fcm-ping', function () {
+    $path = storage_path(env('FIREBASE_CREDENTIALS'));
+    return [
+        'exists' => file_exists($path),
+        'path' => $path,
+        'can_read' => is_readable($path),
+        'content_snippet' => file_exists($path) ? substr(file_get_contents($path), 0, 100) : null,
+    ];
+});
 
 Route::prefix('auth')->controller(AuthController::class)->group(function (){
     Route::post('/login', 'login');
