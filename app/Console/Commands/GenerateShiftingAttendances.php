@@ -49,6 +49,7 @@ class GenerateShiftingAttendances extends Command
 
         // 2. Get class shifting schedules
         $today = Carbon::now();
+        $todayDate = $today->toDateString();
         $todayDayOfWeek = $today->dayOfWeek;
         $schedules = ClassShiftingSchedule::where('day', $todayDayOfWeek)
             ->with('shifting')
@@ -57,6 +58,7 @@ class GenerateShiftingAttendances extends Command
         // 3. Gather every class that has students
         $classIds = Classroom::pluck('id')->toArray();
         $generatedCount = 0;
+
 
         foreach ($classIds as $classId) {
             $students = Student::where('class_id', $classId)->get();
@@ -68,7 +70,7 @@ class GenerateShiftingAttendances extends Command
                 foreach ($students as $student) {
                     $exists = ShiftingAttendance::where([
                         'student_id' => $student->id,
-                        'submit_date' => $today,
+                        'submit_date' => $todayDate,
                     ])->exists();
                     if ($exists) continue;
 
@@ -79,7 +81,7 @@ class GenerateShiftingAttendances extends Command
                         'shifting_name'       => '',
                         'shifting_start_hour' => '',
                         'shifting_end_hour'   => '',
-                        'submit_date'         => $today,
+                        'submit_date'         => $todayDate,
                         'status'              => ShiftAttendanceStatus::DayOff->value,
                     ]);
 
@@ -90,7 +92,7 @@ class GenerateShiftingAttendances extends Command
                     foreach ($students as $student) {
                         $exists = ShiftingAttendance::where([
                             'student_id'    => $student->id,
-                            'submit_date'   => $today,
+                            'submit_date'   => $todayDate,
                         ])->exists();
                         if ($exists) continue;
 
@@ -101,7 +103,7 @@ class GenerateShiftingAttendances extends Command
                             'shifting_name'       => $schedule->shifting->name,
                             'shifting_start_hour' => $schedule->shifting->start_hour,
                             'shifting_end_hour'   => $schedule->shifting->end_hour,
-                            'submit_date'         => $today,
+                            'submit_date'         => $todayDate,
                             'status'              => ShiftAttendanceStatus::Alpha->value,
                         ]);
 
@@ -111,7 +113,7 @@ class GenerateShiftingAttendances extends Command
             }
         }
 
-        Log::info("Generated {$generatedCount} shifting attendances for {$today->toDateString()}");
+        Log::info("Generated {$generatedCount} shifting attendances for {$todayDate}");
         $this->info("Successfully generated {$generatedCount} shifting attendances.");
     }
 }
