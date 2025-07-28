@@ -14,4 +14,9 @@ class Announcement extends Model
         'content',
         'short_content',
     ];
+
+    public function attachments()
+    {
+        return $this->hasMany(AnnouncementAttachment::class);
+    }
 }
