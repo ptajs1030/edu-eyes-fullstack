@@ -25,6 +25,11 @@ const mainNavItems: NavItem[] = [
         icon: UserPen,
     },
     {
+        title: 'Guru',
+        href: '/teachers',
+        icon: UserPen,
+    },
+    {
         title: 'Siswa',
         href: '/students',
         icon: UserSearch,

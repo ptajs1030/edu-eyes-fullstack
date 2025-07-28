@@ -19,13 +19,10 @@ export default function AdminIndex() {
             users={users}
             statuses={statuses}
             filters={filters}
-            breadcrumbs={[
-                { title: 'Dashboard', href: '/' },
-                { title: 'Admin Users', href: route('admin.index') },
-            ]}
-            title="Admin Users"
+            breadcrumbs={[{ title: 'Admin', href: '/admins' }]}
+            title="Admin"
             role={role}
-            routePrefix="admin"
+            routePrefix="admins"
         />
     );
 }

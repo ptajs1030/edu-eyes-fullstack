@@ -35,10 +35,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
     Route::resource('roles', RoleController::class);
     Route::prefix('admins')->group(function () {
-        Route::get('/', [UserController::class, 'indexAdmin'])->name('admin.index');
-        Route::post('/', [UserController::class, 'storeAdmin'])->name('admin.store');
-        Route::put('/{user}', [UserController::class, 'updateAdmin'])->name('admin.update');
-        Route::delete('/{user}', [UserController::class, 'destroyAdmin'])->name('admin.destroy');
+        Route::get('/', [UserController::class, 'indexAdmin'])->name('admins.index');
+        Route::post('/', [UserController::class, 'storeAdmin'])->name('admins.store');
+        Route::put('/{user}', [UserController::class, 'updateAdmin'])->name('admins.update');
+        Route::delete('/{user}', [UserController::class, 'destroyAdmin'])->name('admins.destroy');
     });
     Route::prefix('teachers')->group(function () {
         Route::get('/', [UserController::class, 'indexTeacher'])->name('teachers.index');
