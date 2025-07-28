@@ -5,10 +5,10 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
-import { toast, Toaster } from 'sonner';
-import UserFormModal from './form';
+import { Toaster, toast } from 'sonner';
+import BaseForm from './base-form';
 
-type User = {
+interface User {
     id: number;
     full_name: string;
     username: string;
@@ -17,51 +17,47 @@ type User = {
     nip?: string;
     job?: string;
     position?: string;
-    profile_picture?: string;
-    address?: string;
     status: string;
     role: {
         id: number;
         name: string;
     };
-};
+}
 
-type Role = {
-    id: number;
-    name: string;
-};
-
-type PaginatedResponse<T, L> = {
-    data: T[];
+interface PaginatedResponse {
+    data: User[];
     current_page: number;
     last_page: number;
     per_page: number;
     total: number;
-    links: L[];
-};
+    links: Array<{
+        url: string | null;
+        label: string;
+        active: boolean;
+    }>;
+}
 
-type Link = {
-    url: string | null;
-    label: string;
-    active: boolean;
-};
+interface BaseIndexProps {
+    users: PaginatedResponse;
+    statuses: Array<{ value: string; label: string }>;
+    filters: { search?: string; sort?: string; direction?: string };
+    breadcrumbs: BreadcrumbItem[];
+    title: string;
+    role: {
+        id: number;
+        name: string;
+        value: string;
+    };
+    routePrefix: string;
+}
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Pengguna',
-        href: '/users',
-    },
-];
+export default function BaseIndex({ users, statuses, filters, breadcrumbs, title, role, routePrefix }: BaseIndexProps) {
+    const [isFormOpen, setIsFormOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState<User | null>(null);
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
-export default function UserIndex() {
-    const { users, roles, statuses, filters } = usePage<{
-        users: PaginatedResponse<User, Link>;
-        roles: Role[];
-        statuses: { value: string; label: string }[];
-        filters: { search?: string; sort?: string; direction?: string };
-    }>().props;
-
-    const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
+    const { flash } = usePage().props as { flash?: { success?: string; error?: string } };
 
     useEffect(() => {
         if (flash?.success) {
@@ -73,19 +69,20 @@ export default function UserIndex() {
         }
     }, [flash]);
 
-    const [isFormOpen, setIsFormOpen] = useState(false);
-    const [selectedUser, setSelectedUser] = useState<User | null>(null);
-    const [selectedIds, setSelectedIds] = useState<number[]>([]);
-    const [userToDelete, setUserToDelete] = useState<User | null>(null);
-
     const openForm = (user: User | null = null) => {
         setSelectedUser(user);
         setIsFormOpen(true);
     };
 
-    const handleDelete = async (id: number) => {
-        router.delete(`/users/${id}`, {
-            onSuccess: () => router.reload(),
+    const handleDelete = (id: number) => {
+        router.delete(route(`${routePrefix}.destroy`, id), {
+            onSuccess: () => {
+                toast.success('User deleted successfully');
+                router.reload();
+            },
+            onError: () => {
+                toast.error('Failed to delete user');
+            },
         });
     };
 
@@ -101,13 +98,13 @@ export default function UserIndex() {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = 'users.csv';
+        link.download = `${role.value}-users.csv`;
         link.click();
     };
 
     const handleSortChange = (column: string) => {
         router.get(
-            route('users.index'),
+            route(`${routePrefix}.index`),
             {
                 sort: column,
                 direction: filters.direction === 'asc' ? 'desc' : 'asc',
@@ -117,19 +114,23 @@ export default function UserIndex() {
     };
 
     const tableHeaders = [
-        { key: 'full_name', label: 'Full Name', sortable: true },
-        { key: 'nip', label: 'NIP', sortable: true },
+        { key: 'full_name', label: 'Nama', sortable: true },
+        ...(role.value === 'admin' || role.value === 'teacher' ? [{ key: 'nip', label: 'NIP', sortable: true }] : []),
         { key: 'username', label: 'Username', sortable: true },
-        { key: 'role_id', label: 'Role', sortable: true },
-        { key: 'phone', label: 'Phone', sortable: true },
+        { key: 'role.name', label: 'Role', sortable: true },
+        ...(role.value === 'admin' || role.value === 'teacher'
+            ? [{ key: 'position', label: 'Jabatan', sortable: true }]
+            : [{ key: 'job', label: 'Pekerjaan', sortable: true }]),
+        { key: 'phone', label: 'Nomor Telepon', sortable: true },
         { key: 'email', label: 'Email', sortable: true },
         { key: 'status', label: 'Status', sortable: true },
-        { key: 'actions', label: 'Actions', sortable: false },
+        { key: 'address', label: 'Alamat', sortable: true },
+        { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Users" />
+            <Head title={title} />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
@@ -139,21 +140,21 @@ export default function UserIndex() {
                             type="text"
                             placeholder="Cari pengguna..."
                             defaultValue={filters.search || ''}
-                            onChange={(e) => router.get(route('users.index'), { search: e.target.value }, { preserveState: true })}
+                            onChange={(e) => router.get(route(`${routePrefix}.index`), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
                         />
                         <button
                             onClick={exportSelected}
                             className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                         >
-                            Ekspor yang dipilih
+                            Ekspor data yang dipilih
                         </button>
                     </div>
                     <button
                         onClick={() => openForm(null)}
                         className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
-                        Tambah Pengguna
+                        Tambah {role.name}
                     </button>
                 </div>
 
@@ -171,12 +172,15 @@ export default function UserIndex() {
                                 <input type="checkbox" checked={selectedIds.includes(user.id)} onChange={() => toggleSelect(user.id)} />
                             </td>
                             <td className="p-3 text-sm">{user.full_name}</td>
-                            <td className="p-3 text-sm">{user.nip}</td>
+                            {(role.value === 'admin' || role.value === 'teacher') && <td className="p-3 text-sm">{user.nip || '-'}</td>}
                             <td className="p-3 text-sm">{user.username}</td>
-                            <td className="p-3 text-sm">{user.role?.name || '-'}</td>
+                            <td className="p-3 text-sm">{user.role.name}</td>
+                            {(role.value === 'admin' || role.value === 'teacher') && <td className="p-3 text-sm">{user.position || '-'}</td>}
+                            {role.value === 'parent' && <td className="p-3 text-sm">{user.job || '-'}</td>}
                             <td className="p-3 text-sm">{user.phone || '-'}</td>
                             <td className="p-3 text-sm">{user.email || '-'}</td>
                             <td className="p-3 text-sm">{user.status}</td>
+                            <td className="p-3 text-sm">{user.address || '-'}</td>
                             <td className="flex gap-2 p-3 text-sm">
                                 <button
                                     onClick={() => openForm(user)}
@@ -197,19 +201,13 @@ export default function UserIndex() {
 
                 <Pagination links={users.links} />
 
-                <UserFormModal
+                <BaseForm
                     isOpen={isFormOpen}
                     onClose={() => setIsFormOpen(false)}
-                    user={
-                        selectedUser
-                            ? {
-                                  ...selectedUser,
-                                  role_id: selectedUser.role?.id ?? null,
-                              }
-                            : null
-                    }
-                    roles={roles}
+                    user={selectedUser}
                     statuses={statuses}
+                    role={role}
+                    routePrefix={routePrefix}
                 />
 
                 <ActionModal
