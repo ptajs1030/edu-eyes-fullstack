@@ -186,7 +186,7 @@ class AttendanceService
                 ]);
             }
             
-        }else if ($submit_hour <= $deadline && $attendance->clock_in_hour && $type=='out') {
+        }else if (!$attendance->clock_out_hour && $attendance->clock_in_hour && $type=='out') {
             $attendance->update([
                 'clock_out_hour' => $submit_hour,
             ]);
