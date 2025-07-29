@@ -65,11 +65,26 @@ class ParentService
             'Friday' => 'Jumat',
             'Saturday' => 'Sabtu', 
         ];
+        $months = [
+            'January' => 'Januari',
+            'February' => 'Februari',
+            'March' => 'Maret',
+            'April' => 'April',
+            'May' => 'Mei',
+            'June' => 'Juni',
+            'July' => 'Juli',
+            'August' => 'Agustus',
+            'September' => 'September',
+            'October' => 'Oktober',
+            'November' => 'November',
+            'December' => 'Desember',
+        ];
         $carbon = Carbon::now()->timezone('Asia/Jakarta');
         $hari = $days[$carbon->format('l')];
+        $bulan= $months[$carbon->format('F')];
     
        return [
-        'date'=>$hari . ', ' . $carbon->format('d-m-Y'),
+        'date'=>$hari . ', ' . $carbon->format('d').' '.$bulan.' '.$carbon->format('Y'),
         'attendance'=>$attendance
        ] ;
             
@@ -181,8 +196,21 @@ class ParentService
                 });
             }
 
-            $announcement = $query->paginate(10);
-            return $announcement;
+            $announcements = $query->latest()->with('attachments')->paginate(10);
+
+            $announcementWithRelations = [];
+            foreach ($announcements as $announcement) {
+                $announcementWithRelations[] = [
+                    'id' => $announcement->id,
+                    'title' => $announcement->title,
+                    'content' => $announcement->content,
+                    'short_content' => $announcement->short_content,
+                    'attachments' => $announcement->attachments->pluck('url'),
+                    'created_at' => $announcement->created_at,
+                    'updated_at' => $announcement->updated_at
+                ];
+            }
+            return $announcementWithRelations;
         }
 
     }
