@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('events', function (Blueprint $table) {
             $table->renameColumn('date', 'start_date');
-            $table->date('end_date')->nullable();
+            $table->date('end_date')->after('start_date')->nullable();
         });
     }
 
