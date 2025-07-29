@@ -24,6 +24,7 @@ class ShiftingAttendanceRequest extends FormRequest
         return [
             'submit_hour' => 'required|date_format:H:i',
             'qr_code' => 'required',
+            'type'=>'required|in:in,out',
         ];
     }
 
