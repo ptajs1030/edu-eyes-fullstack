@@ -23,9 +23,9 @@ export default function SearchableSelect({
     placeholder = 'Search...',
     endpoint,
     initialOption,
-    showInitialOptions = false, 
+    showInitialOptions = false,
     maxInitialOptions = 10,
-    disabled= false,
+    disabled = false,
 }: SearchableSelectProps) {
     const [inputValue, setInputValue] = useState('');
     const [options, setOptions] = useState<Option[]>([]);
@@ -55,10 +55,10 @@ export default function SearchableSelect({
 
     const fetchOptions = async (query: string) => {
         if (!endpoint) return;
-        
+
         setIsLoading(true);
         try {
-            const response = await axios.get(endpoint, { 
+            const response = await axios.get(endpoint, {
                 params: { query },
                 withCredentials: true,
             });
@@ -77,24 +77,30 @@ export default function SearchableSelect({
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (disabled) return;
 
-        const value = e.target.value;
-        setInputValue(value);
-        
+        const inputVal = e.target.value;
+        setInputValue(inputVal);
+
+        // Clear selection immediately when user starts typing something different
+        if (selectedOption && inputVal !== selectedOption.full_name) {
+            setSelectedOption(null);
+            onChange(null);
+        }
+
         // Clear previous debounce timeout
         if (debounceRef.current) {
             clearTimeout(debounceRef.current);
         }
 
         // If showInitialOptions is enabled and query is empty, show initial options
-        if (showInitialOptions && value === '') {
+        if (showInitialOptions && inputVal === '') {
             fetchOptions('');
             return;
         }
-        
+
         // Set new debounce
         debounceRef.current = setTimeout(() => {
-            if (value.length >= 1 || (showInitialOptions && value.length === 0)) {
-                fetchOptions(value);
+            if (inputVal.length >= 1 || (showInitialOptions && inputVal.length === 0)) {
+                fetchOptions(inputVal);
             } else {
                 setOptions([]);
                 setIsOpen(false);
@@ -117,15 +123,15 @@ export default function SearchableSelect({
     };
 
     const handleFocus = () => {
-        if (disabled) return; 
-        
+        if (disabled) return;
+
         if (showInitialOptions && inputValue === '') {
             fetchOptions('');
         }
     };
 
     return (
-        
+
         <div className="relative" ref={wrapperRef}>
             <div className={`flex mt-1 items-center block border p-2 border-gray-300 rounded-md shadow-sm ${disabled ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}>
                 <input
@@ -138,7 +144,7 @@ export default function SearchableSelect({
                     className="flex-1 outline-none w-full"
                 />
                 {selectedOption && !disabled && (
-                    <button 
+                    <button
                         type="button"
                         onClick={handleClear}
                         className="px-2 text-gray-500 hover:text-red-500"
@@ -159,9 +165,8 @@ export default function SearchableSelect({
                             <div
                                 key={option.id}
                                 onClick={() => handleSelect(option)}
-                                className={`px-3 py-2 hover:bg-gray-100 cursor-pointer ${
-                                    selectedOption?.id === option.id ? 'bg-blue-50' : ''
-                                }`}
+                                className={`px-3 py-2 hover:bg-gray-100 cursor-pointer ${selectedOption?.id === option.id ? 'bg-blue-50' : ''
+                                    }`}
                             >
                                 {option.full_name}
                             </div>
