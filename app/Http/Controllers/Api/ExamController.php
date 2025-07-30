@@ -14,7 +14,7 @@ class ExamController extends BaseApiController
         $student= $request->attributes->get('current_student');
         $date= $request->query('date');
         $search= $request->query('search');
-        return $this->success($this->service->getExam($student, $date, $search));
+        return $this->success($this->service->getSubject($student, $date, $search));
     }
 
     public function getExam(Request $request, int $subject){

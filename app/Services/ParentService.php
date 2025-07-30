@@ -6,6 +6,7 @@ use App\DTOs\ChangePasswordData;
 use App\Exceptions\SilentHttpException;
 use App\Models\Announcement;
 use App\Models\ClassSubjectSchedule;
+use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\EventParticipant;
 use App\Models\Setting;
@@ -210,7 +211,12 @@ class ParentService
                     'updated_at' => $announcement->updated_at
                 ];
             }
-            return $announcementWithRelations;
+            return [
+                'current_page' => $announcements->currentPage(),
+                'last_page' => $announcements->lastPage(),
+                'per_page' => $announcements->perPage(),
+                'announcements' => $announcementWithRelations
+            ];
         }
 
     }
@@ -239,6 +245,14 @@ class ParentService
         return $scheduleWithRelations;
     }
 
+    public function getEventDate($date){
+        $parsedDate = Carbon::parse($date);
+        $events = Event::whereYear('date', $parsedDate->year)->whereMonth('date', $parsedDate->month)->get('date');
+        if ($events->isEmpty()) {
+            throw new SilentHttpException(404, 'Kegiatan tidak ditemukan');
+        }
+        return $events;
+    }
 
     public function getEventSchedule($student, $date){
         $query = EventParticipant::query();

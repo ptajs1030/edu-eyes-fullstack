@@ -24,7 +24,6 @@ class ExamService
             $subjectQuery->where('name', 'like', '%' . $search . '%');
         }
         $exams = $examQuery->get();
-
         if ($exams->isEmpty()) {
             throw new SilentHttpException(404, 'ujian tidak ditemukan');
         }

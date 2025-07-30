@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exceptions\SilentHttpException;
 use App\Models\TaskAssignment;
+use Carbon\Carbon;
 
 class TaskService
 {
@@ -38,8 +39,8 @@ class TaskService
                 'subject'=>$i->task->subject->name,
                 'title'=>$i->task->title,
                 'description'=>$i->task->description,
-                'due_date'=>$i->task->due_date,
-                'due_time'=>$i->task->due_time,
+                'due_date'=>Carbon::parse($i->task->due_date)->format('Y-m-d'),
+                'due_time'=>Carbon::parse($i->task->due_time)->format('H:i'),
                 'created_at'=>$i->task->created_at
             ];
         }
