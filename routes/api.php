@@ -98,9 +98,11 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
             Route::get('/', 'profile');
             Route::post('/change-password', 'changePassword');
         });
+        Route::get('/subject/{id?}', 'getSubject');
         Route::post('/set-notification-key', 'setNotificationKey');
         Route::get('/announcements/{id?}', 'getAnnouncements');
         Route::get('/subject-schedule', 'getSubjectSchedule');
+        Route::get('/event-date/{date}', 'getEventDate');
         Route::get('/event-schedule', 'getEventSchedule');
         Route::prefix('attendance')->group(function (){
             Route::get('/', 'todayAttendance');
