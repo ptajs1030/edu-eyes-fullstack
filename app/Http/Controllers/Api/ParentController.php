@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ChangePasswordRequest;
 use App\Http\Resources\AnnouncementResource;
 use App\Http\Resources\StudentResource;
+use App\Http\Resources\SubjectResource;
 use App\Http\Resources\UserResource;
 use App\Models\Announcement;
 use App\Models\Student;
+use App\Models\Subject;
 use App\Services\ParentService;
 use Illuminate\Http\Request;
 
@@ -42,7 +44,14 @@ class ParentController extends BaseApiController
 
     public function getAnnouncements(Request $request, ?int $id = null )
     {
-        return $this->success($this->service->getAnnouncements($id, $request->search));
+        $data= $this->service->getAnnouncements($id, $request->search);
+
+        return $this->success([
+            'current_page' => $data['current_page'],
+            'last_page' => $data['last_page'],
+            'per_page' => $data['per_page'],
+            'announcements' => $data['announcements']
+        ]);
     }
 
     public function todayAttendance(Request $request){
@@ -67,6 +76,11 @@ class ParentController extends BaseApiController
         $student = $request->attributes->get('current_student');
         return $this->success($this->service->getSubjectSchedule($student));
     }
+
+    public function getEventDate(string $date){
+        return $this->success($this->service->getEventDate($date));
+    }
+
     public function getEventSchedule(Request $request, ){
         $student = $request->attributes->get('current_student');
         $date = $request->query('date');
@@ -89,5 +103,14 @@ class ParentController extends BaseApiController
     public function studentIdCard(Request $request){
         $student = $request->attributes->get('current_student');
         return $this->success($this->service->studentIdCard($student));
+    }
+
+    public function getSubject(?int $id = null){
+        if ($id) {
+            return $this->resource(SubjectResource::make(Subject::findOrFail($id)));
+        }
+        return $this->resource(
+            SubjectResource::collection(Subject::get())
+        );
     }
 }
