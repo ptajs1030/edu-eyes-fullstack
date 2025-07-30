@@ -1,7 +1,7 @@
-import { router } from '@inertiajs/react';
-import { toast } from 'sonner';
 import FormModal from '@/components/form-modal';
-import { useEffect, useState } from 'react';
+import { router } from '@inertiajs/react';
+import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 interface User {
     id?: number;
@@ -12,6 +12,7 @@ interface User {
     nip?: string;
     job?: string;
     position?: string;
+    profile_picture?: string;
     address?: string;
     password?: string;
     password_confirmation?: string;
@@ -32,14 +33,7 @@ interface BaseFormProps {
     routePrefix: string;
 }
 
-export default function BaseForm({
-    isOpen,
-    onClose,
-    user,
-    statuses,
-    role,
-    routePrefix,
-}: BaseFormProps) {
+export default function BaseForm({ isOpen, onClose, user, statuses, role, routePrefix }: BaseFormProps) {
     const [formData, setFormData] = useState<User>({
         full_name: '',
         username: '',
@@ -49,13 +43,19 @@ export default function BaseForm({
         password_confirmation: '',
         role_id: role.id,
         status: 'active',
-        ...(role.value === 'admin' || role.value === 'teacher' ? { 
-            nip: '',
-            position: '' 
-        } : {}),
+        ...(role.value === 'admin' || role.value === 'teacher'
+            ? {
+                  nip: '',
+                  position: '',
+              }
+            : {}),
         ...(role.value === 'parent' ? { job: '' } : {}),
         address: '',
     });
+
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [removeProfile, setRemoveProfile] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (user) {
@@ -64,6 +64,11 @@ export default function BaseForm({
                 password: '',
                 password_confirmation: '',
             });
+
+            // Set preview if profile picture exists
+            if (user.profile_picture) {
+                setPreviewImage(`/storage/${user.profile_picture}`);
+            }
         } else {
             setFormData({
                 full_name: '',
@@ -74,33 +79,75 @@ export default function BaseForm({
                 password_confirmation: '',
                 role_id: role.id,
                 status: 'active',
-                ...(role.value === 'admin' || role.value === 'teacher' ? { 
-                    nip: '',
-                    position: '' 
-                } : {}),
+                ...(role.value === 'admin' || role.value === 'teacher'
+                    ? {
+                          nip: '',
+                          position: '',
+                      }
+                    : {}),
                 ...(role.value === 'parent' ? { job: '' } : {}),
                 address: '',
             });
+            setPreviewImage(null);
         }
+
+        setRemoveProfile(false);
     }, [user, role.id]);
 
     const handleChange = (field: keyof User, value: any) => {
-        setFormData(prev => ({ ...prev, [field]: value }));
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            // Preview image
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewImage(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+
+            // Set to form data
+            setFormData((prev) => ({ ...prev, profile_picture: file as any }));
+            setRemoveProfile(false);
+        }
+    };
+
+    const handleRemoveImage = () => {
+        setPreviewImage(null);
+        setFormData((prev) => ({ ...prev, profile_picture: undefined }));
+        setRemoveProfile(true);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        const requestData = {
-            ...formData,
-            _method: user?.id ? 'PUT' : 'POST',
-        };
+        const formDataObj = new FormData();
 
-        const url = user?.id 
-            ? route(`${routePrefix}.update`, user.id)
-            : route(`${routePrefix}.store`);
+        // Append all form data
+        Object.entries(formData).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+                formDataObj.append(key, value);
+            }
+        });
 
-        router.post(url, requestData, {
+        // Handle profile picture removal
+        if (removeProfile) {
+            formDataObj.append('remove_profile_picture', '1');
+        }
+
+        // Append method for PUT
+        if (user?.id) {
+            formDataObj.append('_method', 'PUT');
+        }
+
+        const url = user?.id ? route(`${routePrefix}.update`, user.id) : route(`${routePrefix}.store`);
+
+        router.post(url, formDataObj, {
             preserveScroll: true,
             onSuccess: () => {
                 onClose();
@@ -110,21 +157,61 @@ export default function BaseForm({
                 const errorMessage = Object.values(errors).join('\n');
                 toast.error(`Operation failed: ${errorMessage}`);
             },
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
         });
     };
 
     return (
-        <FormModal 
-            isOpen={isOpen} 
-            onClose={onClose} 
-            title={user ? `Edit ${role.name}` : `Add New ${role.name}`}
-            onSubmit={handleSubmit}
-        >
+        <FormModal isOpen={isOpen} onClose={onClose} title={user ? `Edit ${role.name}` : `Add New ${role.name}`} onSubmit={handleSubmit}>
+            {/* Profile Picture */}
+            <div className="mb-4 flex flex-col items-center">
+                <div className="relative">
+                    <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-gray-300 bg-gray-100">
+                        {previewImage ? (
+                            <img src={previewImage} alt="Profile preview" className="h-full w-full object-cover" />
+                        ) : (
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-12 w-12 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                />
+                            </svg>
+                        )}
+                    </div>
+
+                    {(previewImage || (user?.profile_picture && !removeProfile)) && (
+                        <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white hover:cursor-pointer hover:bg-red-600"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
+
+                <label className="mt-2 cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800">
+                    <span>Upload Photo</span>
+                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+                </label>
+                <p className="mt-1 text-xs text-gray-500">Max 2MB (300x300)</p>
+            </div>
+
             {/* Role Field (disabled) */}
             <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700">
-                    Role
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Role</label>
                 <input
                     type="text"
                     value={role.name}
