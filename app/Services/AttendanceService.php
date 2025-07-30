@@ -155,7 +155,7 @@ class AttendanceService
                     $body= 'Anak anda, ' . $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
-                        'tipe' => 'absensi masuk',
+                        'tipe' => 'absensi_masuk',
                     ]);
                 }
             } catch (\Throwable $th) {
@@ -176,7 +176,7 @@ class AttendanceService
                     $body= 'Anak anda, ' . $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
-                        'tipe' => 'absensi masuk',
+                        'tipe' => 'absensi_masuk',
                     ]);
                 }
             } catch (\Throwable $th) {
@@ -197,7 +197,7 @@ class AttendanceService
                     $body= 'Anak anda, ' . $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
-                        'tipe' => 'absensi keluar',
+                        'tipe' => 'absensi_keluar',
                     ]);
                 }
             } catch (\Throwable $th) {
@@ -426,7 +426,7 @@ class AttendanceService
                 $body  = 'Anak Anda, '.$student->full_name.' '.$status.' pada mata pelajaran '.$subject->name;
 
                 $this->firebase->sendToDevice($parent->notification_key, $title, $body, [
-                    'tipe' => 'absensi pelajaran',
+                    'tipe' => 'absensi_pelajaran',
                 ]);
 
             }
@@ -564,7 +564,7 @@ class AttendanceService
                     $body= 'Anak anda, ' . $student->full_name . ' telah melakukan absensi pada kegitan, ' . $participant->event->name . ' dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
-                        'tipe' => 'absensi masuk',
+                        'tipe' => 'absensi_kegiatan',
                     ]);
                 }
             } catch (\Throwable $th) {
