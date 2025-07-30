@@ -55,9 +55,11 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
         address: '',
     });
     const [initialParent, setInitialParent] = useState<Parent | null>(null);
+    const [hasInitialized, setHasInitialized] = useState(false); // Add this flag
 
     useEffect(() => {
-        if (student) {
+        if (isOpen && student && !hasInitialized) {
+            // Only initialize once when modal opens
             setFormData({
                 parent_id: student.parent_id,
                 class_id: student.class_id,
@@ -80,7 +82,8 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
             } else {
                 setInitialParent(null);
             }
-        } else {
+            setHasInitialized(true);
+        } else if (isOpen && !student && !hasInitialized) {
             setFormData({
                 parent_id: null,
                 class_id: null,
@@ -95,8 +98,24 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                 address: '',
             });
             setInitialParent(null);
+            setHasInitialized(true);
         }
-    }, [student]);
+    }, [student, isOpen, hasInitialized]);
+
+    // Reset initialization flag when modal closes
+    useEffect(() => {
+        if (!isOpen) {
+            setHasInitialized(false);
+            setInitialParent(null);
+        }
+    }, [isOpen]);
+
+    // Update initialParent when formData.parent_id changes (user selects new parent)
+    useEffect(() => {
+        if (formData.parent_id === null) {
+            setInitialParent(null);
+        }
+    }, [formData.parent_id]);
 
     const handleChange = (field: keyof Omit<Student, 'id'>, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
