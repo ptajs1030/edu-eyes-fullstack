@@ -1,7 +1,7 @@
-import { type BreadcrumbItem, type SharedData } from '@/types';
+import { type BreadcrumbItem } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
 import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
@@ -18,19 +18,28 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function School({ school_name, school_address = '', school_logo = '' }: { school_name: string; school_address?: string, school_logo?: string }) {
+export default function School({
+    school_name,
+    school_address = '',
+    school_logo = '',
+}: {
+    school_name: string;
+    school_address?: string;
+    school_logo?: string;
+}) {
     const { data, setData, post, errors, processing, recentlySuccessful } = useForm({
         school_name: school_name,
         school_address: school_address,
         school_logo: '' as File | string,
     });
+    const [preview, setPreview] = useState<string | null>(null);
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
         post(route('school.update'), {
             preserveScroll: true,
-            forceFormData: true
+            forceFormData: true,
         });
     };
 
@@ -44,9 +53,10 @@ export default function School({ school_name, school_address = '', school_logo =
 
                     <form onSubmit={submit} className="space-y-6">
                         <div className="grid gap-2">
-                            {school_logo && (
-                                <img src={school_logo} alt="School Logo" className="h-40 w-auto object-contain" />
+                            {(preview || school_logo) && (
+                                <img src={preview || school_logo} alt="School Logo" className="h-40 w-auto rounded border object-cover" />
                             )}
+
                             <Input
                                 type="file"
                                 id="school_logo"
@@ -54,13 +64,15 @@ export default function School({ school_name, school_address = '', school_logo =
                                 accept="image/*"
                                 onChange={(e) => {
                                     if (e.target.files && e.target.files[0]) {
+                                        const file = e.target.files[0];
                                         setData('school_logo', e.target.files[0]);
+                                        setPreview(URL.createObjectURL(file));
                                     }
                                 }}
                             />
                             <InputError className="mt-2" message={errors.school_logo} />
                         </div>
-                    
+
                         <div className="grid gap-2">
                             <Label htmlFor="school_name">Nama Sekolah</Label>
 

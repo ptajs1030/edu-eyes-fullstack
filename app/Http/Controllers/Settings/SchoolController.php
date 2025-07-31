@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Setting;
+use Illuminate\Support\Facades\Storage;
 
 class SchoolController extends Controller
 {
@@ -36,19 +37,49 @@ class SchoolController extends Controller
     public function update(SchoolUpdateRequest $request): RedirectResponse
     {
         $validated = $request->validated();
+        $directory = 'uploads/logos';
 
         // Handle logo upload
         if ($request->hasFile('school_logo')) {
             $logo = $request->file('school_logo');
+            $filename = time() . '-' . uniqid() . '.jpg';
+            $path = $directory . '/' . $filename;
 
-            // Optional: delete old file
+            // crop square, 300 x 300
+            $image = imagecreatefromstring(file_get_contents($logo->path()));
+            $width = imagesx($image);
+            $height = imagesy($image);
+            $size = min($width, $height);
+
+            $cropped = imagecreatetruecolor(300, 300);
+            imagecopyresampled(
+                $cropped,
+                $image,
+                0,
+                0,
+                ($width - $size) / 2,
+                ($height - $size) / 2,
+                300,
+                300,
+                $size,
+                $size
+            );
+
+            // Simpan hasil crop
+            ob_start();
+            imagejpeg($cropped, null, 80);
+            $imageData = ob_get_clean();
+            Storage::disk('public')->put($path, $imageData);
+
+            // Hapus resource
+            imagedestroy($image);
+            imagedestroy($cropped);
+
+            // Delete old file if exists
             $oldLogo = Setting::where('key', 'school_logo')->value('value');
-            if ($oldLogo && \Storage::disk('public')->exists($oldLogo)) {
-                \Storage::disk('public')->delete($oldLogo);
+            if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
+                Storage::disk('public')->delete($oldLogo);
             }
-
-            // Store new logo (e.g. in 'uploads/logos/')
-            $path = $logo->store('uploads/logos', 'public');
 
             // Update setting value with new path
             Setting::updateOrCreate(['key' => 'school_logo'], ['value' => $path]);
