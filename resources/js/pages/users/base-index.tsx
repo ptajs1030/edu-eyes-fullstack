@@ -178,7 +178,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                                         src={
                                             user.profile_picture
                                                 ? `/storage/${user.profile_picture}`
-                                                : `https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(user.full_name)}`
+                                                : `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(user.full_name)}`
                                         }
                                         alt={user.full_name}
                                         className="h-full w-full object-cover"
