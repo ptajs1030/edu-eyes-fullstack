@@ -6,12 +6,10 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Announcement;
+use Illuminate\Validation\ValidationException;
 
 class AnnouncementController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response
     {
         $announcements = Announcement::query()
@@ -26,22 +24,48 @@ class AnnouncementController extends Controller
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    public function create()
+    {
+        return Inertia::render('announcements/create');
+    }
+
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'short_content' => 'required|string'
-        ]);
+        try {
 
-        $data = $request->all();
+            $validated = $request->validate([
+                'title' => 'required|string|max:70',
+                'short_content' => 'required|string|max:255',
+                'content' => 'required|string',
+                'attachments' => 'nullable|array',
+                'attachments.*.url' => 'required|url',
+            ]);
 
-        Announcement::create($data);
+            $announcement = Announcement::create([
+                'title' => $validated['title'],
+                'short_content' => $validated['short_content'],
+                'content' => $validated['content'],
+            ]);
 
-        return redirect()->route('announcements.index')->with('success', 'Announcement created successfully.');
+            if (!empty($validated['attachments'])) {
+                foreach ($validated['attachments'] as $attachment) {
+                    $announcement->attachments()->create([
+                        'url' => $attachment['url'],
+                    ]);
+                }
+            }
+
+            return redirect()->route('announcements.index')->with('success', 'Announcement created successfully.');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->with('error', 'Validasi gagal: ' . implode(' ', $e->validator->errors()->all()))
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal membuat pengumuman: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
