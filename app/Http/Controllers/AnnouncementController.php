@@ -24,6 +24,14 @@ class AnnouncementController extends Controller
         ]);
     }
 
+    public function show($id)
+    {
+        $announcement = Announcement::with('attachments')->findOrFail($id);
+        return Inertia::render('announcements/detail', [
+            'announcement' => $announcement,
+        ]);
+    }
+
     public function create()
     {
         return Inertia::render('announcements/create');
