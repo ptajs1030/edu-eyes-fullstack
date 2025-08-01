@@ -143,6 +143,7 @@ export default function StudentIndex() {
     };
 
     const tableHeaders = [
+        { key: 'profile_picture', label: 'Foto', sortable: false },
         { key: 'full_name', label: 'Nama Siswa', sortable: true },
         { key: 'parent.full_name', label: 'Nama Orang Tua/wali', sortable: false },
         { key: 'classroom.name', label: 'Kelas', sortable: false },
@@ -207,6 +208,23 @@ export default function StudentIndex() {
                         <tr key={student.id} className="border-b">
                             <td className="w-[10px] p-3 text-sm">
                                 <input type="checkbox" checked={selectedIds.includes(student.id)} onChange={() => toggleSelect(student.id)} />
+                            </td>
+                            <td className="p-3">
+                                <div className="flex justify-center">
+                                    {student.profile_picture ? (
+                                        <img
+                                            src={`/storage/${student.profile_picture}`}
+                                            alt={student.full_name}
+                                            className="h-10 w-10 rounded-full border border-gray-300 object-cover"
+                                        />
+                                    ) : (
+                                        <img
+                                            src={`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(student.full_name)}`}
+                                            alt={student.full_name}
+                                            className="h-10 w-10 rounded-full border border-gray-300 object-cover"
+                                        />
+                                    )}
+                                </div>
                             </td>
                             <td className="p-3 text-sm">{student.full_name}</td>
                             <td className="p-3 text-sm">{student.parent?.full_name || '-'}</td>
@@ -326,6 +344,6 @@ export default function StudentIndex() {
                     ]}
                 />
             </div>
-        </AppLayout >
+        </AppLayout>
     );
 }
