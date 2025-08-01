@@ -68,21 +68,54 @@ class AnnouncementController extends Controller
         }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Announcement $announcement)
+    public function edit($id)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'short_content' => 'required|string'
+        $announcement = Announcement::with('attachments')->findOrFail($id);
+        return Inertia::render('announcements/edit', [
+            'announcement' => $announcement,
         ]);
+    }
 
-        $data = $request->all();
-        $announcement->update($data);
+    public function update(Request $request, $id)
+    {
+        try {
+            $announcement = Announcement::findOrFail($id);
 
-        return redirect()->route('announcements.index')->with('success', 'Announcement updated successfully.');
+            $validated = $request->validate([
+                'title' => 'required|string|max:70',
+                'short_content' => 'required|string|max:255',
+                'content' => 'required|string',
+                'attachments' => 'nullable|array',
+                'attachments.*.url' => 'required|url',
+            ]);
+
+            $announcement->update([
+                'title' => $validated['title'],
+                'short_content' => $validated['short_content'],
+                'content' => $validated['content'],
+            ]);
+
+            // Sync attachments
+            $announcement->attachments()->delete();
+            if (!empty($validated['attachments'])) {
+                foreach ($validated['attachments'] as $attachment) {
+                    $announcement->attachments()->create([
+                        'url' => $attachment['url'],
+                    ]);
+                }
+            }
+
+            return redirect()->route('announcements.index')->with('success', 'Announcement updated successfully.');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->with('error', 'Validasi gagal: ' . implode(' ', $e->validator->errors()->all()))
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal memperbarui pengumuman: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
