@@ -15,14 +15,14 @@ class AnnouncementController extends Controller
     public function index(Request $request): Response
     {
         $announcements = Announcement::query()
-        ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
-        ->when($request->sort, fn($q) => $q->orderBy($request->sort, $request->direction ?? 'asc'))
-        ->paginate(5)
-        ->withQueryString(); // penting agar search & sort tetap saat ganti page
+            ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
+            ->orderBy($request->sort ?? 'created_at', $request->direction ?? 'desc')
+            ->paginate(10)
+            ->withQueryString(); // penting agar search & sort tetap saat ganti page
 
-        return Inertia::render('announcement', [
-            'filters' => $request->only(['search', 'sort', 'direction']),
+        return Inertia::render('announcements/index', [
             'announcements' => $announcements,
+            'filters' => $request->only(['search', 'sort', 'direction']),
         ]);
     }
 
