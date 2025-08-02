@@ -40,6 +40,11 @@ class StudentController extends Controller
             $size = min($width, $height);
 
             $cropped = imagecreatetruecolor(300, 300);
+            
+            // Fill background with white color for transparent images
+            $white = imagecolorallocate($cropped, 255, 255, 255);
+            imagefill($cropped, 0, 0, $white);
+
             imagecopyresampled(
                 $cropped,
                 $image,
@@ -122,7 +127,7 @@ class StudentController extends Controller
                 'birth_place' => 'required|string|max:255',
                 'date_of_birth' => 'required|date',
                 'address' => 'required|string',
-                'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
                 'remove_profile_picture' => 'nullable|boolean',
             ]);
 
@@ -164,7 +169,7 @@ class StudentController extends Controller
                 'birth_place' => 'required|string|max:255',
                 'date_of_birth' => 'required|date',
                 'address' => 'required|string',
-                'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+                'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
                 'remove_profile_picture' => 'nullable|boolean',
             ]);
 

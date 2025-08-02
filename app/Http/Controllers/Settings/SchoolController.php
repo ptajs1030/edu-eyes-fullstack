@@ -52,6 +52,10 @@ class SchoolController extends Controller
             $size = min($width, $height);
 
             $cropped = imagecreatetruecolor(300, 300);
+            // Fill background with white color for transparent images
+            $white = imagecolorallocate($cropped, 255, 255, 255);
+            imagefill($cropped, 0, 0, $white);
+            
             imagecopyresampled(
                 $cropped,
                 $image,
