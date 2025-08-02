@@ -1,7 +1,7 @@
 import FormModal from '@/components/form-modal';
 import SearchableSelect from '@/components/ui/searchable-select';
 import { router } from '@inertiajs/react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 interface Classroom {
@@ -28,6 +28,7 @@ interface Student {
     birth_place: string;
     date_of_birth: string;
     address: string;
+    profile_picture?: string | null;
 }
 
 interface Props {
@@ -53,9 +54,13 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
         birth_place: '',
         date_of_birth: '',
         address: '',
+        profile_picture: null,
     });
     const [initialParent, setInitialParent] = useState<Parent | null>(null);
     const [hasInitialized, setHasInitialized] = useState(false); // Add this flag
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [removeProfilePicture, setRemoveProfilePicture] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (isOpen && student && !hasInitialized) {
@@ -72,7 +77,14 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                 birth_place: student.birth_place,
                 date_of_birth: student.date_of_birth,
                 address: student.address,
+                profile_picture: student.profile_picture,
             });
+
+            if (student.profile_picture) {
+                setPreviewImage(`/storage/${student.profile_picture}`);
+            } else {
+                setPreviewImage(`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(student.full_name)}`);
+            }
 
             if (student.parent) {
                 setInitialParent({
@@ -96,6 +108,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                 birth_place: '',
                 date_of_birth: '',
                 address: '',
+                profile_picture: null,
             });
             setInitialParent(null);
             setHasInitialized(true);
@@ -107,6 +120,8 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
         if (!isOpen) {
             setHasInitialized(false);
             setInitialParent(null);
+            setPreviewImage(null);
+            setRemoveProfilePicture(false);
         }
     }, [isOpen]);
 
@@ -121,6 +136,30 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files[0]) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+
+            reader.onload = (event) => {
+                if (event.target?.result) {
+                    setPreviewImage(event.target.result as string);
+                }
+            };
+
+            reader.readAsDataURL(file);
+            setRemoveProfilePicture(false);
+        }
+    };
+
+    const handleRemoveImage = () => {
+        setPreviewImage(null);
+        setRemoveProfilePicture(true);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -130,40 +169,72 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
         }
 
         const { parent, ...payload } = formData;
-        const requestData = {
-            ...payload,
-            _method: student?.id ? 'PUT' : 'POST',
-        };
+        const formDataToSend = new FormData();
 
-        if (student?.id) {
-            router.post(`/students/${student.id}`, requestData, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    onClose();
-                    router.reload();
-                },
-                onError: (errors) => {
-                    const errorMessage = Object.values(errors).join('\n');
-                    toast.error(`Failed to update student: ${errorMessage}`);
-                },
-            });
-        } else {
-            router.post('/students', requestData, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    onClose();
-                    router.reload();
-                },
-                onError: (errors) => {
-                    const errorMessage = Object.values(errors).join('\n');
-                    toast.error(`Failed to add new student: ${errorMessage}`);
-                },
-            });
+        Object.entries(payload).forEach(([key, value]) => {
+            if (value !== null) {
+                formDataToSend.append(key, value as string);
+            }
+        });
+
+        if (fileInputRef.current?.files?.[0]) {
+            formDataToSend.append('profile_picture', fileInputRef.current.files[0]);
         }
+
+        if (removeProfilePicture) {
+            formDataToSend.append('remove_profile_picture', '1');
+        }
+
+        formDataToSend.append('_method', student?.id ? 'PUT' : 'POST');
+
+        const url = student?.id ? `/students/${student.id}` : '/students';
+
+        router.post(url, formDataToSend, {
+            preserveScroll: true,
+            forceFormData: true,
+            onSuccess: () => {
+                onClose();
+                router.reload();
+            },
+            onError: (errors) => {
+                const errorMessage = Object.values(errors).join('\n');
+                toast.error(`Failed to ${student ? 'update' : 'add'} student: ${errorMessage}`);
+            },
+        });
     };
 
     return (
         <FormModal isOpen={isOpen} onClose={onClose} title={student ? 'Edit Siswa' : 'Tambah Siswa Baru'} onSubmit={handleSubmit}>
+            {/* Profile Picture Section */}
+            <div className="mb-4 flex flex-col items-center">
+                <label className="mb-2 block text-sm font-medium text-gray-700">Foto Profil</label>
+                <div className="group relative">
+                    {previewImage ? (
+                        <div className="relative">
+                            <img
+                                src={previewImage}
+                                alt="Profile preview"
+                                className="h-32 w-32 rounded-full border-2 border-gray-300 object-cover shadow-sm"
+                            />
+                            <button
+                                type="button"
+                                onClick={handleRemoveImage}
+                                className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 transform rounded-full bg-red-500 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    ) : (
+                        <div className="flex h-32 w-32 items-center justify-center rounded-full border-2 border-dashed bg-gray-200">
+                            <span className="text-gray-500">No image</span>
+                        </div>
+                    )}
+                </div>
+                <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="mt-2 text-sm" />
+                <p className="mt-1 text-xs text-gray-500">Format: JPG, PNG, GIF (Max 2MB). Gambar akan di-crop menjadi persegi.</p>
+            </div>
             <div className="mb-3">
                 <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
                     Nama Lengkap

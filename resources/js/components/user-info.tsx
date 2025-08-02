@@ -8,7 +8,14 @@ export function UserInfo({ user, showEmail = false }: { user: User; showEmail?: 
     return (
         <>
             <Avatar className="h-8 w-8 overflow-hidden rounded-full">
-                <AvatarImage src={user.avatar} alt={user.full_name} />
+                <AvatarImage
+                    src={
+                        user.profile_picture
+                            ? `/storage/${user.profile_picture}`
+                            : `https://api.dicebear.com/8.x/initials/svg?seed=${encodeURIComponent(user.full_name)}`
+                    }
+                    alt={user.full_name}
+                />
                 <AvatarFallback className="rounded-lg bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
                     {getInitials(user.full_name)}
                 </AvatarFallback>

@@ -8,6 +8,8 @@ use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,6 +25,8 @@ class UserController extends Controller
             'email' => 'nullable|email|max:255|unique:users,email' . ($user ? ",{$user->id}" : ''),
             'address' => 'nullable|string',
             'status' => 'required|in:' . implode(',', UserStatus::getValues()),
+            'profile_picture' => 'nullable|image|max:2048', // 2MB max
+            'remove_profile_picture' => 'nullable|boolean',
         ];
 
         if (!$user) {
@@ -42,6 +46,64 @@ class UserController extends Controller
         }
 
         return $rules;
+    }
+
+    private function handleProfilePicture(Request $request, ?User $user = null)
+    {
+        $filename = null;
+        $directory = 'uploads/profile_pictures';
+
+        if ($request->input('remove_profile_picture')) {
+            if ($user && $user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
+                Storage::disk('public')->delete($user->profile_picture);
+            }
+            return null;
+        }
+
+        if ($request->hasFile('profile_picture')) {
+            $file = $request->file('profile_picture');
+            $filename = time() . '-' . uniqid() . '.jpg';
+            $path = $directory . '/' . $filename;
+
+            // crop square, 300 x 300
+            $image = imagecreatefromstring(file_get_contents($file->path()));
+            $width = imagesx($image);
+            $height = imagesy($image);
+            $size = min($width, $height);
+
+            $cropped = imagecreatetruecolor(300, 300);
+            imagecopyresampled(
+                $cropped,
+                $image,
+                0,
+                0,
+                ($width - $size) / 2,
+                ($height - $size) / 2,
+                300,
+                300,
+                $size,
+                $size
+            );
+
+            // Simpan hasil crop
+            ob_start();
+            imagejpeg($cropped, null, 80);
+            $imageData = ob_get_clean();
+            Storage::disk('public')->put($path, $imageData);
+
+            // Hapus resource
+            imagedestroy($image);
+            imagedestroy($cropped);
+
+            // Hapus file lama jika ada
+            if ($user && $user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
+                Storage::disk('public')->delete($user->profile_picture);
+            }
+
+            return $path;
+        }
+
+        return $user->profile_picture ?? null;
     }
 
     private function prepareUserData(array $validated, EnumsRole $role): array
@@ -140,6 +202,7 @@ class UserController extends Controller
             $userData = $this->prepareUserData($validated, $role);
             $userData['role_id'] = $roleModel->id;
 
+            $userData['profile_picture'] = $this->handleProfilePicture($request);
             User::create($userData);
 
             return redirect()->back()->with('success', "New {$role->label()} created successfully");
@@ -179,6 +242,7 @@ class UserController extends Controller
 
             $userData = $this->prepareUserData($validated, $role);
 
+            $userData['profile_picture'] = $this->handleProfilePicture($request, $user);
             $user->update($userData);
 
             return redirect()->back()->with('success', "{$role->label()} updated successfully");
