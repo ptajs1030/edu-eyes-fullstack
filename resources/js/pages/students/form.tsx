@@ -232,8 +232,17 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                         </div>
                     )}
                 </div>
-                <input type="file" ref={fileInputRef} onChange={handleImageChange} accept="image/*" className="mt-2 text-sm" />
-                <p className="mt-1 text-xs text-gray-500">Format: JPG, PNG, GIF (Max 2MB). Gambar akan di-crop menjadi persegi.</p>
+                <label className="mt-2 cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800">
+                    <span>Upload Photo</span>
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleImageChange}
+                        accept="image/*"
+                        className="hidden"
+                    />
+                </label>
+                <p className="mt-1 text-xs text-gray-500">Max 2MB (300x300)</p>
             </div>
             <div className="mb-3">
                 <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
