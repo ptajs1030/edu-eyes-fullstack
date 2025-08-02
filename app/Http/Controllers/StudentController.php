@@ -127,7 +127,7 @@ class StudentController extends Controller
                 'birth_place' => 'required|string|max:255',
                 'date_of_birth' => 'required|date',
                 'address' => 'required|string',
-                'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+                'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
                 'remove_profile_picture' => 'nullable|boolean',
             ]);
 
@@ -169,7 +169,7 @@ class StudentController extends Controller
                 'birth_place' => 'required|string|max:255',
                 'date_of_birth' => 'required|date',
                 'address' => 'required|string',
-                'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+                'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
                 'remove_profile_picture' => 'nullable|boolean',
             ]);
 
