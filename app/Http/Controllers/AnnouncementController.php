@@ -6,59 +6,124 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Models\Announcement;
+use Illuminate\Validation\ValidationException;
 
 class AnnouncementController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request): Response
     {
         $announcements = Announcement::query()
-        ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
-        ->when($request->sort, fn($q) => $q->orderBy($request->sort, $request->direction ?? 'asc'))
-        ->paginate(5)
-        ->withQueryString(); // penting agar search & sort tetap saat ganti page
+            ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
+            ->orderBy($request->sort ?? 'created_at', $request->direction ?? 'desc')
+            ->paginate(10)
+            ->withQueryString(); // penting agar search & sort tetap saat ganti page
 
-        return Inertia::render('announcement', [
-            'filters' => $request->only(['search', 'sort', 'direction']),
+        return Inertia::render('announcements/index', [
             'announcements' => $announcements,
+            'filters' => $request->only(['search', 'sort', 'direction']),
         ]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    public function show($id)
+    {
+        $announcement = Announcement::with('attachments')->findOrFail($id);
+        return Inertia::render('announcements/detail', [
+            'announcement' => $announcement,
+        ]);
+    }
+
+    public function create()
+    {
+        return Inertia::render('announcements/create');
+    }
+
     public function store(Request $request)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'short_content' => 'required|string'
-        ]);
+        try {
 
-        $data = $request->all();
+            $validated = $request->validate([
+                'title' => 'required|string|max:70',
+                'short_content' => 'required|string|max:255',
+                'content' => 'required|string',
+                'attachments' => 'nullable|array',
+                'attachments.*.url' => 'required|url',
+            ]);
 
-        Announcement::create($data);
+            $announcement = Announcement::create([
+                'title' => $validated['title'],
+                'short_content' => $validated['short_content'],
+                'content' => $validated['content'],
+            ]);
 
-        return redirect()->route('announcements.index')->with('success', 'Announcement created successfully.');
+            if (!empty($validated['attachments'])) {
+                foreach ($validated['attachments'] as $attachment) {
+                    $announcement->attachments()->create([
+                        'url' => $attachment['url'],
+                    ]);
+                }
+            }
+
+            return redirect()->route('announcements.index')->with('success', 'Announcement created successfully.');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->with('error', 'Validasi gagal: ' . implode(' ', $e->validator->errors()->all()))
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal membuat pengumuman: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Announcement $announcement)
+    public function edit($id)
     {
-        $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
-            'short_content' => 'required|string'
+        $announcement = Announcement::with('attachments')->findOrFail($id);
+        return Inertia::render('announcements/edit', [
+            'announcement' => $announcement,
         ]);
+    }
 
-        $data = $request->all();
-        $announcement->update($data);
+    public function update(Request $request, $id)
+    {
+        try {
+            $announcement = Announcement::findOrFail($id);
 
-        return redirect()->route('announcements.index')->with('success', 'Announcement updated successfully.');
+            $validated = $request->validate([
+                'title' => 'required|string|max:70',
+                'short_content' => 'required|string|max:255',
+                'content' => 'required|string',
+                'attachments' => 'nullable|array',
+                'attachments.*.url' => 'required|url',
+            ]);
+
+            $announcement->update([
+                'title' => $validated['title'],
+                'short_content' => $validated['short_content'],
+                'content' => $validated['content'],
+            ]);
+
+            // Sync attachments
+            $announcement->attachments()->delete();
+            if (!empty($validated['attachments'])) {
+                foreach ($validated['attachments'] as $attachment) {
+                    $announcement->attachments()->create([
+                        'url' => $attachment['url'],
+                    ]);
+                }
+            }
+
+            return redirect()->route('announcements.index')->with('success', 'Announcement updated successfully.');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->with('error', 'Validasi gagal: ' . implode(' ', $e->validator->errors()->all()))
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal memperbarui pengumuman: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     /**
