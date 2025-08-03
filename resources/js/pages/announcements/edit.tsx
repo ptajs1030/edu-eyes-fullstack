@@ -1,3 +1,4 @@
+import RichTextEditor from '@/components/rich-text-editor';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router } from '@inertiajs/react';
@@ -108,23 +109,10 @@ export default function EditAnnouncement({ announcement }: Props) {
                         />
                     </div>
                     <div>
-                        <label htmlFor="content" className="block text-sm font-medium text-gray-700">
-                            Konten
+                        <label className="mb-1 block text-sm font-medium text-gray-700">
+                            Konten <span className="text-red-500">*</span>
                         </label>
-                        {/* <ReactQuill
-                            value={content}
-                            onChange={setContent}
-                            modules={{
-                                toolbar: [
-                                    [{ header: '1' }, { header: '2' }, { font: [] }],
-                                    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                                    [{ list: 'ordered' }, { list: 'bullet' }],
-                                    ['link', 'image'],
-                                    ['clean'],
-                                ],
-                            }}
-                            theme="snow"
-                        /> */}
+                        <RichTextEditor value={content} onChange={setContent} placeholder="Ketik konten pengumuman di sini..." />
                     </div>
                     <div>
                         <label className="mb-2 block text-sm font-medium text-gray-700">Lampiran</label>
