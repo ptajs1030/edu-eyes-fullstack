@@ -1,10 +1,8 @@
 import RichTextEditor from '@/components/rich-text-editor';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link, router } from '@inertiajs/react';
-import React, { useState } from 'react';
-// import ReactQuill from 'react-quill';
-// import 'react-quill/dist/quill.snow.css';
+import { Head, Link, router, usePage } from '@inertiajs/react';
+import React, { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 
 interface Announcement {
@@ -30,6 +28,12 @@ export default function EditAnnouncement({ announcement }: Props) {
     const [content, setContent] = useState(announcement.content);
     const [attachments, setAttachments] = useState<{ url: string }[]>(announcement.attachments);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
+
+    useEffect(() => {
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
+    }, [flash]);
 
     const handleAddAttachment = () => {
         setAttachments([...attachments, { url: '' }]);
@@ -60,9 +64,7 @@ export default function EditAnnouncement({ announcement }: Props) {
                 attachments,
             },
             {
-                onSuccess: () => {
-                    toast.success('Pengumuman berhasil diperbarui');
-                },
+                onSuccess: () => {},
                 onError: (errors) => {
                     Object.values(errors).forEach((error) => {
                         toast.error(error);
@@ -128,7 +130,7 @@ export default function EditAnnouncement({ announcement }: Props) {
                                 <button
                                     type="button"
                                     onClick={() => handleRemoveAttachment(index)}
-                                    className="ml-2 inline-flex items-center rounded-md border border-transparent bg-red-100 px-3 py-2 text-sm leading-4 font-medium text-red-700 hover:bg-red-200 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
+                                    className="ml-2 inline-flex items-center rounded-md border border-transparent bg-red-100 px-3 py-2 text-sm leading-4 font-medium text-red-700 hover:cursor-pointer hover:bg-red-200 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
                                 >
                                     Hapus
                                 </button>
@@ -137,7 +139,7 @@ export default function EditAnnouncement({ announcement }: Props) {
                         <button
                             type="button"
                             onClick={handleAddAttachment}
-                            className="mt-2 inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                            className="rounded-md bg-sky-500 px-3 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-sky-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                         >
                             Tambah Lampiran
                         </button>
@@ -152,7 +154,7 @@ export default function EditAnnouncement({ announcement }: Props) {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
+                            className="inline-flex items-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:opacity-50"
                         >
                             {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
                         </button>

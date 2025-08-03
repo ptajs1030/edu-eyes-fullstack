@@ -11,17 +11,51 @@ interface RichTextEditorProps {
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeholder }) => {
     // Konfigurasi modul toolbar
     const modules = {
-        toolbar: [
-            [{ header: [1, 2, 3, false] }],
-            ['bold', 'italic', 'underline', 'strike'],
-            [{ list: 'ordered' }, { list: 'bullet' }],
-            ['link', 'image'],
-            ['clean'],
-        ],
+        toolbar: {
+            container: [
+                [{ header: [1, 2, 3, false] }],
+                ['bold', 'italic', 'underline', 'strike'],
+                [{ list: 'ordered' }, { list: 'bullet' }],
+                ['link', 'image'],
+                ['clean'],
+            ],
+            // handlers: {
+            //     image: imageHandler,
+            // },
+        },
     };
 
     // Format yang didukung
-    const formats = ['header', 'bold', 'italic', 'underline', 'strike', 'list', 'bullet', 'link', 'image'];
+    const formats = ['header', 'bold', 'italic', 'underline', 'strike', 'list', 'link', 'image'];
+
+    // const imageHandler = () => {
+    //     const input = document.createElement('input');
+    //     input.setAttribute('type', 'file');
+    //     input.setAttribute('accept', 'image/*');
+    //     input.click();
+
+    //     input.onchange = async () => {
+    //         const file = input.files?.[0];
+    //         if (file) {
+    //             const formData = new FormData();
+    //             formData.append('image', file);
+
+    //             try {
+    //                 const response = await axios.post('/api/upload-image', formData, {
+    //                     headers: {
+    //                         'Content-Type': 'multipart/form-data',
+    //                     },
+    //                 });
+    //                 const quill = quillRef.current?.getEditor();
+    //                 const range = quill?.getSelection();
+    //                 quill?.insertEmbed(range?.index || 0, 'image', response.data.url);
+    //             } catch (error) {
+    //                 console.error('Upload failed:', error);
+    //                 toast.error('Gagal mengupload gambar');
+    //             }
+    //         }
+    //     };
+    // };
 
     return (
         <div className="rich-editor">

@@ -13,8 +13,9 @@ class AnnouncementController extends Controller
     public function index(Request $request): Response
     {
         $announcements = Announcement::query()
+            ->with('attachments')
             ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
-            ->orderBy($request->sort ?? 'created_at', $request->direction ?? 'desc')
+            ->orderBy($request->sort ?? 'updated_at', $request->direction ?? 'desc')
             ->paginate(10)
             ->withQueryString(); // penting agar search & sort tetap saat ganti page
 
@@ -27,6 +28,7 @@ class AnnouncementController extends Controller
     public function show($id)
     {
         $announcement = Announcement::with('attachments')->findOrFail($id);
+
         return Inertia::render('announcements/detail', [
             'announcement' => $announcement,
         ]);
