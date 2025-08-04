@@ -38,6 +38,8 @@ class DatabaseSeeder extends Seeder
                 EventParticipantSeeder::class,
                 EventAttendanceSeeder::class,
                 CustomDayOffSeeder::class,
+                ExamSeeder::class,
+                TaskSeeder::class
             ]);
 
             DB::commit();

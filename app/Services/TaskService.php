@@ -70,8 +70,8 @@ class TaskService
             'title'=>$task->task->title,
             'description'=>$task->task->description,
             'attachments'=>$attachments,
-            'due_date'=>$task->task->due_date,
-            'due_time'=>$task->task->due_time,
+            'due_date'=>Carbon::parse($task->task->due_date)->format('Y-m-d'),
+                'due_time'=>Carbon::parse($task->task->due_time)->format('H:i'),
             'created_at'=>$task->task->created_at
         ];
     }

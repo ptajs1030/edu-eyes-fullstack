@@ -10,10 +10,15 @@ use Carbon\Carbon;
 
 class ExamService
 {
-    public function getSubject($student, $date, $search){
+    public function getSubject($student, $date, $search, $academicYearId){
         $subjectQuery = Subject::query();
         $examQuery=ExamAssignment::query();
         $examQuery->where('student_id', $student->id);
+        if ($academicYearId) {
+            $examQuery->whereHas('exam', function($q) use ($academicYearId) {
+                $q->where('academic_year_id', $academicYearId);
+            });
+        }
         if ($date) {
             $parsedDate = Carbon::parse($date);
             $examQuery->whereHas('exam', function($q) use ($parsedDate) {
@@ -42,12 +47,17 @@ class ExamService
         ];
     }
 
-    public function getExam($student, $date, $subject){
+    public function getExam($student, $date, $subject, $academicYearId){
         $query=ExamAssignment::query();
         $query->where('student_id', $student->id);
         $query->whereHas('exam', function($q) use ($subject) {
             $q->where('subject_id', $subject);
         });
+        if ($academicYearId) {
+            $query->whereHas('exam', function($q) use ($academicYearId) {
+                $q->where('academic_year_id', $academicYearId);
+            });
+        }
         if ($date) {
             $parsedDate = Carbon::parse($date);
             $query->whereHas('exam', function($q) use ($parsedDate) {
@@ -70,7 +80,7 @@ class ExamService
             ];
         }
 
-        $subject=Subject::find($subject)->value('name');
+        $subject=Subject::where('id',$subject)->value('name');
         $totalUlangan=$exams->count();
         $totalNilai=$exams->sum('score');
         $rataRata=$totalNilai/$totalUlangan;
