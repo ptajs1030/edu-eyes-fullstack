@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\ChangePasswordRequest;
+use App\Http\Resources\AcademicYearResource;
 use App\Http\Resources\AnnouncementResource;
 use App\Http\Resources\StudentResource;
 use App\Http\Resources\SubjectResource;
 use App\Http\Resources\UserResource;
+use App\Models\AcademicYear;
 use App\Models\Announcement;
 use App\Models\Student;
 use App\Models\Subject;
@@ -46,6 +48,12 @@ class ParentController extends BaseApiController
     {
         $data= $this->service->getAnnouncements($id, $request->search);
 
+        if ($id) {
+            return $this->success([
+               AnnouncementResource::make(Announcement::findOrFail($id))
+            ]);
+        }
+    
         return $this->success([
             'current_page' => $data['current_page'],
             'last_page' => $data['last_page'],
@@ -77,8 +85,9 @@ class ParentController extends BaseApiController
         return $this->success($this->service->getSubjectSchedule($student));
     }
 
-    public function getEventDate(string $date){
-        return $this->success($this->service->getEventDate($date));
+    public function getEventDate(Request $request,string $date){
+        $student = $request->attributes->get('current_student');
+        return $this->success($this->service->getEventDate($student,$date));
     }
 
     public function getEventSchedule(Request $request, ){
@@ -112,5 +121,9 @@ class ParentController extends BaseApiController
         return $this->resource(
             SubjectResource::collection(Subject::get())
         );
+    }
+
+    public function getAcademicYear(){
+        return $this->resource(AcademicYearResource::collection(AcademicYear::get()));
     }
 }
