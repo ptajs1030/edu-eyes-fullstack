@@ -187,7 +187,15 @@ class ParentService
             if (!$announcement) {
                 return throw new SilentHttpException(404,'Pengumuman tidak ditemukan');
             }
-            return $announcement;
+            return [
+                'id' => $announcement->id,
+                'title' => $announcement->title,
+                'content' => $announcement->content,
+                'short_content' => $announcement->short_content,
+                'attachments' => $announcement->attachments->pluck('url'),
+                'created_at' => $announcement->created_at,
+                'updated_at' => $announcement->updated_at
+            ];
         }else {
             $query = Announcement::query();
             if ($search) {
@@ -245,10 +253,18 @@ class ParentService
         return $scheduleWithRelations;
     }
 
-    public function getEventDate($date){
+
+    public function getEventDate($student,$date){
         $parsedDate = Carbon::parse($date);
-        $events = Event::whereYear('date', $parsedDate->year)->whereMonth('date', $parsedDate->month)->get('date');
-        if ($events->isEmpty()) {
+        $events = Event::whereHas('participants', function($q) use ($student) {
+            $q->where('student_id', $student->id);
+        })
+        ->whereYear('start_date', $parsedDate->year)
+        ->whereMonth('start_date', $parsedDate->month)
+        ->select( 'start_date', 'end_date', ) 
+        ->get();
+        // $events = Event::whereYear('start_date', $parsedDate->year)->whereMonth('start_date', $parsedDate->month)->get(['start_date', 'end_date']);
+        if (!$events) {
             throw new SilentHttpException(404, 'Kegiatan tidak ditemukan');
         }
         return $events;
@@ -297,7 +313,7 @@ class ParentService
 
         if ($date) {
             $parsedDate = Carbon::parse($date)->format('Y-m-d');
-            $query->where('submit_date', $parsedDate);
+            $query->whereDate('submit_date', $parsedDate);
         }
         $attendances = $query->with('student', 'event', 'academicYear')->paginate(10);
         if ($attendances->isEmpty()) {

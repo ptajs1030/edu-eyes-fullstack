@@ -14,12 +14,14 @@ class ExamController extends BaseApiController
         $student= $request->attributes->get('current_student');
         $date= $request->query('date');
         $search= $request->query('search');
-        return $this->success($this->service->getSubject($student, $date, $search));
+        $academicYearId= $request->query('academicYearId');
+        return $this->success($this->service->getSubject($student, $date, $search, $academicYearId));
     }
 
     public function getExam(Request $request, int $subject){
         $student= $request->attributes->get('current_student');
         $date=$request->query('date');
-        return $this->success($this->service->getExam($student, $date, $subject));
+        $academicYearId= $request->query('academicYearId');
+        return $this->success($this->service->getExam($student, $date, $subject, $academicYearId));
     }
 }
