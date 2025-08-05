@@ -264,7 +264,7 @@ class ParentService
         ->select( 'start_date', 'end_date', ) 
         ->get();
         // $events = Event::whereYear('start_date', $parsedDate->year)->whereMonth('start_date', $parsedDate->month)->get(['start_date', 'end_date']);
-        if (!$events) {
+        if ($events->isEmpty()) {
             throw new SilentHttpException(404, 'Kegiatan tidak ditemukan');
         }
         return $events;
@@ -276,8 +276,8 @@ class ParentService
         if ($date) {
             $parsedDate = Carbon::parse($date);
             $query->whereHas('event', function($q) use ($parsedDate) {
-                $q->whereYear('date', $parsedDate->year)
-                  ->whereMonth('date', $parsedDate->month);
+                $q->whereYear('', $parsedDate->year)
+                  ->whereMonth('start_date', $parsedDate->month);
             });
         }
         $schedules = $query->with('event')->paginate(10);
@@ -291,7 +291,8 @@ class ParentService
                 'id' => $schedule->event->id,
                 'name' => $schedule->event->name,
                 'description' => $schedule->event->description,
-                'date' => $schedule->event->date,
+                'start_date' => $schedule->event->start_date,
+                'end_date' => $schedule->event->end_date,
                 'start_time' => $schedule->event->Start_hour,
                 'end_time' => $schedule->event->end_hour,
             ];

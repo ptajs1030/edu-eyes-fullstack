@@ -121,11 +121,11 @@ class AttendanceService
             throw new SilentHttpException(404, 'PIC tidak ditemukan');
         }
         
-
-        $late_tolerance = (int)Setting::where('key', 'late_tolerance')->value        ('value');
-        $deadline = Carbon::parse($attendance->shifting_start_hour)->addMinutes($late_tolerance);
+       $late_tolerance = (int) Setting::where('key', 'late_tolerance')->value('value');
+        $start_hour = Carbon::parse($attendance->shifting_start_hour);
+        $deadline = $start_hour->copy()->addMinutes($late_tolerance);
         $submit_hour = Carbon::parse($data->getSubmitHour());
-        $minutes_of_late = $deadline->diffInMinutes($data->getSubmitHour());
+        $minutes_of_late = $start_hour->diffInMinutes($data->getSubmitHour());
         $isPic = $pics->contains('teacher_id', auth()->user()->id);
         $type= $data->getType();
         if (!$isPic) {
@@ -143,10 +143,32 @@ class AttendanceService
                 throw new SilentHttpException(400, 'Absen keluar harus minimal 2 menit setelah absen masuk');
             }
         }
-        if ($submit_hour <= $deadline && !$attendance->clock_in_hour && $type=='in') {
+        if ($submit_hour <= $start_hour && !$attendance->clock_in_hour && $type=='in') {
             $attendance->update([
                 'status' => 'present',
                 'clock_in_hour' => $submit_hour
+            ]);
+            
+             try {
+                if ($parent && $parent->notification_key) {
+                    $title= 'Absensi '.$student->full_name;
+                    $body= 'Anak anda, ' . $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
+
+                    $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
+                        'tipe' => 'absensi_masuk',
+                    ]);
+                }
+            } catch (\Throwable $th) {
+                Log::error('Gagal kirim notifikasi Firebase', [
+                    'token' => $parent ? $parent->notification_key : null,
+                    'error_message' => $th->getMessage(),
+                ]);
+            }
+        }else if ($submit_hour <= $deadline && !$attendance->clock_in_hour && $type=='in') {
+             $attendance->update([
+                'status' => 'present_in_tolerance',
+                'clock_in_hour' => $submit_hour,
+                'minutes_of_late' => (int) $minutes_of_late
             ]);
             
              try {
@@ -475,8 +497,8 @@ class AttendanceService
         }
         if ($date) {
             $parsedDate = Carbon::parse($date);
-            $query->whereYear('date', $parsedDate->year)
-              ->whereMonth('date', $parsedDate->month);
+            $query->whereYear('start_date', $parsedDate->year)
+              ->whereMonth('start_date', $parsedDate->month);
         }
         $events = $query->paginate(10);
         if ($events->isEmpty()) {
@@ -488,8 +510,9 @@ class AttendanceService
                 'id' => $event->id,
                 'name' => $event->name,
                 'description' => $event->description,
-                'date' => $event->date,
-                'start_time' => $event->Start_hour,
+                'start_date' => $event->start_date,
+                'end_date' => $event->end_date,
+                'start_time' => $event->start_hour,
                 'end_time' => $event->end_hour,
             ];
         }
@@ -506,7 +529,7 @@ class AttendanceService
             throw new SilentHttpException(404, 'Siswa tidak ditemukan');
         }
         $parent=$student->parent;
-       $participant=EventParticipant::where('student_id', $student->id)
+        $participant=EventParticipant::where('student_id', $student->id)
             ->where('event_id', $data->getEvent())->with('event')
             ->first();
            
@@ -523,15 +546,16 @@ class AttendanceService
             ->where('submit_date', Carbon::now()->format('Y-m-d'))
             ->first();
         $late_tolerance = (int)Setting::where('key', 'late_tolerance')->value        ('value');
+        $start_hour=Carbon::parse($participant->event->start_hour);
         $deadline = Carbon::parse($participant->event->start_hour)->addMinutes($late_tolerance);
         $submit_hour = Carbon::parse($data->getSubmitHour());
-        $minutes_of_late = $deadline->diffInMinutes($data->getSubmitHour());
+        $minutes_of_late = $start_hour->diffInMinutes($submit_hour);
         $isPic = $pics->contains('pic_id', auth()->user()->id);
         if (!$isPic) {
             throw new SilentHttpException(403, 'Anda tidak ditugaskan untuk kegiatan ini.');
         }
        
-        if ($attendance) {
+        if ($attendance && $attendance->submit_date != Carbon::now()->format('Y-m-d')) {
             if ($attendance->clock_in_hour && $attendance->clock_out_hour == '00:00:00') {
                 $minClockOut = Carbon::parse($attendance->clock_in_hour)->addMinutes(2);
                     if ($submit_hour->lt($minClockOut)) {
@@ -546,8 +570,13 @@ class AttendanceService
             throw new SilentHttpException(400, 'Absensi sudah diisi');
             }
         } else {
-        
-            $status = $submit_hour <= $deadline ? 'present' : 'late';
+            if ($submit_hour<=$start_hour) {
+                $status = 'present';
+            }else if($submit_hour<=$deadline){
+                $status = 'present_in_tolerance';
+            }else {
+                $status = 'late';
+            }
             $attendance = EventAttendance::create([
                 'student_id' => $student->id,
                 'event_id' => $data->getEvent(),
@@ -556,7 +585,7 @@ class AttendanceService
                 'clock_in_hour' => $submit_hour->format('H:i:s'),
                 'clock_out_hour' => '00:00:00', 
                 'status' => $status,
-                'minutes_of_late' => $status == 'late' ? (int) $minutes_of_late : 0,
+                'minutes_of_late' => $status == 'late' || $status == 'present_in_tolerance' ? (int) $minutes_of_late : 0,
             ]);
             try {
                 if ($parent && $parent->notification_key) {
