@@ -79,8 +79,6 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
         });
     };
 
-    console.log(announcements);
-
     const tableHeaders = [
         { key: 'title', label: 'Judul', sortable: true },
         { key: 'short_content', label: 'Ringkasan', sortable: false },

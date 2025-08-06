@@ -47,13 +47,15 @@ export default function CreateAnnouncement() {
         e.preventDefault();
         setIsSubmitting(true);
 
+        const formattedAttachments = attachments.filter((att) => att.url.trim() !== '').map((att) => ({ url: att.url }));
+
         router.post(
             '/announcements',
             {
                 title,
                 short_content: shortContent,
                 content,
-                attachments: attachments.filter((a) => a.url.trim() !== ''),
+                attachments: formattedAttachments,
             },
             {
                 onSuccess: () => {},

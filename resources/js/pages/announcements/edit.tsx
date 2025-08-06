@@ -55,13 +55,15 @@ export default function EditAnnouncement({ announcement }: Props) {
         e.preventDefault();
         setIsSubmitting(true);
 
+        const formattedAttachments = attachments.filter((att) => att.url.trim() !== '').map((att) => ({ url: att.url }));
+
         router.put(
             `/announcements/${announcement.id}`,
             {
                 title,
                 short_content: shortContent,
                 content,
-                attachments,
+                attachments: formattedAttachments,
             },
             {
                 onSuccess: () => {},

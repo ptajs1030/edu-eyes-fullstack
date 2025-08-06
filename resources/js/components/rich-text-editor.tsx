@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import { toast } from 'sonner';
 
 interface RichTextEditorProps {
     value: string;
@@ -9,6 +10,43 @@ interface RichTextEditorProps {
 }
 
 const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeholder }) => {
+    const quillRef = useRef<any>(null);
+
+    const imageHandler = () => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.setAttribute('multiple', 'true');
+        input.click();
+
+        input.onchange = () => {
+            const files = input.files;
+            if (!files || files.length === 0) return;
+
+            const editor = quillRef.current?.getEditor();
+            const range = editor?.getSelection();
+
+            Array.from(files).forEach((file) => {
+                if (!file.type.match('image.*')) {
+                    toast.error('Hanya file gambar yang diizinkan');
+                    return;
+                }
+
+                if (file.size > 2 * 1024 * 1024) {
+                    toast.error('Ukuran gambar maksimal 2MB');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imageUrl = e.target?.result as string;
+                    editor?.insertEmbed(range?.index || 0, 'image', imageUrl);
+                };
+                reader.readAsDataURL(file);
+            });
+        };
+    };
+
     // Konfigurasi modul toolbar
     const modules = {
         toolbar: {
@@ -19,47 +57,19 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ value, onChange, placeh
                 ['link', 'image'],
                 ['clean'],
             ],
-            // handlers: {
-            //     image: imageHandler,
-            // },
+            handlers: {
+                image: imageHandler,
+            },
         },
     };
 
     // Format yang didukung
     const formats = ['header', 'bold', 'italic', 'underline', 'strike', 'list', 'link', 'image'];
 
-    // const imageHandler = () => {
-    //     const input = document.createElement('input');
-    //     input.setAttribute('type', 'file');
-    //     input.setAttribute('accept', 'image/*');
-    //     input.click();
-
-    //     input.onchange = async () => {
-    //         const file = input.files?.[0];
-    //         if (file) {
-    //             const formData = new FormData();
-    //             formData.append('image', file);
-
-    //             try {
-    //                 const response = await axios.post('/api/upload-image', formData, {
-    //                     headers: {
-    //                         'Content-Type': 'multipart/form-data',
-    //                     },
-    //                 });
-    //                 const quill = quillRef.current?.getEditor();
-    //                 const range = quill?.getSelection();
-    //                 quill?.insertEmbed(range?.index || 0, 'image', response.data.url);
-    //             } catch (error) {
-    //                 console.error('Upload failed:', error);
-    //                 toast.error('Gagal mengupload gambar');
-    //             }
-    //         }
-    //     };
-    // };
-
     return (
         <div className="rich-editor">
             <ReactQuill
+                ref={quillRef}
                 theme="snow"
                 value={value}
                 onChange={onChange}
