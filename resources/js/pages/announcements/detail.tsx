@@ -8,7 +8,7 @@ interface Announcement {
     short_content: string;
     content: string;
     attachments: { url: string }[];
-    created_at: string;
+    updated_at: string;
 }
 
 interface Props {
@@ -21,15 +21,24 @@ const breadcrumbs = (title: string): BreadcrumbItem[] => [
 ];
 
 export default function AnnouncementDetail({ announcement }: Props) {
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleString('id-ID', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs(announcement.title)}>
             <Head title="Detail Pengumuman" />
             <div className="rounded-xl bg-white p-6 shadow-lg">
                 <div className="mb-6">
                     <h1 className="mb-2 text-2xl font-bold">{announcement.title}</h1>
-                    <p className="text-sm text-gray-600">
-                        {announcement.created_at} | {announcement.short_content}
-                    </p>
+                    <p className="text-xs text-gray-400">Terakhir diperbarui: {formatDate(announcement.updated_at)}</p>
+                    <p className="mb-2 text-sm text-gray-600">{announcement.short_content}</p>
                 </div>
 
                 <div className="mb-6">
