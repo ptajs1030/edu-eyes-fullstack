@@ -107,7 +107,7 @@ class ParentService
         $presentCount = $allAttendance->where('status', 'present')->count();
         $absentCount = $allAttendance->where('status', 'alpha')->count();
         $lateCount = $allAttendance->where('status', 'late')->count();
-        $attendance = $query->latest()->paginate(10);
+        $attendance = $query->latest('submit_date')->paginate(10);
 
         if ($attendance->isEmpty()) {
             return [
@@ -150,7 +150,7 @@ class ParentService
             $parsedDate = Carbon::parse($date)->format('Y-m-d');
             $query->where('submit_date', $parsedDate);
         }
-        $attendances = $query->latest()->with('classroom', 'student')->paginate(10);
+        $attendances = $query->latest('submit_date')->with('classroom', 'student')->paginate(10);
         if ($attendances->isEmpty()) {
             return [
                 throw new SilentHttpException(404,'Data Tidak Ditemukan'),
@@ -320,7 +320,7 @@ class ParentService
             $parsedDate = Carbon::parse($date)->format('Y-m-d');
             $query->whereDate('submit_date', $parsedDate);
         }
-        $attendances = $query->with('student', 'event', 'academicYear')->paginate(10);
+        $attendances = $query->latest('submit_date')->with('student', 'event', 'academicYear')->paginate(10);
         if ($attendances->isEmpty()) {
             return [
                 throw new SilentHttpException(404,'Data Tidak Ditemukan'),
