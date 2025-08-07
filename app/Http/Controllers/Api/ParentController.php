@@ -126,4 +126,16 @@ class ParentController extends BaseApiController
     public function getAcademicYear(){
         return $this->resource(AcademicYearResource::collection(AcademicYear::get()));
     }
+
+    public function getPayment(Request $request){
+        $student = $request->attributes->get('current_student');
+        $year = $request->query('year');
+        $data=$this->service->getPayment($year, $student);
+        return $this->success([
+            'current_page' => $data['current_page'],
+            'last_page' => $data['last_page'],
+            'per_page' => $data['per_page'],
+            'payments' => $data['payments'],
+        ]);
+    }
 }
