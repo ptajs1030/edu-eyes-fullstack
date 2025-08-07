@@ -68,7 +68,7 @@ class AttendanceService
                 $q->where('full_name', 'like', "%$search%");
             });
         }
-        $attendances = $query->with('classroom', 'student')->paginate(10);
+        $attendances = $query->latest()->with('classroom', 'student')->paginate(10);
         
         if ($attendances->isEmpty()) {
             throw new SilentHttpException(404, "Data Kosong");
