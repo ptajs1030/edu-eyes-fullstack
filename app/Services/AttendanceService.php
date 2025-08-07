@@ -68,7 +68,7 @@ class AttendanceService
                 $q->where('full_name', 'like', "%$search%");
             });
         }
-        $attendances = $query->latest()->with('classroom', 'student')->paginate(10);
+        $attendances = $query->latest('submit_date')->with('classroom', 'student')->paginate(10);
         
         if ($attendances->isEmpty()) {
             throw new SilentHttpException(404, "Data Kosong");
@@ -152,7 +152,7 @@ class AttendanceService
              try {
                 if ($parent && $parent->notification_key) {
                     $title= 'Absensi '.$student->full_name;
-                    $body= 'Anak anda, ' . $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
+                    $body=  $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
                         'tipe' => 'absensi_masuk',
@@ -174,7 +174,7 @@ class AttendanceService
              try {
                 if ($parent && $parent->notification_key) {
                     $title= 'Absensi '.$student->full_name;
-                    $body= 'Anak anda, ' . $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
+                    $body= $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
                         'tipe' => 'absensi_masuk',
@@ -195,7 +195,7 @@ class AttendanceService
              try {
                 if ($parent && $parent->notification_key) {
                     $title= 'Absensi '.$student->full_name;
-                    $body= 'Anak anda, ' . $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
+                    $body= $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
                         'tipe' => 'absensi_masuk',
@@ -216,7 +216,7 @@ class AttendanceService
              try {
                 if ($parent && $parent->notification_key) {
                     $title= 'Absensi '.$student->full_name;
-                    $body= 'Anak anda, ' . $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
+                    $body= $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
                         'tipe' => 'absensi_keluar',
@@ -272,7 +272,7 @@ class AttendanceService
             $query->where('subject_name', $subject);
         }
         
-        $attendances = $query->with('classroom', 'student')->paginate(10);
+        $attendances = $query->latest('submit_date')->with('classroom', 'student')->paginate(10);
         
         if ($attendances->isEmpty()) {
             throw new SilentHttpException(404, "Data Kosong");
@@ -445,7 +445,7 @@ class AttendanceService
              try {
                 if ($isPresent && $parent && $parent->notification_key) {
                 $title = 'Absensi Siswa';
-                $body  = 'Anak Anda, '.$student->full_name.' '.$status.' pada mata pelajaran '.$subject->name;
+                $body  = $student->full_name.' '.$status.' pada mata pelajaran '.$subject->name;
 
                 $this->firebase->sendToDevice($parent->notification_key, $title, $body, [
                     'tipe' => 'absensi_pelajaran',
@@ -590,7 +590,7 @@ class AttendanceService
             try {
                 if ($parent && $parent->notification_key) {
                     $title= 'Absensi '.$student->full_name;
-                    $body= 'Anak anda, ' . $student->full_name . ' telah melakukan absensi pada kegitan, ' . $participant->event->name . ' dengan status ' .  $attendance->status;
+                    $body= $student->full_name . ' telah melakukan absensi pada kegitan, ' . $participant->event->name . ' dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
                         'tipe' => 'absensi_kegiatan',
@@ -624,7 +624,7 @@ class AttendanceService
                 $q->where('full_name', 'like', "%$search%");
             });
         }
-        $attendances = $query->with('event', 'student.classroom', 'academicYear')->paginate(10);
+        $attendances = $query->latest('submit_date')->with('event', 'student.classroom', 'academicYear')->paginate(10);
         
         if ($attendances->isEmpty()) {
             throw new SilentHttpException(404, "Data Kosong");
