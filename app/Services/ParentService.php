@@ -9,6 +9,7 @@ use App\Models\ClassSubjectSchedule;
 use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\EventParticipant;
+use App\Models\PaymentAssignment;
 use App\Models\Setting;
 use App\Models\ShiftingAttendance;
 use App\Models\Student;
@@ -106,7 +107,7 @@ class ParentService
         $presentCount = $allAttendance->where('status', 'present')->count();
         $absentCount = $allAttendance->where('status', 'alpha')->count();
         $lateCount = $allAttendance->where('status', 'late')->count();
-        $attendance = $query->paginate(10);
+        $attendance = $query->latest('submit_date')->paginate(10);
 
         if ($attendance->isEmpty()) {
             return [
@@ -149,7 +150,7 @@ class ParentService
             $parsedDate = Carbon::parse($date)->format('Y-m-d');
             $query->where('submit_date', $parsedDate);
         }
-        $attendances = $query->with('classroom', 'student')->paginate(10);
+        $attendances = $query->latest('submit_date')->with('classroom', 'student')->paginate(10);
         if ($attendances->isEmpty()) {
             return [
                 throw new SilentHttpException(404,'Data Tidak Ditemukan'),
@@ -238,6 +239,9 @@ class ParentService
         $scheduleWithRelations = [];
         foreach ($schedules as $schedule) {
             $subjectName = DB::table('subjects')->where('id', $schedule->subject_id)->value('name');
+            if (!$subjectName) {
+                throw new SilentHttpException(404, 'Mata pelajaran tidak ditemukan');
+            }
             $scheduleWithRelations[] = [
                 'id' => $schedule->id,
                 'subject' => $subjectName,
@@ -264,7 +268,7 @@ class ParentService
         ->select( 'start_date', 'end_date', ) 
         ->get();
         // $events = Event::whereYear('start_date', $parsedDate->year)->whereMonth('start_date', $parsedDate->month)->get(['start_date', 'end_date']);
-        if (!$events) {
+        if ($events->isEmpty()) {
             throw new SilentHttpException(404, 'Kegiatan tidak ditemukan');
         }
         return $events;
@@ -276,8 +280,8 @@ class ParentService
         if ($date) {
             $parsedDate = Carbon::parse($date);
             $query->whereHas('event', function($q) use ($parsedDate) {
-                $q->whereYear('date', $parsedDate->year)
-                  ->whereMonth('date', $parsedDate->month);
+                $q->whereYear('', $parsedDate->year)
+                  ->whereMonth('start_date', $parsedDate->month);
             });
         }
         $schedules = $query->with('event')->paginate(10);
@@ -291,7 +295,8 @@ class ParentService
                 'id' => $schedule->event->id,
                 'name' => $schedule->event->name,
                 'description' => $schedule->event->description,
-                'date' => $schedule->event->date,
+                'start_date' => $schedule->event->start_date,
+                'end_date' => $schedule->event->end_date,
                 'start_time' => $schedule->event->Start_hour,
                 'end_time' => $schedule->event->end_hour,
             ];
@@ -315,7 +320,7 @@ class ParentService
             $parsedDate = Carbon::parse($date)->format('Y-m-d');
             $query->whereDate('submit_date', $parsedDate);
         }
-        $attendances = $query->with('student', 'event', 'academicYear')->paginate(10);
+        $attendances = $query->latest('submit_date')->with('student', 'event', 'academicYear')->paginate(10);
         if ($attendances->isEmpty()) {
             return [
                 throw new SilentHttpException(404,'Data Tidak Ditemukan'),
@@ -362,6 +367,44 @@ class ParentService
             'school_address' => $schoolAddress,
             'school_logo' => $schoolLogo,
             'student' => $student,
+        ];
+    }
+
+    public function getPayment($year, $student){
+        $query = PaymentAssignment::query();
+        $query->where('student_id', $student->id);
+        if ($year) {
+            $year = (int)$year; // Konversi ke integer jika perlu
+    $query->whereHas('payment', function($q) use ($year) {
+        $q->whereYear('due_date', $year);
+    });
+            $query->whereHas('payment', function($q) use ($year) {
+                $q->whereYear('due_date', $year);
+            });
+        
+        }
+        $payment = $query->with('payment')->paginate(10);
+        if ($payment->isEmpty()) {
+            return throw new SilentHttpException(404, 'Pembayaran tidak ditemukan');
+        }
+        
+        $paymentWithRelations = [];
+        foreach ($payment as $item) {
+            $paymentWithRelations[] = [
+                'id' => $item->payment->id,
+                'academic_year' => optional($item->payment->academicYear)->title,
+                'title' => $item->payment->title,
+                'description' => $item->payment->description,
+                'nominal' => $item->payment->nominal,
+                'due_date' => $item->payment->due_date,
+                'payment_date' => $item->payment->payment_date,
+            ];
+        }
+        return [
+            'current_page' => $payment->currentPage(),
+            'last_page' => $payment->lastPage(),
+            'per_page' => $payment->perPage(),
+            'payments' => $paymentWithRelations
         ];
     }
 }
