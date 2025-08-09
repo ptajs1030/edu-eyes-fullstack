@@ -231,7 +231,7 @@ class ParentService
     }
 
     public function getSubjectSchedule($student){
-        $schedules=ClassSubjectSchedule::where('class_id', $student->class_id)->get();
+        $schedules=ClassSubjectSchedule::where('class_id', $student->class_id)->whereHas('classroom', function ($q) use ($student) { $q->where('id', $student->class_id); })->get();
         if ($schedules->isEmpty()) {
             throw new SilentHttpException(404, 'Jadwal tidak ditemukan');
         }
@@ -239,9 +239,7 @@ class ParentService
         $scheduleWithRelations = [];
         foreach ($schedules as $schedule) {
             $subjectName = DB::table('subjects')->where('id', $schedule->subject_id)->value('name');
-            if (!$subjectName) {
-                throw new SilentHttpException(404, 'Mata pelajaran tidak ditemukan');
-            }
+            
             $scheduleWithRelations[] = [
                 'id' => $schedule->id,
                 'subject' => $subjectName,
