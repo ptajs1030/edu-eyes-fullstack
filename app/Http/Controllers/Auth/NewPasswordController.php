@@ -27,6 +27,11 @@ class NewPasswordController extends Controller
         ]);
     }
 
+    public function passwordSuccess(): Response
+    {
+        return Inertia::render('success');
+    }
+
     /**
      * Handle an incoming new password request.
      *

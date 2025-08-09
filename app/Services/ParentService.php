@@ -280,7 +280,7 @@ class ParentService
         if ($date) {
             $parsedDate = Carbon::parse($date);
             $query->whereHas('event', function($q) use ($parsedDate) {
-                $q->whereYear('', $parsedDate->year)
+                $q->whereYear('start_date', $parsedDate->year)
                   ->whereMonth('start_date', $parsedDate->month);
             });
         }
@@ -374,14 +374,10 @@ class ParentService
         $query = PaymentAssignment::query();
         $query->where('student_id', $student->id);
         if ($year) {
-            $year = (int)$year; // Konversi ke integer jika perlu
-    $query->whereHas('payment', function($q) use ($year) {
-        $q->whereYear('due_date', $year);
-    });
+            $year = (int)$year; 
             $query->whereHas('payment', function($q) use ($year) {
                 $q->whereYear('due_date', $year);
             });
-        
         }
         $payment = $query->with('payment')->paginate(10);
         if ($payment->isEmpty()) {
@@ -405,6 +401,21 @@ class ParentService
             'last_page' => $payment->lastPage(),
             'per_page' => $payment->perPage(),
             'payments' => $paymentWithRelations
+        ];
+    }
+
+    public function getUnpaidPayment($student){
+        $query = PaymentAssignment::query();
+        $query->where('student_id', $student->id);
+        $query->whereHas('payment', function($q) {
+            $q->whereNull('payment_date');
+        });
+        $payment = $query->get();
+        if ($payment->isEmpty()) {
+            return throw new SilentHttpException(404, 'Pembayaran tidak ditemukan');
+        }
+        return [
+            'unpaid_payments' => $payment->count(),
         ];
     }
 }
