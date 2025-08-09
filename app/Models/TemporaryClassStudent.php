@@ -12,4 +12,9 @@ class TemporaryClassStudent extends Model
     protected $fillable = ['student_id', 'academic_year_id', 'initial_class_id', 'is_graduate'];
 
     public $timestamps = false;
+
+    public function intialClass()
+    {
+        return $this->belongsTo(Classroom::class, 'initial_class_id');
+    }
 }

@@ -14,6 +14,7 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Api\QRCodeController;
 use App\Http\Controllers\CustomDayOffController;
+use App\Http\Controllers\GradePromotionController;
 use App\Http\Controllers\StudentAttendanceController;
 use App\Models\CustomDayOff;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
@@ -76,6 +77,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('subjects', SubjectController::class);
     Route::resource('shiftings', ShiftingController::class);
     Route::resource('school-settings', SchoolSettingController::class);
+    Route::prefix('grade-promotions')->group(function () {
+        Route::get('/', [GradePromotionController::class, 'index'])->name('grade-promotions.index');
+        Route::post('/populate', [GradePromotionController::class, 'populateData'])->name('grade-promotions.populate');
+    });
 });
 
 require __DIR__ . '/settings.php';

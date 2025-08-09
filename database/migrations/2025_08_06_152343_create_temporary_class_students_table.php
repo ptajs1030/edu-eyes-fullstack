@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedBigInteger('student_id');
             $table->unsignedBigInteger('academic_year_id');
             $table->unsignedBigInteger('initial_class_id');
-            $table->unsignedBigInteger('target_class_id');
+            $table->unsignedBigInteger('target_class_id')->nullable();
             $table->boolean('is_graduate')->default(false);
 
             $table->foreign('student_id')->references('id')->on('students');
