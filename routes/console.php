@@ -11,6 +11,12 @@ Schedule::command('attendance:generate-shifting')
     //->dailyAt('00:00')
     ->everyFiveMinutes()
     ->timezone('Asia/Jakarta')
+    ->before(function () {
+        Log::info('[Scheduler] Mulai jalanin generate-shifting');
+    })
+    ->after(function () {
+        Log::info('[Scheduler] Selesai jalanin generate-shifting');
+    })
     ->appendOutputTo(storage_path('logs/attendance-error.log'));
 
 Artisan::command('inspire', function () {
