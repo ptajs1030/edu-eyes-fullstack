@@ -51,4 +51,9 @@ class Classroom extends Model
     {
         return $this->hasOne(TemporaryClassStatus::class, 'class_id', 'id');
     }
+
+    public function temporaryStudent()
+    {
+        return $this->hasMany(TemporaryClassStudent::class, 'initial_class_id');
+    }
 }

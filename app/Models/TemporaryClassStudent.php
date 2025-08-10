@@ -13,8 +13,13 @@ class TemporaryClassStudent extends Model
 
     public $timestamps = false;
 
-    public function intialClass()
+    public function initialClass()
     {
         return $this->belongsTo(Classroom::class, 'initial_class_id');
+    }
+
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'student_id', 'id');
     }
 }

@@ -120,4 +120,9 @@ class Student extends Model
     {
         return $this->hasMany(TaskAssignment::class);
     }
+
+    public function temporaryClassStudent()
+    {
+        return $this->hasOne(TemporaryClassStudent::class, 'student_id', 'id');
+    }
 }

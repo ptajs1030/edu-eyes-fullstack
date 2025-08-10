@@ -100,6 +100,8 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
         );
     };
 
+    // console.log(group.class_id);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Kenaikan Kelas" />
@@ -167,7 +169,7 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
                                 <td className="p-4 text-sm">{group.student_count} Siswa</td>
                                 <td className="p-4 text-sm">
                                     <Link
-                                        // href={route('grade-promotions.assign', group.class_id)}
+                                        href={route('grade-promotions.show', group.class_id)}
                                         className="inline-flex items-center rounded-md bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700"
                                     >
                                         Atur Siswa

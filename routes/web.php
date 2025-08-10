@@ -79,7 +79,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('school-settings', SchoolSettingController::class);
     Route::prefix('grade-promotions')->group(function () {
         Route::get('/', [GradePromotionController::class, 'index'])->name('grade-promotions.index');
+        Route::get('/{classroom}', [GradePromotionController::class, 'showAssign'])->name('grade-promotions.show');
         Route::post('/populate', [GradePromotionController::class, 'populateData'])->name('grade-promotions.populate');
+        Route::post('/{classroom}/assign', [GradePromotionController::class, 'updateAssign'])->name('grade-promotions.update');
     });
 });
 
