@@ -3,13 +3,16 @@ import Table from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 
 interface Announcement {
     id: number;
     title: string;
     short_content: string;
+    content: string;
+    updated_at: string;
+    attachments: { url: string }[];
 }
 
 interface Props {
@@ -32,7 +35,17 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Pengumuman', href: '' }];
 
 export default function AnnouncementIndex({ announcements, filters }: Props) {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
-    const { flash } = usePage().props;
+    const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
+
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
 
     const toggleSelect = (id: number) => {
         setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
@@ -40,8 +53,14 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
 
     const exportSelected = () => {
         const selectedData = announcements.data.filter((a) => selectedIds.includes(a.id));
-        const headers = `Title,Summary\n`;
-        const csv = selectedData.map((a) => `${a.title},${a.short_content}`).join('\n');
+        const headers = `Title,Short Content,Content,Attachments\n`;
+        const csv = selectedData
+            .map((a) => {
+                const content = a.content.replace(/<[^>]*>/g, '').replace(/"/g, '""');
+                const attachments = a.attachments.map((att) => att.url).join('; ');
+                return `"${a.title}","${a.short_content}","${content}","${attachments}"`;
+            })
+            .join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -50,15 +69,22 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
         link.click();
     };
 
-    if (flash?.success) {
-        toast.success(flash.success);
-    } else if (flash?.error) {
-        toast.error(flash.error);
-    }
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleString('id-ID', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+    };
 
     const tableHeaders = [
         { key: 'title', label: 'Judul', sortable: true },
         { key: 'short_content', label: 'Ringkasan', sortable: false },
+        { key: 'content', label: 'Konten', sortable: false },
+        { key: 'attachments.url', label: 'Lampiran', sortable: false },
+        { key: 'updated_at', label: 'Terakhir Diupdate', sortable: true },
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
@@ -128,7 +154,26 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
                                 />
                             </td>
                             <td className="p-3 text-sm">{announcement.title}</td>
-                            <td className="p-3 text-sm">{announcement.short_content}</td>
+                            <td className="p-3 text-sm">
+                                {announcement.short_content && announcement.short_content.length > 70
+                                    ? `${announcement.short_content.substring(0, 70)}...`
+                                    : announcement.short_content || '-'}
+                            </td>
+                            <td className="p-3 text-sm">{announcement.content.replace(/<[^>]*>/g, '').substring(0, 100)}...</td>
+                            <td className="p-3 text-sm">
+                                {announcement.attachments && announcement.attachments.length > 0 ? (
+                                    announcement.attachments.map((a, idx) => (
+                                        <div key={idx}>
+                                            <a href={a.url} target="_blank" rel="noopener noreferrer" className="text-blue-500 underline">
+                                                Attachment {idx + 1}
+                                            </a>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <span>-</span>
+                                )}
+                            </td>
+                            <td className="p-3 text-sm">{formatDate(announcement.updated_at)}</td>
                             <td className="flex gap-2 p-3">
                                 <Link
                                     href={route('announcements.edit', announcement.id)}
