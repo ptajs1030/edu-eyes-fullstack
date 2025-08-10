@@ -8,7 +8,8 @@ app()->make(App\Console\Commands\MakeService::class);
 app()->make(App\Console\Commands\MakeDto::class);
 
 Schedule::command('attendance:generate-shifting')
-    ->dailyAt('00:00')
+    //->dailyAt('00:00')
+    ->everySixMinutes()
     ->timezone('Asia/Jakarta')
     ->appendOutputTo(storage_path('logs/attendance-error.log'));
 
