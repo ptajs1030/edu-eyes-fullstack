@@ -35,6 +35,16 @@ class GenerateShiftingAttendances extends Command
      */
     public function handle()
     {
+
+        $now = now('Asia/Jakarta');
+        $currentTime = $now->format('H:i');
+    
+        // Hanya jalan antara 00:00 - 00:05 WIB
+        if ($currentTime < '00:00' || $currentTime > '00:05') {
+            Log::info('[Cron] Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
+            return;
+        }
+        
         Log::info('Cron generate attendance running...');
 
         // 1. check attendance_mode == per-shift
