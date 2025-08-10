@@ -40,7 +40,7 @@ class QRCodeService
             $photoUrl = $student->getProfilePictureUrlAttribute(); // Fallback avatar
         }
 
-        $eduEyeslogo = 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/uploads/logos/edu-eyes.png')));
+        $eduEyeslogo = 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('edu-eyes.png')));
 
         $svg = QrCode::size(200)->generate($student->uuid);
         $svgDataUri = 'data:image/svg+xml;base64,' . base64_encode($svg);
