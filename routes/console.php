@@ -9,7 +9,8 @@ app()->make(App\Console\Commands\MakeDto::class);
 
 Schedule::command('attendance:generate-shifting')
     //->dailyAt('00:00')
-    ->everyFiveMinutes()
+    // ->everyFiveMinutes()
+    ->everyMinute()
     ->timezone('Asia/Jakarta')
     ->before(function () {
         Log::info('[Scheduler] Mulai jalanin generate-shifting');
