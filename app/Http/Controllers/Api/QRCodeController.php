@@ -16,6 +16,12 @@ class QRCodeController extends BaseApiController
         return $this->service->generate($student);
     }
 
+
+    public function studentIdCard(Request $request){
+        $student = $request->attributes->get('current_student');
+        return $this->service->view($student);
+    }
+
     public function bulkGenerate(Request $request)
     {
         try {
