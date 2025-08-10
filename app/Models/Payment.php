@@ -14,13 +14,11 @@ class Payment extends Model
         'title',
         'description',
         'nominal',
-        'due_date',
-        'payment_date',
+        'due_date'
     ];
 
     protected $casts = [
         'due_date' => 'date',
-        'payment_date' => 'date',
         'nominal' => 'integer',
     ];
 

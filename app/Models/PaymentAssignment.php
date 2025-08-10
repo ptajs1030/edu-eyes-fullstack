@@ -12,6 +12,7 @@ class PaymentAssignment extends Model
     protected $fillable = [
         'payment_id',
         'student_id',
+        'payment_date',
     ];
 
     // Relationships
