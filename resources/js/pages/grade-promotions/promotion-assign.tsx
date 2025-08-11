@@ -163,115 +163,127 @@ export default function PromotionAssign({
                 <h1 className="text-2xl font-bold">Atur Promosi Kelas {currentClass.name}</h1>
 
                 <div className="grid grid-cols-1 gap-6">
-                    {/* Current Class Students */}
-                    <div className="rounded-lg border p-4">
-                        <div className="mb-4 flex items-center justify-between">
-                            <h2 className="text-lg font-semibold">Siswa Kelas {currentClass.name}</h2>
-                            <div className="flex items-center gap-2">
-                                <label className="flex items-center gap-2 text-sm">
-                                    <input
-                                        type="checkbox"
-                                        checked={selectedStudents.length === students.length && students.length > 0}
-                                        onChange={(e) => handleSelectAll(e.target.checked)}
-                                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                    />
-                                    Pilih Semua
-                                </label>
-
-                                <select
-                                    value={bulkAction}
-                                    onChange={(e) => setBulkAction(e.target.value)}
-                                    className="rounded border px-3 py-1 text-sm"
-                                >
-                                    {getBulkActionOptions().map((option) => (
-                                        <option key={option.value} value={option.value}>
-                                            {option.label}
-                                        </option>
-                                    ))}
-                                </select>
-
-                                <button
-                                    onClick={handleBulkAction}
-                                    disabled={!bulkAction || selectedStudents.length === 0}
-                                    className="rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-700 disabled:opacity-50"
-                                >
-                                    Terapkan
-                                </button>
+                    {students.length === 0 ? (
+                        // If Empty class
+                        <div className="rounded-lg bg-green-50 p-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <p className="text-lg font-semibold">Kelas ini tidak memiliki siswa</p>
+                                    <p className="text-sm text-gray-600">Status: {unassignedCount === 0 ? 'Selesai' : 'Belum Selesai'}</p>
+                                </div>
                             </div>
                         </div>
+                    ) : (
+                        // Current Class Students
+                        <div className="rounded-lg border p-4">
+                            <div className="mb-4 flex items-center justify-between">
+                                <h2 className="text-lg font-semibold">Siswa Kelas {currentClass.name}</h2>
+                                <div className="flex items-center gap-2">
+                                    <label className="flex items-center gap-2 text-sm">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedStudents.length === students.length && students.length > 0}
+                                            onChange={(e) => handleSelectAll(e.target.checked)}
+                                            className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                        />
+                                        Pilih Semua
+                                    </label>
 
-                        <div className="max-h-[500px] overflow-y-auto">
-                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
-                                {students.map((student) => (
-                                    <div
-                                        key={student.id}
-                                        className={`flex items-center justify-between rounded-lg border p-3 ${getStudentStatusColor(student)}`}
+                                    <select
+                                        value={bulkAction}
+                                        onChange={(e) => setBulkAction(e.target.value)}
+                                        className="rounded border px-3 py-1 text-sm"
                                     >
-                                        <div className="flex items-center gap-3">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedStudents.includes(student.id)}
-                                                onChange={() => toggleStudentSelection(student.id)}
-                                                className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                            />
-                                            <div>
-                                                <p className="font-medium">{student.full_name}</p>
-                                                <p className="text-sm text-gray-500">NIS: {student.nis || '-'}</p>
-                                            </div>
-                                        </div>
+                                        {getBulkActionOptions().map((option) => (
+                                            <option key={option.value} value={option.value}>
+                                                {option.label}
+                                            </option>
+                                        ))}
+                                    </select>
 
-                                        <select
-                                            value={student.is_graduate ? 'graduate' : student.target_class_id || ''}
-                                            onChange={(e) => {
-                                                if (e.target.value === 'graduate') {
-                                                    handleAssignmentChange(student.id, 'is_graduate', true);
-                                                    handleAssignmentChange(student.id, 'target_class_id', null);
-                                                } else {
-                                                    handleAssignmentChange(student.id, 'is_graduate', false);
-                                                    handleAssignmentChange(
-                                                        student.id,
-                                                        'target_class_id',
-                                                        e.target.value ? parseInt(e.target.value) : null,
-                                                    );
-                                                }
-                                            }}
-                                            className="rounded border px-2 py-1 text-sm"
+                                    <button
+                                        onClick={handleBulkAction}
+                                        disabled={!bulkAction || selectedStudents.length === 0}
+                                        className="rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-700 disabled:opacity-50"
+                                    >
+                                        Terapkan
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="max-h-[500px] overflow-y-auto">
+                                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+                                    {students.map((student) => (
+                                        <div
+                                            key={student.id}
+                                            className={`flex items-center justify-between rounded-lg border p-3 ${getStudentStatusColor(student)}`}
                                         >
-                                            {getClassOptions().map((option) => (
-                                                <option key={option.value} value={option.value}>
-                                                    {option.label}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                                            <div className="flex items-center gap-3">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedStudents.includes(student.id)}
+                                                    onChange={() => toggleStudentSelection(student.id)}
+                                                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                                />
+                                                <div>
+                                                    <p className="font-medium">{student.full_name}</p>
+                                                    <p className="text-sm text-gray-500">NIS: {student.nis || '-'}</p>
+                                                </div>
+                                            </div>
 
-                        {unassignedCount > 0 ? (
-                            <div className="mt-4 flex items-center rounded-lg bg-yellow-50 p-3 text-sm text-yellow-700">
-                                <svg className="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        fillRule="evenodd"
-                                        d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                                        clipRule="evenodd"
-                                    />
-                                </svg>
-                                <span>Siswa belum ditentukan: {unassignedCount}</span>
+                                            <select
+                                                value={student.is_graduate ? 'graduate' : student.target_class_id || ''}
+                                                onChange={(e) => {
+                                                    if (e.target.value === 'graduate') {
+                                                        handleAssignmentChange(student.id, 'is_graduate', true);
+                                                        handleAssignmentChange(student.id, 'target_class_id', null);
+                                                    } else {
+                                                        handleAssignmentChange(student.id, 'is_graduate', false);
+                                                        handleAssignmentChange(
+                                                            student.id,
+                                                            'target_class_id',
+                                                            e.target.value ? parseInt(e.target.value) : null,
+                                                        );
+                                                    }
+                                                }}
+                                                className="rounded border px-2 py-1 text-sm"
+                                            >
+                                                {getClassOptions().map((option) => (
+                                                    <option key={option.value} value={option.value}>
+                                                        {option.label}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                        ) : (
-                            <div className="mt-4 flex items-center rounded-lg bg-green-50 p-3 text-sm text-green-700">
-                                <svg className="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
-                                    <path
-                                        fillRule="evenodd"
-                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                                        clipRule="evenodd"
-                                    />
-                                </svg>
-                                <span>Siswa selesai ditentukan</span>
-                            </div>
-                        )}
-                    </div>
+
+                            {unassignedCount > 0 ? (
+                                <div className="mt-4 flex items-center rounded-lg bg-yellow-50 p-3 text-sm text-yellow-700">
+                                    <svg className="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                            clipRule="evenodd"
+                                        />
+                                    </svg>
+                                    <span>Siswa belum ditentukan: {unassignedCount}</span>
+                                </div>
+                            ) : (
+                                <div className="mt-4 flex items-center rounded-lg bg-green-50 p-3 text-sm text-green-700">
+                                    <svg className="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path
+                                            fillRule="evenodd"
+                                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                            clipRule="evenodd"
+                                        />
+                                    </svg>
+                                    <span>Siswa selesai ditentukan</span>
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     {/* Incoming Students */}
                     <div className="rounded-lg border p-4">

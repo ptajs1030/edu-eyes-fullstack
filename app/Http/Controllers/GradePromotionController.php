@@ -26,8 +26,6 @@ class GradePromotionController extends Controller
     public function populateData()
     {
         try {
-            Log::info('Mulai populateData');
-
             $currentAcademicYear = $this->getAcademicYear();
             if (!$currentAcademicYear || !$currentAcademicYear->id) {
                 Log::error('Tahun akademik tidak ditemukan');
@@ -37,56 +35,38 @@ class GradePromotionController extends Controller
             $students = Student::where('status', StudentStatus::Active->value)
                 ->whereNotNull('class_id')
                 ->get();
-
             if ($students->isEmpty()) {
                 Log::error('Tidak ada siswa aktif');
                 throw new \Exception('Tidak ada siswa aktif yang ditemukan');
             }
 
-            DB::transaction(function () use ($students, $currentAcademicYear) {
-                Log::info('Memulai transaksi');
+            DB::transaction(function () use ($currentAcademicYear) {
+                $classrooms = Classroom::with('students')->get();
 
-                // TemporaryClassStudent::truncate();
-                // TemporaryClassStatus::truncate();
+                foreach ($classrooms as $class) {
+                    foreach ($class->students as $student) {
+                        TemporaryClassStudent::create([
+                            'student_id' => $student->id,
+                            'academic_year_id' => $currentAcademicYear->id,
+                            'initial_class_id' => $student->class_id,
+                            'target_class_id' => null,
+                            'is_graduate' => false
+                        ]);
+                    }
 
-                $classIds = Classroom::pluck('id')->toArray();
-                foreach ($classIds as $classId) {
+                    $status = $class->students->isEmpty() ? 'completed' : 'draft';
+
                     TemporaryClassStatus::create([
-                        'class_id' => $classId,
-                        'status' => 'draft',
+                        'class_id' => $class->id,
+                        'status' => $status,
                     ]);
                 }
-
-                foreach ($students as $student) {
-                    TemporaryClassStudent::create([
-                        'student_id' => $student->id,
-                        'academic_year_id' => $currentAcademicYear->id,
-                        'initial_class_id' => $student->class_id,
-                        'target_class_id' => null,
-                        'is_graduate' => false
-                    ]);
-
-                    // if (!in_array($student->class_id, $classIds)) {
-                    //     $classIds[] = $student->class_id;
-                    //     TemporaryClassStatus::create([
-                    //         'class_id' => $student->class_id,
-                    //         'status'   => 'draft',
-                    //     ]);
-                    // }
-                }
-
-                Log::info('Transaksi selesai');
             });
 
-            Log::info('Populate berhasil');
-
-            // ->route('grade-promotions.index')
             return redirect()->back()
                 ->with('success', 'Data siswa berhasil dipopulate');
         } catch (\Exception $e) {
-            Log::error('Populate gagal: ' . $e->getMessage());
             return redirect()->back()
-                // ->route('grade-promotions.index')
                 ->with('error', 'Gagal menginisialisasi data: ' . $e->getMessage());
         }
     }
@@ -204,6 +184,20 @@ class GradePromotionController extends Controller
     public function updateAssign(Request $request, $classId)
     {
         try {
+            Classroom::findOrFail($classId);
+            $hasStudents = TemporaryClassStudent::where('initial_class_id', $classId)->exists();
+
+            if (!$hasStudents) {
+                DB::transaction(function () use ($classId) {
+                    TemporaryClassStatus::updateOrCreate(
+                        ['class_id' => $classId],
+                        ['status' => 'completed']
+                    );
+                });
+
+                return redirect()->back()->with('success', 'Status kelas kosong berhasil diperbarui');
+            }
+
             $validated = $request->validate([
                 'students' => 'required|array',
                 'students.*.id' => 'required|exists:temporary_class_students,id',
@@ -241,6 +235,19 @@ class GradePromotionController extends Controller
     public function finalize(Request $request)
     {
         try {
+            $incompleteClasses = TemporaryClassStatus::where('status', '!=', 'completed')
+                ->with('classroom')
+                ->get()
+                ->pluck('classroom.name');
+
+            if ($incompleteClasses->isNotEmpty()) {
+                return back()->with(
+                    'error',
+                    'Proses finalisasi gagal. Kelas berikut belum selesai: '
+                        . $incompleteClasses->implode(', ')
+                );
+            }
+
             $validated = $request->validate([
                 'attendance_mode' => 'required|in:' . implode(',', AttendanceMode::getValues()),
             ]);

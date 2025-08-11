@@ -100,8 +100,6 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
         );
     };
 
-    // console.log(group.class_id);
-
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Kenaikan Kelas" />
