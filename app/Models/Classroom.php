@@ -43,7 +43,17 @@ class Classroom extends Model
     }
 
     public function subjectSchedules()
-{
-    return $this->hasMany(ClassSubjectSchedule::class, 'class_id');
-}
+    {
+        return $this->hasMany(ClassSubjectSchedule::class, 'class_id');
+    }
+
+    public function temporaryStatus()
+    {
+        return $this->hasOne(TemporaryClassStatus::class, 'class_id', 'id');
+    }
+
+    public function temporaryStudent()
+    {
+        return $this->hasMany(TemporaryClassStudent::class, 'initial_class_id');
+    }
 }
