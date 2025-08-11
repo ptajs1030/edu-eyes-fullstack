@@ -33,7 +33,8 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Kenaikan Kelas', href: '' }];
 
 export default function GradePromotionIndex({ classGroups, nextAcademicYear, allCompleted, hasData, filters, attendanceModes }: Props) {
     const [attendanceMode, setAttendanceMode] = useState('per-subject');
-    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showFinalizeModal, setShowFinalizeModal] = useState(false);
+    const [showResetModal, setShowResetModal] = useState(false);
     const [isPopulating, setIsPopulating] = useState(false);
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
 
@@ -71,7 +72,7 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
     ];
 
     const handleFinalize = () => {
-        setShowConfirmModal(true);
+        setShowFinalizeModal(true);
     };
 
     const confirmFinalize = () => {
@@ -83,7 +84,7 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
             {
                 onSuccess: () => {
                     toast.success('Migrasi kelas berhasil difinalisasi');
-                    setShowConfirmModal(false);
+                    setShowFinalizeModal(false);
                 },
             },
         );
@@ -96,6 +97,27 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
             {},
             {
                 onFinish: () => setIsPopulating(false),
+            },
+        );
+    };
+
+    const handleReset = () => {
+        setShowResetModal(true);
+    };
+
+    const confirmReset = () => {
+        router.post(
+            route('grade-promotions.reset'),
+            {},
+            {
+                onSuccess: () => {
+                    toast.success('Proses berhasil direset');
+                    setShowResetModal(false);
+                },
+                onError: () => {
+                    toast.error('Gagal mereset data');
+                    setShowResetModal(false);
+                },
             },
         );
     };
@@ -136,9 +158,12 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
                 <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
                     <div className="flex items-center justify-between">
                         <h1 className="text-2xl font-bold">Migrasi Kenaikan Kelas</h1>
-                        <div className="text-sm text-gray-500">
-                            Tahun Ajaran Baru: <span className="font-medium">{nextAcademicYear}</span>
-                        </div>
+                        <button
+                            onClick={handleReset}
+                            className="rounded-md bg-red-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-red-700"
+                        >
+                            Reset Proses
+                        </button>
                     </div>
 
                     <Table
@@ -226,19 +251,39 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
 
             {/* Confirmation Modal */}
             <ActionModal
-                isOpen={showConfirmModal}
-                onClose={() => setShowConfirmModal(false)}
+                isOpen={showFinalizeModal}
+                onClose={() => setShowFinalizeModal(false)}
                 title="Konfirmasi Finalisasi"
                 message="Anda yakin ingin memfinalisasi kenaikan kelas? Proses ini tidak dapat dibatalkan dan akan mempengaruhi data siswa."
                 buttons={[
                     {
                         label: 'Batal',
-                        onClick: () => setShowConfirmModal(false),
+                        onClick: () => setShowFinalizeModal(false),
                         variant: 'neutral',
                     },
                     {
                         label: 'Ya, Finalisasi',
                         onClick: confirmFinalize,
+                        variant: 'danger',
+                    },
+                ]}
+            />
+
+            {/* Reset Confirmation Modal */}
+            <ActionModal
+                isOpen={showResetModal}
+                onClose={() => setShowResetModal(false)}
+                title="Konfirmasi Reset Proses"
+                message="Anda yakin ingin mereset seluruh proses kenaikan kelas? Semua data sementara akan dihapus permanen."
+                buttons={[
+                    {
+                        label: 'Batal',
+                        onClick: () => setShowResetModal(false),
+                        variant: 'neutral',
+                    },
+                    {
+                        label: 'Ya, Reset',
+                        onClick: confirmReset,
                         variant: 'danger',
                     },
                 ]}

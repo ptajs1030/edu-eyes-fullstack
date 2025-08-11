@@ -281,9 +281,22 @@ class GradePromotionController extends Controller
             return redirect()->route('grade-promotions.index')
                 ->with('success', 'Migrasi kelas berhasil difinalisasi');
         } catch (\Exception $e) {
-            DB::rollBack();
             return redirect()->back()
                 ->with('error', 'Gagal memfinalisasi migrasi: ' . $e->getMessage());
+        }
+    }
+
+    public function resetData()
+    {
+        try {
+            TemporaryClassStudent::truncate();
+            TemporaryClassStatus::truncate();
+
+            return redirect()->route('grade-promotions.index')
+                ->with('success', 'Proses kenaikan kelas berhasil direset');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal reset kenaikan kelas: ' . $e->getMessage());
         }
     }
 }
