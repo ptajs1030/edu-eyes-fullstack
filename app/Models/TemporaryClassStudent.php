@@ -9,7 +9,13 @@ class TemporaryClassStudent extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['student_id', 'academic_year_id', 'initial_class_id', 'is_graduate'];
+    protected $fillable = [
+        'student_id',
+        'academic_year_id',
+        'initial_class_id',
+        'target_class_id',
+        'is_graduate'
+    ];
 
     public $timestamps = false;
 

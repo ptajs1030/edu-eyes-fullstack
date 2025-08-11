@@ -52,14 +52,29 @@ export default function PromotionAssign({
 }: Props) {
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
     const [students, setStudents] = useState<StudentAssignment[]>(initialStudents);
-    const [selectAll, setSelectAll] = useState(false);
+    const [selectedStudents, setSelectedStudents] = useState<number[]>([]);
     const [bulkAction, setBulkAction] = useState('');
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
     useEffect(() => {
-        if (flash?.success) toast.success(flash.success);
-        if (flash?.error) toast.error(flash.error);
+        if (flash?.success) {
+            toast.success(flash.success);
+        } else if (flash?.error) {
+            toast.error(flash.error);
+        }
     }, [flash]);
+
+    const toggleStudentSelection = (id: number) => {
+        setSelectedStudents((prev) => (prev.includes(id) ? prev.filter((studentId) => studentId !== id) : [...prev, id]));
+    };
+
+    const handleSelectAll = (checked: boolean) => {
+        if (checked) {
+            setSelectedStudents(students.map((student) => student.id));
+        } else {
+            setSelectedStudents([]);
+        }
+    };
 
     const handleAssignmentChange = (id: number, field: string, value: any) => {
         setStudents((prev) => prev.map((student) => (student.id === id ? { ...student, [field]: value } : student)));
@@ -70,7 +85,7 @@ export default function PromotionAssign({
 
         setStudents((prev) =>
             prev.map((student) => {
-                if (selectAll || (!student.target_class_id && !student.is_graduate)) {
+                if (selectedStudents.includes(student.id)) {
                     return bulkAction === 'graduate'
                         ? { ...student, target_class_id: null, is_graduate: true }
                         : bulkAction === 'null'
@@ -82,7 +97,7 @@ export default function PromotionAssign({
         );
 
         setBulkAction('');
-        setSelectAll(false);
+        setSelectedStudents([]);
     };
 
     const handleSubmit = () => {
@@ -114,12 +129,7 @@ export default function PromotionAssign({
             .filter((c) => c.level === currentClass.level + 1)
             .map((c) => ({ value: c.id, label: `Pindah ke ${c.name}` }));
 
-        const options = [
-            { value: '', label: 'Pilih Aksi Massal' },
-            { value: 'null', label: 'Reset ke Belum Ditentukan' },
-            ...sameLevelClasses,
-            ...nextLevelClasses,
-        ];
+        const options = [{ value: 'null', label: 'Pilih Aksi Massal' }, ...sameLevelClasses, ...nextLevelClasses];
 
         if (isHighestLevel) {
             options.push({ value: 'graduate', label: 'Luluskan' });
@@ -131,7 +141,7 @@ export default function PromotionAssign({
     const getStudentStatusColor = (student: StudentAssignment) => {
         if (student.is_graduate) return 'bg-purple-50 border-purple-200';
         if (student.target_class_id) return 'bg-green-50 border-green-200';
-        return 'bg-yellow-50 border-yellow-200';
+        return 'bg-white border';
     };
 
     const breadcrumbs: BreadcrumbItem[] = [
@@ -161,8 +171,8 @@ export default function PromotionAssign({
                                 <label className="flex items-center gap-2 text-sm">
                                     <input
                                         type="checkbox"
-                                        checked={selectAll}
-                                        onChange={(e) => setSelectAll(e.target.checked)}
+                                        checked={selectedStudents.length === students.length && students.length > 0}
+                                        onChange={(e) => handleSelectAll(e.target.checked)}
                                         className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                     />
                                     Pilih Semua
@@ -182,7 +192,7 @@ export default function PromotionAssign({
 
                                 <button
                                     onClick={handleBulkAction}
-                                    disabled={!bulkAction}
+                                    disabled={!bulkAction || selectedStudents.length === 0}
                                     className="rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-700 disabled:opacity-50"
                                 >
                                     Terapkan
@@ -200,8 +210,8 @@ export default function PromotionAssign({
                                         <div className="flex items-center gap-3">
                                             <input
                                                 type="checkbox"
-                                                checked={selectAll && !student.target_class_id && !student.is_graduate}
-                                                onChange={() => {}}
+                                                checked={selectedStudents.includes(student.id)}
+                                                onChange={() => toggleStudentSelection(student.id)}
                                                 className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                             />
                                             <div>

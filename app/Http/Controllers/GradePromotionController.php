@@ -12,6 +12,7 @@ use App\Models\TemporaryClassStatus;
 use App\Models\TemporaryClassStudent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Inertia\Response;
 use Inertia\Inertia;
 
@@ -25,50 +26,67 @@ class GradePromotionController extends Controller
     public function populateData()
     {
         try {
-            DB::transaction(function () {
-                $currentAcademicYearId = $this->getAcademicYear()->id;
-                if (!$currentAcademicYearId) {
-                    throw new \Exception('Tahun akademik aktif tidak ditemukan');
+            Log::info('Mulai populateData');
+
+            $currentAcademicYear = $this->getAcademicYear();
+            if (!$currentAcademicYear || !$currentAcademicYear->id) {
+                Log::error('Tahun akademik tidak ditemukan');
+                throw new \Exception('Tahun akademik aktif tidak ditemukan');
+            }
+
+            $students = Student::where('status', StudentStatus::Active->value)
+                ->whereNotNull('class_id')
+                ->get();
+
+            if ($students->isEmpty()) {
+                Log::error('Tidak ada siswa aktif');
+                throw new \Exception('Tidak ada siswa aktif yang ditemukan');
+            }
+
+            DB::transaction(function () use ($students, $currentAcademicYear) {
+                Log::info('Memulai transaksi');
+
+                // TemporaryClassStudent::truncate();
+                // TemporaryClassStatus::truncate();
+
+                $classIds = Classroom::pluck('id')->toArray();
+                foreach ($classIds as $classId) {
+                    TemporaryClassStatus::create([
+                        'class_id' => $classId,
+                        'status' => 'draft',
+                    ]);
                 }
 
-                // Clear existing temporary data
-                TemporaryClassStudent::truncate();
-                TemporaryClassStatus::truncate();
-
-                $students = Student::where('status', StudentStatus::Active->value)
-                    ->whereNotNull('class_id')
-                    ->get();
-
-                if ($students->isEmpty()) {
-                    throw new \Exception('Tidak ada siswa aktif yang ditemukan');
-                }
-
-                $classIds = [];
                 foreach ($students as $student) {
                     TemporaryClassStudent::create([
                         'student_id' => $student->id,
-                        'academic_year_id' => $currentAcademicYearId,
+                        'academic_year_id' => $currentAcademicYear->id,
                         'initial_class_id' => $student->class_id,
                         'target_class_id' => null,
                         'is_graduate' => false
                     ]);
 
-                    if (!in_array($student->class_id, $classIds)) {
-                        $classIds[] = $student->class_id;
-                        TemporaryClassStatus::create([
-                            'class_id' => $student->class_id,
-                            'status'   => 'draft',
-                        ]);
-                    }
+                    // if (!in_array($student->class_id, $classIds)) {
+                    //     $classIds[] = $student->class_id;
+                    //     TemporaryClassStatus::create([
+                    //         'class_id' => $student->class_id,
+                    //         'status'   => 'draft',
+                    //     ]);
+                    // }
                 }
+
+                Log::info('Transaksi selesai');
             });
 
-            return redirect()
-                ->route('grade-promotions.index')
+            Log::info('Populate berhasil');
+
+            // ->route('grade-promotions.index')
+            return redirect()->back()
                 ->with('success', 'Data siswa berhasil dipopulate');
         } catch (\Exception $e) {
-            return redirect()
-                ->route('grade-promotions.index')
+            Log::error('Populate gagal: ' . $e->getMessage());
+            return redirect()->back()
+                // ->route('grade-promotions.index')
                 ->with('error', 'Gagal menginisialisasi data: ' . $e->getMessage());
         }
     }
@@ -152,12 +170,8 @@ class GradePromotionController extends Controller
 
             // Get incoming students
             $incomingStudents = TemporaryClassStudent::with([
-                'student' => function ($query) {
-                    $query->select('id', 'full_name', 'nis');
-                },
-                'initialClass' => function ($query) {
-                    $query->select('id', 'name');
-                }
+                'student' => fn($query) => $query->select('id', 'full_name', 'nis'),
+                'initialClass' => fn($query) => $query->select('id', 'name')
             ])
                 ->where('target_class_id', $classId)
                 ->get()
