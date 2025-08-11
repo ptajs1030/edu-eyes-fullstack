@@ -204,7 +204,7 @@ export default function PromotionAssign({
                                     <button
                                         onClick={handleBulkAction}
                                         disabled={!bulkAction || selectedStudents.length === 0}
-                                        className="rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-700 disabled:opacity-50"
+                                        className="rounded-md bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-700 disabled:opacity-50"
                                     >
                                         Terapkan
                                     </button>
@@ -314,13 +314,13 @@ export default function PromotionAssign({
                 <div className="flex justify-end gap-3">
                     <button
                         onClick={() => setIsConfirmModalOpen(true)}
-                        className="rounded bg-green-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-green-700"
+                        className="rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-green-700"
                     >
                         Simpan Perubahan
                     </button>
                     <Link
                         href={route('grade-promotions.index')}
-                        className="rounded bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300"
+                        className="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300"
                     >
                         Kembali
                     </Link>

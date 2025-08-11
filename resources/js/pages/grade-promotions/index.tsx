@@ -32,7 +32,7 @@ interface Props {
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Kenaikan Kelas', href: '' }];
 
 export default function GradePromotionIndex({ classGroups, nextAcademicYear, allCompleted, hasData, filters, attendanceModes }: Props) {
-    const [attendanceMode, setAttendanceMode] = useState('per-subject');
+    const [attendanceMode, setAttendanceMode] = useState('');
     const [showFinalizeModal, setShowFinalizeModal] = useState(false);
     const [showResetModal, setShowResetModal] = useState(false);
     const [isPopulating, setIsPopulating] = useState(false);
@@ -77,7 +77,7 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
 
     const confirmFinalize = () => {
         router.post(
-            route('migration.finalize'),
+            route('grade-promotions.finalize'),
             {
                 attendance_mode: attendanceMode,
             },
@@ -235,7 +235,7 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
                                     onClick={handleFinalize}
                                     disabled={!allCompleted}
                                     className={`rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 ${
-                                        !allCompleted ? 'cursor-not-allowed opacity-50' : ''
+                                        !allCompleted ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
                                     }`}
                                 >
                                     Finalisasi

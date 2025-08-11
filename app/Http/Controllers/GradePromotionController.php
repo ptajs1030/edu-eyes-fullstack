@@ -234,51 +234,68 @@ class GradePromotionController extends Controller
 
     public function finalize(Request $request)
     {
+        $incompleteClasses = TemporaryClassStatus::where('status', '!=', 'completed')
+            ->with('classroom')
+            ->get()
+            ->pluck('classroom.name');
+
+        if ($incompleteClasses->isNotEmpty()) {
+            return back()->with(
+                'error',
+                'Proses finalisasi gagal. Kelas berikut belum selesai: '
+                    . $incompleteClasses->implode(', ')
+            );
+        }
+
         try {
-            $incompleteClasses = TemporaryClassStatus::where('status', '!=', 'completed')
-                ->with('classroom')
-                ->get()
-                ->pluck('classroom.name');
-
-            if ($incompleteClasses->isNotEmpty()) {
-                return back()->with(
-                    'error',
-                    'Proses finalisasi gagal. Kelas berikut belum selesai: '
-                        . $incompleteClasses->implode(', ')
-                );
-            }
-
             $validated = $request->validate([
                 'attendance_mode' => 'required|in:' . implode(',', AttendanceMode::getValues()),
             ]);
 
             DB::transaction(function () use ($validated) {
                 $currentYear = $this->getAcademicYear()->start_year;
+
                 AcademicYear::create([
-                    'start_year' => $currentYear,
-                    'title' => "{$currentYear}/" . ($currentYear + 1),
+                    'start_year' => $currentYear + 1,
+                    'title' => ($currentYear + 1) . "/" . ($currentYear + 2),
                     'status' => AcademicYearStatus::Active->value,
                     'attendance_mode' => $validated['attendance_mode']
                 ]);
 
-                TemporaryClassStudent::each(function ($temp) {
-                    $student = Student::find($temp->student_id);
+                // chunk migration
+                TemporaryClassStudent::orderBy('id')->chunk(100, function ($students) {
+                    foreach ($students as $temp) {
+                        $student = Student::find($temp->student_id);
 
-                    if ($temp->is_graduate) {
-                        $student->update(['status' => 'graduated']);
-                    } elseif ($temp->target_class_id) {
-                        $student->update([
-                            'class_id' => $temp->target_class_id,
-                            'status' => 'active'
-                        ]);
+                        if ($temp->is_graduate) {
+                            $student->update(['status' => StudentStatus::Graduated->value]);
+                        } elseif ($temp->target_class_id) {
+                            $student->update([
+                                'class_id' => $temp->target_class_id,
+                                'status' => StudentStatus::Active->value,
+                            ]);
+                        }
                     }
                 });
 
-                TemporaryClassStatus::truncate();
-                TemporaryClassStudent::truncate();
+                // TemporaryClassStudent::all()->each(function ($temp) {
+                //     $student = Student::find($temp->student_id);
+
+                //     if ($temp->is_graduate) {
+                //         $student->update(['status' => StudentStatus::Graduated->value]);
+                //     } elseif ($temp->target_class_id) {
+                //         $student->update([
+                //             'class_id' => $temp->target_class_id,
+                //             'status' => StudentStatus::Active->value,
+                //         ]);
+                //     }
+                // });
+
+                TemporaryClassStatus::query()->delete();
+                TemporaryClassStudent::query()->delete();
             });
 
-            return redirect()->route('grade-promotions.index')
+            return redirect()->back()
                 ->with('success', 'Migrasi kelas berhasil difinalisasi');
         } catch (\Exception $e) {
             return redirect()->back()
