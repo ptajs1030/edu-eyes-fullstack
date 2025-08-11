@@ -391,7 +391,7 @@ class ParentService
                 'description' => $item->payment->description,
                 'nominal' => $item->payment->nominal,
                 'due_date' => $item->payment->due_date,
-                'payment_date' => $item->payment->payment_date,
+                'payment_date' => $item->payment_date,
             ];
         }
         return [
@@ -405,9 +405,7 @@ class ParentService
     public function getUnpaidPayment($student){
         $query = PaymentAssignment::query();
         $query->where('student_id', $student->id);
-        $query->whereHas('payment', function($q) {
-            $q->whereNull('payment_date');
-        });
+        $query->whereNull('payment_date');
         $payment = $query->get();
         if ($payment->isEmpty()) {
             return throw new SilentHttpException(404, 'Pembayaran tidak ditemukan');
