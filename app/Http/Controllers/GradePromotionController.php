@@ -262,13 +262,19 @@ class GradePromotionController extends Controller
                     'attendance_mode' => $validated['attendance_mode']
                 ]);
 
+                // activate flag finalization
+                Student::$isFinalizing = true;
+
                 // chunk migration
                 TemporaryClassStudent::orderBy('id')->chunk(100, function ($students) {
                     foreach ($students as $temp) {
                         $student = Student::find($temp->student_id);
 
                         if ($temp->is_graduate) {
-                            $student->update(['status' => StudentStatus::Graduated->value]);
+                            $student->update([
+                                'class_id' => null,
+                                'status' => StudentStatus::Graduated->value
+                            ]);
                         } elseif ($temp->target_class_id) {
                             $student->update([
                                 'class_id' => $temp->target_class_id,
@@ -278,18 +284,8 @@ class GradePromotionController extends Controller
                     }
                 });
 
-                // TemporaryClassStudent::all()->each(function ($temp) {
-                //     $student = Student::find($temp->student_id);
-
-                //     if ($temp->is_graduate) {
-                //         $student->update(['status' => StudentStatus::Graduated->value]);
-                //     } elseif ($temp->target_class_id) {
-                //         $student->update([
-                //             'class_id' => $temp->target_class_id,
-                //             'status' => StudentStatus::Active->value,
-                //         ]);
-                //     }
-                // });
+                // Turn off flag
+                Student::$isFinalizing = false;
 
                 TemporaryClassStatus::query()->delete();
                 TemporaryClassStudent::query()->delete();
