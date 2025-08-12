@@ -68,10 +68,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('attendance', [StudentAttendanceController::class, 'showAttendanceHistory'])->name('students.attendance');
         Route::patch('attendance/shift', [StudentAttendanceController::class, 'updateShiftAttendance'])->name('students.attendance.shift.save');
         Route::patch('attendance/subject', [StudentAttendanceController::class, 'updateSubjectAttendance'])->name('students.attendance.subject.save');
+        Route::get('qrcode-preview', function (Student $student) {
+            return QrCode::size(200)->generate($student->uuid); // returns SVG as raw HTML
+        })->name('student.qrcode.preview');
     });
-    Route::get('/students/{student}/qrcode-preview', function (Student $student) {
-        return QrCode::size(200)->generate($student->uuid); // returns SVG as raw HTML
-    })->name('student.qrcode.preview');
     Route::get('/kartu-siswa', [QRCodeController::class, 'generate'])->middleware('inject.student')->name('kartu-siswa');
     Route::post('/bulk-kartu-siswa', [QRCodeController::class, 'bulkGenerate'])->name('qrcode.bulk');
     Route::resource('subjects', SubjectController::class);
