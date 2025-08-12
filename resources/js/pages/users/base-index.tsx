@@ -194,7 +194,9 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                             <td className="p-3 text-sm">{user.phone || '-'}</td>
                             <td className="p-3 text-sm">{user.email || '-'}</td>
                             <td className="p-3 text-sm">{user.status}</td>
-                            <td className="p-3 text-sm">{user.address || '-'}</td>
+                            <td className="p-3 text-sm">
+                                {user.address ? (user.address.length > 70 ? user.address.substring(0, 70) + '...' : user.address) : '-'}
+                            </td>
                             <td className="flex gap-2 p-3 text-sm">
                                 <button
                                     onClick={() => openForm(user)}

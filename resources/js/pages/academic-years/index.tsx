@@ -159,7 +159,13 @@ export default function AcademicYearIndex() {
                             <td className="p-3 text-sm">{academicYear.title}</td>
                             <td className="p-3 text-sm">{academicYear.status}</td>
                             <td className="p-3 text-sm">{academicYear.attendance_mode}</td>
-                            <td className="p-3 text-sm">{academicYear.note}</td>
+                            <td className="p-3 text-sm">
+                                {academicYear.note
+                                    ? academicYear.note.length > 70
+                                        ? academicYear.note.substring(0, 70) + '...'
+                                        : academicYear.note
+                                    : '-'}
+                            </td>
                             <td className="flex gap-2 p-3">
                                 <button
                                     onClick={() => openModal(academicYear)}
