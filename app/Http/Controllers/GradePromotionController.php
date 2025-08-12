@@ -26,6 +26,9 @@ class GradePromotionController extends Controller
     public function populateData()
     {
         try {
+            TemporaryClassStatus::query()->delete();
+            TemporaryClassStudent::query()->delete();
+
             $currentAcademicYear = $this->getAcademicYear();
             if (!$currentAcademicYear || !$currentAcademicYear->id) {
                 Log::error('Tahun akademik tidak ditemukan');
