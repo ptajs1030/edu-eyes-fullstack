@@ -24,7 +24,7 @@ export default function ActionModal({ isOpen, title, message, buttons, onClose }
             case 'primary':
                 return 'bg-blue-600 hover:bg-blue-700 text-white';
             default:
-                return 'bg-gray-300 hover:bg-gray-400';
+                return 'border-gray-300 text-gray-700 hover:bg-gray-50';
         }
     };
 
@@ -49,7 +49,7 @@ export default function ActionModal({ isOpen, title, message, buttons, onClose }
                         <button
                             key={index}
                             onClick={button.onClick}
-                            className={`rounded px-4 py-2 hover:cursor-pointer ${getButtonClass(button.variant)}`}
+                            className={`mr-2 rounded-md border px-4 py-2 text-sm font-medium shadow-sm hover:cursor-pointer ${getButtonClass(button.variant)}`}
                         >
                             {button.label}
                         </button>
