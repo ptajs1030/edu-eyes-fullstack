@@ -493,13 +493,6 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                                             >
                                                                                 Cancel
                                                                             </button>
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => setEditingSchedule(null)}
-                                                                                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-700"
-                                                                            >
-                                                                                Done
-                                                                            </button>
                                                                         </>
                                                                     ) : isEditing ? (
                                                                         <>
