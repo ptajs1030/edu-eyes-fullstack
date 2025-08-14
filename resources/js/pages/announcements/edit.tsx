@@ -94,10 +94,12 @@ export default function EditAnnouncement({ announcement }: Props) {
                             type="text"
                             id="title"
                             value={title}
+                            maxLength={70}
                             onChange={(e) => setTitle(e.target.value)}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
                             required
                         />
+                         <span className="ml-auto text-xs text-gray-500">{title.length}/70 karakter</span>
                     </div>
                     <div>
                         <label htmlFor="short_content" className="block text-sm font-medium text-gray-700">
@@ -108,9 +110,11 @@ export default function EditAnnouncement({ announcement }: Props) {
                             value={shortContent}
                             onChange={(e) => setShortContent(e.target.value)}
                             rows={3}
-                            className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-                            required
-                        />
+                            maxLength={255}
+                                className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                required
+                            />
+                            <span className="text-xs text-gray-500">{shortContent.length}/255 karakter</span>
                     </div>
                     <div>
                         <label className="mb-1 block text-sm font-medium text-gray-700">

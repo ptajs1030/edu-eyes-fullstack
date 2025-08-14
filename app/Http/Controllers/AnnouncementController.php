@@ -70,7 +70,6 @@ class AnnouncementController extends Controller
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
-                ->with('error', 'Validasi gagal: ' . implode(' ', $e->validator->errors()->all()))
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
@@ -122,7 +121,6 @@ class AnnouncementController extends Controller
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
-                ->with('error', 'Validasi gagal: ' . implode(' ', $e->validator->errors()->all()))
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
@@ -223,7 +221,7 @@ class AnnouncementController extends Controller
     private function handleAttachments($announcementId, $attachments)
     {
         AnnouncementAttachment::where('announcement_id', $announcementId)->delete();
-        
+
         foreach ($attachments as $attachment) {
             AnnouncementAttachment::create([
                 'announcement_id' => $announcementId,
@@ -242,7 +240,7 @@ class AnnouncementController extends Controller
             'attachments.*.url' => 'required|url',
         ]);
     }
-    
+
     public function destroy(string $id)
     {
         try {

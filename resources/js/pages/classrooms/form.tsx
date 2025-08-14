@@ -100,20 +100,6 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
     return (
         <FormModal isOpen={isOpen} onClose={onClose} title={classroom ? 'Edit Kelas' : 'Tambahkan Kelas Baru'} onSubmit={handleSubmit}>
             <div className="mb-3">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Nama Kelas
-                </label>
-                <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => handleChange('name', e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                    required
-                />
-            </div>
-            <div className="mb-3">
                 <label htmlFor="level" className="block text-sm font-medium text-gray-700">
                     Level
                 </label>
@@ -124,6 +110,21 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
                     min="1"
                     value={formData.level}
                     onChange={(e) => handleChange('level', parseInt(e.target.value) || 1)}
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                    required
+                />
+            </div>
+            <div className="mb-3">
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                    Nama Kelas
+                </label>
+                <input
+                    id="name"
+                    name="name"
+                    type="text"
+                    maxLength={255}
+                    value={formData.name}
+                    onChange={(e) => handleChange('name', e.target.value)}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                     required
                 />

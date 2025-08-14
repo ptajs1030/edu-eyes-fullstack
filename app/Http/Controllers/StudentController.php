@@ -40,10 +40,10 @@ class StudentController extends Controller
             $size = min($width, $height);
 
             $cropped = imagecreatetruecolor(300, 300);
-            
+
             // Fill background with white color for transparent images
             $white = imagecolorallocate($cropped, 255, 255, 255);
-            imagefill($cropped, 0, 0, $white); 
+            imagefill($cropped, 0, 0, $white);
 
             imagecopyresampled(
                 $cropped,
@@ -145,7 +145,6 @@ class StudentController extends Controller
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
-                ->with('error', 'Validation error: ' . implode(' ', $e->validator->errors()->all()))
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
@@ -183,6 +182,10 @@ class StudentController extends Controller
 
             return redirect()->back()
                 ->with('success', 'Student updated successfully');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to update student: ' . $e->getMessage())

@@ -81,6 +81,7 @@ export default function RoleFormModal({ isOpen, onClose, role }: Props) {
                     id="name"
                     name="name"
                     type="text"
+                    maxLength={255}
                     value={formData.name}
                     onChange={(e) => handleChange('name', e.target.value)}
                     className="w-full rounded border p-2"

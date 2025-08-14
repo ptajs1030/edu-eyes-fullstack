@@ -91,6 +91,8 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
     };
 
     const exportSelected = () => {
+        if (selectedIds.length === 0) return;
+
         const selectedData = users.data.filter((a) => selectedIds.includes(a.id));
         const headers = `Name,Username,Role,Phone,Email,Status\n`;
         const csv = selectedData.map((a) => `${a.full_name},${a.username},${a.role.name},${a.phone},${a.email},${a.status}`).join('\n');
@@ -145,8 +147,11 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                             className="w-64 rounded border px-3 py-1"
                         />
                         <button
+                            disabled={selectedIds.length === 0}
                             onClick={exportSelected}
-                            className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
+                                selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
+                            }`}
                         >
                             Ekspor data yang dipilih
                         </button>
@@ -194,7 +199,9 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                             <td className="p-3 text-sm">{user.phone || '-'}</td>
                             <td className="p-3 text-sm">{user.email || '-'}</td>
                             <td className="p-3 text-sm">{user.status}</td>
-                            <td className="p-3 text-sm">{user.address || '-'}</td>
+                            <td className="p-3 text-sm">
+                                {user.address ? (user.address.length > 70 ? user.address.substring(0, 70) + '...' : user.address) : '-'}
+                            </td>
                             <td className="flex gap-2 p-3 text-sm">
                                 <button
                                     onClick={() => openForm(user)}

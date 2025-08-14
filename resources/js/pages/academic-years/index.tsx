@@ -60,6 +60,8 @@ export default function AcademicYearIndex() {
     };
 
     const exportSelected = () => {
+        if (selectedIds.length === 0) return;
+        
         const selectedData = academicYears.data.filter((a) => selectedIds.includes(a.id));
         const headers = `Title,Status\n`;
         const csv = selectedData.map((a) => `${a.title},${a.status}`).join('\n');
@@ -124,8 +126,11 @@ export default function AcademicYearIndex() {
                             className="w-64 rounded border px-3 py-1"
                         />
                         <button
+                            disabled={selectedIds.length === 0}
                             onClick={exportSelected}
-                            className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
+                                selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
+                            }`}
                         >
                             Ekspor data yang dipilih
                         </button>
@@ -159,7 +164,13 @@ export default function AcademicYearIndex() {
                             <td className="p-3 text-sm">{academicYear.title}</td>
                             <td className="p-3 text-sm">{academicYear.status}</td>
                             <td className="p-3 text-sm">{academicYear.attendance_mode}</td>
-                            <td className="p-3 text-sm">{academicYear.note}</td>
+                            <td className="p-3 text-sm">
+                                {academicYear.note
+                                    ? academicYear.note.length > 70
+                                        ? academicYear.note.substring(0, 70) + '...'
+                                        : academicYear.note
+                                    : '-'}
+                            </td>
                             <td className="flex gap-2 p-3">
                                 <button
                                     onClick={() => openModal(academicYear)}

@@ -61,9 +61,8 @@ interface Props {
     subjects: Subject[];
 }
 
-const breadcrumbs = (classroomName: string, classroomId: number): BreadcrumbItem[] => [
+const breadcrumbs = (): BreadcrumbItem[] => [
     { title: 'Kelas', href: '/classrooms' },
-    { title: classroomName, href: `/classrooms/${classroomId}` },
     { title: 'Jadwal', href: '' },
 ];
 
@@ -303,7 +302,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
     }
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs(classroom.name, classroom.id)}>
+        <AppLayout breadcrumbs={breadcrumbs()}>
             <Head title={`Jadwal - ${classroom.name}`} />
             <Toaster position="top-right" richColors />
 
@@ -493,13 +492,6 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                                                 className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:cursor-pointer hover:bg-gray-50"
                                                                             >
                                                                                 Cancel
-                                                                            </button>
-                                                                            <button
-                                                                                type="button"
-                                                                                onClick={() => setEditingSchedule(null)}
-                                                                                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-700"
-                                                                            >
-                                                                                Done
                                                                             </button>
                                                                         </>
                                                                     ) : isEditing ? (
