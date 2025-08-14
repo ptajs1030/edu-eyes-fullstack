@@ -103,8 +103,8 @@ export default function ClassroomIndex() {
     };
 
     const tableHeaders = [
-        { key: 'name', label: 'Nama', sortable: true },
         { key: 'level', label: 'Level', sortable: true },
+        { key: 'name', label: 'Nama', sortable: true },
         { key: 'main_teacher', label: 'Wali Kelas', sortable: false },
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
@@ -154,8 +154,8 @@ export default function ClassroomIndex() {
                             <td className="w-[10px] p-3 text-sm">
                                 <input type="checkbox" checked={selectedIds.includes(classroom.id)} onChange={() => toggleSelect(classroom.id)} />
                             </td>
-                            <td className="p-3 text-sm">{classroom.name}</td>
                             <td className="p-3 text-sm">Level {classroom.level}</td>
+                            <td className="p-3 text-sm">{classroom.name}</td>
                             <td className="p-3 text-sm">{classroom.main_teacher ? classroom.main_teacher.full_name : '-- Not assigned --'}</td>
                             <td className="flex gap-2 p-3">
                                 <button
