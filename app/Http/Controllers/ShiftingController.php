@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Shifting;
 use Carbon\Carbon;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -96,6 +97,16 @@ class ShiftingController extends Controller
 
             return redirect()->back()
                 ->with('success', 'Shifting deleted successfully');
+        } catch (QueryException $e) {
+            if ($e->getCode() === "23000") {
+                return redirect()->back()
+                    ->with('error', 'Tidak dapat menghapus shifting karena digunakan dalam jadwal kelas.');
+
+                return redirect()->back()
+                    ->with('error', app()->environment('production')
+                        ? 'Gagal menghapus shifting.'
+                        : 'Gagal menghapus shifting: ' . $e->getMessage());
+            }
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', app()->environment('production')
