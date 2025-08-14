@@ -52,6 +52,8 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
     };
 
     const exportSelected = () => {
+        if (selectedIds.length === 0) return;
+
         const selectedData = announcements.data.filter((a) => selectedIds.includes(a.id));
         const headers = `Title,Short Content,Content,Attachments\n`;
         const csv = selectedData
@@ -121,8 +123,11 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
                             className="w-64 rounded border px-3 py-1"
                         />
                         <button
+                            disabled={selectedIds.length === 0}
                             onClick={exportSelected}
-                            className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
+                                selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
+                            }`}
                         >
                             Ekspor data yang dipilih
                         </button>

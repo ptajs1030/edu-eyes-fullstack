@@ -41,7 +41,6 @@ class SubjectController extends Controller
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
-                ->with('error', 'Validation error: ' . implode(' ', $e->validator->errors()->all()))
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
@@ -68,7 +67,6 @@ class SubjectController extends Controller
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
-                ->with('error', 'Validation error: ' . implode(' ', $e->validator->errors()->all()))
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
