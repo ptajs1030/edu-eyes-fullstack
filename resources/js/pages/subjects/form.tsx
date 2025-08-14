@@ -97,7 +97,7 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
                     id="name"
                     name="name"
                     type="text"
-                    maxLength={255}
+                    maxLength={70}
                     value={formData.name}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
@@ -112,7 +112,7 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
                     id="curriculum_year"
                     name="curriculum_year"
                     type="text"
-                    maxLength={255}
+                    maxLength={70}
                     value={formData.curriculum_year}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"

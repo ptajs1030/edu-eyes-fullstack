@@ -43,7 +43,7 @@ class ShiftingController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:70',
                 'start_hour' => 'required|date_format:H:i',
                 'end_hour' => 'required|date_format:H:i|after:start_hour',
             ]);
@@ -69,7 +69,7 @@ class ShiftingController extends Controller
             $shifting = Shifting::findOrFail($id);
 
             $validated = $request->validate([
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:70',
                 'start_hour' => 'required|date_format:H:i',
                 'end_hour' => 'required|date_format:H:i|after:start_hour',
             ]);
