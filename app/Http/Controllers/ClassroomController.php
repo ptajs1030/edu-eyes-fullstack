@@ -61,7 +61,7 @@ class ClassroomController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:255|unique:classrooms,name',
+                'name' => 'required|string|max:70|unique:classrooms,name',
                 'level' => 'required|integer|min:1',
                 'main_teacher_id' => 'nullable|exists:users,id',
             ]);
@@ -87,7 +87,7 @@ class ClassroomController extends Controller
             $classroom = Classroom::findOrFail($id);
 
             $validated = $request->validate([
-                'name' => 'required|string|max:255|unique:classrooms,name,' . $classroom->id,
+                'name' => 'required|string|max:70|unique:classrooms,name,' . $classroom->id,
                 'level' => 'required|integer|min:1',
                 'main_teacher_id' => 'nullable|exists:users,id',
             ]);

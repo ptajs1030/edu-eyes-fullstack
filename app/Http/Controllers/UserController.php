@@ -18,10 +18,10 @@ class UserController extends Controller
     private function getValidationRules(EnumsRole $role, ?User $user): array
     {
         $rules = [
-            'full_name' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users,username' . ($user ? ",{$user->id}" : ''),
+            'full_name' => 'required|string|max:70',
+            'username' => 'required|string|max:70|unique:users,username' . ($user ? ",{$user->id}" : ''),
             'phone' => 'nullable|string|max:20|unique:users,phone' . ($user ? ",{$user->id}" : ''),
-            'email' => 'nullable|email|max:255|unique:users,email' . ($user ? ",{$user->id}" : ''),
+            'email' => 'nullable|email|max:70|unique:users,email' . ($user ? ",{$user->id}" : ''),
             'address' => 'nullable|string',
             'status' => 'required|in:' . implode(',', UserStatus::getValues()),
             'profile_picture' => 'nullable|image|max:2048', // 2MB max
@@ -36,12 +36,12 @@ class UserController extends Controller
 
         // Role-specific rules
         if ($role === EnumsRole::Admin || $role === EnumsRole::Teacher) {
-            $rules['nip'] = 'nullable|string|max:255';
-            $rules['position'] = 'nullable|string|max:255';
+            $rules['nip'] = 'nullable|string|max:70';
+            $rules['position'] = 'nullable|string|max:70';
         }
 
         if ($role === EnumsRole::Parent) {
-            $rules['job'] = 'nullable|string|max:255';
+            $rules['job'] = 'nullable|string|max:70';
         }
 
         return $rules;

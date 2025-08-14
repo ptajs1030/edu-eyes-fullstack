@@ -229,7 +229,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 <input
                     id="full_name"
                     type="text"
-                    maxLength={255}
+                    maxLength={70}
                     value={formData.full_name}
                     onChange={(e) => handleChange('full_name', e.target.value)}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
@@ -244,7 +244,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 <input
                     id="username"
                     type="text"
-                    maxLength={255}
+                    maxLength={70}
                     value={formData.username}
                     onChange={(e) => handleChange('username', e.target.value)}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
@@ -262,7 +262,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                         <input
                             id="nip"
                             type="text"
-                            maxLength={255}
+                            maxLength={70}
                             value={formData.nip || ''}
                             onChange={(e) => handleChange('nip', e.target.value)}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
@@ -275,7 +275,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                         <input
                             id="position"
                             type="text"
-                            maxLength={255}
+                            maxLength={70}
                             value={formData.position || ''}
                             onChange={(e) => handleChange('position', e.target.value)}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
@@ -292,7 +292,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                     <input
                         id="job"
                         type="text"
-                        maxLength={255}
+                        maxLength={70}
                         value={formData.job || ''}
                         onChange={(e) => handleChange('job', e.target.value)}
                         className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"

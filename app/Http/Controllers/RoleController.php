@@ -28,7 +28,7 @@ class RoleController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:255|unique:roles,name',
+                'name' => 'required|string|max:70|unique:roles,name',
             ]);
             $validated['name'] = strtolower($validated['name']);
 
@@ -53,7 +53,7 @@ class RoleController extends Controller
             $role = Role::findOrFail($id);
 
             $validated = $request->validate([
-                'name' => 'required|string|max:255|unique:roles,name,' . $role->id,
+                'name' => 'required|string|max:70|unique:roles,name,' . $role->id,
             ]);
             $validated['name'] = strtolower($validated['name']);
 

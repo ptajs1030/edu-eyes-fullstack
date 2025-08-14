@@ -28,8 +28,8 @@ class SubjectController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'curriculum_year' => 'required|string|max:255',
+                'name' => 'required|string|max:70',
+                'curriculum_year' => 'required|string|max:70',
                 'is_archived' => 'required|boolean'
             ]);
 
@@ -55,8 +55,8 @@ class SubjectController extends Controller
             $subject = Subject::findOrFail($id);
 
             $validated = $request->validate([
-                'name' => 'required|string|max:255',
-                'curriculum_year' => 'required|string|max:255',
+                'name' => 'required|string|max:70',
+                'curriculum_year' => 'required|string|max:70',
                 'is_archived' => 'required|boolean'
             ]);
 
