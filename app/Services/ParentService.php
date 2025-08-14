@@ -414,4 +414,23 @@ class ParentService
             'unpaid_payments' => $payment->count(),
         ];
     }
+
+    public function getPaymentYear($student){
+        $payments = PaymentAssignment::where('student_id', $student->id)
+        ->whereHas('payment') 
+        ->with('payment:id,due_date') 
+        ->get()
+        ->pluck('payment.due_date') 
+        ->map(fn($date) => Carbon::parse($date)->format('Y'))
+        ->unique()
+        ->values();
+
+        if ($payments->isEmpty()) {
+            throw new SilentHttpException(404, 'Pembayaran tidak ditemukan');
+        }
+
+        return [
+            'payment_years' => $payments,
+        ];
+    }
 }

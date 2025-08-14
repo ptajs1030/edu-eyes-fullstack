@@ -4,7 +4,8 @@ namespace App\Services;
 
 use App\Models\Setting;
 use App\Models\Student;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Mpdf\Mpdf;
+use PDF;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Spatie\Browsershot\Browsershot;
@@ -37,7 +38,7 @@ class QRCodeService
         if (!empty($student->profile_picture) && file_exists(storage_path('app/public/' . $student->profile_picture))) {
             $photoUrl = 'data:image/jpeg;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $student->profile_picture)));
         } else {
-            $photoUrl = $student->getProfilePictureUrlAttribute(); // Fallback avatar
+            $photoUrl = $student->getProfilePictureUrlAttribute();
         }
 
         $eduEyeslogo = 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('edu-eyes.png')));
@@ -61,13 +62,15 @@ class QRCodeService
         if (file_exists($pdfPath)) {
             unlink($pdfPath);
         }
-        Browsershot::html($html)
-            ->noSandbox()
-            ->showBackground()
-            ->margins(0, 0, 0, 0)
-            ->paperSize(212, 336 ,'px')
-            ->waitUntilNetworkIdle()
-            ->save($pdfPath);
+        $mpdf = new Mpdf([
+            'format' => [212, 336],
+            'margin_top'    => 0,
+            'margin_right'  => 0,
+            'margin_bottom' => 0,
+            'margin_left'   => 0,
+        ]);
+        $mpdf->WriteHTML($html);
+        $mpdf->Output($pdfPath, \Mpdf\Output\Destination::FILE);
 
         return response()->download($pdfPath, $pdfFileName);
     }
