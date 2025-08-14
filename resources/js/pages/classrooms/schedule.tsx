@@ -61,9 +61,8 @@ interface Props {
     subjects: Subject[];
 }
 
-const breadcrumbs = (classroomName: string, classroomId: number): BreadcrumbItem[] => [
+const breadcrumbs = (): BreadcrumbItem[] => [
     { title: 'Kelas', href: '/classrooms' },
-    { title: classroomName, href: `/classrooms/${classroomId}` },
     { title: 'Jadwal', href: '' },
 ];
 
@@ -303,7 +302,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
     }
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs(classroom.name, classroom.id)}>
+        <AppLayout breadcrumbs={breadcrumbs()}>
             <Head title={`Jadwal - ${classroom.name}`} />
             <Toaster position="top-right" richColors />
 

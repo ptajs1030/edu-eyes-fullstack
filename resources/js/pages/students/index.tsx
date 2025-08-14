@@ -237,7 +237,9 @@ export default function StudentIndex() {
                             <td className="p-3 text-sm">
                                 {student.birth_place}, {student.date_of_birth}
                             </td>
-                            <td className="p-3 text-sm">{student.address}</td>
+                            <td className="p-3 text-sm">
+                                {student.address ? (student.address.length > 70 ? student.address.substring(0, 70) + '...' : student.address) : '-'}
+                            </td>
                             <td className="flex justify-center gap-2 p-3">
                                 <button
                                     onClick={() => openForm(student)}
