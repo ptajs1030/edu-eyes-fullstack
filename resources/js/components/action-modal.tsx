@@ -43,7 +43,7 @@ export default function ActionModal({ isOpen, title, message, buttons, onClose }
                 className="w-full max-w-xl rounded-lg bg-white p-6 shadow-xl"
             >
                 <h2 className="mb-4 text-lg font-bold">{title}</h2>
-                <div className="mb-4">{message}</div>
+                <div className="mb-4 break-all">{message}</div>
                 <div className="flex justify-end gap-2">
                     {buttons.map((button, index) => (
                         <button
