@@ -122,6 +122,7 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
                     id="name"
                     name="name"
                     type="text"
+                    maxLength={255}
                     value={formData.name}
                     onChange={(e) => handleChange('name', e.target.value)}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
