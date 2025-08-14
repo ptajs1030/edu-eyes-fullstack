@@ -312,7 +312,6 @@ class ClassroomScheduleController extends Controller
     {
         return redirect()->back()
             ->withErrors($e->validator)
-            ->with('error', 'Validation error: ' . implode(' ', $e->validator->errors()->all()))
             ->withInput();
     }
 

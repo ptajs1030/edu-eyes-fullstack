@@ -100,7 +100,7 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
                     value={formData.name}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                    required
+                    
                 />
             </div>
             <div className="mb-3">
