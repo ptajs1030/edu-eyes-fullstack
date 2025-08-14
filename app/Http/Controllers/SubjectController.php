@@ -29,7 +29,7 @@ class SubjectController extends Controller
         try {
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'curriculum_year' => 'required|string',
+                'curriculum_year' => 'required|string|max:255',
                 'is_archived' => 'required|boolean'
             ]);
 
@@ -56,7 +56,7 @@ class SubjectController extends Controller
 
             $validated = $request->validate([
                 'name' => 'required|string|max:255',
-                'curriculum_year' => 'required|string',
+                'curriculum_year' => 'required|string|max:255',
                 'is_archived' => 'required|boolean'
             ]);
 
