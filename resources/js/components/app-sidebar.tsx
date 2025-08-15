@@ -50,9 +50,19 @@ const mainNavItems: NavItem[] = [
         icon: School,
     },
     {
+        title: 'Kenaikan Kelas',
+        href: '/grade-promotions',
+        icon: TrendingUpDown,
+    },
+    {
         title: 'Mata Pelajaran',
         href: '/subjects',
         icon: BookText,
+    },
+    {
+        title: 'Ujian',
+        href: '/exams',
+        icon: PencilRuler,
     },
     {
         title: 'Shiftings',
@@ -68,16 +78,6 @@ const mainNavItems: NavItem[] = [
         title: 'Pengaturan',
         href: '/school-settings',
         icon: Settings2,
-    },
-    {
-        title: 'Kenaikan Kelas',
-        href: '/grade-promotions',
-        icon: TrendingUpDown,
-    },
-    {
-        title: 'Ujian',
-        href: '/exams',
-        icon: PencilRuler,
     },
 ];
 
