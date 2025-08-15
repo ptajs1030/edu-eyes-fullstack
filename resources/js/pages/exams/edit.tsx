@@ -273,7 +273,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                         <div className="mb-4 flex items-center justify-between">
                             <h3 className="text-lg font-medium text-gray-900">Student Assignments</h3>
                             <p className="text-sm text-blue-600">
-                                ⚠️ Warning: Menghapus data siswa dari exam, akan menyebabkan skor hilang
+                                ⚠️ Warning: Menghapus data siswa dari exam ini akan menyebabkan data skor yang sudah diinputkan hilang!
                             </p>
                         </div>
                         
