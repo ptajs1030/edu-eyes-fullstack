@@ -290,4 +290,212 @@ class ExamController extends Controller
                 ->withInput();
         }
     }
+
+    public function edit($id): Response
+    {
+        try {
+            $exam = Exam::with(['subject', 'academicYear', 'assignments.student', 'assignments.class'])
+                ->findOrFail($id);
+
+            // Transform assignments to match frontend structure
+            $studentAssignments = $exam->assignments->map(function ($assignment) {
+                return [
+                    'student_id' => $assignment->student_id,
+                    'student_name' => $assignment->student->full_name,
+                    'nis' => $assignment->student->nis,
+                    'class_name' => $assignment->class_name,
+                    'class_id' => $assignment->class_id,
+                ];
+            });
+
+            $subjects = Subject::all();
+            $classrooms = Classroom::orderBy('name')->get();
+            $academicYears = AcademicYear::all();
+
+            return Inertia::render('exams/edit', [
+                'exam' => [
+                    'id' => $exam->id,
+                    'academic_year_id' => $exam->academic_year_id,
+                    'subject_id' => $exam->subject_id,
+                    'name' => $exam->name,
+                    'type' => $exam->type,
+                    'date' => $exam->date->format('Y-m-d'),
+                    'student_assignments' => $studentAssignments,
+                ],
+                'subjects' => $subjects,
+                'academicYears' => $academicYears,
+                'classrooms' => $classrooms,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error loading exam for edit', [
+                'exam_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('exams.index')
+                ->with('error', 'Exam tidak ditemukan atau terjadi kesalahan.');
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        try {
+            // Remove academic_year_id from validation since it's not updatable
+            $validated = $request->validate([
+                'subject_id' => 'required|exists:subjects,id',
+                'name' => 'required|string|max:70',
+                'type' => 'nullable|string|max:70',
+                'date' => 'required|date',
+                'student_assignments' => 'required|array|min:1',
+                'student_assignments.*.student_id' => 'required|exists:students,id',
+                'student_assignments.*.student_name' => 'required|string',
+                'student_assignments.*.class_name' => 'required|string',
+                'student_assignments.*.class_id' => 'required|exists:classrooms,id',
+            ], [
+                'subject_id.required' => 'Mata pelajaran harus dipilih',
+                'subject_id.exists' => 'Mata pelajaran tidak valid',
+                'name.required' => 'Nama exam harus diisi',
+                'name.max' => 'Nama exam maksimal 70 karakter',
+                'type.max' => 'Tipe exam maksimal 70 karakter',
+                'date.required' => 'Tanggal harus dipilih',
+                'date.date' => 'Format tanggal tidak valid',
+                'student_assignments.required' => 'Minimal harus memilih 1 siswa',
+                'student_assignments.min' => 'Minimal harus memilih 1 siswa',
+                'student_assignments.*.student_id.required' => 'ID siswa harus ada',
+                'student_assignments.*.student_id.exists' => 'Siswa tidak ditemukan',
+            ]);
+
+            DB::beginTransaction();
+
+            $exam = Exam::findOrFail($id);
+
+            // Check for duplicate exam name (exclude current exam and use the existing academic_year_id)
+            $existingExam = Exam::where('name', $validated['name'])
+                ->where('subject_id', $validated['subject_id'])
+                ->where('academic_year_id', $exam->academic_year_id) // Use existing academic_year_id
+                ->where('id', '!=', $id)
+                ->first();
+
+            if ($existingExam) {
+                throw new \Exception('Exam dengan nama "' . $validated['name'] . '" sudah ada untuk mata pelajaran dan tahun ajaran yang sama.');
+            }
+
+            // Update exam (without academic_year_id)
+            $exam->update([
+                'subject_id' => $validated['subject_id'],
+                'name' => $validated['name'],
+                'type' => $validated['type'],
+                'date' => $validated['date'],
+                // academic_year_id is NOT updated
+            ]);
+
+            // Get current assignments to preserve scores
+            $currentAssignments = $exam->assignments()->get()->keyBy('student_id');
+
+            // Delete all existing assignments
+            $exam->assignments()->delete();
+
+            // Check for duplicate student assignments
+            $studentIds = collect($validated['student_assignments'])->pluck('student_id')->toArray();
+            $duplicateStudentIds = array_diff_assoc($studentIds, array_unique($studentIds));
+            
+            if (!empty($duplicateStudentIds)) {
+                throw new \Exception('Terdapat siswa yang dipilih lebih dari sekali dalam exam ini.');
+            }
+
+            // Create new assignments (preserve existing scores if student was already assigned)
+            $assignmentData = [];
+            foreach ($validated['student_assignments'] as $assignment) {
+                $existingAssignment = $currentAssignments->get($assignment['student_id']);
+                
+                $assignmentData[] = [
+                    'exam_id' => $exam->id,
+                    'student_id' => $assignment['student_id'],
+                    'class_id' => $assignment['class_id'],
+                    'class_name' => $assignment['class_name'],
+                    'score' => $existingAssignment ? $existingAssignment->score : null, // Preserve existing score
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+
+            // Bulk insert new assignments
+            ExamAssignment::insert($assignmentData);
+
+            DB::commit();
+
+            return redirect()->route('exams.index')
+                ->with('success', 'Exam berhasil diperbarui dengan ' . count($validated['student_assignments']) . ' siswa');
+
+        } catch (ValidationException $e) {
+            DB::rollback();
+            
+            Log::warning('Validation failed when updating exam', [
+                'exam_id' => $id,
+                'errors' => $e->errors(),
+                'request_data' => $request->except(['_token']),
+                'user_id' => auth()->id() ?? 'Guest',
+            ]);
+
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput()
+                ->with('error', 'Data yang dimasukkan tidak valid. Silakan periksa kembali.');
+
+        } catch (QueryException $e) {
+            DB::rollback();
+            
+            Log::error('Database error when updating exam', [
+                'exam_id' => $id,
+                'error_code' => $e->getCode(),
+                'error_message' => $e->getMessage(),
+                'request_data' => $request->except(['_token']),
+                'user_id' => auth()->id() ?? 'Guest',
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan database. Silakan coba lagi atau hubungi administrator.')
+                ->withInput();
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            Log::error('Unexpected error when updating exam', [
+                'exam_id' => $id,
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'stack_trace' => $e->getTraceAsString(),
+                'request_data' => $request->except(['_token']),
+                'user_id' => auth()->id() ?? 'Guest',
+                'timestamp' => now()->toISOString(),
+            ]);
+
+            // Check if error message is user-friendly
+            $userFriendlyMessages = [
+                'sudah ada untuk mata pelajaran',
+                'dipilih lebih dari sekali',
+                'tidak ditemukan',
+                'tidak valid',
+            ];
+
+            $isUserFriendly = false;
+            foreach ($userFriendlyMessages as $pattern) {
+                if (str_contains($e->getMessage(), $pattern)) {
+                    $isUserFriendly = true;
+                    break;
+                }
+            }
+
+            if ($isUserFriendly) {
+                return redirect()->back()
+                    ->with('error', $e->getMessage())
+                    ->withInput();
+            }
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi atau hubungi administrator jika masalah berlanjut.')
+                ->withInput();
+        }
+    }
 }

@@ -24,16 +24,6 @@ interface Classroom {
     level: string;
 }
 
-interface Student {
-    id: number;
-    full_name: string;
-    nis: string;
-    classroom: {
-        id: number;
-        name: string;
-    };
-}
-
 interface AssignedStudent {
     student_id: number;
     student_name: string;
@@ -42,52 +32,47 @@ interface AssignedStudent {
     class_id: number;
 }
 
+interface ExamData {
+    id: number;
+    academic_year_id: number;
+    subject_id: number;
+    name: string;
+    type: string;
+    date: string;
+    student_assignments: AssignedStudent[];
+    academic_year?: AcademicYear; // Add academic year data
+}
+
 interface Props {
+    exam: ExamData;
     subjects: Subject[];
     academicYears: AcademicYear[];
     classrooms: Classroom[];
 }
 
-interface FormData {
-    [key: string]: any;
-    academic_year_id: string | number;
-    subject_id: string;
-    name: string;
-    type: string;
-    date: string;
-    student_assignments: {
-        student_id: number;
-        // Add other simple properties that are form-compatible
-    }[];
-}
-
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Ujian', href: '/exams' },
-    { title: 'Buat Ujian', href: '' },
+    { title: 'Edit Ujian', href: '' },
 ];
 
-export default function ExamCreate({ subjects, academicYears, classrooms }: Props) {
-    const activeAcademicYear = academicYears.find(year => year.status === 'active');
-
-    const { data, setData, post, processing } = useForm<{
-        academic_year_id: string | number;
-        subject_id: string;
-        name: string;
-        type: string;
-        date: string;
-        student_assignments: any[]; // Use any[] to satisfy FormDataConvertible[]
-    }>({
-        academic_year_id: activeAcademicYear?.id || '',
-        subject_id: '',
-        name: '',
-        type: '',
-        date: '',
-        student_assignments: []
+export default function ExamEdit({ exam, subjects, academicYears, classrooms }: Props) {
+    const { data, setData, put, processing } = useForm({
+        subject_id: exam.subject_id,
+        name: exam.name,
+        type: exam.type || '',
+        date: exam.date,
+        student_assignments: (exam.student_assignments || []).map(s => ({
+            student_id: s.student_id,
+            student_name: s.student_name,
+            nis: s.nis,
+            class_name: s.class_name,
+            class_id: s.class_id
+        }))
     });
 
     const [showStudentModal, setShowStudentModal] = useState(false);
-    const [nameLength, setNameLength] = useState(0);
-    const [typeLength, setTypeLength] = useState(0);
+    const [nameLength, setNameLength] = useState(exam.name.length);
+    const [typeLength, setTypeLength] = useState((exam.type || '').length);
 
     const { errors, flash } = usePage<{ 
         errors?: Record<string, string>;
@@ -96,15 +81,12 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
 
     useEffect(() => {
         if (flash?.success) {
-            console.log('Showing success toast:', flash.success);
             toast.success(flash.success);
         }
         if (flash?.error) {
-            console.log('Showing error toast:', flash.error);
             toast.error(flash.error);
         }
         
-        // Show validation errors
         if (errors && Object.keys(errors).length > 0) {
             const errorMessages = Object.values(errors);
             errorMessages.forEach(message => {
@@ -115,24 +97,21 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-    
+        
         if (!Array.isArray(data.student_assignments) || data.student_assignments.length === 0) {
             toast.error('Minimal harus memilih 1 siswa untuk exam ini');
             return;
         }
 
-        // Show loading state
-        const loadingToast = toast.loading('Menyimpan exam...');
+        const loadingToast = toast.loading('Memperbarui exam...');
 
-        post('/exams', {
+        put(`/exams/${exam.id}`, {
             onSuccess: () => {
                 toast.dismiss(loadingToast);
-                // Success will be handled by flash message and redirect
             },
             onError: (errors) => {
                 toast.dismiss(loadingToast);
                 
-                // Handle specific field errors
                 if (errors.student_assignments) {
                     toast.error('Terjadi kesalahan pada data siswa yang dipilih');
                 } else if (errors.name) {
@@ -179,12 +158,16 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
         toast.success('Siswa berhasil dihapus dari exam');
     };
 
+    // Get academic year info for display
+    const academicYear = academicYears.find(year => year.id === exam.academic_year_id) || exam.academic_year;
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Buat Exam Baru" />
+            <Head title={`Edit Exam - ${exam.name}`} />
             <Toaster position="top-right" richColors />
+            
             <div className="rounded-xl bg-white p-6 shadow-lg">
-                <h2 className="mb-6 text-2xl font-semibold text-gray-900">Buat Exam Baru</h2>
+                <h2 className="mb-6 text-2xl font-semibold text-gray-900">Edit Exam: {exam.name}</h2>
                 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Tahun Ajaran */}
@@ -192,13 +175,26 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Tahun Ajaran
                         </label>
-                        <input
-                            type="text"
-                            value={activeAcademicYear?.title || ''}
-                            disabled
-                            className="w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-gray-600"
-                        />
-                        <p className="mt-1 text-xs text-gray-500">Auto fill disabled, taken from active academic_year</p>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                value={academicYear?.title || 'Loading...'}
+                                disabled
+                                className="w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-gray-600 cursor-not-allowed"
+                                readOnly
+                            />
+                            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <p className="mt-1 text-xs text-amber-600 flex items-center gap-1">
+                            <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.99-.833-2.46 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                            Tahun ajaran tidak dapat diubah setelah exam dibuat
+                        </p>
                     </div>
 
                     {/* Mata Pelajaran */}
@@ -207,8 +203,8 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
                             Mata Pelajaran *
                         </label>
                         <select
-                            value={typeof data.subject_id === 'string' || typeof data.subject_id === 'number' ? data.subject_id : ''}
-                            onChange={(e) => setData('subject_id', e.target.value)}
+                            value={data.subject_id}
+                            onChange={(e) => setData('subject_id', parseInt(e.target.value))}
                             className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             required
                         >
@@ -230,7 +226,7 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
                         </label>
                         <input
                             type="text"
-                            value={typeof data.name === 'string' || typeof data.name === 'number' ? data.name : ''}
+                            value={data.name}
                             onChange={handleNameChange}
                             className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             placeholder="Masukkan nama exam"
@@ -247,7 +243,7 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
                         </label>
                         <input
                             type="text"
-                            value={typeof data.type === 'string' || typeof data.type === 'number' ? data.type : ''}
+                            value={data.type}
                             onChange={handleTypeChange}
                             className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             placeholder="Contoh: Ulangan Harian, Quiz, UTS, UAS"
@@ -263,7 +259,7 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
                         </label>
                         <input
                             type="date"
-                            value={typeof data.date === 'string' ? data.date : ''}
+                            value={data.date}
                             onChange={(e) => setData('date', e.target.value)}
                             className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                             required
@@ -276,6 +272,9 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
                     <div>
                         <div className="mb-4 flex items-center justify-between">
                             <h3 className="text-lg font-medium text-gray-900">Student Assignments</h3>
+                            <p className="text-sm text-blue-600">
+                                ⚠️ Warning: Menghapus data siswa dari exam, akan menyebabkan skor hilang
+                            </p>
                         </div>
                         
                         {data.student_assignments.length > 0 ? (
@@ -290,7 +289,7 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {data.student_assignments.map((student, index) => (
+                                        {data.student_assignments.map((student) => (
                                             <tr key={student.student_id} className="border-t">
                                                 <td className="px-4 py-3 text-sm">{student.student_name}</td>
                                                 <td className="px-4 py-3 text-sm">{student.nis || '-'}</td>
@@ -344,7 +343,7 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
                             disabled={processing}
                             className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                         >
-                            {processing ? 'Menyimpan...' : 'Submit'}
+                            {processing ? 'Memperbarui...' : 'Update'}
                         </button>
                     </div>
                 </form>
