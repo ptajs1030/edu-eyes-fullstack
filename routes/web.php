@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\QRCodeController;
 use App\Http\Controllers\CustomDayOffController;
 use App\Http\Controllers\GradePromotionController;
 use App\Http\Controllers\StudentAttendanceController;
+use App\Http\Controllers\ExamController;
 use App\Models\CustomDayOff;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Models\Student;
@@ -63,6 +64,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('schedule', [ClassroomScheduleController::class, 'showScheduleForm'])->name('classrooms.schedule');
         Route::get('history', [ClassroomController::class, 'history'])->name('classrooms.history');
     });
+    Route::get('/classrooms/{id}/students', [ClassroomController::class, 'getStudents']);
     Route::resource('students', StudentController::class);
     Route::prefix('students/{student}')->group(function () {
         Route::get('attendance', [StudentAttendanceController::class, 'showAttendanceHistory'])->name('students.attendance');
@@ -85,6 +87,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/reset', [GradePromotionController::class, 'resetData'])->name('grade-promotions.reset');
         Route::post('/{classroom}/assign', [GradePromotionController::class, 'updateAssign'])->name('grade-promotions.update');
     });
+    Route::resource('exams', ExamController::class);
+    Route::get('/exams/create', [ExamController::class, 'create'])->name('exams.create');
+    Route::get('exams/{exam}/scoring', [ExamController::class, 'scoring'])->name('exams.scoring');
+    Route::put('exams/{exam}/scores', [ExamController::class, 'updateScores'])->name('exams.updateScores');
 });
 
 require __DIR__ . '/settings.php';

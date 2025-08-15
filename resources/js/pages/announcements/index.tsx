@@ -144,7 +144,7 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
                     headers={tableHeaders}
                     data={announcements.data}
                     sortColumn={filters.sort || ''}
-                    sortDirection={filters.direction || 'asc'}
+                    sortDirection={filters.direction === 'asc' || filters.direction === 'desc' ? filters.direction : 'asc'}
                     onSort={handleSortChange}
                     onSelectAll={(checked) => setSelectedIds(checked ? announcements.data.map((a) => a.id) : [])}
                     selectedIds={selectedIds}

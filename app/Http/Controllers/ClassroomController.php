@@ -182,4 +182,34 @@ class ClassroomController extends Controller
             'filters' => $request->only(['sort', 'direction']),
         ]);
     }
+
+    public function getStudents($id)
+    {
+        try {
+            $classroom = Classroom::with(['students' => function($query) {
+                $query->select('id', 'full_name', 'nis', 'class_id')
+                      ->where('status', 'active');
+            }])->findOrFail($id);
+
+            $students = $classroom->students->map(function($student) use ($classroom) {
+                return [
+                    'id' => $student->id,
+                    'full_name' => $student->full_name,
+                    'nis' => $student->nis,
+                    'classroom' => [
+                        'id' => $classroom->id,
+                        'name' => $classroom->name
+                    ]
+                ];
+            });
+
+            return response()->json([
+                'students' => $students
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Classroom not found'
+            ], 404);
+        }
+    }
 }
