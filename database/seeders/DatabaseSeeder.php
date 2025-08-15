@@ -39,6 +39,7 @@ class DatabaseSeeder extends Seeder
                 EventAttendanceSeeder::class,
                 CustomDayOffSeeder::class,
                 ExamSeeder::class,
+                PaymentSeeder::class,
                 TaskSeeder::class
             ]);
 

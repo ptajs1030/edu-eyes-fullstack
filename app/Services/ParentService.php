@@ -391,7 +391,7 @@ class ParentService
                 'description' => $item->payment->description,
                 'nominal' => $item->payment->nominal,
                 'due_date' => $item->payment->due_date,
-                'payment_date' => $item->payment->payment_date,
+                'payment_date' => $item->payment_date,
             ];
         }
         return [
@@ -405,15 +405,32 @@ class ParentService
     public function getUnpaidPayment($student){
         $query = PaymentAssignment::query();
         $query->where('student_id', $student->id);
-        $query->whereHas('payment', function($q) {
-            $q->whereNull('payment_date');
-        });
+        $query->whereNull('payment_date');
         $payment = $query->get();
         if ($payment->isEmpty()) {
             return throw new SilentHttpException(404, 'Pembayaran tidak ditemukan');
         }
         return [
             'unpaid_payments' => $payment->count(),
+        ];
+    }
+
+    public function getPaymentYear($student){
+        $payments = PaymentAssignment::where('student_id', $student->id)
+        ->whereHas('payment') 
+        ->with('payment:id,due_date') 
+        ->get()
+        ->pluck('payment.due_date') 
+        ->map(fn($date) => Carbon::parse($date)->format('Y'))
+        ->unique()
+        ->values();
+
+        if ($payments->isEmpty()) {
+            throw new SilentHttpException(404, 'Pembayaran tidak ditemukan');
+        }
+
+        return [
+            'payment_years' => $payments,
         ];
     }
 }
