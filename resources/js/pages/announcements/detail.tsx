@@ -15,9 +15,9 @@ interface Props {
     announcement: Announcement;
 }
 
-const breadcrumbs = (title: string): BreadcrumbItem[] => [
+const breadcrumbs = (): BreadcrumbItem[] => [
     { title: 'Pengumuman', href: '/announcements' },
-    { title: title, href: '' },
+    { title: "Detail", href: '' },
 ];
 
 export default function AnnouncementDetail({ announcement }: Props) {
@@ -32,7 +32,7 @@ export default function AnnouncementDetail({ announcement }: Props) {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs(announcement.title)}>
+        <AppLayout breadcrumbs={breadcrumbs()}>
             <Head title="Detail Pengumuman" />
             <div className="rounded-xl bg-white p-6 shadow-lg">
                 <div className="mb-6">

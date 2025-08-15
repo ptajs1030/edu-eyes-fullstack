@@ -29,13 +29,13 @@ export interface Props {
     subjectStatistics?: Record<string, number>;
 }
 
-const breadcrumbs = (studentName: string): BreadcrumbItem[] => [
+const breadcrumbs = (): BreadcrumbItem[] => [
     {
         title: 'Siswa',
         href: '/students',
     },
     {
-        title: `${studentName} - Histori kehadiran`,
+        title: "Histori kehadiran",
     },
 ];
 
@@ -123,7 +123,7 @@ export default function AttendanceHistory({
     const statistics = attendanceMode === 'per-shift' ? shiftStatistics : subjectStatistics;
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs(student.full_name)}>
+        <AppLayout breadcrumbs={breadcrumbs()}>
             <Head title={`Riwayat Kehadiran - ${student.full_name}`} />
             <Toaster position="top-right" richColors />
 

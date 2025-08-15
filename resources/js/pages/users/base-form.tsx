@@ -63,6 +63,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 ...user,
                 password: '',
                 password_confirmation: '',
+                profile_picture: undefined
             });
 
             // Set preview if profile picture exists
@@ -109,7 +110,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
             reader.readAsDataURL(file);
 
             // Set to form data
-            setFormData((prev) => ({ ...prev, profile_picture: file as any }));
+            setFormData((prev) => ({ ...prev, profile_picture: file }));
             setRemoveProfile(false);
         }
     };
@@ -128,17 +129,22 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
 
         const formDataObj = new FormData();
 
-        // Append all form data
-        Object.entries(formData).forEach(([key, value]) => {
-            if (value !== undefined && value !== null) {
-                formDataObj.append(key, value);
-            }
-        });
+        // Handle profile picture
+        if (formData.profile_picture instanceof File) {
+            formDataObj.append('profile_picture', formData.profile_picture);
+        }
 
         // Handle profile picture removal
         if (removeProfile) {
             formDataObj.append('remove_profile_picture', '1');
         }
+
+        // Append other fields
+        Object.entries(formData).forEach(([key, value]) => {
+            if (key !== 'profile_picture' && value !== undefined && value !== null) {
+                formDataObj.append(key, value);
+            }
+        });
 
         // Append method for PUT
         if (user?.id) {
@@ -149,14 +155,8 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
 
         router.post(url, formDataObj, {
             preserveScroll: true,
-            onSuccess: () => {
-                onClose();
-                toast.success(user ? `${role.name} updated successfully` : `New ${role.name} created successfully`);
-            },
-            onError: (errors) => {
-                const errorMessage = Object.values(errors).join('\n');
-                toast.error(`Operation failed: ${errorMessage}`);
-            },
+            onSuccess: () => onClose(),
+            onError: () => {},
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -229,7 +229,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 <input
                     id="full_name"
                     type="text"
-                    maxLength={255}
+                    maxLength={70}
                     value={formData.full_name}
                     onChange={(e) => handleChange('full_name', e.target.value)}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
@@ -244,7 +244,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 <input
                     id="username"
                     type="text"
-                    maxLength={255}
+                    maxLength={70}
                     value={formData.username}
                     onChange={(e) => handleChange('username', e.target.value)}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
@@ -262,7 +262,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                         <input
                             id="nip"
                             type="text"
-                            maxLength={255}
+                            maxLength={70}
                             value={formData.nip || ''}
                             onChange={(e) => handleChange('nip', e.target.value)}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
@@ -275,7 +275,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                         <input
                             id="position"
                             type="text"
-                            maxLength={255}
+                            maxLength={70}
                             value={formData.position || ''}
                             onChange={(e) => handleChange('position', e.target.value)}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
@@ -292,7 +292,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                     <input
                         id="job"
                         type="text"
-                        maxLength={255}
+                        maxLength={70}
                         value={formData.job || ''}
                         onChange={(e) => handleChange('job', e.target.value)}
                         className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"

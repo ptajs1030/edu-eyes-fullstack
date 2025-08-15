@@ -252,7 +252,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                     id="full_name"
                     name="full_name"
                     type="text"
-                    maxLength={255}
+                    maxLength={70}
                     value={formData.full_name}
                     onChange={(e) => handleChange('full_name', e.target.value)}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
@@ -266,7 +266,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                 <input
                     id="nis"
                     name="nis"
-                    maxLength={255}
+                    maxLength={70}
                     type="text"
                     value={formData.nis ?? ''}
                     onChange={(e) => handleChange('nis', e.target.value)}
@@ -402,7 +402,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                         id="birth_place"
                         name="birth_place"
                         type="text"
-                        maxLength={255}
+                        maxLength={70}
                         value={formData.birth_place}
                         onChange={(e) => handleChange('birth_place', e.target.value)}
                         className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"

@@ -37,13 +37,13 @@ interface Props {
     };
 }
 
-const breadcrumbs = (classroomName: string): BreadcrumbItem[] => [
+const breadcrumbs = (): BreadcrumbItem[] => [
     {
         title: 'Kelas',
         href: '/classrooms',
     },
     {
-        title: classroomName,
+        title: 'Detail',
         href: '',
     },
 ];
@@ -74,7 +74,7 @@ export default function ClassroomDetail({ classroom, academicYear, filters }: Pr
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs(classroom.name)}>
+        <AppLayout breadcrumbs={breadcrumbs()}>
             <Head title={`Kelas - ${classroom.name}`} />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
