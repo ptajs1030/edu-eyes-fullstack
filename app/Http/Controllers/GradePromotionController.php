@@ -6,6 +6,7 @@ use App\Enums\AcademicYearStatus;
 use App\Enums\AttendanceMode;
 use App\Enums\StudentStatus;
 use App\Models\AcademicYear;
+use App\Models\ClassHistory;
 use App\Models\Classroom;
 use App\Models\Student;
 use App\Models\TemporaryClassStatus;
@@ -31,7 +32,6 @@ class GradePromotionController extends Controller
 
             $currentAcademicYear = $this->getAcademicYear();
             if (!$currentAcademicYear || !$currentAcademicYear->id) {
-                Log::error('Tahun akademik tidak ditemukan');
                 throw new \Exception('Tahun akademik aktif tidak ditemukan');
             }
 
@@ -39,7 +39,6 @@ class GradePromotionController extends Controller
                 ->whereNotNull('class_id')
                 ->get();
             if ($students->isEmpty()) {
-                Log::error('Tidak ada siswa aktif');
                 throw new \Exception('Tidak ada siswa aktif yang ditemukan');
             }
 
@@ -258,20 +257,18 @@ class GradePromotionController extends Controller
             DB::transaction(function () use ($validated) {
                 $currentYear = $this->getAcademicYear()->start_year;
 
-                AcademicYear::create([
+                $newAcademicYear = AcademicYear::create([
                     'start_year' => $currentYear + 1,
                     'title' => ($currentYear + 1) . "/" . ($currentYear + 2),
                     'status' => AcademicYearStatus::Active->value,
                     'attendance_mode' => $validated['attendance_mode']
                 ]);
 
-                // activate flag finalization
-                Student::$isFinalizing = true;
-
                 // chunk migration
-                TemporaryClassStudent::orderBy('id')->chunk(100, function ($students) {
+                TemporaryClassStudent::orderBy('id')->chunk(100, function ($students) use ($newAcademicYear) {
                     foreach ($students as $temp) {
                         $student = Student::find($temp->student_id);
+                        $previousClassId = $student->class_id;
 
                         if ($temp->is_graduate) {
                             $student->update([
@@ -284,11 +281,28 @@ class GradePromotionController extends Controller
                                 'status' => StudentStatus::Active->value,
                             ]);
                         }
+
+                        if (!$temp->is_graduate) {
+                            $classId = $temp->target_class_id ?: $previousClassId;
+
+                            if ($classId) {
+                                $classroom = Classroom::find($classId);
+
+                                ClassHistory::updateOrCreate(
+                                    [
+                                        'academic_year_id' => $newAcademicYear->id,
+                                        'student_id' => $student->id
+                                    ],
+                                    [
+                                        'class_id' => $classId,
+                                        'class_name' => $classroom->name,
+                                        'class_level' => $classroom->level,
+                                    ]
+                                );
+                            }
+                        }
                     }
                 });
-
-                // Turn off flag
-                Student::$isFinalizing = false;
 
                 TemporaryClassStatus::query()->delete();
                 TemporaryClassStudent::query()->delete();

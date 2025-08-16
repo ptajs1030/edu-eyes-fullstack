@@ -15,6 +15,7 @@ interface SearchableSelectProps {
     showInitialOptions?: boolean;
     maxInitialOptions?: number;
     disabled?: boolean;
+    required?: boolean;
 }
 
 export default function SearchableSelect({
@@ -26,6 +27,7 @@ export default function SearchableSelect({
     showInitialOptions = false,
     maxInitialOptions = 10,
     disabled = false,
+    required = false,
 }: SearchableSelectProps) {
     const [inputValue, setInputValue] = useState('');
     const [options, setOptions] = useState<Option[]>([]);
@@ -142,6 +144,7 @@ export default function SearchableSelect({
                     onFocus={handleFocus}
                     disabled={disabled}
                     className="flex-1 outline-none w-full"
+                    required={required}
                 />
                 {selectedOption && !disabled && (
                     <button

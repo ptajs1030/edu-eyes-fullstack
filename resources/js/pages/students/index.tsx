@@ -112,10 +112,24 @@ export default function StudentIndex() {
         link.href = url;
         link.download = 'students.csv';
         link.click();
+        
+         toast.success(`Berhasil mengekspor ${selectedData.length} data siswa`, {
+            description: 'File CSV telah didownload otomatis'
+        });
+
+        URL.revokeObjectURL(url);
     };
 
     const handleSortChange = (column: string) => {
-        router.get(route('students.index'), { sort: column, direction: filters.direction === 'asc' ? 'desc' : 'asc' }, { preserveState: true });
+        const sortDirection = filters.direction === 'asc' ? 'desc' : 'asc';
+        let sortColumn = column;
+
+        // Mapping untuk kolom relasi
+        if (column === 'classroom.name') {
+            sortColumn = 'class_name'; // Nama yang akan dikenali oleh backend
+        }
+
+        router.get(route('students.index'), { sort: sortColumn, direction: sortDirection }, { preserveState: true });
     };
 
     const handleBulkPrint = async () => {
@@ -148,7 +162,7 @@ export default function StudentIndex() {
         { key: 'profile_picture', label: 'Foto', sortable: false },
         { key: 'full_name', label: 'Nama Siswa', sortable: true },
         { key: 'parent.full_name', label: 'Nama Orang Tua/wali', sortable: false },
-        { key: 'classroom.name', label: 'Kelas', sortable: false },
+        { key: 'classroom.name', label: 'Kelas', sortable: true },
         { key: 'nis', label: 'NIS', sortable: true },
         { key: 'status', label: 'Status', sortable: true },
         { key: 'entry_year', label: 'Tahun Masuk', sortable: true },
@@ -254,7 +268,17 @@ export default function StudentIndex() {
                                 </button>
                                 <Link
                                     href={route('students.attendance', student.id)}
-                                    className="rounded bg-sky-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
+                                        student.classroom?.name 
+                                        ? 'bg-sky-500 hover:bg-sky-600 hover:cursor-pointer' 
+                                        : 'bg-sky-300 cursor-not-allowed'
+                                    }`}
+                                    onClick={(e) => {
+                                        if (!student.classroom?.name) {
+                                        e.preventDefault();
+                                        }
+                                    }}
+                                    title={!student.classroom?.name ? "Siswa harus memiliki kelas untuk melihat kehadiran" : ""}
                                 >
                                     Kehadiran
                                 </Link>
