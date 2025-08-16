@@ -138,4 +138,14 @@ class ParentController extends BaseApiController
             'payments' => $data['payments'],
         ]);
     }
+
+    public function getUnpaidPayment(Request $request){
+        $student = $request->attributes->get('current_student');
+        return $this->success($this->service->getUnpaidPayment($student));
+    }
+
+    public function getPaymentYear(Request $request){
+        $student = $request->attributes->get('current_student');
+        return $this->success($this->service->getPaymentYear($student));
+    }
 }

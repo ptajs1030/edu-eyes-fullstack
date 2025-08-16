@@ -36,7 +36,7 @@ class AttendanceService
 
     public function todayAttendance(){
         $today = Carbon::now()->format('Y-m-d');
-        $attendances = ShiftingAttendance::where('submit_date', $today)
+        $attendances = ShiftingAttendance::where('submit_date', $today)->where('status', ['present', 'late', 'present_in_tolerance'])
             ->with('student', 'classroom')
             ->get();
         if ($attendances->isEmpty()) {
@@ -45,7 +45,7 @@ class AttendanceService
 
         return[
             'date' => $today,
-            'number_of_in' => $attendances->whereNull('clock_out_hour')->count(),
+            'number_of_in' => $attendances->count(),
             'number_of_out' => $attendances->whereNotNull('clock_out_hour')->count(),
         ];
     }
@@ -57,7 +57,13 @@ class AttendanceService
             $query->where('submit_date', $parsedDate);
         }
         if ($class_id) {
-            $query->where('class_id', $class_id);
+            $query->where('class_id', $class_id)->whereHas('student') 
+            ->whereHas('student')
+            ->orderByRaw("FIELD(status, 'present', 'present_in_tolerance', 'alpha') ASC")
+            ->orderBy(
+                Student::select('full_name')
+                ->whereColumn('students.id', 'shifting_attendances.student_id'),'asc'
+            );
         }
         if ($type=='out') {
             $query->whereNotNull('clock_in_hour')
@@ -93,7 +99,9 @@ class AttendanceService
             ];
         }
         return [
-            'number_of_attendances' => $attendances->total(),
+            'number_of_attendances' => $class_id 
+            ? $query->whereIn('status', ['present', 'late', 'present_in_tolerance'])->count() 
+            : ShiftingAttendance::whereIn('status', ['present', 'late', 'present_in_tolerance'])->count(),
             'current_page' => $attendances->currentPage(),
             'last_page' => $attendances->lastPage(),
             'per_page' => $attendances->perPage(),
@@ -103,25 +111,30 @@ class AttendanceService
     
 
     public function shiftingAttendance(ShiftingAttendanceData $data){
+        $academic_year=AcademicYear::where('status', 'active')->first()->value('attendance_mode');
         $student=Student::where('uuid', $data->getStudent())->first();
         if (!$student) {
             throw new SilentHttpException(404, 'Murid tidak ditemukan');
         }
         $parent=$student->parent;
-        $attendance=ShiftingAttendance::where('student_id', $student->id)->where('submit_date', Carbon::now()->format('Y-m-d'))->first();
-        if (!$attendance) {
-            throw new SilentHttpException(404, 'Absensi tidak ditemukan');
-        }
         $day=ClassShiftingSchedule::where('class_id', $student->class_id)->where('day', Carbon::now()->dayOfWeek())->first();
         if(!$day){
             throw new SilentHttpException(404, 'Jadwal kelas tidak ditemukan untuk hari ini.');
+        }
+        $attendance=ShiftingAttendance::where('student_id', $student->id)->where('submit_date', Carbon::now()->format('Y-m-d'))->where('class_id', $day->class_id)->first();
+        if (!$attendance) {
+            throw new SilentHttpException(404, 'Absensi tidak ditemukan');
         }
         $pics=ClassShiftingSchedulePic::where('class_shifting_schedule_id', $day->id)->get();
         if ($pics->isEmpty()) {
             throw new SilentHttpException(404, 'PIC tidak ditemukan');
         }
         
-       $late_tolerance = (int) Setting::where('key', 'late_tolerance')->value('value');
+        if($academic_year!='per-shift'){
+            throw new SilentHttpException(400, 'Absensi tidak aktif');
+        }
+
+        $late_tolerance = (int) Setting::where('key', 'late_tolerance')->value('value');
         $start_hour = Carbon::parse($attendance->shifting_start_hour);
         $deadline = $start_hour->copy()->addMinutes($late_tolerance);
         $submit_hour = Carbon::parse($data->getSubmitHour());
@@ -152,7 +165,7 @@ class AttendanceService
              try {
                 if ($parent && $parent->notification_key) {
                     $title= 'Absensi '.$student->full_name;
-                    $body=  $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
+                    $body=  $student->full_name . ' telah melakukan absensi masuk, dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
                         'tipe' => 'absensi_masuk',
@@ -174,7 +187,7 @@ class AttendanceService
              try {
                 if ($parent && $parent->notification_key) {
                     $title= 'Absensi '.$student->full_name;
-                    $body= $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
+                    $body= $student->full_name . ' telah melakukan absensi masuk, dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
                         'tipe' => 'absensi_masuk',
@@ -195,7 +208,7 @@ class AttendanceService
              try {
                 if ($parent && $parent->notification_key) {
                     $title= 'Absensi '.$student->full_name;
-                    $body= $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
+                    $body= $student->full_name . ' telah melakukan absensi masuk, dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
                         'tipe' => 'absensi_masuk',
@@ -216,7 +229,7 @@ class AttendanceService
              try {
                 if ($parent && $parent->notification_key) {
                     $title= 'Absensi '.$student->full_name;
-                    $body= $student->full_name . ' telah melakukan absensi, dengan status ' .  $attendance->status;
+                    $body= $student->full_name . ' telah melakukan absensi keluar, dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
                         'tipe' => 'absensi_keluar',
@@ -247,7 +260,7 @@ class AttendanceService
             throw new SilentHttpException(404, 'Absensi tidak ditemukan');
         }
         if($attendance->submit_date != Carbon::now()->format('Y-m-d')){
-            throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
+            throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini, karena tanggal absensi sudah terlewat. Silahkan hubungi admin untuk mengedit absensi');
         }
         $attendance->update([
             'status' => $data->getStatus(),
@@ -304,7 +317,7 @@ class AttendanceService
     }
 
     public function getClassroomByTeacher($search){
-        $query= Classroom::where('main_teacher_id', auth()->user()->id);
+        $query= ClassSubjectSchedule::where('teacher_id', auth()->user()->id);
         if ($search) {
             $query->where('name', 'like', "%$search%");
         }
@@ -381,19 +394,26 @@ class AttendanceService
 
         return $attendanceWithRelations;
     }
-    public function subjectAttendance(SubjectAttendanceData $data){ 
+    public function subjectAttendance(SubjectAttendanceData $data){
+        $academic_year=AcademicYear::where('status', 'active')->first()->value('attendance_mode'); 
         $subject = Subject::where('name', $data->getSubjectName())->firstOrFail();
         
         $allStudents = Student::where('class_id', $data->getClassId())->get();
 
         $schedule = ClassSubjectSchedule::where('class_id', $data->getClassId())
             ->where('subject_id', $subject->id)
-            ->firstOrFail();
+            ->first();
 
+
+        if (!$schedule) {
+            throw new SilentHttpException(404, 'Jadwal pelajaran tidak ditemukan');
+        }
         if($schedule->teacher_id != auth()->user()->id){
             throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengabsen mata pelajaran ini');
         }
-
+        if ($academic_year != 'per-subject') {
+            throw new SilentHttpException(400, 'Absensi tidak aktif');
+        }
         $presentIds = $data->getStudentIdList();
         $today = Carbon::now()->format('Y-m-d');
         $results = []; 

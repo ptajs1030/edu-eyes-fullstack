@@ -106,6 +106,8 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
         Route::get('/event-schedule', 'getEventSchedule');
         Route::get('/get-academic-year', 'getAcademicYear');
         Route::get('/payment', 'getPayment');
+        Route::get('/unpaid-payment', 'getUnpaidPayment');
+        Route::get('/payment-year', 'getPaymentYear');
 
         Route::prefix('attendance')->group(function (){
             Route::get('/', 'todayAttendance');

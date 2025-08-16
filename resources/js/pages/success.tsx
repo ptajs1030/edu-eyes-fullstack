@@ -12,10 +12,10 @@ interface PasswordResetSuccessProps {
 export default function PasswordResetSuccess({ status }: PasswordResetSuccessProps) {
     return (
         <AuthLayout
-            title="Password Reset Successful"
-            description="Your password has been successfully updated. You can now log in with your new password."
+            title="Password Berhasil Diubah"
+            description="Password anda berhasil diubah silahkan login dengan password terbaru anda."
         >
-            <Head title="Password Reset Success" />
+            <Head title="Password Berhasil Diubah" />
 
             <div className="flex flex-col items-center gap-6 text-center">
                 <div className="rounded-full bg-green-100 p-4 text-green-600">
@@ -24,9 +24,6 @@ export default function PasswordResetSuccess({ status }: PasswordResetSuccessPro
 
                 <div className="space-y-2">
                    
-                    <p className="text-muted-foreground text-sm">
-                       please login with your new password.
-                    </p>
                 </div>
 
               
