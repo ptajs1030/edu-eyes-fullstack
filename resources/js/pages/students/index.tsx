@@ -112,6 +112,12 @@ export default function StudentIndex() {
         link.href = url;
         link.download = 'students.csv';
         link.click();
+        
+         toast.success(`Berhasil mengekspor ${selectedData.length} data siswa`, {
+            description: 'File CSV telah didownload otomatis'
+        });
+
+        URL.revokeObjectURL(url);
     };
 
     const handleSortChange = (column: string) => {
