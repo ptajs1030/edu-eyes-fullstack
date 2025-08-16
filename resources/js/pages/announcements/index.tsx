@@ -1,3 +1,4 @@
+import ActionModal from '@/components/action-modal';
 import Pagination from '@/components/ui/pagination';
 import Table from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
@@ -35,6 +36,8 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Pengumuman', href: '' }];
 
 export default function AnnouncementIndex({ announcements, filters }: Props) {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const [announcementToDelete, setAnnouncementToDelete] = useState<Announcement | null>(null);
+
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
 
     useEffect(() => {
@@ -102,13 +105,11 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
     };
 
     const handleDelete = (id: number) => {
-        if (confirm('Apakah Anda yakin ingin menghapus pengumuman ini?')) {
-            router.delete(route('announcements.destroy', id), {
-                onSuccess: () => {
-                    toast.success('Pengumuman berhasil dihapus');
-                },
-            });
-        }
+        router.delete(route('announcements.destroy', id), {
+            onSuccess: () => {
+                router.reload();
+            },
+        });
     };
 
     return (
@@ -197,7 +198,7 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
                                     Detail
                                 </Link>
                                 <button
-                                    onClick={() => handleDelete(announcement.id)}
+                                    onClick={() => setAnnouncementToDelete(announcement)}
                                     className="rounded bg-red-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
                                     Hapus
@@ -208,6 +209,34 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
                 />
 
                 <Pagination links={announcements.links} />
+
+                <ActionModal
+                    isOpen={!!announcementToDelete}
+                    onClose={() => setAnnouncementToDelete(null)}
+                    title="Confirm Deletion"
+                    message={
+                        <span>
+                            Are you sure you want to delete annpuncement <strong>{announcementToDelete?.title}</strong>?
+                        </span>
+                    }
+                    buttons={[
+                        {
+                            label: 'Cancel',
+                            onClick: () => setAnnouncementToDelete(null),
+                            variant: 'neutral',
+                        },
+                        {
+                            label: 'Delete',
+                            onClick: () => {
+                                if (announcementToDelete) {
+                                    handleDelete(announcementToDelete.id);
+                                    setAnnouncementToDelete(null);
+                                }
+                            },
+                            variant: 'danger',
+                        },
+                    ]}
+                />
             </div>
         </AppLayout>
     );
