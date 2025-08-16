@@ -115,7 +115,15 @@ export default function StudentIndex() {
     };
 
     const handleSortChange = (column: string) => {
-        router.get(route('students.index'), { sort: column, direction: filters.direction === 'asc' ? 'desc' : 'asc' }, { preserveState: true });
+        const sortDirection = filters.direction === 'asc' ? 'desc' : 'asc';
+        let sortColumn = column;
+
+        // Mapping untuk kolom relasi
+        if (column === 'classroom.name') {
+            sortColumn = 'class_name'; // Nama yang akan dikenali oleh backend
+        }
+
+        router.get(route('students.index'), { sort: sortColumn, direction: sortDirection }, { preserveState: true });
     };
 
     const handleBulkPrint = async () => {
@@ -148,7 +156,7 @@ export default function StudentIndex() {
         { key: 'profile_picture', label: 'Foto', sortable: false },
         { key: 'full_name', label: 'Nama Siswa', sortable: true },
         { key: 'parent.full_name', label: 'Nama Orang Tua/wali', sortable: false },
-        { key: 'classroom.name', label: 'Kelas', sortable: false },
+        { key: 'classroom.name', label: 'Kelas', sortable: true },
         { key: 'nis', label: 'NIS', sortable: true },
         { key: 'status', label: 'Status', sortable: true },
         { key: 'entry_year', label: 'Tahun Masuk', sortable: true },

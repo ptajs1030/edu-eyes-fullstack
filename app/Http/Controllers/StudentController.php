@@ -97,11 +97,33 @@ class StudentController extends Controller
             'label' => $religion->label(),
         ]);
 
-        $students = Student::with(['classroom', 'parent'])
-            ->when($request->search, fn($q) => $q->where('full_name', 'like', "%{$request->search}%"))
-            ->orderBy($request->sort ?? 'created_at', $request->direction ?? 'desc')
-            ->paginate(10)
-            ->withQueryString();
+        $query = Student::with(['classroom', 'parent'])
+            ->leftJoin('classrooms', 'students.class_id', '=', 'classrooms.id')
+            ->select('students.*');
+
+        if ($request->search) {
+            $query->where('students.full_name', 'like', "%{$request->search}%");
+        }
+
+        if ($request->sort) {
+            $direction = $request->direction === 'asc' ? 'asc' : 'desc';
+
+            switch ($request->sort) {
+                case 'class_name':
+                    $query->orderBy('classrooms.name', $direction);
+                    break;
+                case 'class_level':
+                    $query->orderBy('classrooms.level', $direction);
+                    break;
+                default:
+                    // Untuk sorting kolom lain di tabel students
+                    $query->orderBy('students.' . $request->sort, $direction);
+            }
+        } else {
+            $query->orderBy('students.created_at', 'desc');
+        }
+
+        $students = $query->paginate(10)->withQueryString();
 
         return Inertia::render('students/index', [
             'students' => $students,
