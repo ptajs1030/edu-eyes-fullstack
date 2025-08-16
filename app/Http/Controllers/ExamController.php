@@ -305,6 +305,8 @@ class ExamController extends Controller
                     'nis' => $assignment->student->nis,
                     'class_name' => $assignment->class_name,
                     'class_id' => $assignment->class_id,
+                    'score' => $assignment->score, 
+                    'is_scored'=> $assignment->score !== null
                 ];
             });
 
@@ -321,6 +323,7 @@ class ExamController extends Controller
                     'type' => $exam->type,
                     'date' => $exam->date->format('Y-m-d'),
                     'student_assignments' => $studentAssignments,
+                    'academic_year' => $exam->academicYear, // Include academic year data
                 ],
                 'subjects' => $subjects,
                 'academicYears' => $academicYears,
@@ -427,75 +430,215 @@ class ExamController extends Controller
             return redirect()->route('exams.index')
                 ->with('success', 'Exam berhasil diperbarui dengan ' . count($validated['student_assignments']) . ' siswa');
 
+            } catch (ValidationException $e) {
+                DB::rollback();
+                
+                Log::warning('Validation failed when updating exam', [
+                    'exam_id' => $id,
+                    'errors' => $e->errors(),
+                    'request_data' => $request->except(['_token']),
+                    'user_id' => auth()->id() ?? 'Guest',
+                ]);
+
+                return redirect()->back()
+                    ->withErrors($e->errors())
+                    ->withInput()
+                    ->with('error', 'Data yang dimasukkan tidak valid. Silakan periksa kembali.');
+
+            } catch (QueryException $e) {
+                DB::rollback();
+                
+                Log::error('Database error when updating exam', [
+                    'exam_id' => $id,
+                    'error_code' => $e->getCode(),
+                    'error_message' => $e->getMessage(),
+                    'request_data' => $request->except(['_token']),
+                    'user_id' => auth()->id() ?? 'Guest',
+                ]);
+
+                return redirect()->back()
+                    ->with('error', 'Terjadi kesalahan database. Silakan coba lagi atau hubungi administrator.')
+                    ->withInput();
+
+            } catch (\Exception $e) {
+                DB::rollback();
+                
+                Log::error('Unexpected error when updating exam', [
+                    'exam_id' => $id,
+                    'error_message' => $e->getMessage(),
+                    'error_file' => $e->getFile(),
+                    'error_line' => $e->getLine(),
+                    'stack_trace' => $e->getTraceAsString(),
+                    'request_data' => $request->except(['_token']),
+                    'user_id' => auth()->id() ?? 'Guest',
+                    'timestamp' => now()->toISOString(),
+                ]);
+
+                // Check if error message is user-friendly
+                $userFriendlyMessages = [
+                    'sudah ada untuk mata pelajaran',
+                    'dipilih lebih dari sekali',
+                    'tidak ditemukan',
+                    'tidak valid',
+                ];
+
+                $isUserFriendly = false;
+                foreach ($userFriendlyMessages as $pattern) {
+                    if (str_contains($e->getMessage(), $pattern)) {
+                        $isUserFriendly = true;
+                        break;
+                    }
+                }
+
+                if ($isUserFriendly) {
+                    return redirect()->back()
+                        ->with('error', $e->getMessage())
+                        ->withInput();
+                }
+
+                return redirect()->back()
+                    ->with('error', 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi atau hubungi administrator jika masalah berlanjut.')
+                    ->withInput();
+            }
+        }
+
+
+    public function scoring($id): Response
+    {
+        try {
+            $exam = Exam::with(['subject', 'academicYear', 'assignments.student', 'assignments.class'])
+                ->findOrFail($id);
+
+            // Transform assignments for frontend
+            $studentAssignments = $exam->assignments->map(function ($assignment) {
+                return [
+                    'id' => $assignment->id,
+                    'student_id' => $assignment->student_id,
+                    'student_name' => $assignment->student->full_name,
+                    'nis' => $assignment->student->nis,
+                    'class_name' => $assignment->class_name,
+                    'class_id' => $assignment->class_id,
+                    'score' => $assignment->score,
+                ];
+            });
+
+            return Inertia::render('exams/scoring', [
+                'exam' => [
+                    'id' => $exam->id,
+                    'academic_year_id' => $exam->academic_year_id,
+                    'subject_id' => $exam->subject_id,
+                    'name' => $exam->name,
+                    'type' => $exam->type,
+                    'date' => $exam->date->format('Y-m-d'),
+                    'academic_year' => $exam->academicYear,
+                    'subject' => $exam->subject,
+                    'student_assignments' => $studentAssignments,
+                ],
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error loading exam for scoring', [
+                'exam_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->route('exams.index')
+                ->with('error', 'Exam tidak ditemukan atau terjadi kesalahan.');
+        }
+    }
+
+    public function updateScore(Request $request, $examId, $assignmentId)
+    {
+        try {
+            $validated = $request->validate([
+                'score' => 'required|numeric|min:0|max:100',
+            ], [
+                'score.required' => 'Nilai harus diisi',
+                'score.numeric' => 'Nilai harus berupa angka',
+                'score.min' => 'Nilai minimal adalah 0',
+                'score.max' => 'Nilai maksimal adalah 100',
+            ]);
+
+            $assignment = ExamAssignment::where('id', $assignmentId)
+                ->where('exam_id', $examId)
+                ->firstOrFail();
+
+            $assignment->update(['score' => $validated['score']]);
+
+            // Untuk Inertia, return redirect dengan flash message
+            return redirect()->back()->with('success', 'Nilai berhasil disimpan');
+
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->with('error', 'Data tidak valid');
+
+        } catch (\Exception $e) {
+            Log::error('Error updating exam score', [
+                'exam_id' => $examId,
+                'assignment_id' => $assignmentId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan nilai');
+        }
+    }
+
+    public function updateBulkScores(Request $request, $examId)
+    {
+        try {
+            $validated = $request->validate([
+                'scores' => 'required|array|min:1',
+                'scores.*.assignment_id' => 'required|exists:exam_assignments,id',
+                'scores.*.score' => 'required|numeric|min:0|max:100',
+            ], [
+                'scores.required' => 'Data nilai harus ada',
+                'scores.array' => 'Format data nilai tidak valid',
+                'scores.min' => 'Minimal harus ada 1 nilai',
+                'scores.*.assignment_id.required' => 'ID assignment harus ada',
+                'scores.*.assignment_id.exists' => 'Assignment tidak ditemukan',
+                'scores.*.score.required' => 'Nilai harus diisi',
+                'scores.*.score.numeric' => 'Nilai harus berupa angka',
+                'scores.*.score.min' => 'Nilai minimal adalah 0',
+                'scores.*.score.max' => 'Nilai maksimal adalah 100',
+            ]);
+
+            DB::beginTransaction();
+
+            $exam = Exam::findOrFail($examId);
+            $updatedCount = 0;
+
+            foreach ($validated['scores'] as $scoreData) {
+                $assignment = ExamAssignment::where('id', $scoreData['assignment_id'])
+                    ->where('exam_id', $examId)
+                    ->first();
+
+                if ($assignment) {
+                    $assignment->update(['score' => $scoreData['score']]);
+                    $updatedCount++;
+                }
+            }
+
+            DB::commit();
+
+            // Untuk Inertia, return redirect dengan flash message
+            return redirect()->back()->with('success', "Berhasil menyimpan {$updatedCount} nilai");
+
         } catch (ValidationException $e) {
             DB::rollback();
             
-            Log::warning('Validation failed when updating exam', [
-                'exam_id' => $id,
-                'errors' => $e->errors(),
-                'request_data' => $request->except(['_token']),
-                'user_id' => auth()->id() ?? 'Guest',
-            ]);
-
             return redirect()->back()
                 ->withErrors($e->errors())
-                ->withInput()
-                ->with('error', 'Data yang dimasukkan tidak valid. Silakan periksa kembali.');
-
-        } catch (QueryException $e) {
-            DB::rollback();
-            
-            Log::error('Database error when updating exam', [
-                'exam_id' => $id,
-                'error_code' => $e->getCode(),
-                'error_message' => $e->getMessage(),
-                'request_data' => $request->except(['_token']),
-                'user_id' => auth()->id() ?? 'Guest',
-            ]);
-
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan database. Silakan coba lagi atau hubungi administrator.')
-                ->withInput();
+                ->with('error', 'Data tidak valid');
 
         } catch (\Exception $e) {
             DB::rollback();
             
-            Log::error('Unexpected error when updating exam', [
-                'exam_id' => $id,
-                'error_message' => $e->getMessage(),
-                'error_file' => $e->getFile(),
-                'error_line' => $e->getLine(),
-                'stack_trace' => $e->getTraceAsString(),
-                'request_data' => $request->except(['_token']),
-                'user_id' => auth()->id() ?? 'Guest',
-                'timestamp' => now()->toISOString(),
+            Log::error('Error updating bulk exam scores', [
+                'exam_id' => $examId,
+                'error' => $e->getMessage(),
             ]);
 
-            // Check if error message is user-friendly
-            $userFriendlyMessages = [
-                'sudah ada untuk mata pelajaran',
-                'dipilih lebih dari sekali',
-                'tidak ditemukan',
-                'tidak valid',
-            ];
-
-            $isUserFriendly = false;
-            foreach ($userFriendlyMessages as $pattern) {
-                if (str_contains($e->getMessage(), $pattern)) {
-                    $isUserFriendly = true;
-                    break;
-                }
-            }
-
-            if ($isUserFriendly) {
-                return redirect()->back()
-                    ->with('error', $e->getMessage())
-                    ->withInput();
-            }
-
-            return redirect()->back()
-                ->with('error', 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi atau hubungi administrator jika masalah berlanjut.')
-                ->withInput();
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan nilai');
         }
     }
 }

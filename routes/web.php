@@ -91,8 +91,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/exams/create', [ExamController::class, 'create'])->name('exams.create');
     Route::get('/exams/{exam}/edit', [ExamController::class, 'edit'])->name('exams.edit');
     Route::put('/exams/{exam}', [ExamController::class, 'update'])->name('exams.update');
-    Route::get('exams/{exam}/scoring', [ExamController::class, 'scoring'])->name('exams.scoring');
-    Route::put('exams/{exam}/scores', [ExamController::class, 'updateScores'])->name('exams.updateScores');
+    Route::get('/exams/{exam}/scoring', [ExamController::class, 'scoring'])->name('exams.scoring');
+    Route::put('/exams/{exam}/assignments/{assignment}/score', [ExamController::class, 'updateScore'])->name('exams.updateScore');
+    Route::put('/exams/{exam}/scores/bulk', [ExamController::class, 'updateBulkScores'])->name('exams.updateBulkScores');
 });
 
 require __DIR__ . '/settings.php';

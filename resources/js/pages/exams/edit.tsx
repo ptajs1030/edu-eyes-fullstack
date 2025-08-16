@@ -30,6 +30,8 @@ interface AssignedStudent {
     nis: string;
     class_name: string;
     class_id: number;
+    score?: number | null; // Add score field
+    is_scored?: boolean; // Add scoring status
 }
 
 interface ExamData {
@@ -66,7 +68,9 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
             student_name: s.student_name,
             nis: s.nis,
             class_name: s.class_name,
-            class_id: s.class_id
+            class_id: s.class_id,
+            score: s.score,
+            is_scored: s.is_scored
         }))
     });
 
@@ -148,12 +152,36 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
         const currentStudentIds = data.student_assignments.map(s => s.student_id);
         const newStudents = students.filter(s => !currentStudentIds.includes(s.student_id));
         
-        setData('student_assignments', [...data.student_assignments, ...newStudents]);
+        setData(
+            'student_assignments',
+            [
+                ...data.student_assignments,
+                ...newStudents.map(s => ({
+                    student_id: s.student_id,
+                    student_name: s.student_name,
+                    nis: s.nis,
+                    class_name: s.class_name,
+                    class_id: s.class_id,
+                    score: s.score ?? null,
+                    is_scored: s.is_scored ?? false
+                }))
+            ]
+        );
         setShowStudentModal(false);
         toast.success(`${newStudents.length} siswa berhasil ditambahkan`);
     };
 
-    const handleRemoveStudent = (studentId: number) => {
+    const handleRemoveStudent = (studentId: number, isScored: boolean = false) => {
+        if (isScored) {
+            // Show confirmation dialog for scored students
+            const confirmed = window.confirm(
+                'Siswa ini sudah memiliki nilai. Menghapus siswa akan menghilangkan data nilai tersebut. Apakah Anda yakin ingin melanjutkan?'
+            );
+            
+            if (!confirmed) {
+                return;
+            }
+        }
         setData('student_assignments', data.student_assignments.filter(s => s.student_id !== studentId));
         toast.success('Siswa berhasil dihapus dari exam');
     };
@@ -161,6 +189,8 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
     // Get academic year info for display
     const academicYear = academicYears.find(year => year.id === exam.academic_year_id) || exam.academic_year;
 
+    const scoredStudents = data.student_assignments.filter(s => s.is_scored).length;
+    const totalStudents = data.student_assignments.length;
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit Exam - ${exam.name}`} />
@@ -271,9 +301,14 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                     {/* Student Assignments */}
                     <div>
                         <div className="mb-4 flex items-center justify-between">
-                            <h3 className="text-lg font-medium text-gray-900">Student Assignments</h3>
-                            <p className="text-sm text-blue-600">
-                                ⚠️ Warning: Menghapus data siswa dari exam ini akan menyebabkan data skor yang sudah diinputkan hilang!
+                            <div>
+                                <h3 className="text-lg font-medium text-gray-900">Student Assignments</h3>
+                                <p className="text-sm text-gray-600 mt-1">
+                                    {scoredStudents} dari {totalStudents} siswa sudah dinilai
+                                </p>
+                            </div>
+                            <p className="text-sm text-red-600 max-w-md text-right">
+                                ⚠️ Warning: Menghapus siswa yang sudah dinilai akan menghilangkan data skor mereka!
                             </p>
                         </div>
                         
@@ -285,20 +320,50 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Nama</th>
                                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">NIS</th>
                                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Kelas</th>
+                                            <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">Status Nilai</th>
                                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {data.student_assignments.map((student) => (
                                             <tr key={student.student_id} className="border-t">
-                                                <td className="px-4 py-3 text-sm">{student.student_name}</td>
+                                                <td className="px-4 py-3 text-sm font-medium">
+                                                    <div className="flex items-center gap-2">
+                                                        {student.student_name}
+                                                        {student.is_scored && (
+                                                            <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
+                                                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                                                </svg>
+                                                                Sudah Dinilai
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
                                                 <td className="px-4 py-3 text-sm">{student.nis || '-'}</td>
                                                 <td className="px-4 py-3 text-sm">{student.class_name}</td>
-                                                <td className="px-4 py-3">
+                                                <td className="px-4 py-3 text-center">
+                                                    {student.is_scored ? (
+                                                        <div className="flex flex-col items-center">
+                                                            <span className="inline-flex rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-800">
+                                                                Sudah Dinilai
+                                                            </span>
+                                                            <span className="text-xs text-gray-600 mt-1">
+                                                                Nilai: {student.score}
+                                                            </span>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="inline-flex rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-800">
+                                                            Belum Dinilai
+                                                        </span>
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-3 text-center">
                                                     <button
                                                         type="button"
-                                                        onClick={() => handleRemoveStudent(student.student_id)}
-                                                        className="flex items-center gap-1 rounded bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600"
+                                                        onClick={() => handleRemoveStudent(student.student_id, student.is_scored)}
+                                                        className={`flex items-center gap-1 rounded px-2 py-1 text-xs text-white hover:opacity-90 bg-red-500 hover:bg-red-600`}
+                                                        title={student.is_scored ? 'Hati-hati: Siswa ini sudah memiliki nilai!' : 'Hapus siswa dari exam'}
                                                     >
                                                         <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
