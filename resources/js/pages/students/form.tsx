@@ -248,7 +248,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                     id="full_name"
                     name="full_name"
                     type="text"
-                    maxLength={70}
+                    maxLength={80}
                     value={formData.full_name}
                     onChange={(e) => handleChange('full_name', e.target.value)}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
@@ -279,6 +279,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                     placeholder="Search parent by name..."
                     endpoint={route('parents.search')}
                     initialOption={initialParent ? { id: initialParent.id, full_name: initialParent.full_name } : undefined}
+                    required={true}
                 />
             </div>
             <div className="mb-3">

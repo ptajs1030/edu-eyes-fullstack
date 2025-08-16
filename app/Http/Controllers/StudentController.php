@@ -105,7 +105,7 @@ class StudentController extends Controller
 
         return Inertia::render('students/index', [
             'students' => $students,
-            'classrooms' => Classroom::all(),
+            'classrooms' => Classroom::orderBy('level', 'asc')->get(),
             'sexes' => $sexes,
             'statuses' => $statuses,
             'religions' => $religions,
