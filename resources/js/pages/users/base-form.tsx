@@ -1,7 +1,6 @@
 import FormModal from '@/components/form-modal';
 import { router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
 
 interface User {
     id?: number;
@@ -168,7 +167,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
             {/* Profile Picture */}
             <div className="mb-4 flex flex-col items-center">
                 <div className="relative">
-                    <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-gray-300 bg-gray-100">
+                    <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-gray-300 bg-gray-100">
                         {previewImage ? (
                             <img src={previewImage} alt="Profile preview" className="h-full w-full object-cover" />
                         ) : (

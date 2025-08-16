@@ -2,7 +2,6 @@ import FormModal from '@/components/form-modal';
 import SearchableSelect from '@/components/ui/searchable-select';
 import { router } from '@inertiajs/react';
 import React, { useEffect, useRef, useState } from 'react';
-import { toast } from 'sonner';
 
 interface Classroom {
     id: number;
@@ -82,8 +81,6 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
 
             if (student.profile_picture) {
                 setPreviewImage(`/storage/${student.profile_picture}`);
-            } else {
-                setPreviewImage(`https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(student.full_name)}`);
             }
 
             if (student.parent) {
@@ -94,6 +91,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
             } else {
                 setInitialParent(null);
             }
+
             setHasInitialized(true);
         } else if (isOpen && !student && !hasInitialized) {
             setFormData({
@@ -137,23 +135,24 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
+        const file = e.target.files?.[0];
 
-            reader.onload = (event) => {
-                if (event.target?.result) {
-                    setPreviewImage(event.target.result as string);
-                }
+        if (file) {
+            // Preview image
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewImage(reader.result as string);
             };
 
             reader.readAsDataURL(file);
+            setFormData((prev) => ({ ...prev, profile_picture: file }));
             setRemoveProfilePicture(false);
         }
     };
 
     const handleRemoveImage = () => {
         setPreviewImage(null);
+        setFormData((prev) => ({ ...prev, profile_picture: undefined }));
         setRemoveProfilePicture(true);
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
@@ -168,20 +167,17 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
             formData.status = 'active';
         }
 
-        const { parent, ...payload } = formData;
         const formDataToSend = new FormData();
 
-        Object.entries(payload).forEach(([key, value]) => {
-            if (value !== null) {
+        Object.entries(formData).forEach(([key, value]) => {
+            if (key !== 'profile_picture' && value !== null) {
                 formDataToSend.append(key, value as string);
             }
         });
 
-        if (fileInputRef.current?.files?.[0]) {
-            formDataToSend.append('profile_picture', fileInputRef.current.files[0]);
-        }
-
-        if (removeProfilePicture) {
+        if (formData.profile_picture instanceof File) {
+            formDataToSend.append('profile_picture', formData.profile_picture);
+        } else if (removeProfilePicture) {
             formDataToSend.append('remove_profile_picture', '1');
         }
 
@@ -196,10 +192,6 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                 onClose();
                 router.reload();
             },
-            onError: (errors) => {
-                const errorMessage = Object.values(errors).join('\n');
-                toast.error(`Failed to ${student ? 'update' : 'add'} student: ${errorMessage}`);
-            },
         });
     };
 
@@ -207,40 +199,44 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
         <FormModal isOpen={isOpen} onClose={onClose} title={student ? 'Edit Siswa' : 'Tambah Siswa Baru'} onSubmit={handleSubmit}>
             {/* Profile Picture Section */}
             <div className="mb-4 flex flex-col items-center">
-                <label className="mb-2 block text-sm font-medium text-gray-700">Foto Profil</label>
-                <div className="group relative">
-                    {previewImage ? (
-                        <div className="relative">
-                            <img
-                                src={previewImage}
-                                alt="Profile preview"
-                                className="h-32 w-32 rounded-full border-2 border-gray-300 object-cover shadow-sm"
-                            />
-                            <button
-                                type="button"
-                                onClick={handleRemoveImage}
-                                className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 transform rounded-full bg-red-500 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                <div className="relative">
+                    <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-gray-300 bg-gray-100">
+                        {previewImage ? (
+                            <img src={previewImage} alt="Profile preview" className="h-full w-full object-cover" />
+                        ) : (
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-12 w-12 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="flex h-32 w-32 items-center justify-center rounded-full border-2 border-dashed bg-gray-200">
-                            <span className="text-gray-500">No image</span>
-                        </div>
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                />
+                            </svg>
+                        )}
+                    </div>
+
+                    {(previewImage || (student?.profile_picture && !removeProfilePicture)) && (
+                        <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white hover:cursor-pointer hover:bg-red-600"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
                     )}
                 </div>
+
                 <label className="mt-2 cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800">
                     <span>Upload Photo</span>
-                    <input
-                        type="file"
-                        ref={fileInputRef}
-                        onChange={handleImageChange}
-                        accept="image/*"
-                        className="hidden"
-                    />
+                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
                 </label>
                 <p className="mt-1 text-xs text-gray-500">Max 2MB (300x300)</p>
             </div>
