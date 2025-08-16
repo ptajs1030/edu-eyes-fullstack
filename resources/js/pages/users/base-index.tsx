@@ -102,6 +102,10 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         link.href = url;
         link.download = `${role.value}-users.csv`;
         link.click();
+
+        toast.success(`Berhasil mengekspor ${selectedData.length} data user`, {
+            description: 'File CSV telah didownload otomatis'
+        });
     };
 
     const handleSortChange = (column: string) => {

@@ -69,6 +69,10 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
         link.href = url;
         link.download = 'announcements.csv';
         link.click();
+
+        toast.success(`Berhasil mengekspor ${selectedData.length} data pengumuman`, {
+            description: 'File CSV telah didownload otomatis'
+        });        
     };
 
     const formatDate = (dateString: string) => {

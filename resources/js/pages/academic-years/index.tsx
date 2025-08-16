@@ -4,7 +4,7 @@ import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
-import { Toaster } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import AcademicYearFormModal from './form';
 
 type AcademicYear = {
@@ -71,6 +71,10 @@ export default function AcademicYearIndex() {
         link.href = url;
         link.download = 'academic-years.csv';
         link.click();
+
+        toast.success(`Berhasil mengekspor ${selectedData.length} data tahun akademik`, {
+            description: 'File CSV telah didownload otomatis'
+        });
     };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
