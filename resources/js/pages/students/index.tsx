@@ -254,7 +254,17 @@ export default function StudentIndex() {
                                 </button>
                                 <Link
                                     href={route('students.attendance', student.id)}
-                                    className="rounded bg-sky-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
+                                        student.classroom?.name 
+                                        ? 'bg-sky-500 hover:bg-sky-600 hover:cursor-pointer' 
+                                        : 'bg-sky-300 cursor-not-allowed'
+                                    }`}
+                                    onClick={(e) => {
+                                        if (!student.classroom?.name) {
+                                        e.preventDefault();
+                                        }
+                                    }}
+                                    title={!student.classroom?.name ? "Siswa harus memiliki kelas untuk melihat kehadiran" : ""}
                                 >
                                     Kehadiran
                                 </Link>
