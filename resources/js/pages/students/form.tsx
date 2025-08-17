@@ -2,6 +2,7 @@ import FormModal from '@/components/form-modal';
 import SearchableSelect from '@/components/ui/searchable-select';
 import { router } from '@inertiajs/react';
 import React, { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 interface Classroom {
     id: number;
@@ -192,6 +193,10 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                 onClose();
                 router.reload();
             },
+            onError: (errors) => {
+                const errorMessage = Object.values(errors).join('\n');
+                toast.error(`Failed: ${errorMessage}`);
+            },
         });
     };
 
@@ -248,7 +253,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                     id="full_name"
                     name="full_name"
                     type="text"
-                    maxLength={80}
+                    maxLength={70}
                     value={formData.full_name}
                     onChange={(e) => handleChange('full_name', e.target.value)}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"

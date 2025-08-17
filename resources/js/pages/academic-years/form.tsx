@@ -68,15 +68,11 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                 {
                     onSuccess: () => {
                         closeModal();
-                        toast.success('Academic year updated successfully.');
                         router.reload();
                     },
                     onError: (errors) => {
-                        if (errors.start_year) {
-                            toast.error('Failed to update academic year: ' + errors.start_year);
-                        } else {
-                            toast.error('Failed to update academic year');
-                        }
+                        const errorMessage = Object.values(errors).join('\n');
+                        toast.error('Failed to update academic year: ' + errorMessage);
                     },
                 },
             );
@@ -88,11 +84,8 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                     router.reload();
                 },
                 onError: (errors) => {
-                    if (errors.start_year) {
-                        toast.error('Failed to create academic year: ' + errors.start_year);
-                    } else {
-                        toast.error('Failed to create academic year');
-                    }
+                    const errorMessage = Object.values(errors).join('\n');
+                    toast.error('Failed to create academic year: ' + errorMessage);
                 },
             });
         }
