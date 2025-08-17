@@ -77,7 +77,6 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
     const handleDelete = (id: number) => {
         router.delete(route(`${routePrefix}.destroy`, id), {
             onSuccess: () => {
-                toast.success('User deleted successfully');
                 router.reload();
             },
             onError: () => {
