@@ -7,6 +7,7 @@ use App\Enums\AttendanceMode;
 use App\Models\AcademicYear;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use Inertia\Response;
 use Inertia\Inertia;
 
@@ -35,52 +36,73 @@ class AcademicYearController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'start_year' => [
-                'required',
-                'integer',
-                Rule::unique(AcademicYear::class),
-            ],
-            'attendance_mode' => 'required|in:' . implode(',', AttendanceMode::getValues()),
-            'note' => 'nullable|string',
-        ]);
+        try {
+            $request->validate([
+                'start_year' => [
+                    'required',
+                    'integer',
+                    Rule::unique(AcademicYear::class),
+                ],
+                'attendance_mode' => 'required|in:' . implode(',', AttendanceMode::getValues()),
+                'note' => 'nullable|string',
+            ]);
 
-        AcademicYear::create([
-            'start_year' => $request->start_year,
-            'title' => $request->start_year . '/' . ($request->start_year + 1),
-            'status' => AcademicYearStatus::Active->value,  // Status is set to active by default
-            'attendance_mode' => $request->attendance_mode,
-            'note' => $request->note,
-        ]);
+            AcademicYear::create([
+                'start_year' => $request->start_year,
+                'title' => $request->start_year . '/' . ($request->start_year + 1),
+                'status' => AcademicYearStatus::Active->value,  // Status is set to active by default
+                'attendance_mode' => $request->attendance_mode,
+                'note' => $request->note,
+            ]);
 
-        return back()
-            ->with('success', 'Academic Year created successfully.')
-            ->with('queryParams', request()->query());
+            return back()
+                ->with('success', 'Academic Year created successfully.')
+                ->with('queryParams', request()->query());
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to create academic year: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 
     public function update(Request $request, $id)
     {
-        $academicYear = AcademicYear::findOrFail($id);
+        try {
 
-        $request->validate([
-            'start_year' => [
-                'required',
-                'integer',
-                Rule::unique(AcademicYear::class)->ignore($academicYear->id),
-            ],
-            'attendance_mode' => 'required|in:' . implode(',', AttendanceMode::getValues()),
-            'note' => 'nullable|string',
-        ]);
+            $academicYear = AcademicYear::findOrFail($id);
 
-        $academicYear->update([
-            'start_year' => $request->start_year,
-            'title' => $request->start_year . '/' . ($request->start_year + 1),
-            'attendance_mode' => $request->attendance_mode,
-            'note' => $request->note,
-        ]);
+            $request->validate([
+                'start_year' => [
+                    'required',
+                    'integer',
+                    Rule::unique(AcademicYear::class)->ignore($academicYear->id),
+                ],
+                'attendance_mode' => 'required|in:' . implode(',', AttendanceMode::getValues()),
+                'note' => 'nullable|string|max:5',
+            ]);
 
-        return back()
-            ->with('success', 'Academic Year updated successfully.')
-            ->with('queryParams', request()->query());
+            $academicYear->update([
+                'start_year' => $request->start_year,
+                'title' => $request->start_year . '/' . ($request->start_year + 1),
+                'attendance_mode' => $request->attendance_mode,
+                'note' => $request->note,
+            ]);
+
+            return back()
+                ->with('success', 'Academic Year updated successfully.')
+                ->with('queryParams', request()->query());
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to update academic year: ' . $e->getMessage())
+                ->withInput();
+        }
     }
 }

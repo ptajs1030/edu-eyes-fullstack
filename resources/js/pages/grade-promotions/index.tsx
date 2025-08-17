@@ -83,7 +83,6 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
             },
             {
                 onSuccess: () => {
-                    toast.success('Migrasi kelas berhasil difinalisasi');
                     setShowFinalizeModal(false);
                 },
             },
@@ -111,11 +110,9 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
             {},
             {
                 onSuccess: () => {
-                    toast.success('Proses berhasil direset');
                     setShowResetModal(false);
                 },
                 onError: () => {
-                    toast.error('Gagal mereset data');
                     setShowResetModal(false);
                 },
             },

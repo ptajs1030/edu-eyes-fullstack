@@ -91,6 +91,10 @@ export default function ClassroomIndex() {
         link.href = url;
         link.download = 'classrooms.csv';
         link.click();
+
+        toast.success(`Berhasil mengekspor ${selectedData.length} data kelas`, {
+            description: 'File CSV telah didownload otomatis'
+        });
     };
 
     const handleSortChange = (column: string) => {
