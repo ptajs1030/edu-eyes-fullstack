@@ -1,6 +1,7 @@
 import FormModal from '@/components/form-modal';
 import { router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 interface User {
     id?: number;
@@ -62,7 +63,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 ...user,
                 password: '',
                 password_confirmation: '',
-                profile_picture: undefined
+                profile_picture: undefined,
             });
 
             // Set preview if profile picture exists
@@ -154,8 +155,14 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
 
         router.post(url, formDataObj, {
             preserveScroll: true,
-            onSuccess: () => onClose(),
-            onError: () => {},
+            onSuccess: () => {
+                onClose();
+                router.reload();
+            },
+            onError: (errors) => {
+                const errorMessage = Object.values(errors).join('\n');
+                toast.error(`Failed: ${errorMessage}`);
+            },
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
