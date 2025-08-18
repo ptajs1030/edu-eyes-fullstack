@@ -29,10 +29,11 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
         level: 1,
         main_teacher_id: null,
     });
+    const [hasInitialized, setHasInitialized] = useState(false); // Add this flag
     const [initialTeacher, setInitialTeacher] = useState<Teacher | null>(null);
 
     useEffect(() => {
-        if (classroom) {
+        if (isOpen && classroom && !hasInitialized) {
             setFormData({
                 name: classroom.name,
                 level: classroom.level,
@@ -47,15 +48,24 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
             } else {
                 setInitialTeacher(null);
             }
-        } else {
+
+            setHasInitialized(true);
+        } else if (isOpen && !classroom && !hasInitialized) {
             setFormData({
                 name: '',
                 level: 1,
                 main_teacher_id: null,
             });
             setInitialTeacher(null);
+            setHasInitialized(true);
         }
-    }, [classroom]);
+    }, [classroom, isOpen, hasInitialized]);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setHasInitialized(false);
+        }
+    }, [isOpen]);
 
     const handleChange = (field: keyof Omit<Classroom, 'id'>, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));

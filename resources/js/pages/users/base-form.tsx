@@ -53,12 +53,13 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
         address: '',
     });
 
+    const [hasInitialized, setHasInitialized] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [removeProfile, setRemoveProfile] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (user) {
+        if (isOpen && user && !hasInitialized) {
             setFormData({
                 ...user,
                 password: '',
@@ -70,7 +71,9 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
             if (user.profile_picture) {
                 setPreviewImage(`/storage/${user.profile_picture}`);
             }
-        } else {
+
+            setHasInitialized(true);
+        } else if (isOpen && !user && !hasInitialized) {
             setFormData({
                 full_name: '',
                 username: '',
@@ -90,10 +93,20 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 address: '',
             });
             setPreviewImage(null);
+            setHasInitialized(true);
         }
 
         setRemoveProfile(false);
-    }, [user, role.id]);
+    }, [user, role, isOpen, hasInitialized]);
+
+    // Reset initialization flag when modal closes
+    useEffect(() => {
+        if (!isOpen) {
+            setHasInitialized(false)
+            setPreviewImage(null);
+            setRemoveProfile(false);
+        }
+    }, [isOpen]);
 
     const handleChange = (field: keyof User, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
