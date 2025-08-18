@@ -24,23 +24,35 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
         attendance_mode: '',
         note: '',
     });
+    const [hasInitialized, setHasInitialized] = useState(false); // Add this flag
     const [showConfirm, setShowConfirm] = useState(false);
 
     useEffect(() => {
-        if (academicYear) {
+        if (isOpen && academicYear && !hasInitialized) {
             setFormData({
                 start_year: academicYear.start_year,
                 attendance_mode: academicYear.attendance_mode,
                 note: academicYear.note || '',
             });
-        } else {
+
+            setHasInitialized(true);
+        } else if (isOpen && !academicYear && !hasInitialized) {
             setFormData({
                 start_year: new Date().getFullYear(),
                 attendance_mode: '',
                 note: '',
             });
+
+            setHasInitialized(true);
         }
-    }, [academicYear]);
+    }, [academicYear, isOpen, hasInitialized]);
+
+    // Reset initialization flag when modal closes
+    useEffect(() => {
+        if (!isOpen) {
+            setHasInitialized(false);
+        }
+    }, [isOpen]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
