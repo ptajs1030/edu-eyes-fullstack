@@ -14,6 +14,7 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Api\QRCodeController;
 use App\Http\Controllers\CustomDayOffController;
+use App\Http\Controllers\EventController;
 use App\Http\Controllers\GradePromotionController;
 use App\Http\Controllers\StudentAttendanceController;
 use App\Http\Controllers\ExamController;
@@ -94,6 +95,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/exams/{exam}/scoring', [ExamController::class, 'scoring'])->name('exams.scoring');
     Route::put('/exams/{exam}/assignments/{assignment}/score', [ExamController::class, 'updateScore'])->name('exams.updateScore');
     Route::put('/exams/{exam}/scores/bulk', [ExamController::class, 'updateBulkScores'])->name('exams.updateBulkScores');
+    Route::resource('events', EventController::class);
 });
 
 require __DIR__ . '/settings.php';
