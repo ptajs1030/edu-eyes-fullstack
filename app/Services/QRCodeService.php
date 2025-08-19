@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Setting;
 use App\Models\Student;
 use Mpdf\Mpdf;
-use PDF;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use Spatie\Browsershot\Browsershot;
@@ -33,46 +33,40 @@ class QRCodeService
         Storage::disk('public')->makeDirectory('qrcodes');
 
         $logoUrl = !empty($schoolLogo) && file_exists(storage_path('app/public/' . $schoolLogo))
-            ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $schoolLogo))): getProfilePictureUrlAttribute();
+            ? 'data:image/png;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $schoolLogo))): null;
 
-        if (!empty($student->profile_picture) && file_exists(storage_path('app/public/' . $student->profile_picture))) {
+        if (!empty($student->profile_picture) && file_exists(storage_path('app/public/' .   $student->profile_picture))) {
             $photoUrl = 'data:image/jpeg;base64,' . base64_encode(file_get_contents(storage_path('app/public/' . $student->profile_picture)));
         } else {
-            $photoUrl = $student->getProfilePictureUrlAttribute();
+            $avatarUrl = 'https://api.dicebear.com/9.x/initials/svg?seed=' . urlencode($student->full_name);
+            $photoUrl = 'data:image/svg+xml;base64,' . base64_encode(file_get_contents($avatarUrl));
         }
 
-        $eduEyeslogo = 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('edu-eyes.png')));
+        $eduEyeslogo = 'data:image/png;base64,' . base64_encode(file_get_contents(public_path('edu-eyes-logo.png')));
 
         $svg = QrCode::size(200)->generate($student->uuid);
         $svgDataUri = 'data:image/svg+xml;base64,' . base64_encode($svg);
 
-        $html = view('kartu-siswa', [
-            'qrcode_image' => $svgDataUri,
-            'studentName' => $student->full_name,
-            'schoolName' => $schoolName,
-            'schoolAddress' => $schoolAddress,
-            'logoUrl' => $logoUrl,
-            'eduEyeslogo' => $eduEyeslogo,
-            'photoUrl' => $photoUrl,
-            'nis' => $student->nis,
-            'class' => $student->classroom->name ?? '',
-            'address' => $student->address
-        ])->render();
+        $pdfFileName = 'kartu-siswa-' . $student->full_name . '.pdf';
 
-        if (file_exists($pdfPath)) {
-            unlink($pdfPath);
-        }
-        $mpdf = new Mpdf([
-            'format' => [212, 336],
-            'margin_top'    => 0,
-            'margin_right'  => 0,
-            'margin_bottom' => 0,
-            'margin_left'   => 0,
-        ]);
-        $mpdf->WriteHTML($html);
-        $mpdf->Output($pdfPath, \Mpdf\Output\Destination::FILE);
+    $pdf = Pdf::loadView('kartu-siswa', [
+        'qrcode_image' => $svgDataUri,
+        'studentName' => $student->full_name,
+        'schoolName' => $schoolName,
+        'schoolAddress' => $schoolAddress,
+        'logoUrl' => $logoUrl,
+        'eduEyeslogo' => $eduEyeslogo,
+        'photoUrl' => $photoUrl,
+        'nis' => $student->nis,
+        'class' => $student->classroom->name ?? '',
+        'address' => $student->address,
+    ]);
 
-        return response()->download($pdfPath, $pdfFileName);
+    // Atur ukuran custom kartu (212 x 336 mm)
+    $pdf->setPaper([0, 0, 212, 336], 'portrait');
+
+    // Download langsung tanpa simpan file
+    return $pdf->download($pdfFileName);
     }
     
     public function view($student){
