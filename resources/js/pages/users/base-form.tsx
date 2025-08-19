@@ -53,24 +53,27 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
         address: '',
     });
 
+    const [hasInitialized, setHasInitialized] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [removeProfile, setRemoveProfile] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
-        if (user) {
+        if (isOpen && user && !hasInitialized) {
             setFormData({
                 ...user,
                 password: '',
                 password_confirmation: '',
-                profile_picture: undefined
+                profile_picture: undefined,
             });
 
             // Set preview if profile picture exists
             if (user.profile_picture) {
                 setPreviewImage(`/storage/${user.profile_picture}`);
             }
-        } else {
+
+            setHasInitialized(true);
+        } else if (isOpen && !user && !hasInitialized) {
             setFormData({
                 full_name: '',
                 username: '',
@@ -90,10 +93,20 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 address: '',
             });
             setPreviewImage(null);
+            setHasInitialized(true);
         }
 
         setRemoveProfile(false);
-    }, [user, role.id]);
+    }, [user, role, isOpen, hasInitialized]);
+
+    // Reset initialization flag when modal closes
+    useEffect(() => {
+        if (!isOpen) {
+            setHasInitialized(false)
+            setPreviewImage(null);
+            setRemoveProfile(false);
+        }
+    }, [isOpen]);
 
     const handleChange = (field: keyof User, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -155,8 +168,14 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
 
         router.post(url, formDataObj, {
             preserveScroll: true,
-            onSuccess: () => onClose(),
-            onError: () => {},
+            onSuccess: () => {
+                onClose();
+                router.reload();
+            },
+            onError: (errors) => {
+                const errorMessage = Object.values(errors).join('\n');
+                toast.error(`Failed: ${errorMessage}`);
+            },
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -168,7 +187,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
             {/* Profile Picture */}
             <div className="mb-4 flex flex-col items-center">
                 <div className="relative">
-                    <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-gray-300 bg-gray-100">
+                    <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-gray-300 bg-gray-100">
                         {previewImage ? (
                             <img src={previewImage} alt="Profile preview" className="h-full w-full object-cover" />
                         ) : (

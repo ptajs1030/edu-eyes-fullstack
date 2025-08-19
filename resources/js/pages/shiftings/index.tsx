@@ -87,6 +87,10 @@ export default function ShiftingIndex() {
         link.href = url;
         link.download = 'shiftings.csv';
         link.click();
+
+        toast.success(`Berhasil mengekspor ${selectedData.length} data shifting`, {
+            description: 'File CSV telah didownload otomatis'
+        });
     };
 
     const handleSortChange = (column: string) => {

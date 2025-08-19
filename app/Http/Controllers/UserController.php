@@ -162,7 +162,7 @@ class UserController extends Controller
         $users = User::with('role')
             ->whereHas('role', fn($q) => $q->where('name', $role->value))
             ->when($request->search, fn($q) => $q->where('full_name', 'like', "%{$request->search}%"))
-            ->orderBy($request->sort ?? 'id', $request->direction ?? 'asc')
+            ->orderBy($request->sort ?? 'full_name', $request->direction ?? 'asc')
             ->paginate(10)
             ->withQueryString();
 

@@ -17,6 +17,7 @@ interface Props {
 }
 
 export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
+    const [hasInitialized, setHasInitialized] = useState(false); // Add this flag
     const [formData, setFormData] = useState<Subject>({
         name: '',
         curriculum_year: '',
@@ -24,20 +25,30 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
     });
 
     useEffect(() => {
-        if (subject) {
+        if (isOpen && subject && !hasInitialized) {
             setFormData({
                 name: subject.name,
                 curriculum_year: subject.curriculum_year,
                 is_archived: subject.is_archived,
             });
-        } else {
+
+            setHasInitialized(true);
+        } else if (isOpen && !subject && !hasInitialized) {
             setFormData({
                 name: '',
                 curriculum_year: '',
                 is_archived: false,
             });
+
+            setHasInitialized(true);
         }
-    }, [subject]);
+    }, [subject, isOpen, hasInitialized]);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setHasInitialized(false);
+        }
+    }, [isOpen]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -101,7 +112,6 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
                     value={formData.name}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                    
                 />
             </div>
             <div className="mb-3">

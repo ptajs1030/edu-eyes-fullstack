@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AcademicYearStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -23,18 +24,6 @@ class Student extends Model
         'updated_at'
     ];
 
-    public static bool $isFinalizing = false;
-
-    // To force update class_id even if is the class_id same
-    public function isDirty($attributes = null)
-    {
-        if (self::$isFinalizing && (is_null($attributes) || in_array('class_id', (array) $attributes))) {
-            return true;
-        }
-
-        return parent::isDirty($attributes);
-    }
-
     protected static function booted()
     {
         static::creating(function ($student) {
@@ -43,38 +32,34 @@ class Student extends Model
 
         static::created(function (self $student) {
             if (!is_null($student->class_id)) {
-                $activeAcademicYear = AcademicYear::where('status', 'active')->first();
-                $classroom = Classroom::findOrFail($student->class_id);
-
-                ClassHistory::updateOrCreate(
-                    ['academic_year_id' => $activeAcademicYear->id, 'student_id' => $student->id],
-                    [
-                        'class_id' => $student->class_id,
-                        'class_name' => $classroom->name,
-                        'class_level' => $classroom->level,
-                    ]
-                );
+                self::createClassHistory($student);
             }
         });
+
         static::updated(function (self $student) {
             if ($student->isDirty('class_id') && $student->class_id) {
-                $activeAcademicYear = AcademicYear::where('status', 'active')->first();
-                $classroom = Classroom::find($student->class_id);
-
-                if (!$classroom || !$activeAcademicYear) {
-                    return;
-                }
-
-                ClassHistory::updateOrCreate(
-                    ['academic_year_id' => $activeAcademicYear->id, 'student_id' => $student->id],
-                    [
-                        'class_id' => $student->class_id,
-                        'class_name' => $classroom->name,
-                        'class_level' => $classroom->level,
-                    ]
-                );
+                self::createClassHistory($student);
             }
         });
+    }
+
+    private static function createClassHistory(self $student)
+    {
+        $activeAcademicYear = AcademicYear::where('status', AcademicYearStatus::Active->value)->first();
+        $classroom = Classroom::find($student->class_id);
+
+        if (!$activeAcademicYear || !$classroom) {
+            return;
+        }
+
+        ClassHistory::updateOrCreate(
+            ['academic_year_id' => $activeAcademicYear->id, 'student_id' => $student->id],
+            [
+                'class_id' => $student->class_id,
+                'class_name' => $classroom->name,
+                'class_level' => $classroom->level,
+            ]
+        );
     }
 
     // Short functions

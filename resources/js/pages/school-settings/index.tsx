@@ -78,6 +78,10 @@ export default function SettingIndex() {
         link.href = url;
         link.download = 'general-settngs.csv';
         link.click();
+
+        toast.success(`Berhasil mengekspor ${selectedData.length} data pengaturan sekolah`, {
+            description: 'File CSV telah didownload otomatis'
+        });
     };
 
     const handleSortChange = (column: string) => {

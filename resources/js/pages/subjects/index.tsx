@@ -76,7 +76,7 @@ export default function SubjectIndex() {
     };
 
     const exportSelected = () => {
-if (selectedIds.length === 0) return;
+        if (selectedIds.length === 0) return;
 
         const selectedData = subjects.data.filter((a) => selectedIds.includes(a.id));
         const headers = `Nama,Nama Kurikulum,Status Arsip\n`;
@@ -87,6 +87,10 @@ if (selectedIds.length === 0) return;
         link.href = url;
         link.download = 'subjects.csv';
         link.click();
+
+        toast.success(`Berhasil mengekspor ${selectedData.length} data mata pelajaran`, {
+            description: 'File CSV telah didownload otomatis'
+        });
     };
 
     const handleSortChange = (column: string) => {

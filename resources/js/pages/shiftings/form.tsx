@@ -17,6 +17,7 @@ interface Props {
 }
 
 export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) {
+    const [hasInitialized, setHasInitialized] = useState(false); // Add this flag
     const [formData, setFormData] = useState<Shifting>({
         name: '',
         start_hour: '07:00',
@@ -24,20 +25,30 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
     });
 
     useEffect(() => {
-        if (shifting) {
+        if (isOpen && shifting && !hasInitialized) {
             setFormData({
                 name: shifting.name,
                 start_hour: shifting.start_hour,
                 end_hour: shifting.end_hour,
             });
-        } else {
+
+            setHasInitialized(true);
+        } else if (isOpen && !shifting && !hasInitialized) {
             setFormData({
                 name: '',
                 start_hour: '',
                 end_hour: '',
             });
+
+            setHasInitialized(true);
         }
-    }, [shifting]);
+    }, [shifting, isOpen, hasInitialized]);
+
+    useEffect(() => {
+        if (!isOpen) {
+            setHasInitialized(false);
+        }
+    }, [isOpen]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;

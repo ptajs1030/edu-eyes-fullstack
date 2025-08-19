@@ -74,6 +74,8 @@ export default function RoleIndex() {
     };
 
     const exportSelected = () => {
+        if (selectedIds.length === 0) return;
+        
         const selectedData = roles.data.filter((a) => selectedIds.includes(a.id));
         const headers = `Name\n`;
         const csv = selectedData.map((a) => `${a.name}`).join('\n');
@@ -83,6 +85,10 @@ export default function RoleIndex() {
         link.href = url;
         link.download = 'roles.csv';
         link.click();
+
+        toast.success(`Berhasil mengekspor ${selectedData.length} data roles`, {
+            description: 'File CSV telah didownload otomatis'
+        });
     };
 
     const handleSortChange = (column: string) => {
