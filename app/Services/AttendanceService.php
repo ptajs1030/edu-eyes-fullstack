@@ -36,13 +36,13 @@ class AttendanceService
 
     public function todayAttendance(){
         $today = Carbon::now()->format('Y-m-d');
-        $attendances = ShiftingAttendance::where('submit_date', $today)->where('status', ['present', 'late', 'present_in_tolerance'])
+        $attendances = ShiftingAttendance::where('submit_date', $today)->whereIn('status', ['present', 'late', 'present_in_tolerance'])
             ->with('student', 'classroom')
             ->get();
         if ($attendances->isEmpty()) {
             throw new SilentHttpException(404, 'Data Kosong');
         }
-
+        
         return[
             'date' => $today,
             'number_of_in' => $attendances->count(),
@@ -99,9 +99,7 @@ class AttendanceService
             ];
         }
         return [
-            'number_of_attendances' => $class_id 
-            ? $query->whereIn('status', ['present', 'late', 'present_in_tolerance'])->count() 
-            : ShiftingAttendance::whereIn('status', ['present', 'late', 'present_in_tolerance'])->count(),
+            'number_of_attendances' => $query->whereIn('status', ['present', 'late', 'present_in_tolerance'])->where('submit_date', Carbon::now()->format('Y-m-d'))->count() ,
             'current_page' => $attendances->currentPage(),
             'last_page' => $attendances->lastPage(),
             'per_page' => $attendances->perPage(),
@@ -145,16 +143,12 @@ class AttendanceService
             throw new SilentHttpException(403, 'Anda tidak ditugaskan untuk jadwal kelas ini.');
         }
         if ($attendance->clock_out_hour && $attendance->clock_in_hour) {
-            return throw new SilentHttpException(400, 'Absensi sudah diisi');
+            return throw new SilentHttpException(400, 'Siswa telah melakukan absensi');
         }
         
 
         if ($attendance->clock_in_hour && !$attendance->clock_out_hour) {
-            $minClockOut = Carbon::parse($attendance->clock_in_hour)->addMinutes(2);
-
-            if ($submit_hour->lt($minClockOut)) {
-                throw new SilentHttpException(400, 'Absen keluar harus minimal 2 menit setelah absen masuk');
-            }
+            return throw new SilentHttpException(400, 'Siswa telah melakukan absensi masuk');
         }
         if ($submit_hour <= $start_hour && !$attendance->clock_in_hour && $type=='in') {
             $attendance->update([
@@ -242,9 +236,9 @@ class AttendanceService
                 ]);
             }
         }else if ($attendance->clock_in_hour && !$attendance->clock_out_hour && $type=='in') {
-            throw new SilentHttpException(400, 'Anda sudah absen masuk');
+            throw new SilentHttpException(400, 'Siswa telah melakukan absensi masuk');
         }else{
-            throw new SilentHttpException(400, 'Anda harus absen masuk terlebih dahulu');
+            throw new SilentHttpException(400, 'Anda harus melakukan absensi masuk terlebih ');
         }
 
            
@@ -259,8 +253,20 @@ class AttendanceService
         if (!$attendance) {
             throw new SilentHttpException(404, 'Absensi tidak ditemukan');
         }
-        if($attendance->submit_date != Carbon::now()->format('Y-m-d')){
+        $submit_date=Carbon::parse($attendance->submit_date)->format('Y-m-d');
+        if($submit_date != Carbon::now()->format('Y-m-d')){
             throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini, karena tanggal absensi sudah terlewat. Silahkan hubungi admin untuk mengedit absensi');
+        }
+        $classSchedule=ClassShiftingSchedule::where('day', Carbon::format)->first();
+        if (!$classSchedule) {
+            throw new SilentHttpException(404, 'Jadwal kelas tidak ditemukan');
+        }
+        $pic = ClassShiftingSchedulePic::where('class_shifting_schedule_id', $classSchedule->id)->first('teacher_id');
+        if (!$pic) {
+            throw new SilentHttpException(404, 'PIC tidak ditemukan');
+        }
+        if ($pic->teacher_id != auth()->user()->id) {
+            throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
         }
         $attendance->update([
             'status' => $data->getStatus(),
@@ -495,10 +501,19 @@ class AttendanceService
         }
         $submit_date=Carbon::parse($attendance->submit_date)->format('Y-m-d');
         if($submit_date != Carbon::now()->format('Y-m-d')){
-            throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
+            throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini, karena tanggal absensi sudah terlewat. Silahkan hubungi admin untuk mengedit absensi');
         }
-        $teacher=$attendance->classroom->main_teacher_id;
-        if($teacher != auth()->user()->id){
+        
+        $teacher=ClassSubjectSchedule::where('class_id', $attendance->class_id)
+            ->whereHas('subject', function($query) use ($attendance) {
+                $query->where('name', $attendance->subject_name);
+            })
+            ->where('day', Carbon::now()->dayOfWeek())
+            ->first();
+        if (!$teacher) {
+            throw new SilentHttpException(404, 'Jadwal pelajaran tidak ditemukan');
+        }
+        if($teacher->teacher_id != auth()->user()->id){
             throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
         }
         $attendance->update([
@@ -680,9 +695,16 @@ class AttendanceService
         if (!$attendance) {
             throw new SilentHttpException(404, 'Absensi tidak ditemukan');
         }
-        if(!Carbon::parse($attendance->submit_date)->isToday()){
+        $submit_date=Carbon::parse($attendance->submit_date)->format('Y-m-d');
+        if($submit_date != Carbon::now()->format('Y-m-d')){
+            throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini, karena tanggal absensi sudah terlewat. Silahkan hubungi admin untuk mengedit absensi');
+        }
+        $pic=EventPic::where('event_id', $attendance->event_id)
+            ->where('pic_id', auth()->user()->id)
+            ->first();
+        if (!$pic) {
             throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
-        } 
+        }
         $attendance->update([
             'status' => $data->getStatus(),
         ]);
