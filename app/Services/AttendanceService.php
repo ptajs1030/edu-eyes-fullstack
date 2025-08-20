@@ -699,6 +699,12 @@ class AttendanceService
         if($submit_date != Carbon::now()->format('Y-m-d')){
             throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini, karena tanggal absensi sudah terlewat. Silahkan hubungi admin untuk mengedit absensi');
         }
+        $pic=EventPic::where('event_id', $attendance->event_id)
+            ->where('pic_id', auth()->user()->id)
+            ->first();
+        if (!$pic) {
+            throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
+        }
         $attendance->update([
             'status' => $data->getStatus(),
         ]);

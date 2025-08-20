@@ -68,4 +68,9 @@ class TeacherController extends BaseApiController
         );
     }
 
+    public function getAttendanceMode()
+    {
+        return $this->success($this->service->getAttendanceMode());
+    }
+
 }
