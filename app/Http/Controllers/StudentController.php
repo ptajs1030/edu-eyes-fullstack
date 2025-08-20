@@ -230,4 +230,35 @@ class StudentController extends Controller
                 ->with('error', app()->environment('production') ? 'Failed to delete student' : 'Failed to delete student: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Get students by classroom ID
+     */
+    public function getStudentsByClass(Classroom $classroom)
+    {
+        $students = Student::where('class_id', $classroom->id)
+            ->where('status', 'active') // Hanya siswa aktif
+            ->orderBy('full_name')
+            ->get(['id', 'full_name', 'nis', 'class_id']);
+
+        return response()->json($students);
+    }
+
+    /**
+     * Get students by multiple IDs
+     */
+    public function getStudentsByIds(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|string'
+        ]);
+
+        $ids = explode(',', $request->ids);
+        
+        $students = Student::whereIn('id', $ids)
+            ->with(['classroom:id,name'])
+            ->get(['id', 'full_name', 'nis', 'class_id']);
+
+        return response()->json($students);
+    }
 }

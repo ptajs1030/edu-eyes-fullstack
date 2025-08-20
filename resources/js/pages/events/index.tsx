@@ -6,7 +6,7 @@ import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { format, parseISO } from 'date-fns';
 import { id } from 'date-fns/locale';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 
 interface Event {
@@ -53,11 +53,15 @@ export default function EventIndex() {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [eventToDelete, setEventToDelete] = useState<Event | null>(null);
 
-    if (flash?.success) {
-        toast.success(flash.success);
-    } else if (flash?.error) {
-        toast.error(flash.error);
-    }
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success);
+        }
+
+        if (flash?.error) {
+            toast.error(flash.error);
+        }
+    }, [flash]);
 
     const handleDelete = (id: number) => {
         router.delete(route('events.destroy', id), {
