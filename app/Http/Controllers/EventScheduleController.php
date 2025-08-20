@@ -6,6 +6,7 @@ use App\Models\Event;
 use App\Models\EventAttendance;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class EventScheduleController extends Controller
@@ -13,6 +14,11 @@ class EventScheduleController extends Controller
     private function formatTimeForDisplay($time)
     {
         return Carbon::createFromFormat('H:i:s', $time)->format('H:i');
+    }
+
+    private function formatTimeForDatabase($time)
+    {
+        return Carbon::createFromFormat('H:i', $time)->format('H:i:s');
     }
 
     public function showAttendance(Event $event)
@@ -74,5 +80,59 @@ class EventScheduleController extends Controller
             'attendances' => $attendances,
             'canEditAttendance' => $event->start_date <= now()->format('Y-m-d') && $attendances->isNotEmpty(),
         ]);
+    }
+
+    public function updateAttendance(Request $request, Event $event)
+    {
+        if ($event->start_date > now()->format('Y-m-d')) {
+            return redirect()->back()
+                ->with('error', 'Cannot update attendance for future event');
+        }
+
+        try {
+            $validated = $request->validate([
+                'student_id' => 'required|exists:students,id',
+                'status' => 'required|in:present,present_in_tolerance,alpha,late',
+                'clock_in_hour' => 'nullable|date_format:H:i',
+                'clock_out_hour' => 'nullable|date_format:H:i',
+                'minutes_of_late' => 'nullable|integer|min:0',
+                'note' => 'nullable|string|max:255',
+            ]);
+
+            $attendanceData = [
+                'academic_year_id' => 1, // Sesuaikan dengan academic year yang aktif
+                'submit_date' => now()->format('Y-m-d'),
+                'status' => $validated['status'],
+                'minutes_of_late' => $validated['minutes_of_late'] ?? null,
+                'note' => $validated['note'] ?? null,
+            ];
+
+            // Format waktu untuk database jika ada
+            if (!empty($validated['clock_in_hour'])) {
+                $attendanceData['clock_in_hour'] = $this->formatTimeForDatabase($validated['clock_in_hour']);
+            }
+
+            if (!empty($validated['clock_out_hour'])) {
+                $attendanceData['clock_out_hour'] = $this->formatTimeForDatabase($validated['clock_out_hour']);
+            }
+
+            $attendance = EventAttendance::updateOrCreate(
+                [
+                    'event_id' => $event->id,
+                    'student_id' => $validated['student_id'],
+                ],
+                $attendanceData
+            );
+
+            return redirect()->back()
+                ->with('success', 'Attendance updated successfully');
+        } catch (ValidationException $e) {
+            return redirect()->back()
+                ->withErrors($e->validator)
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to update attendance: ' . $e->getMessage());
+        }
     }
 }

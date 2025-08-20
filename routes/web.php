@@ -101,6 +101,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('events', EventController::class);
     Route::prefix('events/{event}')->group(function () {
         Route::get('/attendance', [EventScheduleController::class, 'showAttendance'])->name('events.attendance');
+        Route::patch('/attendance', [EventScheduleController::class, 'updateAttendance'])->name('events.attendance.update');
     });
 });
 

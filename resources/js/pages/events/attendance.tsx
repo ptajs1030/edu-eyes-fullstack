@@ -3,8 +3,7 @@ import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import { toast, Toaster } from 'sonner';
-// import ActionModal from '@/components/action-modal';
-// import EditAttendanceModal from '@/components/events/edit-attendance-modal';
+import EditAttendanceModal from './editAttendance';
 
 interface Student {
     id: number;
@@ -67,17 +66,13 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
     }
 
     const handleUpdateAttendance = (formData: any) => {
-        router.patch(route('events.update-attendance', event.id), formData, {
+        router.patch(route('events.attendance.update', event.id), formData, {
             preserveScroll: true,
             onSuccess: () => {
-                toast.success('Kehadiran berhasil diperbarui');
                 setIsEditModalOpen(false);
                 setSelectedAttendance(null);
             },
-            onError: (errors) => {
-                const errorMessages = Object.values(errors).flat();
-                errorMessages.forEach(msg => toast.error(msg));
-            },
+            onError: () => {},
         });
     };
 
@@ -112,8 +107,8 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
     };
 
     // Gabungkan data participants dengan attendances
-    const combinedData = event.participants.map(participant => {
-        const attendance = attendances.find(a => a.student.id === participant.student.id);
+    const combinedData = event.participants.map((participant) => {
+        const attendance = attendances.find((a) => a.student.id === participant.student.id);
         return {
             student: participant.student,
             attendance: attendance || {
@@ -122,8 +117,8 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
                 clock_out_hour: null,
                 minutes_of_late: null,
                 note: null,
-                submit_date: ''
-            }
+                submit_date: '',
+            },
         };
     });
 
@@ -136,16 +131,11 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
                 {/* Event Info */}
                 <div className="rounded-lg border p-4">
                     <h1 className="mb-4 text-2xl font-bold">{event.name}</h1>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        <div>
-                            <p className="font-semibold">Deskripsi</p>
-                            <p className="mt-1">{event.description || '-'}</p>
-                        </div>
+                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
                         <div>
                             <p className="font-semibold">Tanggal</p>
                             <p className="mt-1">
-                                {new Date(event.start_date).toLocaleDateString('id-ID')} -{' '}
-                                {new Date(event.end_date).toLocaleDateString('id-ID')}
+                                {new Date(event.start_date).toLocaleDateString('id-ID')} - {new Date(event.end_date).toLocaleDateString('id-ID')}
                             </p>
                         </div>
                         <div>
@@ -156,13 +146,11 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
                         </div>
                         <div>
                             <p className="font-semibold">PIC</p>
-                            <p className="mt-1">
-                                {event.event_pics.map(pic => pic.user.full_name).join(', ') || '-'}
-                            </p>
+                            <p className="mt-1">{event.event_pics.map((pic) => pic.user.full_name).join(', ') || '-'}</p>
                         </div>
                         <div>
-                            <p className="font-semibold">Jumlah Peserta</p>
-                            <p className="mt-1">{event.participants.length}</p>
+                            <p className="font-semibold">Deskripsi</p>
+                            <p className="mt-1">{event.description || '-'}</p>
                         </div>
                     </div>
                 </div>
@@ -171,92 +159,56 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
                 <div className="rounded-lg border p-4">
                     <div className="mb-4 flex items-center justify-between">
                         <h2 className="text-xl font-bold">Daftar Kehadiran</h2>
-                        <div className="text-sm text-gray-600">
-                            Total: {event.participants.length} peserta
-                        </div>
+                        <div className="text-sm text-gray-600">Total: {event.participants.length} peserta</div>
                     </div>
 
                     <div className="overflow-x-auto">
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                                        Nama
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                                        NIS
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                                        Kelas
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                                        Status
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                                        Jam Masuk
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                                        Jam Keluar
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                                        Keterlambatan
-                                    </th>
-                                    <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                                        Catatan
-                                    </th>
-                                    {canEditAttendance && (
-                                        <th className="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">
-                                            Aksi
-                                        </th>
-                                    )}
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIS</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kelas</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jam Masuk</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Jam Keluar</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Keterlambatan</th>
+                                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Catatan</th>
+                                    {canEditAttendance && <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aksi</th>}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 bg-white">
                                 {combinedData.map(({ student, attendance }) => (
                                     <tr key={student.id} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                                            {student.full_name}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-500">
-                                            {student.nis || '-'}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-500">
-                                            {student.classroom?.name || '-'}
-                                        </td>
+                                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{student.full_name}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">{student.nis || '-'}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">{student.classroom?.name || '-'}</td>
                                         <td className="px-4 py-3 text-sm">
                                             <span
                                                 className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(
-                                                    attendance.status
+                                                    attendance.status,
                                                 )}`}
                                             >
                                                 {getStatusLabel(attendance.status)}
                                             </span>
                                         </td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">{attendance.clock_in_hour || '-'}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">{attendance.clock_out_hour || '-'}</td>
                                         <td className="px-4 py-3 text-sm text-gray-500">
-                                            {attendance.clock_in_hour || '-'}
+                                            {attendance.minutes_of_late ? `${attendance.minutes_of_late} menit` : '-'}
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-500">
-                                            {attendance.clock_out_hour || '-'}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-500">
-                                            {attendance.minutes_of_late
-                                                ? `${attendance.minutes_of_late} menit`
-                                                : '-'}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-500">
-                                            {attendance.note || '-'}
-                                        </td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">{attendance.note || '-'}</td>
                                         {canEditAttendance && (
                                             <td className="px-4 py-3 text-sm">
                                                 <button
                                                     onClick={() => {
                                                         setSelectedAttendance({
                                                             student,
-                                                            ...attendance
+                                                            ...attendance,
                                                         });
                                                         setIsEditModalOpen(true);
                                                     }}
-                                                    className="rounded bg-blue-500 px-2 py-1 text-xs font-medium text-white hover:bg-blue-600"
+                                                    className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                                 >
                                                     Edit
                                                 </button>
@@ -297,7 +249,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
             </div>
 
             {/* Edit Attendance Modal */}
-            {/* {isEditModalOpen && selectedAttendance && (
+            {isEditModalOpen && selectedAttendance && (
                 <EditAttendanceModal
                     attendance={selectedAttendance}
                     onClose={() => {
@@ -306,7 +258,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
                     }}
                     onSubmit={handleUpdateAttendance}
                 />
-            )} */}
+            )}
         </AppLayout>
     );
 }
