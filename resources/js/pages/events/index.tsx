@@ -203,10 +203,10 @@ export default function EventIndex() {
 
                                 {/* Detail Button (selalu aktif) */}
                                 <Link
-                                    href={route('events.show', event.id)}
+                                    href={route('events.attendance', event.id)}
                                     className="rounded bg-sky-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-sky-600"
                                 >
-                                    Detail
+                                    Kehadiran
                                 </Link>
 
                                 {/* Delete Button */}
