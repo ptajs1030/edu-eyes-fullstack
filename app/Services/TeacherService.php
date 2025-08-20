@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\ChangePasswordData;
 use App\Exceptions\SilentHttpException;
+use App\Models\AcademicYear;
 
 class TeacherService
 {
@@ -23,5 +24,13 @@ class TeacherService
             'message' => 'Password berhasil diubah',
         ];
 
+    }
+
+    public function getAttendanceMode(){
+        $academicYear=AcademicYear::where('status', 'active')->first();
+
+        return [
+            'attendance_mode'=>$academicYear->attendance_mode
+        ];
     }
 }

@@ -64,6 +64,7 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
         Route::get('/classrooms/{id?}', 'getClassrooms');
         Route::get('/subjects/{id?}', 'getSubjects');
         Route::get('/event/{id?}', 'getEvent');
+        Route::get('/attendance-mode', 'getAttendanceMode');
     });
 
     Route::prefix('attendance')->controller(AttendanceController::class)->group(function () {

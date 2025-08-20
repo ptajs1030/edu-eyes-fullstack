@@ -24,7 +24,6 @@ use App\Models\Student;
 Route::get('/', function () {
     return redirect('/login');
 })->name('home');
-
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/parents/search', [UserController::class, 'searchParents'])->name('parents.search');
     Route::get('/teachers/search', [UserController::class, 'searchTeachers'])->name('teachers.search');
