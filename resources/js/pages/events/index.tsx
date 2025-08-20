@@ -64,7 +64,7 @@ export default function EventIndex() {
     }, [flash]);
 
     const handleDelete = (id: number) => {
-        router.delete(route('events.destroy', id), {
+        router.delete(`events/${id}`, {
             onSuccess: () => {
                 setEventToDelete(null);
                 router.reload();

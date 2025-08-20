@@ -243,4 +243,25 @@ class EventController extends Controller
                 ->withInput();
         }
     }
+
+    public function destroy(Event $event)
+    {
+        $today = now()->format('Y-m-d');
+        $currentTime = now()->format('H:i');
+        $eventStartHour = $this->formatTimeForDisplay($event->start_hour);
+
+        if ($event->start_date < $today || ($event->start_date === $today && $eventStartHour <= $currentTime)) {
+            return redirect()->route('events.index')
+                ->with('error', 'Cannot delete event that has already started or passed');
+        }
+
+        try {
+            $event->delete();
+            return redirect()->back()
+                ->with('success', 'Event deleted successfully');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Failed to delete event: ' . $e->getMessage());
+        }
+    }
 }
