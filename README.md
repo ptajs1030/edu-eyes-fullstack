@@ -36,6 +36,7 @@ npm install
 # 3. Copy env dan generate key
 cp .env.example .env
 php artisan key:generate
+php artisan storage:link
 
 # 4. Setup database
 php artisan migrate --seed
