@@ -20,6 +20,9 @@ interface Student {
     full_name: string;
     nis: string | null;
     class_id: number;
+    classroom?: {
+        name: string;
+    };
 }
 
 interface Props {
@@ -56,7 +59,6 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
         end_date: event?.end_date || '',
         start_hour: event?.start_hour || '',
         end_hour: event?.end_hour || '',
-        // pics: event?.pics || [],
     });
 
     const [selectedPics, setSelectedPics] = useState<number[]>(event?.pics ? event.pics.map((pic) => pic.user.id) : []);
@@ -104,35 +106,12 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
             const data = await response.json();
             setStudents(data);
         } catch {
-            setStudents([]);
             toast.error('Gagal memuat data siswa');
+            setStudents([]);
         } finally {
             setIsLoading(false);
         }
     };
-
-    // const fetchStudents = async (classId: number) => {
-    //     setIsLoading(true);
-    //     try {
-    //         const response = await fetch(route('events.get-students', classId));
-    //         const data = await response.json();
-    //         setStudents(data);
-    //     } catch {
-    //         toast.error('Gagal memuat data siswa');
-    //     } finally {
-    //         setIsLoading(false);
-    //     }
-    // };
-
-    // const fetchSelectedStudentsInfo = async () => {
-    //     try {
-    //         const response = await fetch(route('students.get-by-ids', { ids: selectedStudents.join(',') }));
-    //         const data = await response.json();
-    //         setSelectedStudentsInfo(data);
-    //     } catch (error) {
-    //         toast.error('Gagal memuat data siswa terpilih');
-    //     }
-    // };
 
     const fetchSelectedStudentsInfo = async (studentIds: number[]) => {
         try {
@@ -143,8 +122,8 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
             const data = await response.json();
             setSelectedStudentsInfo(data);
         } catch {
-            setSelectedStudentsInfo([]);
             toast.error('Gagal memuat data siswa terpilih');
+            setSelectedStudentsInfo([]);
         }
     };
 
@@ -152,10 +131,6 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
         setSelectedClass(classId);
         setStudents([]);
     };
-
-    // const handleStudentToggle = (studentId: number) => {
-    //     setSelectedStudents((prev) => (prev.includes(studentId) ? prev.filter((id) => id !== studentId) : [...prev, studentId]));
-    // };
 
     const handleStudentToggle = (studentId: number) => {
         setSelectedStudentIds((prev) => (prev.includes(studentId) ? prev.filter((id) => id !== studentId) : [...prev, studentId]));
@@ -166,15 +141,10 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
             const allStudentIds = students.map((student) => student.id);
             setSelectedStudentIds(allStudentIds);
         } else {
-            // Hapus hanya siswa dari kelas yang sedang dipilih
             const studentIdsToRemove = students.map((student) => student.id);
             setSelectedStudentIds((prev) => prev.filter((id) => !studentIdsToRemove.includes(id)));
         }
     };
-
-    // const handlePicChange = (selected: Teacher[]) => {
-    //     setFormData((prev) => ({ ...prev, pics: selected }));
-    // };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -195,24 +165,16 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
         router[method](
             url,
             {
-                // ...formData,
-                // selected_students: selectedStudents,
                 ...formData,
                 pics: selectedPics.map((id) => ({ id })),
                 selected_students: selectedStudentIds,
             },
             {
-                onSuccess: () => {
-                    // toast.success(`Event ${event?.id ? 'diperbarui' : 'dibuat'} successfully`);
-                },
-                onError: (errors) => {
-                    // toast.error(Object.values(errors).join('\n'));
-                },
+                onSuccess: () => {},
+                onError: () => {},
             },
         );
     };
-
-    console.log(selectedStudentIds);
 
     // Check if all students in current class are selected
     const areAllStudentsSelected = students.length > 0 && students.every((student) => selectedStudentIds.includes(student.id));
@@ -235,6 +197,7 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                                 <input
                                     id="name"
                                     type="text"
+                                    maxLength={70}
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
@@ -245,12 +208,6 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                                 <label htmlFor="pics" className="block text-sm font-medium text-gray-700">
                                     PIC (Penanggung Jawab)*
                                 </label>
-                                {/* <MultiSearchableSelect
-                                    value={selectedPics}
-                                    onChange={setSelectedPics}
-                                    placeholder="Cari guru..."
-                                    options={teacherOptions}
-                                /> */}
                                 <MultiSearchableSelectInline
                                     value={selectedPics}
                                     onChange={setSelectedPics}
@@ -260,7 +217,6 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                                     showInitialOptions={true}
                                     maxInitialOptions={10}
                                 />
-                                <p className="mt-1 text-xs text-gray-500">Guru yang dipilih akan muncul di sini. Klik × untuk menghapus.</p>
                             </div>
 
                             <div>
@@ -331,7 +287,7 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                                     value={formData.description}
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                                    rows={3}
+                                    rows={4}
                                 />
                             </div>
                         </div>
@@ -363,43 +319,44 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                                     <div className="h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent"></div>
                                 </div>
                             ) : students.length > 0 ? (
-                                <div className="max-h-[300px] overflow-y-auto rounded border">
-                                    <table className="min-w-full divide-y divide-gray-200">
-                                        <thead className="bg-gray-50">
-                                            <tr>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                        <span className="text-sm text-gray-600">{students.length} siswa ditemukan</span>
+                                        <label className="flex items-center gap-2 text-sm">
+                                            <input
+                                                type="checkbox"
+                                                checked={areAllStudentsSelected}
+                                                onChange={(e) => handleSelectAllStudents(e.target.checked)}
+                                                className="rounded border-gray-300 text-indigo-600 hover:cursor-pointer"
+                                            />
+                                            Pilih Semua
+                                        </label>
+                                    </div>
+
+                                    <div className="max-h-96 overflow-y-auto rounded-lg border">
+                                        <div className="divide-y divide-gray-200">
+                                            {students.map((student) => (
+                                                <div key={student.id} className="flex items-center justify-between p-3 hover:bg-gray-50">
+                                                    <div className="flex-1">
+                                                        <p className="font-medium text-gray-900">{student.full_name}</p>
+                                                        <p className="text-sm text-gray-500">NIS: {student.nis || '-'}</p>
+                                                    </div>
                                                     <input
                                                         type="checkbox"
-                                                        checked={areAllStudentsSelected}
-                                                        onChange={(e) => handleSelectAllStudents(e.target.checked)}
-                                                        className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                                        checked={selectedStudentIds.includes(student.id)}
+                                                        onChange={() => handleStudentToggle(student.id)}
+                                                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 hover:cursor-pointer"
                                                     />
-                                                </th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIS</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-200 bg-white">
-                                            {students.map((student) => (
-                                                <tr key={student.id} className="hover:bg-gray-50">
-                                                    <td className="px-4 py-2">
-                                                        <input
-                                                            type="checkbox"
-                                                            checked={selectedStudentIds.includes(student.id)}
-                                                            onChange={() => handleStudentToggle(student.id)}
-                                                            className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                                                        />
-                                                    </td>
-                                                    <td className="px-4 py-2 text-sm">{student.full_name}</td>
-                                                    <td className="px-4 py-2 text-sm">{student.nis || '-'}</td>
-                                                </tr>
+                                                </div>
                                             ))}
-                                        </tbody>
-                                    </table>
+                                        </div>
+                                    </div>
                                 </div>
                             ) : (
-                                <div className="rounded border bg-gray-50 p-4 text-center text-gray-500">
-                                    {selectedClass ? 'Tidak ada siswa di kelas ini' : 'Pilih kelas untuk melihat siswa'}
+                                <div className="rounded-lg border bg-gray-50 p-6 text-center">
+                                    <div className="text-gray-400">
+                                        {selectedClass ? 'Tidak ada siswa di kelas ini' : 'Pilih kelas untuk melihat siswa'}
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -409,30 +366,37 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                             <h2 className="mb-4 text-lg font-semibold">Peserta Terpilih ({selectedStudentIds.length})</h2>
 
                             {selectedStudentsInfo.length > 0 ? (
-                                <div className="max-h-[300px] overflow-y-auto rounded border">
-                                    <table className="min-w-full divide-y divide-gray-200">
-                                        <thead className="bg-gray-50">
-                                            <tr>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">NIS</th>
-                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Kelas</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody className="divide-y divide-gray-200 bg-white">
-                                            {selectedStudentsInfo.map((student) => (
-                                                <tr key={student.id} className="hover:bg-gray-50">
-                                                    <td className="px-4 py-2 text-sm">{student.full_name}</td>
-                                                    <td className="px-4 py-2 text-sm">{student.nis || '-'}</td>
-                                                    <td className="px-4 py-2 text-sm">
-                                                        {classrooms.find((c) => c.id === student.class_id)?.name || '-'}
-                                                    </td>
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
+                                <div className="space-y-3">
+                                    <div className="max-h-96 divide-y divide-gray-200 overflow-y-auto rounded-lg border border-gray-200">
+                                        {selectedStudentsInfo.map((student) => (
+                                            <div key={student.id} className="flex items-center justify-between bg-white p-3">
+                                                <div className="flex-1">
+                                                    <p className="font-medium text-gray-900">{student.full_name}</p>
+                                                    <div className="flex items-center gap-4 text-sm text-gray-500">
+                                                        <span>
+                                                            {classrooms.find((c) => c.id === student.class_id)?.name ||
+                                                                student.classroom?.name ||
+                                                                '-'}
+                                                        </span>
+                                                        <span>•</span>
+                                                        <span>NIS: {student.nis || '-'}</span>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleStudentToggle(student.id)}
+                                                    className="text-red-500 hover:cursor-pointer hover:text-red-700"
+                                                >
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             ) : (
-                                <div className="rounded border bg-gray-50 p-4 text-center text-gray-500">Belum ada peserta terpilih</div>
+                                <div className="rounded-lg border bg-gray-50 p-6 text-center">
+                                    <div className="text-gray-400">Belum ada peserta terpilih</div>
+                                </div>
                             )}
                         </div>
                     </div>
