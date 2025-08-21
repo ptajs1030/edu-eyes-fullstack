@@ -29,43 +29,40 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
         level: 1,
         main_teacher_id: null,
     });
-    const [hasInitialized, setHasInitialized] = useState(false); // Add this flag
     const [initialTeacher, setInitialTeacher] = useState<Teacher | null>(null);
+    const [resetSelectKey, setResetSelectKey] = useState(0);
 
     useEffect(() => {
-        if (isOpen && classroom && !hasInitialized) {
-            setFormData({
-                name: classroom.name,
-                level: classroom.level,
-                main_teacher_id: classroom.main_teacher_id,
-            });
-
-            if (classroom.main_teacher) {
-                setInitialTeacher({
-                    id: classroom.main_teacher_id as number,
-                    full_name: classroom.main_teacher.full_name,
+        if (isOpen) {
+            if (classroom) {
+                // Edit mode - isi dengan data classroom
+                setFormData({
+                    name: classroom.name,
+                    level: classroom.level,
+                    main_teacher_id: classroom.main_teacher_id,
                 });
+                
+                if (classroom.main_teacher) {
+                    setInitialTeacher({
+                        id: classroom.main_teacher_id as number,
+                        full_name: classroom.main_teacher.full_name,
+                    });
+                } else {
+                    setInitialTeacher(null);
+                }
             } else {
+                // Create mode - reset ke default
+                setFormData({
+                    name: '',
+                    level: 1,
+                    main_teacher_id: null,
+                });
                 setInitialTeacher(null);
             }
-
-            setHasInitialized(true);
-        } else if (isOpen && !classroom && !hasInitialized) {
-            setFormData({
-                name: '',
-                level: 1,
-                main_teacher_id: null,
-            });
-            setInitialTeacher(null);
-            setHasInitialized(true);
+            // Increment key untuk force reset SearchableSelect
+            setResetSelectKey(prev => prev + 1);
         }
-    }, [classroom, isOpen, hasInitialized]);
-
-    useEffect(() => {
-        if (!isOpen) {
-            setHasInitialized(false);
-        }
-    }, [isOpen]);
+    }, [isOpen, classroom]);
 
     const handleChange = (field: keyof Omit<Classroom, 'id'>, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -144,6 +141,7 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
                     Wali Murid
                 </label>
                 <SearchableSelect
+                    key={resetSelectKey}
                     value={formData.main_teacher_id}
                     onChange={(value) => handleChange('main_teacher_id', value ? Number(value) : null)}
                     placeholder="Search teacher by name..."
