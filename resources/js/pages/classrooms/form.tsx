@@ -31,9 +31,14 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
     });
     const [initialTeacher, setInitialTeacher] = useState<Teacher | null>(null);
     const [resetSelectKey, setResetSelectKey] = useState(0);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
+            setErrors({});
+            setIsSubmitting(false);
+
             if (classroom) {
                 // Edit mode - isi dengan data classroom
                 setFormData({
@@ -41,7 +46,7 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
                     level: classroom.level,
                     main_teacher_id: classroom.main_teacher_id,
                 });
-                
+
                 if (classroom.main_teacher) {
                     setInitialTeacher({
                         id: classroom.main_teacher_id as number,
@@ -60,48 +65,42 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
                 setInitialTeacher(null);
             }
             // Increment key untuk force reset SearchableSelect
-            setResetSelectKey(prev => prev + 1);
+            setResetSelectKey((prev) => prev + 1);
         }
     }, [isOpen, classroom]);
 
     const handleChange = (field: keyof Omit<Classroom, 'id'>, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
+        if (errors[field]) {
+            setErrors((prev) => ({ ...prev, [field]: '' }));
+        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        setErrors({});
+        setIsSubmitting(true);
 
-        const { main_teacher, ...payload } = formData;
         const requestData = {
-            ...payload,
+            ...formData,
             _method: classroom?.id ? 'PUT' : 'POST',
         };
 
-        if (classroom?.id) {
-            router.post(`/classrooms/${classroom.id}`, requestData, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    onClose();
-                    router.reload();
-                },
-                onError: (errors) => {
-                    const errorMessage = Object.values(errors).join('\n');
-                    toast.error(`Failed to update classroom: ${errorMessage}`);
-                },
-            });
-        } else {
-            router.post('/classrooms', requestData, {
-                preserveScroll: true,
-                onSuccess: () => {
-                    onClose();
-                    router.reload();
-                },
-                onError: (errors) => {
-                    const errorMessage = Object.values(errors).join('\n');
-                    toast.error(`Failed to add new classroom: ${errorMessage}`);
-                },
-            });
-        }
+        const url = classroom?.id ? `/classrooms/${classroom.id}` : '/classrooms';
+
+        router.post(url, requestData, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                setIsSubmitting(false);
+                onClose();
+            },
+            onError: (errors) => {
+                setIsSubmitting(false);
+                const errorMessage = Object.values(errors).join('\n');
+                toast.error(`Failed to update classroom: ${errorMessage}`);
+            },
+        });
     };
 
     return (
