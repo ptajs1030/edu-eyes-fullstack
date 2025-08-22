@@ -14,6 +14,8 @@ use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\Api\QRCodeController;
 use App\Http\Controllers\CustomDayOffController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\EventScheduleController;
 use App\Http\Controllers\GradePromotionController;
 use App\Http\Controllers\StudentAttendanceController;
 use App\Http\Controllers\ExamController;
@@ -27,6 +29,8 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/parents/search', [UserController::class, 'searchParents'])->name('parents.search');
     Route::get('/teachers/search', [UserController::class, 'searchTeachers'])->name('teachers.search');
+    Route::get('/students/classroom/{classroom}', [StudentController::class, 'getStudentsByClass'])->name('students.by-class');
+    Route::get('students/by-ids', [StudentController::class, 'getStudentsByIds'])->name('students.get-by-ids');
     Route::get('/subjects/search', [SubjectController::class, 'searchSubject'])->name('subjects.search');
     Route::get('/day-off/search', [CustomDayOffController::class, 'searchDayOff'])->name('dayOff.search');
 });
@@ -93,6 +97,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/exams/{exam}/scoring', [ExamController::class, 'scoring'])->name('exams.scoring');
     Route::put('/exams/{exam}/assignments/{assignment}/score', [ExamController::class, 'updateScore'])->name('exams.updateScore');
     Route::put('/exams/{exam}/scores/bulk', [ExamController::class, 'updateBulkScores'])->name('exams.updateBulkScores');
+    Route::resource('events', EventController::class);
+    Route::prefix('events/{event}')->group(function () {
+        Route::get('/attendance', [EventScheduleController::class, 'showAttendance'])->name('events.attendance');
+        Route::patch('/attendance', [EventScheduleController::class, 'updateAttendance'])->name('events.attendance.update');
+    });
 });
 
 require __DIR__ . '/settings.php';
