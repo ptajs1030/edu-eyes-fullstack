@@ -101,6 +101,10 @@ class StudentController extends Controller
             ->leftJoin('classrooms', 'students.class_id', '=', 'classrooms.id')
             ->select('students.*');
 
+        if ($request->has('classrooms') && !empty($request->classrooms)) {
+            $query->whereIn('students.class_id', $request->classrooms);
+        }
+
         if ($request->search) {
             $query->where('students.full_name', 'like', "%{$request->search}%");
         }
@@ -131,7 +135,7 @@ class StudentController extends Controller
             'sexes' => $sexes,
             'statuses' => $statuses,
             'religions' => $religions,
-            'filters' => $request->only(['search', 'sort', 'direction']),
+            'filters' => $request->only(['search', 'sort', 'direction', 'classrooms']),
         ]);
     }
 
@@ -254,7 +258,7 @@ class StudentController extends Controller
         ]);
 
         $ids = explode(',', $request->ids);
-        
+
         $students = Student::whereIn('id', $ids)
             ->with(['classroom:id,name'])
             ->get(['id', 'full_name', 'nis', 'class_id']);
