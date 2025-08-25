@@ -61,10 +61,20 @@ class ClassroomController extends Controller
     {
         try {
             $validated = $request->validate([
-                'name' => 'required|string|max:70|unique:classrooms,name',
+                'name' => 'required|string|max:70',
                 'level' => 'required|integer|min:1',
                 'main_teacher_id' => 'nullable|exists:users,id',
             ]);
+
+            $existingClassroom = Classroom::where('name', $validated['name'])
+                ->whereNull('deleted_at')
+                ->first();
+
+            if ($existingClassroom) {
+                throw ValidationException::withMessages([
+                    'name' => 'Nama kelas sudah digunakan. Silakan gunakan nama lain.'
+                ]);
+            }
 
             Classroom::create($validated);
 
@@ -87,10 +97,21 @@ class ClassroomController extends Controller
             $classroom = Classroom::findOrFail($id);
 
             $validated = $request->validate([
-                'name' => 'required|string|max:70|unique:classrooms,name,' . $classroom->id,
+                'name' => 'required|string|max:70',
                 'level' => 'required|integer|min:1',
                 'main_teacher_id' => 'nullable|exists:users,id',
             ]);
+
+            $existingClassroom = Classroom::where('name', $validated['name'])
+                ->whereNull('deleted_at')
+                ->where('id', '!=', $classroom->id)
+                ->first();
+
+            if ($existingClassroom) {
+                throw ValidationException::withMessages([
+                    'name' => 'Nama kelas sudah digunakan oleh kelas lain. Silakan gunakan nama lain.'
+                ]);
+            }
 
             $classroom->update($validated);
 
@@ -186,12 +207,12 @@ class ClassroomController extends Controller
     public function getStudents($id)
     {
         try {
-            $classroom = Classroom::with(['students' => function($query) {
+            $classroom = Classroom::with(['students' => function ($query) {
                 $query->select('id', 'full_name', 'nis', 'class_id')
-                      ->where('status', 'active');
+                    ->where('status', 'active');
             }])->findOrFail($id);
 
-            $students = $classroom->students->map(function($student) use ($classroom) {
+            $students = $classroom->students->map(function ($student) use ($classroom) {
                 return [
                     'id' => $student->id,
                     'full_name' => $student->full_name,
