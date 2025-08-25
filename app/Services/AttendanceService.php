@@ -256,7 +256,7 @@ class AttendanceService
         if($submit_date != Carbon::now()->format('Y-m-d')){
             throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini, karena tanggal absensi sudah terlewat. Silahkan hubungi admin untuk mengedit absensi');
         }
-        $classSchedule=ClassShiftingSchedule::where('day', Carbon::format)->first();
+        $classSchedule=ClassShiftingSchedule::where('day', Carbon::now()->dayOfWeek())->first();
         if (!$classSchedule) {
             throw new SilentHttpException(404, 'Jadwal kelas tidak ditemukan');
         }
