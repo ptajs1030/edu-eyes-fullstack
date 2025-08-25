@@ -27,6 +27,7 @@ use App\Models\Subject;
 use App\Models\SubjectAttendance;
 use Carbon\Carbon;
 use Illuminate\Console\Scheduling\Schedule;
+use Log;
 
 
 class AttendanceService
@@ -147,9 +148,7 @@ class AttendanceService
         }
         
 
-        if ($attendance->clock_in_hour && !$attendance->clock_out_hour) {
-            return throw new SilentHttpException(400, 'Siswa telah melakukan absensi masuk');
-        }
+        
         if ($submit_hour <= $start_hour && !$attendance->clock_in_hour && $type=='in') {
             $attendance->update([
                 'status' => 'present',
@@ -323,7 +322,8 @@ class AttendanceService
     }
 
     public function getClassroomByTeacher($search){
-        $query= ClassSubjectSchedule::where('teacher_id', auth()->user()->id);
+        $query= ClassSubjectSchedule::where('teacher_id', auth()->user()->id)->where('day', Carbon::now()->dayOfWeek());
+
         if ($search) {
             $query->where('name', 'like', "%$search%");
         }
@@ -331,8 +331,8 @@ class AttendanceService
         if ($classrooms->isEmpty()) {
             throw new SilentHttpException(404, 'Kelas tidak ditemukan');
         }
-        return $classrooms;
-        
+        return $classrooms->pluck('classroom.name')->unique()->values();
+
     }
 
     public function getClassroomSubject($class_id, $search = null){
