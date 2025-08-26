@@ -70,6 +70,30 @@ class CustomDayOffController extends Controller
         }
     }
 
+    public function destroy(CustomDayOff $customDayOff)
+    {
+        try {
+            $today = now()->format('Y-m-d');
+            if ($customDayOff->date < $today) {
+                return redirect()->route('custom-day-offs.index')
+                    ->with('error', 'Cannot delete day off that has already passed');
+            }
+
+            $customDayOff->delete();
+
+            return redirect()->back()
+                ->with('success', 'Hari libur berhasil dihapus.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', app()->environment('production')
+                    ? 'Gagal menghapus hari libur'
+                    : 'Gagal menghapus hari libur: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get Day Off
+     */
     public function searchDayOff(Request $request)
     {
         $request->validate([
