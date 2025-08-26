@@ -135,29 +135,17 @@ export default function StudentIndex() {
     const exportSelected = () => {
         if (selectedIds.length === 0) return;
 
-        const exportUrl = route('students.export', {
-            ids: selectedIds.join(','),
-            classrooms: selectedClassrooms.length > 0 ? selectedClassrooms.join(',') : null,
-            search: filters.search || null,
-        });
-
-        // Download via hidden link
+        const selectedData = students.data.filter((a) => selectedIds.includes(a.id));
+        const headers = `Nama,Kelas,Tahun masuk,Jenis kelamin,Agama,Status\n`;
+        const csv = selectedData.map((a) => `${a.full_name},${a.classroom?.name},${a.entry_year},${a.gender},${a.religion},${a.status}`).join('\n');
+        const blob = new Blob([headers, csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.href = exportUrl;
+        link.href = url;
         link.download = 'students.csv';
         link.click();
 
-        // const selectedData = students.data.filter((a) => selectedIds.includes(a.id));
-        // const headers = `Nama,Kelas,Tahun masuk,Jenis kelamin,Agama,Status\n`;
-        // const csv = selectedData.map((a) => `${a.full_name},${a.classroom?.name},${a.entry_year},${a.gender},${a.religion},${a.status}`).join('\n');
-        // const blob = new Blob([headers, csv], { type: 'text/csv' });
-        // const url = URL.createObjectURL(blob);
-        // const link = document.createElement('a');
-        // link.href = url;
-        // link.download = 'students.csv';
-        // link.click();
-
-        toast.success(`Berhasil mengekspor ${selectedData.length} data siswa`, {
+        toast.success(`Berhasil mengekspor ${selectedIds.length} data siswa`, {
             description: 'File CSV telah didownload otomatis',
         });
 
@@ -197,7 +185,7 @@ export default function StudentIndex() {
             link.href = url;
             link.download = 'kumpulan-kartu-siswa.pdf';
             link.click();
-        } catch (error) {
+        } catch {
             toast.error('Gagal download kartu siswa.');
         }
     };
