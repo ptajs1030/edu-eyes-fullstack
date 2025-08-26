@@ -88,7 +88,7 @@ export default function CustomDayOffIndex() {
         link.click();
 
         toast.success(`Berhasil mengekspor ${selectedData.length} data hari libur`, {
-            description: 'File CSV telah didownload otomatis'
+            description: 'File CSV telah didownload otomatis',
         });
     };
 
@@ -129,7 +129,7 @@ export default function CustomDayOffIndex() {
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
                             className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                                selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
+                                selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
                             }`}
                         >
                             Ekspor data yang dipilih
@@ -180,11 +180,7 @@ export default function CustomDayOffIndex() {
                 <Pagination links={customDayOffs.links} />
 
                 {/* Modals */}
-                <CustomDayOffFormModal 
-                    isOpen={isFormOpen} 
-                    onClose={() => setIsFormOpen(false)} 
-                    dayOff={selectedDayOff} 
-                />
+                <CustomDayOffFormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} dayOff={selectedDayOff} />
 
                 <ActionModal
                     isOpen={!!dayOffToDelete}
@@ -192,7 +188,8 @@ export default function CustomDayOffIndex() {
                     title="Konfirmasi Penghapusan"
                     message={
                         <span>
-                            Apakah Anda yakin ingin menghapus hari libur pada tanggal <strong>{dayOffToDelete ? new Date(dayOffToDelete.date).toLocaleDateString('id-ID') : ''}</strong>?
+                            Apakah Anda yakin ingin menghapus hari libur pada tanggal{' '}
+                            <strong>{dayOffToDelete ? new Date(dayOffToDelete.date).toLocaleDateString('id-ID') : ''}</strong>?
                         </span>
                     }
                     buttons={[
