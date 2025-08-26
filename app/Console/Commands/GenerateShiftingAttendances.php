@@ -8,6 +8,7 @@ use App\Enums\ShiftAttendanceStatus;
 use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\ClassShiftingSchedule;
+use App\Models\CustomDayOff;
 use App\Models\ShiftingAttendance;
 use App\Models\Student;
 use Carbon\Carbon;
@@ -38,14 +39,15 @@ class GenerateShiftingAttendances extends Command
 
         $now = now('Asia/Jakarta');
         $currentTime = $now->format('H:i');
-    
+        $todayDate = $now->toDateString();
+
         // Hanya jalan antara 00:00 - 00:05 WIB
         if ($currentTime < '00:00' || $currentTime > '00:05') {
             Log::info('[Cron] Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
             $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
             return;
         }
-        
+
         Log::info('Cron generate attendance running...');
 
         // 1. check attendance_mode == per-shift
@@ -58,7 +60,14 @@ class GenerateShiftingAttendances extends Command
             return;
         }
 
-        // 2. Get class shifting schedules
+        // 2. Check is today is day off
+        $isDayOff = CustomDayOff::where('date', $todayDate)->exists();
+        if ($isDayOff) {
+            Log::info('[Cron] Hari ini (' . $todayDate . ') adalah custom day off, command tidak dijalankan.');
+            $this->info('Hari ini adalah custom day off, command tidak dijalankan.');
+            return;
+        }
+        // 3. Get class shifting schedules
         // $today = Carbon::now();
         $today = $now;
         $todayDate = $today->toDateString();
@@ -67,7 +76,7 @@ class GenerateShiftingAttendances extends Command
             ->with('shifting')
             ->get();
 
-        // 3. Gather every class that has students
+        // 4. Gather every class that has students
         $classIds = Classroom::pluck('id')->toArray();
         $generatedCount = 0;
 
