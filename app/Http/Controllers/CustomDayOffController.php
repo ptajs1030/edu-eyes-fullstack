@@ -47,6 +47,28 @@ class CustomDayOffController extends Controller
         }
     }
 
+    public function update(Request $request, CustomDayOff $customDayOff)
+    {
+        try {
+            $validated = $request->validate([
+                'date' => 'required|date|after_or_equal:today|unique:custom_day_offs,date,' . $customDayOff->id,
+                'description' => 'required|string|max:255',
+            ]);
+
+            $customDayOff->update($validated);
+
+            return redirect()->back()
+                ->with('success', 'Hari libur berhasil diperbarui.');
+        } catch (ValidationException $e) {
+            return back()
+                ->withErrors($e->validator)
+                ->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal memperbarui hari libur: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
 
     public function searchDayOff(Request $request)
     {
