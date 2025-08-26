@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BadgeInfo, BookText, GraduationCap, LayoutGrid, School, Settings2, TimerReset, TrendingUpDown, UserPen, UserSearch, PencilRuler, LandPlot } from 'lucide-react';
+import { BadgeInfo, BookText, GraduationCap, LayoutGrid, School, Settings2, TimerReset, TrendingUpDown, UserPen, UserSearch, PencilRuler, LandPlot, CalendarOff } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -73,6 +73,11 @@ const mainNavItems: NavItem[] = [
         title: 'Shiftings',
         href: '/shiftings',
         icon: TimerReset,
+    },
+    {
+        title: 'Hari Libur',
+        href: '/custom-day-offs',
+        icon: CalendarOff,
     },
     {
         title: 'Pengumuman',
