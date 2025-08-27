@@ -26,6 +26,7 @@ use App\Models\Student;
 use App\Models\Subject;
 use App\Models\SubjectAttendance;
 use Carbon\Carbon;
+use DB;
 use Illuminate\Console\Scheduling\Schedule;
 use Log;
 
@@ -278,47 +279,90 @@ class AttendanceService
     }
 
     public function subjectAttendanceHistory($date, $class_id, $subject){
-        $query=SubjectAttendance::query();
-        if ($date) {
-            $parsedDate = Carbon::parse($date)->format('Y-m-d');
-            $query->where('submit_date', $parsedDate);
-        }
-        if ($class_id) {
-            $query->where('class_id', $class_id);
-        }
-        if ($subject) {
-            $query->where('subject_name', $subject);
-        }
+        // $query=SubjectAttendance::query();
+        // if ($date) {
+        //     $parsedDate = Carbon::parse($date)->format('Y-m-d');
+        //     $query->where('submit_date', $parsedDate);
+        // }
+        // if ($class_id) {
+        //     $query->where('class_id', $class_id);
+        // }
+        // if ($subject) {
+        //     $query->where('subject_name', $subject);
+        // }
         
-        $attendances = $query->latest('submit_date')->with('classroom', 'student')->paginate(10);
+        // $attendances = $query->latest('submit_date')->with('classroom', 'student')->paginate(10);
         
-        if ($attendances->isEmpty()) {
-            throw new SilentHttpException(404, "Data Kosong");
-        }
+        // if ($attendances->isEmpty()) {
+        //     throw new SilentHttpException(404, "Data Kosong");
+        // }
 
-        $attendancesWithRelations=[];
-        foreach ($attendances->items() as $attendance) {
-            $attendancesWithRelations[]=[
-                'id' => $attendance->id,
-                'student' => optional($attendance->student)->full_name,
-                'classroom' => optional($attendance->classroom)->name,
-                'academic_year'=> optional($attendance->academicYear)->title,
-                'subject_name' => $attendance->subject_name,
-                'subject_start_hour' => $attendance->subject_start_hour,
-                'subject_end_hour' => $attendance->subject_end_hour,
-                'submit_date' => $attendance->submit_date,
-                'submit_hour'=> $attendance->submit_hour,
-                'status' => $attendance->status,
-                'note'=>$attendance->note,
-            ];
-        }
-        return [
-            'number_of_attendances' => $attendances->total(),
-            'current_page' => $attendances->currentPage(),
-            'last_page' => $attendances->lastPage(),
-            'per_page' => $attendances->perPage(),
-            'attendances' => $attendancesWithRelations,
-        ];
+        // $attendancesWithRelations=[];
+        // foreach ($attendances->items() as $attendance) {
+        //     $attendancesWithRelations[]=[
+        //         'id' => $attendance->id,
+        //         'student' => optional($attendance->student)->full_name,
+        //         'classroom' => optional($attendance->classroom)->name,
+        //         'academic_year'=> optional($attendance->academicYear)->title,
+        //         'subject_name' => $attendance->subject_name,
+        //         'subject_start_hour' => $attendance->subject_start_hour,
+        //         'subject_end_hour' => $attendance->subject_end_hour,
+        //         'submit_date' => $attendance->submit_date,
+        //         'submit_hour'=> $attendance->submit_hour,
+        //         'status' => $attendance->status,
+        //         'note'=>$attendance->note,
+        //     ];
+        // }
+        // return [
+        //     'number_of_attendances' => $attendances->total(),
+        //     'current_page' => $attendances->currentPage(),
+        //     'last_page' => $attendances->lastPage(),
+        //     'per_page' => $attendances->perPage(),
+        //     'attendances' => $attendancesWithRelations,
+        // ];
+        $query = DB::table('subject_attendances')
+    ->leftJoin('students', 'students.id', '=', 'subject_attendances.student_id')
+    ->leftJoin('classrooms', 'classrooms.id', '=', 'subject_attendances.class_id')
+    ->leftJoin('academic_years', 'academic_years.id', '=', 'subject_attendances.academic_year_id')
+    ->select(
+        'subject_attendances.id',
+        'students.full_name as student',
+        'classrooms.name as classroom',
+        'academic_years.title as academic_year',
+        'subject_attendances.subject_name',
+        'subject_attendances.subject_start_hour',
+        'subject_attendances.subject_end_hour',
+        'subject_attendances.submit_date',
+        'subject_attendances.submit_hour',
+        'subject_attendances.status',
+        'subject_attendances.note'
+    );
+
+
+if ($date) {
+    $parsedDate = Carbon::parse($date)->format('Y-m-d');
+    $query->whereDate('subject_attendances.submit_date', $parsedDate);
+}
+if ($class_id) {
+    $query->where('subject_attendances.class_id', $class_id);
+}
+if ($subject) {
+    $query->where('subject_attendances.subject_name', $subject);
+}
+
+$attendances = $query->orderByDesc('subject_attendances.submit_date')->paginate(10);
+
+if ($attendances->isEmpty()) {
+    throw new SilentHttpException(404, "Data Kosong");
+}
+
+return [
+    'number_of_attendances' => $attendances->total(),
+    'current_page' => $attendances->currentPage(),
+    'last_page' => $attendances->lastPage(),
+    'per_page' => $attendances->perPage(),
+    'attendances' => $attendances->items(),
+];
     }
 
     public function getClassroomByTeacher($search){
