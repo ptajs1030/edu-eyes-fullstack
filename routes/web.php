@@ -102,6 +102,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/attendance', [EventScheduleController::class, 'showAttendance'])->name('events.attendance');
         Route::patch('/attendance', [EventScheduleController::class, 'updateAttendance'])->name('events.attendance.update');
     });
+    Route::resource('custom-day-offs', CustomDayOffController::class);
 });
 
 require __DIR__ . '/settings.php';

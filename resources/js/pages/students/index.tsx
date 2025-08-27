@@ -58,7 +58,7 @@ export default function StudentIndex() {
         sexes: { value: string; label: string }[];
         statuses: { value: string; label: string }[];
         religions: { value: string; label: string }[];
-        filters: { search?: string; sort?: string; direction?: string };
+        filters: { search?: string; sort?: string; direction?: string; classrooms?: number[] };
     }>().props;
 
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
@@ -81,6 +81,38 @@ export default function StudentIndex() {
     const [qrStudent, setQrStudent] = useState<Student | null>(null);
     const [qrDownloadUrl, setQrDownloadUrl] = useState<string>('');
     const [qrSvgHtml, setQrSvgHtml] = useState<string>('');
+    const [selectedClassrooms, setSelectedClassrooms] = useState<number[]>(filters.classrooms || []);
+    const [showClassroomFilter, setShowClassroomFilter] = useState(false);
+
+    const handleClassroomFilterChange = (classroomId: number) => {
+        const newSelectedClassrooms = selectedClassrooms.includes(classroomId)
+            ? selectedClassrooms.filter((id) => id !== classroomId)
+            : [...selectedClassrooms, classroomId];
+
+        setSelectedClassrooms(newSelectedClassrooms);
+
+        router.get(
+            route('students.index'),
+            {
+                ...filters,
+                classrooms: newSelectedClassrooms.length > 0 ? newSelectedClassrooms : null,
+            },
+            { preserveState: true },
+        );
+    };
+
+    // Clear all classroom filters
+    const clearClassroomFilters = () => {
+        setSelectedClassrooms([]);
+        router.get(
+            route('students.index'),
+            {
+                ...filters,
+                classrooms: null,
+            },
+            { preserveState: true },
+        );
+    };
 
     const openForm = (student: Student | null = null) => {
         setSelectedStudent(student);
@@ -112,9 +144,9 @@ export default function StudentIndex() {
         link.href = url;
         link.download = 'students.csv';
         link.click();
-        
-         toast.success(`Berhasil mengekspor ${selectedData.length} data siswa`, {
-            description: 'File CSV telah didownload otomatis'
+
+        toast.success(`Berhasil mengekspor ${selectedIds.length} data siswa`, {
+            description: 'File CSV telah didownload otomatis',
         });
 
         URL.revokeObjectURL(url);
@@ -153,7 +185,7 @@ export default function StudentIndex() {
             link.href = url;
             link.download = 'kumpulan-kartu-siswa.pdf';
             link.click();
-        } catch (error) {
+        } catch {
             toast.error('Gagal download kartu siswa.');
         }
     };
@@ -189,11 +221,47 @@ export default function StudentIndex() {
                             onChange={(e) => router.get(route('students.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
                         />
+                        {/* Classroom Filter Dropdown */}
+                        <div className="relative">
+                            <button
+                                onClick={() => setShowClassroomFilter(!showClassroomFilter)}
+                                className="rounded bg-gray-200 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-300"
+                            >
+                                Filter Kelas {selectedClassrooms.length > 0 ? `(${selectedClassrooms.length})` : ''}
+                            </button>
+
+                            {showClassroomFilter && (
+                                <div className="absolute top-full left-0 z-10 mt-1 w-64 rounded-md border border-gray-200 bg-white p-3 shadow-lg">
+                                    <div className="mb-2 flex items-center justify-between">
+                                        <span className="text-sm font-medium">Filter by Kelas</span>
+                                        {selectedClassrooms.length > 0 && (
+                                            <button onClick={clearClassroomFilters} className="text-xs text-blue-600 hover:text-blue-800">
+                                                Clear
+                                            </button>
+                                        )}
+                                    </div>
+                                    <div className="max-h-48 overflow-y-auto">
+                                        {classrooms.map((classroom) => (
+                                            <label key={classroom.id} className="flex items-center space-x-2 py-1">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedClassrooms.includes(classroom.id)}
+                                                    onChange={() => handleClassroomFilterChange(classroom.id)}
+                                                    className="rounded border-gray-300"
+                                                />
+                                                <span className="text-sm">{classroom.name}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
                         <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
                             className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                                selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
+                                selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
                             }`}
                         >
                             Ekspor data yang dipilih
@@ -269,16 +337,14 @@ export default function StudentIndex() {
                                 <Link
                                     href={route('students.attendance', student.id)}
                                     className={`rounded px-3 py-1 text-sm font-medium text-white ${
-                                        student.classroom?.name 
-                                        ? 'bg-sky-500 hover:bg-sky-600 hover:cursor-pointer' 
-                                        : 'bg-sky-300 cursor-not-allowed'
+                                        student.classroom?.name ? 'bg-sky-500 hover:cursor-pointer hover:bg-sky-600' : 'cursor-not-allowed bg-sky-300'
                                     }`}
                                     onClick={(e) => {
                                         if (!student.classroom?.name) {
-                                        e.preventDefault();
+                                            e.preventDefault();
                                         }
                                     }}
-                                    title={!student.classroom?.name ? "Siswa harus memiliki kelas untuk melihat kehadiran" : ""}
+                                    title={!student.classroom?.name ? 'Siswa harus memiliki kelas untuk melihat kehadiran' : ''}
                                 >
                                     Kehadiran
                                 </Link>
