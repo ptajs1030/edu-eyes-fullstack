@@ -322,7 +322,7 @@ class AttendanceService
     }
 
     public function getClassroomByTeacher($search){
-        $query= ClassSubjectSchedule::where('teacher_id', auth()->user()->id)->where('day', Carbon::now()->dayOfWeek());
+        $query= ClassSubjectSchedule::where('teacher_id', auth()->user()->id)->where('day', Carbon::now()->dayOfWeek())->with('classroom');
 
         if ($search) {
             $query->where('name', 'like', "%$search%");
@@ -331,7 +331,14 @@ class AttendanceService
         if ($classrooms->isEmpty()) {
             throw new SilentHttpException(404, 'Kelas tidak ditemukan');
         }
-        return $classrooms->pluck('classroom.name')->unique()->values();
+        $classroomsWithRelations = [];
+        foreach ($classrooms as $classroom) {
+            $classroomsWithRelations[] = [
+                'id' => $classroom->id,
+                'classroom' => $classroom->classroom->name,
+            ];
+        }
+        return $classroomsWithRelations;
 
     }
 
