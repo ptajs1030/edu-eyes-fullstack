@@ -1,5 +1,9 @@
-# name: tests
+name: tests
 
+on : 
+  push:
+    branches:
+      - dev
 # on:
 #   push:
 #     branches:
