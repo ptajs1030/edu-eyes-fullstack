@@ -11,6 +11,10 @@ class TemporaryClassStatus extends Model
 
     protected $fillable = ['class_id', 'status'];
 
+    protected $casts = [
+        'class_id' => 'integer',
+    ];
+
     public $timestamps = false;
 
     public function classroom()

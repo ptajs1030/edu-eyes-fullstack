@@ -19,6 +19,8 @@ class Task extends Model
     ];
 
     protected $casts = [
+        'subject_id' => 'integer',
+        'academic_year_id' => 'integer',
         'due_date' => 'date',
         'due_time' => 'datetime:H:i',
     ];

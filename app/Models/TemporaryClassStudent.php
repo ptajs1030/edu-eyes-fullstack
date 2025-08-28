@@ -17,6 +17,13 @@ class TemporaryClassStudent extends Model
         'is_graduate'
     ];
 
+    protected $casts = [
+        'student_id' => 'integer',
+        'academic_year_id' => 'integer',
+        'initial_class_id' => 'integer',
+        'target_class_id' => 'integer',
+    ];
+
     public $timestamps = false;
 
     public function initialClass()

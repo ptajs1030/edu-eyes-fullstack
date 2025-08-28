@@ -18,6 +18,8 @@ class Exam extends Model
     ];
 
     protected $casts = [
+        'subject_id' => 'integer',
+        'academic_year_id' => 'integer',
         'date' => 'date',
     ];
 

@@ -14,6 +14,10 @@ class TaskAttachment extends Model
         'url',
     ];
 
+    protected $casts = [
+        'task_id' => 'integer',
+    ];
+
     // Relationships
     public function task()
     {
