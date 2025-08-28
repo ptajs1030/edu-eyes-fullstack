@@ -14,6 +14,11 @@ class ClassShiftingSchedulePic extends Pivot
         'teacher_id'
     ];
 
+    protected $casts = [
+        'class_shifting_schedule_id' => 'integer',
+        'teacher_id' => 'integer',
+    ];
+
     // not used timestamps
     public $timestamps = false;
 
