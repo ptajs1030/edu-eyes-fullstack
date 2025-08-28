@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AnnouncementController;
@@ -58,6 +59,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{user}', [UserController::class, 'updateParent'])->name('parents.update');
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('parents.destroy');
     });
+    Route::resource('payments', PaymentController::class);
     Route::resource('announcements', AnnouncementController::class);
     Route::resource('academic-years', AcademicYearController::class);
     Route::resource('classrooms', ClassroomController::class);
