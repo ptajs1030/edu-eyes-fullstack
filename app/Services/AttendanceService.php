@@ -26,7 +26,9 @@ use App\Models\Student;
 use App\Models\Subject;
 use App\Models\SubjectAttendance;
 use Carbon\Carbon;
+use DB;
 use Illuminate\Console\Scheduling\Schedule;
+use Log;
 
 
 class AttendanceService
@@ -36,13 +38,13 @@ class AttendanceService
 
     public function todayAttendance(){
         $today = Carbon::now()->format('Y-m-d');
-        $attendances = ShiftingAttendance::where('submit_date', $today)->where('status', ['present', 'late', 'present_in_tolerance'])
+        $attendances = ShiftingAttendance::where('submit_date', $today)->whereIn('status', ['present', 'late', 'present_in_tolerance'])
             ->with('student', 'classroom')
             ->get();
         if ($attendances->isEmpty()) {
             throw new SilentHttpException(404, 'Data Kosong');
         }
-
+        
         return[
             'date' => $today,
             'number_of_in' => $attendances->count(),
@@ -99,9 +101,7 @@ class AttendanceService
             ];
         }
         return [
-            'number_of_attendances' => $class_id 
-            ? $query->whereIn('status', ['present', 'late', 'present_in_tolerance'])->count() 
-            : ShiftingAttendance::whereIn('status', ['present', 'late', 'present_in_tolerance'])->count(),
+            'number_of_attendances' => $query->whereIn('status', ['present', 'late', 'present_in_tolerance'])->where('submit_date', Carbon::now()->format('Y-m-d'))->count() ,
             'current_page' => $attendances->currentPage(),
             'last_page' => $attendances->lastPage(),
             'per_page' => $attendances->perPage(),
@@ -145,17 +145,11 @@ class AttendanceService
             throw new SilentHttpException(403, 'Anda tidak ditugaskan untuk jadwal kelas ini.');
         }
         if ($attendance->clock_out_hour && $attendance->clock_in_hour) {
-            return throw new SilentHttpException(400, 'Absensi sudah diisi');
+            return throw new SilentHttpException(400, 'Siswa telah melakukan absensi');
         }
         
 
-        if ($attendance->clock_in_hour && !$attendance->clock_out_hour) {
-            $minClockOut = Carbon::parse($attendance->clock_in_hour)->addMinutes(2);
-
-            if ($submit_hour->lt($minClockOut)) {
-                throw new SilentHttpException(400, 'Absen keluar harus minimal 2 menit setelah absen masuk');
-            }
-        }
+        
         if ($submit_hour <= $start_hour && !$attendance->clock_in_hour && $type=='in') {
             $attendance->update([
                 'status' => 'present',
@@ -242,9 +236,9 @@ class AttendanceService
                 ]);
             }
         }else if ($attendance->clock_in_hour && !$attendance->clock_out_hour && $type=='in') {
-            throw new SilentHttpException(400, 'Anda sudah absen masuk');
+            throw new SilentHttpException(400, 'Siswa telah melakukan absensi masuk');
         }else{
-            throw new SilentHttpException(400, 'Anda harus absen masuk terlebih dahulu');
+            throw new SilentHttpException(400, 'Anda harus melakukan absensi masuk terlebih ');
         }
 
            
@@ -259,8 +253,20 @@ class AttendanceService
         if (!$attendance) {
             throw new SilentHttpException(404, 'Absensi tidak ditemukan');
         }
-        if($attendance->submit_date != Carbon::now()->format('Y-m-d')){
+        $submit_date=Carbon::parse($attendance->submit_date)->format('Y-m-d');
+        if($submit_date != Carbon::now()->format('Y-m-d')){
             throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini, karena tanggal absensi sudah terlewat. Silahkan hubungi admin untuk mengedit absensi');
+        }
+        $classSchedule=ClassShiftingSchedule::where('day', Carbon::now()->dayOfWeek())->first();
+        if (!$classSchedule) {
+            throw new SilentHttpException(404, 'Jadwal kelas tidak ditemukan');
+        }
+        $pic = ClassShiftingSchedulePic::where('class_shifting_schedule_id', $classSchedule->id)->first('teacher_id');
+        if (!$pic) {
+            throw new SilentHttpException(404, 'PIC tidak ditemukan');
+        }
+        if ($pic->teacher_id != auth()->user()->id) {
+            throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
         }
         $attendance->update([
             'status' => $data->getStatus(),
@@ -273,51 +279,95 @@ class AttendanceService
     }
 
     public function subjectAttendanceHistory($date, $class_id, $subject){
-        $query=SubjectAttendance::query();
-        if ($date) {
-            $parsedDate = Carbon::parse($date)->format('Y-m-d');
-            $query->where('submit_date', $parsedDate);
-        }
-        if ($class_id) {
-            $query->where('class_id', $class_id);
-        }
-        if ($subject) {
-            $query->where('subject_name', $subject);
-        }
+        // $query=SubjectAttendance::query();
+        // if ($date) {
+        //     $parsedDate = Carbon::parse($date)->format('Y-m-d');
+        //     $query->where('submit_date', $parsedDate);
+        // }
+        // if ($class_id) {
+        //     $query->where('class_id', $class_id);
+        // }
+        // if ($subject) {
+        //     $query->where('subject_name', $subject);
+        // }
         
-        $attendances = $query->latest('submit_date')->with('classroom', 'student')->paginate(10);
+        // $attendances = $query->latest('submit_date')->with('classroom', 'student')->paginate(10);
         
-        if ($attendances->isEmpty()) {
-            throw new SilentHttpException(404, "Data Kosong");
-        }
+        // if ($attendances->isEmpty()) {
+        //     throw new SilentHttpException(404, "Data Kosong");
+        // }
 
-        $attendancesWithRelations=[];
-        foreach ($attendances->items() as $attendance) {
-            $attendancesWithRelations[]=[
-                'id' => $attendance->id,
-                'student' => optional($attendance->student)->full_name,
-                'classroom' => optional($attendance->classroom)->name,
-                'academic_year'=> optional($attendance->academicYear)->title,
-                'subject_name' => $attendance->subject_name,
-                'subject_start_hour' => $attendance->subject_start_hour,
-                'subject_end_hour' => $attendance->subject_end_hour,
-                'submit_date' => $attendance->submit_date,
-                'submit_hour'=> $attendance->submit_hour,
-                'status' => $attendance->status,
-                'note'=>$attendance->note,
-            ];
-        }
-        return [
-            'number_of_attendances' => $attendances->total(),
-            'current_page' => $attendances->currentPage(),
-            'last_page' => $attendances->lastPage(),
-            'per_page' => $attendances->perPage(),
-            'attendances' => $attendancesWithRelations,
-        ];
+        // $attendancesWithRelations=[];
+        // foreach ($attendances->items() as $attendance) {
+        //     $attendancesWithRelations[]=[
+        //         'id' => $attendance->id,
+        //         'student' => optional($attendance->student)->full_name,
+        //         'classroom' => optional($attendance->classroom)->name,
+        //         'academic_year'=> optional($attendance->academicYear)->title,
+        //         'subject_name' => $attendance->subject_name,
+        //         'subject_start_hour' => $attendance->subject_start_hour,
+        //         'subject_end_hour' => $attendance->subject_end_hour,
+        //         'submit_date' => $attendance->submit_date,
+        //         'submit_hour'=> $attendance->submit_hour,
+        //         'status' => $attendance->status,
+        //         'note'=>$attendance->note,
+        //     ];
+        // }
+        // return [
+        //     'number_of_attendances' => $attendances->total(),
+        //     'current_page' => $attendances->currentPage(),
+        //     'last_page' => $attendances->lastPage(),
+        //     'per_page' => $attendances->perPage(),
+        //     'attendances' => $attendancesWithRelations,
+        // ];
+        $query = DB::table('subject_attendances')
+    ->leftJoin('students', 'students.id', '=', 'subject_attendances.student_id')
+    ->leftJoin('classrooms', 'classrooms.id', '=', 'subject_attendances.class_id')
+    ->leftJoin('academic_years', 'academic_years.id', '=', 'subject_attendances.academic_year_id')
+    ->select(
+        'subject_attendances.id',
+        'students.full_name as student',
+        'classrooms.name as classroom',
+        'academic_years.title as academic_year',
+        'subject_attendances.subject_name',
+        'subject_attendances.subject_start_hour',
+        'subject_attendances.subject_end_hour',
+        'subject_attendances.submit_date',
+        'subject_attendances.submit_hour',
+        'subject_attendances.status',
+        'subject_attendances.note'
+    );
+
+
+if ($date) {
+    $parsedDate = Carbon::parse($date)->format('Y-m-d');
+    $query->whereDate('subject_attendances.submit_date', $parsedDate);
+}
+if ($class_id) {
+    $query->where('subject_attendances.class_id', $class_id);
+}
+if ($subject) {
+    $query->where('subject_attendances.subject_name', $subject);
+}
+
+$attendances = $query->orderByDesc('subject_attendances.submit_date')->paginate(10);
+
+if ($attendances->isEmpty()) {
+    throw new SilentHttpException(404, "Data Kosong");
+}
+
+return [
+    'number_of_attendances' => $attendances->total(),
+    'current_page' => $attendances->currentPage(),
+    'last_page' => $attendances->lastPage(),
+    'per_page' => $attendances->perPage(),
+    'attendances' => $attendances->items(),
+];
     }
 
     public function getClassroomByTeacher($search){
-        $query= ClassSubjectSchedule::where('teacher_id', auth()->user()->id);
+        $query= ClassSubjectSchedule::where('teacher_id', auth()->user()->id)->where('day', Carbon::now()->dayOfWeek())->with('classroom');
+
         if ($search) {
             $query->where('name', 'like', "%$search%");
         }
@@ -325,8 +375,15 @@ class AttendanceService
         if ($classrooms->isEmpty()) {
             throw new SilentHttpException(404, 'Kelas tidak ditemukan');
         }
-        return $classrooms;
-        
+        $classroomsWithRelations = [];
+        foreach ($classrooms as $classroom) {
+            $classroomsWithRelations[] = [
+                'id' => $classroom->id,
+                'classroom' => $classroom->classroom->name,
+            ];
+        }
+        return $classroomsWithRelations;
+
     }
 
     public function getClassroomSubject($class_id, $search = null){
@@ -495,10 +552,19 @@ class AttendanceService
         }
         $submit_date=Carbon::parse($attendance->submit_date)->format('Y-m-d');
         if($submit_date != Carbon::now()->format('Y-m-d')){
-            throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
+            throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini, karena tanggal absensi sudah terlewat. Silahkan hubungi admin untuk mengedit absensi');
         }
-        $teacher=$attendance->classroom->main_teacher_id;
-        if($teacher != auth()->user()->id){
+        
+        $teacher=ClassSubjectSchedule::where('class_id', $attendance->class_id)
+            ->whereHas('subject', function($query) use ($attendance) {
+                $query->where('name', $attendance->subject_name);
+            })
+            ->where('day', Carbon::now()->dayOfWeek())
+            ->first();
+        if (!$teacher) {
+            throw new SilentHttpException(404, 'Jadwal pelajaran tidak ditemukan');
+        }
+        if($teacher->teacher_id != auth()->user()->id){
             throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
         }
         $attendance->update([
@@ -680,9 +746,16 @@ class AttendanceService
         if (!$attendance) {
             throw new SilentHttpException(404, 'Absensi tidak ditemukan');
         }
-        if(!Carbon::parse($attendance->submit_date)->isToday()){
+        $submit_date=Carbon::parse($attendance->submit_date)->format('Y-m-d');
+        if($submit_date != Carbon::now()->format('Y-m-d')){
+            throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini, karena tanggal absensi sudah terlewat. Silahkan hubungi admin untuk mengedit absensi');
+        }
+        $pic=EventPic::where('event_id', $attendance->event_id)
+            ->where('pic_id', auth()->user()->id)
+            ->first();
+        if (!$pic) {
             throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
-        } 
+        }
         $attendance->update([
             'status' => $data->getStatus(),
         ]);
