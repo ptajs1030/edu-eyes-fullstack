@@ -167,7 +167,7 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
             return;
         }
 
-        const url = event?.id ? `/events/${event.id}` : '/events/';
+        const url = event?.id ? `/events/${event.id}` : '/events';
         const method = event?.id ? 'put' : 'post';
 
         router[method](
@@ -178,8 +178,8 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                 selected_students: selectedStudentIds,
             },
             {
-                onSuccess: () => {},
-                onError: () => {},
+                onSuccess: () => { },
+                onError: () => { },
             },
         );
     };
