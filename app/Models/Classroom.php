@@ -17,6 +17,11 @@ class Classroom extends Model
         'level'
     ];
 
+    protected $casts = [
+        'main_teacher_id' => 'integer',
+        'level' => 'integer',
+    ];
+
     public function students()
     {
         return $this->hasMany(Student::class, 'class_id');

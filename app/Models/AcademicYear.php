@@ -18,6 +18,10 @@ class AcademicYear extends Model
         'note',
     ];
 
+    protected $casts = [
+        'start_year' => 'integer',
+    ];
+
     protected static function booted()
     {
         static::creating(function (self $academicYear) {

@@ -35,6 +35,7 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
     const [attendanceMode, setAttendanceMode] = useState('');
     const [showFinalizeModal, setShowFinalizeModal] = useState(false);
     const [showResetModal, setShowResetModal] = useState(false);
+    const [showPopulateModal, setShowPopulateModal] = useState(false);
     const [isPopulating, setIsPopulating] = useState(false);
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
 
@@ -90,7 +91,13 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
     };
 
     const handlePopulate = () => {
+        setShowPopulateModal(true);
+    };
+
+    const confirmPopulate = () => {
         setIsPopulating(true);
+        setShowPopulateModal(false); // Tutup modal
+        
         router.post(
             route('grade-promotions.populate'),
             {},
@@ -246,7 +253,7 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
                 </div>
             )}
 
-            {/* Confirmation Modal */}
+            {/* Confirmation Modal untuk Finalize */}
             <ActionModal
                 isOpen={showFinalizeModal}
                 onClose={() => setShowFinalizeModal(false)}
@@ -266,7 +273,7 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
                 ]}
             />
 
-            {/* Reset Confirmation Modal */}
+            {/* Confirmation Modal untuk Reset */}
             <ActionModal
                 isOpen={showResetModal}
                 onClose={() => setShowResetModal(false)}
@@ -282,6 +289,26 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
                         label: 'Ya, Reset',
                         onClick: confirmReset,
                         variant: 'danger',
+                    },
+                ]}
+            />
+
+            {/* Confirmation Modal untuk Populate */}
+            <ActionModal
+                isOpen={showPopulateModal}
+                onClose={() => setShowPopulateModal(false)}
+                title="Konfirmasi Inisialisasi Data"
+                message="Anda yakin ingin menginisialisasi data kenaikan kelas?"
+                buttons={[
+                    {
+                        label: 'Batal',
+                        onClick: () => setShowPopulateModal(false),
+                        variant: 'neutral',
+                    },
+                    {
+                        label: 'Ya, Inisialisasi',
+                        onClick: confirmPopulate,
+                        variant: 'primary',
                     },
                 ]}
             />

@@ -24,6 +24,11 @@ class Student extends Model
         'updated_at'
     ];
 
+    protected $casts = [
+        'parent_id' => 'integer',
+        'class_id' => 'integer',
+    ];
+
     protected static function booted()
     {
         static::creating(function ($student) {

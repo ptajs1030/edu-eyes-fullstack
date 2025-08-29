@@ -8,6 +8,11 @@ class EventPic extends Model
 {
     protected $fillable = ['event_id', 'pic_id'];
 
+    protected $casts = [
+        'event_id' => 'integer',
+        'pic_id' => 'integer',
+    ];
+
     public function event()
     {
         return $this->belongsTo(Event::class);
