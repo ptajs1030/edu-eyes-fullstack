@@ -228,9 +228,21 @@ class StudentController extends Controller
             return redirect()->back()
                 ->with('success', 'Student deleted successfully');
         } catch (\Exception $e) {
-            // if it's production environment, don't show detailed error
+            $errorMessage = 'Failed to delete student';
+
+            // Check if it's a foreign key constraint violation
+            if (
+                str_contains($e->getMessage(), 'Integrity constraint violation') &&
+                str_contains($e->getMessage(), 'foreign key constraint')
+            ) {
+
+                $errorMessage = 'Cannot delete student because the data is already associated with other records.';
+            } else if (!app()->environment('production')) {
+                $errorMessage .= ': ' . $e->getMessage();
+            }
+
             return redirect()->back()
-                ->with('error', app()->environment('production') ? 'Failed to delete student' : 'Failed to delete student: ' . $e->getMessage());
+                ->with('error', $errorMessage);
         }
     }
 
