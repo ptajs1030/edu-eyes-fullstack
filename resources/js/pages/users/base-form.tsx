@@ -102,7 +102,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
     // Reset initialization flag when modal closes
     useEffect(() => {
         if (!isOpen) {
-            setHasInitialized(false)
+            setHasInitialized(false);
             setPreviewImage(null);
             setRemoveProfile(false);
         }
@@ -110,6 +110,15 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
 
     const handleChange = (field: keyof User, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let value = e.target.value;
+
+        // Remove any non-digit characters
+        value = value.replace(/\D/g, '');
+
+        setFormData((prev) => ({ ...prev, phone: value }));
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -228,18 +237,6 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 <p className="mt-1 text-xs text-gray-500">Max 2MB (300x300)</p>
             </div>
 
-            {/* Role Field (disabled) */}
-            {/* <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700">Role</label>
-                <input
-                    type="text"
-                    value={role.name}
-                    disabled
-                    className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 p-2 shadow-sm"
-                />
-                <input type="hidden" name="role_id" value={role.id} />
-            </div> */}
-
             {/* Common Fields */}
             <div className="mb-3">
                 <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
@@ -327,8 +324,10 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 <input
                     id="phone"
                     type="tel"
+                    minLength={7}
+                    maxLength={15}
                     value={formData.phone || ''}
-                    onChange={(e) => handleChange('phone', e.target.value)}
+                    onChange={handlePhoneChange}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                 />
             </div>
