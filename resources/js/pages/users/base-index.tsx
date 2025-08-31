@@ -123,7 +123,6 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         { key: 'full_name', label: 'Nama', sortable: true },
         ...(role.value === 'admin' || role.value === 'teacher' ? [{ key: 'nip', label: 'NIP', sortable: true }] : []),
         { key: 'username', label: 'Username', sortable: true },
-        { key: 'role.name', label: 'Role', sortable: true },
         ...(role.value === 'admin' || role.value === 'teacher'
             ? [{ key: 'position', label: 'Jabatan', sortable: true }]
             : [{ key: 'job', label: 'Pekerjaan', sortable: true }]),
@@ -196,7 +195,6 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                             <td className="p-3 text-sm">{user.full_name}</td>
                             {(role.value === 'admin' || role.value === 'teacher') && <td className="p-3 text-sm">{user.nip || '-'}</td>}
                             <td className="p-3 text-sm">{user.username}</td>
-                            <td className="p-3 text-sm">{user.role.name}</td>
                             {(role.value === 'admin' || role.value === 'teacher') && <td className="p-3 text-sm">{user.position || '-'}</td>}
                             {role.value === 'parent' && <td className="p-3 text-sm">{user.job || '-'}</td>}
                             <td className="p-3 text-sm">{user.phone || '-'}</td>
