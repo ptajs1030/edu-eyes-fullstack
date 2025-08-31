@@ -133,6 +133,28 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
+    const getStatusBadgeClass = (status: string): string => {
+        switch (status) {
+            case 'active':
+                return 'bg-green-100 text-green-800';
+            case 'inactive':
+                return 'bg-red-100 text-red-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    const getStatusLabel = (status: string): string => {
+        switch (status) {
+            case 'active':
+                return 'Active';
+            case 'inactive':
+                return 'Inactive';
+            default:
+                return status;
+        }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={title} />
@@ -199,7 +221,13 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                             {role.value === 'parent' && <td className="p-3 text-sm">{user.job || '-'}</td>}
                             <td className="p-3 text-sm">{user.phone || '-'}</td>
                             <td className="p-3 text-sm">{user.email || '-'}</td>
-                            <td className="p-3 text-sm">{user.status}</td>
+                            <td className="p-3 text-sm">
+                                <span
+                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(user.status)}`}
+                                >
+                                    {getStatusLabel(user.status)}
+                                </span>
+                            </td>
                             <td className="p-3 text-sm">
                                 {user.address ? (user.address.length > 70 ? user.address.substring(0, 70) + '...' : user.address) : '-'}
                             </td>
