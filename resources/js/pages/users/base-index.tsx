@@ -123,7 +123,6 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         { key: 'full_name', label: 'Nama', sortable: true },
         ...(role.value === 'admin' || role.value === 'teacher' ? [{ key: 'nip', label: 'NIP', sortable: true }] : []),
         { key: 'username', label: 'Username', sortable: true },
-        { key: 'role.name', label: 'Role', sortable: true },
         ...(role.value === 'admin' || role.value === 'teacher'
             ? [{ key: 'position', label: 'Jabatan', sortable: true }]
             : [{ key: 'job', label: 'Pekerjaan', sortable: true }]),
@@ -133,6 +132,28 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         { key: 'address', label: 'Alamat', sortable: true },
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
+
+    const getStatusBadgeClass = (status: string): string => {
+        switch (status) {
+            case 'active':
+                return 'bg-green-100 text-green-800';
+            case 'inactive':
+                return 'bg-red-100 text-red-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    const getStatusLabel = (status: string): string => {
+        switch (status) {
+            case 'active':
+                return 'Active';
+            case 'inactive':
+                return 'Inactive';
+            default:
+                return status;
+        }
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -196,12 +217,17 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                             <td className="p-3 text-sm">{user.full_name}</td>
                             {(role.value === 'admin' || role.value === 'teacher') && <td className="p-3 text-sm">{user.nip || '-'}</td>}
                             <td className="p-3 text-sm">{user.username}</td>
-                            <td className="p-3 text-sm">{user.role.name}</td>
                             {(role.value === 'admin' || role.value === 'teacher') && <td className="p-3 text-sm">{user.position || '-'}</td>}
                             {role.value === 'parent' && <td className="p-3 text-sm">{user.job || '-'}</td>}
                             <td className="p-3 text-sm">{user.phone || '-'}</td>
                             <td className="p-3 text-sm">{user.email || '-'}</td>
-                            <td className="p-3 text-sm">{user.status}</td>
+                            <td className="p-3 text-sm">
+                                <span
+                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(user.status)}`}
+                                >
+                                    {getStatusLabel(user.status)}
+                                </span>
+                            </td>
                             <td className="p-3 text-sm">
                                 {user.address ? (user.address.length > 70 ? user.address.substring(0, 70) + '...' : user.address) : '-'}
                             </td>
