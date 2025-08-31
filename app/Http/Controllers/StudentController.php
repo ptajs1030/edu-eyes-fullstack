@@ -123,7 +123,7 @@ class StudentController extends Controller
                     $query->orderBy('students.' . $request->sort, $direction);
             }
         } else {
-            $query->orderBy('students.created_at', 'desc');
+            $query->orderBy('students.full_name', 'asc');
         }
 
         $students = $query->paginate(10)->withQueryString();
