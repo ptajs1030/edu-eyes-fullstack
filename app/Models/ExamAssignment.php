@@ -18,6 +18,9 @@ class ExamAssignment extends Model
     ];
 
     protected $casts = [
+        'exam_id' => 'integer',
+        'student_id' => 'integer',
+        'class_id' => 'integer',
         'score' => 'float',
     ];
 

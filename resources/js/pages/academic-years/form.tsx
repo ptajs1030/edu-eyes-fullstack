@@ -122,8 +122,10 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                         id="start_year"
                         name="start_year"
                         value={formData.start_year}
+                        min={new Date().getFullYear()}
+                        disabled={academicYear ? true : false}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                        className={`mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm ${academicYear ? 'bg-gray-100' : ''} `}
                         required
                     ></input>
                 </div>

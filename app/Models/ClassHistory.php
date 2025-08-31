@@ -17,6 +17,13 @@ class ClassHistory extends Model
         'class_level',
     ];
 
+    protected $casts = [
+        'academic_year_id' => 'integer',
+        'student_id' => 'integer',
+        'class_id' => 'integer',
+        'class_level' => 'integer',
+    ];
+
     public function academicYear()
     {
         return $this->belongsTo(AcademicYear::class);

@@ -15,6 +15,11 @@ class PaymentAssignment extends Model
         'payment_date',
     ];
 
+    protected $casts = [
+        'payment_id' => 'integer',
+        'student_id' => 'integer',
+    ];
+
     // Relationships
     public function payment()
     {

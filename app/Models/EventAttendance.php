@@ -18,6 +18,13 @@ class EventAttendance extends Model
         'note'
     ];
 
+    protected $casts = [
+        'student_id' => 'integer',
+        'event_id' => 'integer',
+        'academic_year_id' => 'integer',
+        'minutes_of_late' => 'integer',
+    ];
+
     public function student()
     {
         return $this->belongsTo(Student::class);

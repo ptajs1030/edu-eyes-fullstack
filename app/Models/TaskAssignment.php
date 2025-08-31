@@ -18,6 +18,9 @@ class TaskAssignment extends Model
     ];
 
     protected $casts = [
+        'task_id' => 'integer',
+        'student_id' => 'integer',
+        'class_id' => 'integer',
         'score' => 'float',
     ];
 
@@ -34,6 +37,6 @@ class TaskAssignment extends Model
 
     public function class()
     {
-        return $this->belongsTo(Classroom::class, 'class_id'); 
+        return $this->belongsTo(Classroom::class, 'class_id');
     }
 }
