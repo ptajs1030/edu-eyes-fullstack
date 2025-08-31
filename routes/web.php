@@ -60,6 +60,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('parents.destroy');
     });
     Route::resource('payments', PaymentController::class);
+    Route::patch('/payments/{payment}/transactions/update', [PaymentController::class, 'updateTransactions'])
+    ->name('payments.updateTransactions');
     Route::resource('announcements', AnnouncementController::class);
     Route::resource('academic-years', AcademicYearController::class);
     Route::resource('classrooms', ClassroomController::class);
