@@ -183,7 +183,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
     };
 
     return (
-        <FormModal isOpen={isOpen} onClose={onClose} title={user ? `Edit ${role.name}` : `Add New ${role.name}`} onSubmit={handleSubmit}>
+        <FormModal isOpen={isOpen} onClose={onClose} title={user ? `Edit ${role.name}` : `Tambah ${role.name} Baru`} onSubmit={handleSubmit}>
             {/* Profile Picture */}
             <div className="mb-4 flex flex-col items-center">
                 <div className="relative">
@@ -222,14 +222,14 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 </div>
 
                 <label className="mt-2 cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800">
-                    <span>Upload Photo</span>
+                    <span>Unggah Foto</span>
                     <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
                 </label>
                 <p className="mt-1 text-xs text-gray-500">Max 2MB (300x300)</p>
             </div>
 
             {/* Role Field (disabled) */}
-            <div className="mb-3">
+            {/* <div className="mb-3">
                 <label className="block text-sm font-medium text-gray-700">Role</label>
                 <input
                     type="text"
@@ -238,12 +238,12 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                     className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 p-2 shadow-sm"
                 />
                 <input type="hidden" name="role_id" value={role.id} />
-            </div>
+            </div> */}
 
             {/* Common Fields */}
             <div className="mb-3">
                 <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
-                    Full Name*
+                    Nama Lengkap*
                 </label>
                 <input
                     id="full_name"
@@ -289,7 +289,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                     </div>
                     <div className="mb-3">
                         <label htmlFor="position" className="block text-sm font-medium text-gray-700">
-                            Position
+                            Posisi/Jabatan
                         </label>
                         <input
                             id="position"
@@ -306,7 +306,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
             {role.value === 'parent' && (
                 <div className="mb-3">
                     <label htmlFor="job" className="block text-sm font-medium text-gray-700">
-                        Job
+                        Pekerjaan
                     </label>
                     <input
                         id="job"
@@ -322,7 +322,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
             {/* Common Contact Fields */}
             <div className="mb-3">
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                    Phone
+                    Nomor Telepon
                 </label>
                 <input
                     id="phone"
@@ -348,7 +348,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
 
             <div className="mb-3">
                 <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                    Address
+                    Alamat
                 </label>
                 <textarea
                     id="address"
@@ -382,7 +382,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
             {/* Password Fields */}
             <div className="mb-3">
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                    {user ? 'New Password' : 'Password*'}
+                    {user ? 'Password Baru' : 'Password*'}
                 </label>
                 <input
                     id="password"
@@ -397,7 +397,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
 
             <div className="mb-3">
                 <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700">
-                    {user ? 'Confirm New Password' : 'Confirm Password*'}
+                    {user ? 'Konfirmasi Password Baru' : 'Konfirmasi Password*'}
                 </label>
                 <input
                     id="password_confirmation"
