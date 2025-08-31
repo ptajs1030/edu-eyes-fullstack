@@ -18,6 +18,7 @@ class Payment extends Model
     ];
 
     protected $casts = [
+        'academic_year_id' => 'integer',
         'due_date' => 'date',
         'nominal' => 'integer',
     ];

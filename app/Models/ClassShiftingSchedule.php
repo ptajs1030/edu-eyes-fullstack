@@ -12,6 +12,12 @@ class ClassShiftingSchedule extends Model
         'day',
     ];
 
+    protected $casts = [
+        'class_id' => 'integer',
+        'shifting_id' => 'integer',
+        'day' => 'integer',
+    ];
+
     // not used timestamps
     public $timestamps = false;
 

@@ -137,12 +137,20 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
     };
 
     const handleSelectAllStudents = (checked: boolean) => {
+        const currentClassStudentIds = students.map((student) => student.id);
+
         if (checked) {
-            const allStudentIds = students.map((student) => student.id);
-            setSelectedStudentIds(allStudentIds);
+            setSelectedStudentIds((prev) => {
+                const newIds = [...prev];
+                currentClassStudentIds.forEach((id) => {
+                    if (!newIds.includes(id)) {
+                        newIds.push(id);
+                    }
+                });
+                return newIds;
+            });
         } else {
-            const studentIdsToRemove = students.map((student) => student.id);
-            setSelectedStudentIds((prev) => prev.filter((id) => !studentIdsToRemove.includes(id)));
+            setSelectedStudentIds((prev) => prev.filter((id) => !currentClassStudentIds.includes(id)));
         }
     };
 
@@ -159,7 +167,7 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
             return;
         }
 
-        const url = event?.id ? `/events/${event.id}` : '/events/';
+        const url = event?.id ? `/events/${event.id}` : '/events';
         const method = event?.id ? 'put' : 'post';
 
         router[method](
@@ -170,8 +178,8 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                 selected_students: selectedStudentIds,
             },
             {
-                onSuccess: () => {},
-                onError: () => {},
+                onSuccess: () => { },
+                onError: () => { },
             },
         );
     };

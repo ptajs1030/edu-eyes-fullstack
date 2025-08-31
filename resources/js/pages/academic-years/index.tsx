@@ -61,7 +61,7 @@ export default function AcademicYearIndex() {
 
     const exportSelected = () => {
         if (selectedIds.length === 0) return;
-        
+
         const selectedData = academicYears.data.filter((a) => selectedIds.includes(a.id));
         const headers = `Title,Status\n`;
         const csv = selectedData.map((a) => `${a.title},${a.status}`).join('\n');
@@ -73,7 +73,7 @@ export default function AcademicYearIndex() {
         link.click();
 
         toast.success(`Berhasil mengekspor ${selectedData.length} data tahun akademik`, {
-            description: 'File CSV telah didownload otomatis'
+            description: 'File CSV telah didownload otomatis',
         });
     };
 
@@ -106,6 +106,9 @@ export default function AcademicYearIndex() {
         );
     };
 
+    console.log(academicYears.data.length);
+    console.log(academicYears.data.length !== 0);
+
     const tableHeaders = [
         { key: 'title', label: 'Judul', sortable: true },
         { key: 'status', label: 'Status', sortable: true },
@@ -133,15 +136,16 @@ export default function AcademicYearIndex() {
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
                             className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                                selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
+                                selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
                             }`}
                         >
                             Ekspor data yang dipilih
                         </button>
                     </div>
                     <button
+                        disabled={academicYears.data.length !== 0}
                         onClick={() => openModal()}
-                        className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
+                        className={`rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition ${academicYears.data.length !== 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer hover:bg-green-700'} `}
                     >
                         Tambah Tahun Akademik
                     </button>

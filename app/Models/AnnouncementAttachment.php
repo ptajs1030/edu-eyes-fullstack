@@ -14,6 +14,10 @@ class AnnouncementAttachment extends Model
         'url',
     ];
 
+    protected $casts = [
+        'announcement_id' => 'integer',
+    ];
+
     // Relationships
     public function announcement()
     {

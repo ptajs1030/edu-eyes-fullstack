@@ -30,6 +30,9 @@ class SubjectAttendance extends Model
     ];
 
     protected $casts = [
+        'student_id' => 'integer',
+        'class_id' => 'integer',
+        'academic_year_id' => 'integer',
         'submit_date' => 'date',
     ];
 
