@@ -129,7 +129,7 @@ export default function PaymentIndex() {
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
-                            placeholder="Cari payment..."
+                            placeholder="Cari tagihan..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('payments.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
