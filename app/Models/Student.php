@@ -12,9 +12,6 @@ use Illuminate\Support\Str;
 class Student extends Model
 {
     use HasFactory;
-    use SoftDeletes;
-
-    protected $dates = ['deleted_at'];
 
     protected $guarded = [
         'id',
