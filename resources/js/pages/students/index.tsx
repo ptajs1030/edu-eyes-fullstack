@@ -205,6 +205,32 @@ export default function StudentIndex() {
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
+    const getStatusBadgeClass = (status: string): string => {
+        switch (status) {
+            case 'active':
+                return 'bg-green-100 text-green-800';
+            case 'inactive':
+                return 'bg-red-100 text-red-800';
+            case 'graduated':
+                return 'bg-blue-100 text-blue-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    const getStatusLabel = (status: string): string => {
+        switch (status) {
+            case 'active':
+                return 'Active';
+            case 'inactive':
+                return 'Inactive';
+            case 'graduated':
+                return 'Graduated';
+            default:
+                return status;
+        }
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Siswa" />
@@ -326,7 +352,13 @@ export default function StudentIndex() {
                             <td className="p-3 text-sm">
                                 {student.address ? (student.address.length > 70 ? student.address.substring(0, 70) + '...' : student.address) : '-'}
                             </td>
-                            <td className="p-3 text-sm">{student.status}</td>
+                            <td className="p-3 text-sm">
+                                <span
+                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(student.status)}`}
+                                >
+                                    {getStatusLabel(student.status)}
+                                </span>
+                            </td>
                             <td className="flex justify-center gap-2 p-3">
                                 <button
                                     onClick={() => openForm(student)}
