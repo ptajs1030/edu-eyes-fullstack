@@ -252,6 +252,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                 <Pagination links={users.links} />
 
                 <BaseForm
+                    key={selectedUser?.id || 'new'}
                     isOpen={isFormOpen}
                     onClose={() => setIsFormOpen(false)}
                     user={selectedUser}

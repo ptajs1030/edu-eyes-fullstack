@@ -34,6 +34,7 @@ interface BaseFormProps {
 }
 
 export default function BaseForm({ isOpen, onClose, user, statuses, role, routePrefix }: BaseFormProps) {
+    const [formKey, setFormKey] = useState(0);
     const [formData, setFormData] = useState<User>({
         full_name: '',
         username: '',
@@ -95,18 +96,40 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
             setPreviewImage(null);
             setHasInitialized(true);
         }
-
-        setRemoveProfile(false);
     }, [user, role, isOpen, hasInitialized]);
 
-    // Reset initialization flag when modal closes
     useEffect(() => {
         if (!isOpen) {
+            // Reset semua state ke default
+            setFormData({
+                full_name: '',
+                username: '',
+                phone: '',
+                email: '',
+                password: '',
+                password_confirmation: '',
+                role_id: role.id,
+                status: 'active',
+                ...(role.value === 'admin' || role.value === 'teacher'
+                    ? {
+                          nip: '',
+                          position: '',
+                      }
+                    : {}),
+                ...(role.value === 'parent' ? { job: '' } : {}),
+                address: '',
+            });
             setHasInitialized(false);
             setPreviewImage(null);
             setRemoveProfile(false);
+            setFormKey((prev) => prev + 1); // Force re-render
+
+            // Reset file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, role.id, role.value]);
 
     const handleChange = (field: keyof User, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
@@ -192,7 +215,13 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
     };
 
     return (
-        <FormModal isOpen={isOpen} onClose={onClose} title={user ? `Edit ${role.name}` : `Tambah ${role.name} Baru`} onSubmit={handleSubmit}>
+        <FormModal
+            key={formKey}
+            isOpen={isOpen}
+            onClose={onClose}
+            title={user ? `Edit ${role.name}` : `Tambah ${role.name} Baru`}
+            onSubmit={handleSubmit}
+        >
             {/* Profile Picture */}
             <div className="mb-4 flex flex-col items-center">
                 <div className="relative">
@@ -243,6 +272,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                     Nama Lengkap*
                 </label>
                 <input
+                    autoComplete="off"
                     id="full_name"
                     type="text"
                     maxLength={70}
@@ -258,6 +288,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                     Username*
                 </label>
                 <input
+                    autoComplete="off"
                     id="username"
                     type="text"
                     maxLength={70}
@@ -276,6 +307,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                             NIP
                         </label>
                         <input
+                            autoComplete="off"
                             id="nip"
                             type="text"
                             maxLength={70}
@@ -289,6 +321,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                             Posisi/Jabatan
                         </label>
                         <input
+                            autoComplete="off"
                             id="position"
                             type="text"
                             maxLength={70}
@@ -306,6 +339,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                         Pekerjaan
                     </label>
                     <input
+                        autoComplete="off"
                         id="job"
                         type="text"
                         maxLength={70}
@@ -322,6 +356,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                     Nomor Telepon
                 </label>
                 <input
+                    autoComplete="off"
                     id="phone"
                     type="tel"
                     minLength={7}
@@ -337,6 +372,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                     Email
                 </label>
                 <input
+                    autoComplete="off"
                     id="email"
                     type="email"
                     value={formData.email || ''}
@@ -384,6 +420,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                     {user ? 'Password Baru' : 'Password*'}
                 </label>
                 <input
+                    autoComplete="off"
                     id="password"
                     type="password"
                     value={formData.password || ''}
@@ -399,6 +436,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                     {user ? 'Konfirmasi Password Baru' : 'Konfirmasi Password*'}
                 </label>
                 <input
+                    autoComplete="off"
                     id="password_confirmation"
                     type="password"
                     value={formData.password_confirmation || ''}
