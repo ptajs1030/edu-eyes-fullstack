@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Controllers\AnnouncementController;
@@ -101,6 +102,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/exams/{exam}/scoring', [ExamController::class, 'scoring'])->name('exams.scoring');
     Route::put('/exams/{exam}/assignments/{assignment}/score', [ExamController::class, 'updateScore'])->name('exams.updateScore');
     Route::put('/exams/{exam}/scores/bulk', [ExamController::class, 'updateBulkScores'])->name('exams.updateBulkScores');
+    Route::resource('tasks', TaskController::class);
     Route::resource('events', EventController::class);
     Route::prefix('events/{event}')->group(function () {
         Route::get('/attendance', [EventScheduleController::class, 'showAttendance'])->name('events.attendance');
