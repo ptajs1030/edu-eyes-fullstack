@@ -135,13 +135,9 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
-    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let value = e.target.value;
-
-        // Remove any non-digit characters
-        value = value.replace(/\D/g, '');
-
-        setFormData((prev) => ({ ...prev, phone: value }));
+    const handleNumericInputChange = (fieldName: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value.replace(/\D/g, '');
+        setFormData((prev) => ({ ...prev, [fieldName]: value }));
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -310,9 +306,12 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                             autoComplete="off"
                             id="nip"
                             type="text"
-                            maxLength={70}
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            minLength={18}
+                            maxLength={18}
                             value={formData.nip || ''}
-                            onChange={(e) => handleChange('nip', e.target.value)}
+                            onChange={handleNumericInputChange('nip')}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                         />
                     </div>
@@ -362,7 +361,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                     minLength={7}
                     maxLength={15}
                     value={formData.phone || ''}
-                    onChange={handlePhoneChange}
+                    onChange={handleNumericInputChange('phone')}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                 />
             </div>
