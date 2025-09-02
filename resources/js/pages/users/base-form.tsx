@@ -219,48 +219,50 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
             onSubmit={handleSubmit}
         >
             {/* Profile Picture */}
-            <div className="mb-4 flex flex-col items-center">
-                <div className="relative">
-                    <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-gray-300 bg-gray-100">
-                        {previewImage ? (
-                            <img src={previewImage} alt="Profile preview" className="h-full w-full object-cover" />
-                        ) : (
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-12 w-12 text-gray-400"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
+            {(role.value === 'admin' || role.value === 'teacher') && (
+                <div className="mb-4 flex flex-col items-center">
+                    <div className="relative">
+                        <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-gray-300 bg-gray-100">
+                            {previewImage ? (
+                                <img src={previewImage} alt="Profile preview" className="h-full w-full object-cover" />
+                            ) : (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-12 w-12 text-gray-400"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                    />
+                                </svg>
+                            )}
+                        </div>
+
+                        {(previewImage || (user?.profile_picture && !removeProfile)) && (
+                            <button
+                                type="button"
+                                onClick={handleRemoveImage}
+                                className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white hover:cursor-pointer hover:bg-red-600"
                             >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                />
-                            </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
                         )}
                     </div>
 
-                    {(previewImage || (user?.profile_picture && !removeProfile)) && (
-                        <button
-                            type="button"
-                            onClick={handleRemoveImage}
-                            className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white hover:cursor-pointer hover:bg-red-600"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    )}
+                    <label className="mt-2 cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800">
+                        <span>Upload Photo</span>
+                        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+                    </label>
+                    <p className="mt-1 text-xs text-gray-500">Max 2MB (300x300)</p>
                 </div>
-
-                <label className="mt-2 cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800">
-                    <span>Unggah Foto</span>
-                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
-                </label>
-                <p className="mt-1 text-xs text-gray-500">Max 2MB (300x300)</p>
-            </div>
+            )}
 
             {/* Common Fields */}
             <div className="mb-3">
