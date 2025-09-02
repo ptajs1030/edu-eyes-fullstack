@@ -1,20 +1,20 @@
-import TimePickerWrapper from '@/components/time-picker-wrapper';
-import MultiSearchableSelectInline from '@/components/ui/multi-searchable-select-inline';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
-import '../../../css/time-picker.css';
 
-interface Teacher {
+interface AcademicYear {
     id: number;
-    full_name: string;
+    title: string;
+    start_year: number;
+    status: 'active' | 'inactive';
 }
 
 interface Classroom {
     id: number;
     name: string;
+    level: string;
 }
 
 interface Student {
@@ -28,44 +28,48 @@ interface Student {
 }
 
 interface Props {
-    teachers: Teacher[];
-    classrooms: Classroom[];
-    event?: {
-        id?: number;
-        name: string;
+    academicYears: AcademicYear[];
+    selectedStudents?: Student[];
+    payment?: {
+        id: number;
+        academic_year_id: number;
+        title: string;
+        nominal: number;
+        due_date: string;
         description: string;
-        start_date: string;
-        end_date: string;
-        start_hour: string;
-        end_hour: string;
-        pics: { id: number; user: Teacher }[];
+        student_assignments: {
+            student_id: number;
+        }[];
     };
-    selectedStudents?: number[];
+    classrooms: Classroom[];
 }
 
 const breadcrumbs = (isEdit: boolean): BreadcrumbItem[] => [
     {
-        title: 'Events',
-        href: '/events',
+        title: 'Tagihan',
+        href: '/payments',
     },
     {
-        title: isEdit ? 'Edit Event' : 'Buat Event Baru',
+        title: isEdit ? 'Edit Tagihan' : 'Buat Tagihan Baru',
     },
 ];
 
-export default function EventForm({ teachers, classrooms, event, selectedStudents = [] }: Props) {
+export default function PaymentCreate({ academicYears, classrooms, payment, selectedStudents = [] }: Props) {
+    const activeYear = academicYears.find((y) => y.status === 'active');
     const [formData, setFormData] = useState({
-        name: event?.name || '',
-        description: event?.description || '',
-        start_date: event?.start_date || '',
-        end_date: event?.end_date || '',
-        start_hour: event?.start_hour || '',
-        end_hour: event?.end_hour || '',
+        title: payment?.title || '',
+        nominal: payment?.nominal,
+        due_date: payment?.due_date || '',
+        academic_year_id: payment?.academic_year_id || activeYear?.id || '',
+        description: payment?.description || '',
+        student_assignments: payment?.student_assignments || [],
     });
 
-    const [selectedPics, setSelectedPics] = useState<number[]>(event?.pics ? event.pics.map((pic) => pic.user.id) : []);
     const [selectedClass, setSelectedClass] = useState<number | null>(null);
     const [students, setStudents] = useState<Student[]>([]);
+    const [nominal, setNominal] = useState<number | null>(payment?.nominal || null);
+    const [academicYear, setAcademicYear] = useState<number>(payment?.academic_year_id || academicYears[0]?.id || 0);
+    const selectedAcademicYear = academicYears.find((y) => y.id === academicYear);
     const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>(selectedStudents);
     const [selectedStudentsInfo, setSelectedStudentsInfo] = useState<Student[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -80,11 +84,6 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
             toast.error(flash.error);
         }
     }, [flash]);
-
-    const teacherOptions = teachers.map((teacher) => ({
-        id: teacher.id,
-        name: teacher.full_name,
-    }));
 
     useEffect(() => {
         if (selectedClass) {
@@ -139,20 +138,12 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
     };
 
     const handleSelectAllStudents = (checked: boolean) => {
-        const currentClassStudentIds = students.map((student) => student.id);
-
         if (checked) {
-            setSelectedStudentIds((prev) => {
-                const newIds = [...prev];
-                currentClassStudentIds.forEach((id) => {
-                    if (!newIds.includes(id)) {
-                        newIds.push(id);
-                    }
-                });
-                return newIds;
-            });
+            const allStudentIds = students.map((student) => student.id);
+            setSelectedStudentIds(allStudentIds);
         } else {
-            setSelectedStudentIds((prev) => prev.filter((id) => !currentClassStudentIds.includes(id)));
+            const studentIdsToRemove = students.map((student) => student.id);
+            setSelectedStudentIds((prev) => prev.filter((id) => !studentIdsToRemove.includes(id)));
         }
     };
 
@@ -164,125 +155,97 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
             return;
         }
 
-        if (selectedPics.length === 0) {
-            toast.error('Pilih minimal 1 PIC');
-            return;
-        }
-
-        const url = event?.id ? `/events/${event.id}` : '/events';
-        const method = event?.id ? 'put' : 'post';
+        const url = payment?.id ? `/payments/${payment.id}` : '/payments/';
+        const method = payment?.id ? 'put' : 'post';
 
         router[method](
             url,
             {
                 ...formData,
-                pics: selectedPics.map((id) => ({ id })),
-                selected_students: selectedStudentIds,
+                student_ids: selectedStudentIds,
             },
             {
-                onSuccess: () => { },
-                onError: () => { },
+                onSuccess: () => {},
+                onError: () => {},
             },
         );
     };
-
-    // Check if all students in current class are selected
     const areAllStudentsSelected = students.length > 0 && students.every((student) => selectedStudentIds.includes(student.id));
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs(!!event?.id)}>
-            <Head title={event?.id ? 'Edit Event' : 'Buat Event Baru'} />
+        <AppLayout breadcrumbs={breadcrumbs(!!payment?.id)}>
+            <Head title={payment?.id ? 'Edit Pembayaran' : 'Buat Pembayaran Baru'} />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
-                <h1 className="text-2xl font-bold">{event?.id ? 'Edit Event' : 'Buat Event Baru'}</h1>
+                <h1 className="text-2xl font-bold">{payment?.id ? 'Edit Pembayaran' : 'Buat Pembayaran Baru'}</h1>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                     <div className="rounded-lg border p-4">
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div>
-                                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                    Nama Event*
+                                <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                                    Nama Tagihan*
                                 </label>
                                 <input
-                                    id="name"
+                                    id="title"
                                     type="text"
-                                    placeholder="Nama kegiatan"
                                     maxLength={70}
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                    value={formData.title}
+                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                                     required
                                 />
                             </div>
-                            <div className="">
-                                <label htmlFor="pics" className="block text-sm font-medium text-gray-700">
-                                    PIC (Penanggung Jawab)*
-                                </label>
-                                <MultiSearchableSelectInline
-                                    value={selectedPics}
-                                    onChange={setSelectedPics}
-                                    placeholder="Cari guru..."
-                                    endpoint={route('teachers.search')}
-                                    initialOptions={teacherOptions}
-                                    showInitialOptions={true}
-                                    maxInitialOptions={10}
-                                />
-                            </div>
 
                             <div>
-                                <label htmlFor="start_hour" className="block text-sm font-medium text-gray-700">
-                                    Jam Mulai*
-                                </label>
-                                <TimePickerWrapper
-                                    id="start_hour"
-                                    value={formData.start_hour}
-                                    onChange={(e) => setFormData({ ...formData, start_hour: e })}
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label htmlFor="end_hour" className="block text-sm font-medium text-gray-700">
-                                    Jam Selesai*
-                                </label>
-                                <TimePickerWrapper
-                                    id="end_hour"
-                                    value={formData.end_hour}
-                                    minTime={formData.start_hour}
-                                    onChange={(e) => setFormData({ ...formData, end_hour: e })}
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label htmlFor="start_date" className="block text-sm font-medium text-gray-700">
-                                    Tanggal Mulai*
+                                <label htmlFor="academic_year_id" className="mb-2 block text-sm font-medium text-gray-700">
+                                    Tahun Ajaran*
                                 </label>
                                 <input
-                                    id="start_date"
+                                    type="text"
+                                    id="academic_year_id"
+                                    value={academicYears.find((y) => y.id === formData.academic_year_id)?.title || ''}
+                                    disabled
+                                    className="w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-gray-600"
+                                />
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Tahun ajaran otomatis dipilih dari yang <span className="font-medium">aktif</span>.
+                                </p>
+                            </div>
+
+                            <div>
+                                <label htmlFor="due_date" className="block text-sm font-medium text-gray-700">
+                                    Batas Waktu*
+                                </label>
+                                <input
+                                    id="due_date"
                                     type="date"
-                                    value={formData.start_date}
-                                    min={new Date().toISOString().split('T')[0]}
-                                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                                    value={formData.due_date}
+                                    onChange={(e) => setFormData({ ...formData, due_date: e.target.value })}
                                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                                     required
                                 />
                             </div>
-
                             <div>
-                                <label htmlFor="end_date" className="block text-sm font-medium text-gray-700">
-                                    Tanggal Selesai*
+                                <label htmlFor="nominal" className="block text-sm font-medium text-gray-700">
+                                    Nominal*
                                 </label>
                                 <input
-                                    id="end_date"
-                                    type="date"
-                                    value={formData.end_date}
-                                    min={formData.start_date}
-                                    onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                                    id="nominal"
+                                    type="text"
+                                    inputMode="numeric"
+                                    value={formData.nominal ? formData.nominal.toLocaleString('id-ID') : ''}
+                                    onChange={(e) => {
+                                        const rawValue = e.target.value.replace(/\D/g, '');
+                                        const numericValue = rawValue ? parseInt(rawValue, 10) : 0;
+
+                                        setFormData({ ...formData, nominal: numericValue });
+                                    }}
                                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                                     required
                                 />
+                                <p className="mt-1 text-xs text-gray-500">Gunakan angka saja, otomatis diformat dengan pemisah ribuan</p>
                             </div>
 
                             <div className="md:col-span-2">
@@ -419,7 +382,7 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                             type="submit"
                             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
                         >
-                            {event?.id ? 'Update' : 'Simpan'}
+                            {payment?.id ? 'Update' : 'Simpan'}
                         </button>
                     </div>
                 </form>
