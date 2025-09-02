@@ -1,0 +1,1 @@
+import{j as t,L as n}from"./app-ECl7PNEZ.js";import{c as a}from"./button-BcjioZaA.js";function u({className:r="",children:e,...o}){return t.jsx(n,{className:a("text-foreground underline decoration-neutral-300 underline-offset-4 transition-colors duration-300 ease-out hover:decoration-current! dark:decoration-neutral-500",r),...o,children:e})}export{u as T};
