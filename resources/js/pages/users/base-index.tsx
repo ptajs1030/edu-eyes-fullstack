@@ -119,7 +119,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
     };
 
     const tableHeaders = [
-        { key: 'profile_picture', label: 'Foto', sortable: false },
+        ...(role.value === 'admin' || role.value === 'teacher' ? [{ key: 'profile_picture', label: 'Foto', sortable: false }] : []),
         { key: 'full_name', label: 'Nama', sortable: true },
         ...(role.value === 'admin' || role.value === 'teacher' ? [{ key: 'nip', label: 'NIP', sortable: true }] : []),
         { key: 'username', label: 'Username', sortable: true },
@@ -201,19 +201,21 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                             <td className="w-[10px] p-3 text-sm">
                                 <input type="checkbox" checked={selectedIds.includes(user.id)} onChange={() => toggleSelect(user.id)} />
                             </td>
-                            <td className="w-[50px] p-3 text-sm">
-                                <div className="h-10 w-10 overflow-hidden rounded-full border shadow-sm">
-                                    <img
-                                        src={
-                                            user.profile_picture
-                                                ? `/storage/${user.profile_picture}`
-                                                : `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(user.full_name)}`
-                                        }
-                                        alt={user.full_name}
-                                        className="h-full w-full object-cover"
-                                    />
-                                </div>
-                            </td>
+                            {(role.value === 'admin' || role.value === 'teacher') && (
+                                <td className="w-[50px] p-3 text-sm">
+                                    <div className="h-10 w-10 overflow-hidden rounded-full border shadow-sm">
+                                        <img
+                                            src={
+                                                user.profile_picture
+                                                    ? `/storage/${user.profile_picture}`
+                                                    : `https://api.dicebear.com/9.x/initials/svg?seed=${encodeURIComponent(user.full_name)}`
+                                            }
+                                            alt={user.full_name}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    </div>
+                                </td>
+                            )}
                             <td className="p-3 text-sm">{user.full_name}</td>
                             {(role.value === 'admin' || role.value === 'teacher') && <td className="p-3 text-sm">{user.nip || '-'}</td>}
                             <td className="p-3 text-sm">{user.username}</td>
