@@ -52,7 +52,7 @@ const EditShiftModal = ({
                     type="text"
                     value={attendance.submit_date ? format(parseISO(attendance.submit_date), 'dd MMM yyyy') : ''}
                     disabled
-                    className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 p-2 shadow-sm"
+                    className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 p-2 shadow-sm"
                 />
             </div>
 
@@ -62,7 +62,7 @@ const EditShiftModal = ({
                     type="text"
                     value={`${attendance.shifting_name} (${attendance.shifting_start_hour_formatted} - ${attendance.shifting_end_hour_formatted})`}
                     disabled
-                    className="mt-1 block w-full rounded-md border-gray-300 bg-gray-100 p-2 shadow-sm"
+                    className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 p-2 shadow-sm"
                 />
             </div>
 
@@ -73,7 +73,8 @@ const EditShiftModal = ({
                         type="time"
                         value={formData.clock_in_hour_formatted || ''}
                         onChange={(e) => handleChange('clock_in_hour_formatted', e.target.value)}
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                        className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 p-2 shadow-sm"
+                        disabled
                     />
                 </div>
                 <div>
@@ -82,7 +83,8 @@ const EditShiftModal = ({
                         type="time"
                         value={formData.clock_out_hour_formatted || ''}
                         onChange={(e) => handleChange('clock_out_hour_formatted', e.target.value)}
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                        className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 p-2 shadow-sm"
+                        disabled
                     />
                 </div>
             </div>

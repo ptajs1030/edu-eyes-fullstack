@@ -256,7 +256,7 @@ export default function ExamIndex() {
                                 </button>
                                 <Link
                                     href={route('exams.scoring', exam.id)}
-                                    className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                                    className="rounded bg-sky-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
                                     Penilaian
                                 </Link>
