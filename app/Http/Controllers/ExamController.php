@@ -22,6 +22,7 @@ class ExamController extends Controller
         $search = $request->input('search');
         $sort = $request->input('sort', 'created_at');
         $direction = $request->input('direction', 'desc');
+        $academic_year = $request->input('academic_year');
 
         $exams = Exam::with(['subject', 'academicYear', 'assignments.student', 'assignments.class'])
             ->when($search, function ($query) use ($search) {
@@ -33,15 +34,18 @@ class ExamController extends Controller
                         });
                 });
             })
+            ->when($academic_year, function ($query) use ($academic_year) {
+                $query->where('academic_year_id', $academic_year);
+            })
             ->when($sort, function ($query) use ($sort, $direction) {
                 if ($sort === 'subject_name') {
                     $query->join('subjects', 'exams.subject_id', '=', 'subjects.id')
-                            ->orderBy('subjects.name', $direction)
-                            ->select('exams.*');
+                        ->orderBy('subjects.name', $direction)
+                        ->select('exams.*');
                 } elseif ($sort === 'academic_year') {
                     $query->join('academic_years', 'exams.academic_year_id', '=', 'academic_years.id')
-                            ->orderBy('academic_years.title', $direction)
-                            ->select('exams.*');
+                        ->orderBy('academic_years.title', $direction)
+                        ->select('exams.*');
                 } elseif ($sort === 'student_count') {
                     // Sort by student count using subquery
                     $query->withCount('assignments as student_count')
@@ -55,15 +59,18 @@ class ExamController extends Controller
 
         // Add student count to each exam
         $exams->getCollection()->transform(function ($exam) {
-             // Only add student_count if it wasn't added by withCount
+            // Only add student_count if it wasn't added by withCount
             if (!isset($exam->student_count)) {
                 $exam->student_count = $exam->assignments->count();
             }
             return $exam;
         });
 
+        $academicYears = AcademicYear::orderBy('start_year')->get();
+
         return Inertia::render('exams/index', [
             'exams' => $exams,
+            'academicYears' => $academicYears,
             'filters' => $request->only(['search', 'sort', 'direction']),
         ]);
     }
@@ -72,10 +79,10 @@ class ExamController extends Controller
     {
         try {
             $exam = Exam::findOrFail($id);
-            
+
             // Delete related exam assignments first
             $exam->assignments()->delete();
-            
+
             // Delete the exam
             $exam->delete();
 
@@ -155,7 +162,7 @@ class ExamController extends Controller
             // Check for duplicate student assignments
             $studentIds = collect($validated['student_assignments'])->pluck('student_id')->toArray();
             $duplicateStudentIds = array_diff_assoc($studentIds, array_unique($studentIds));
-            
+
             if (!empty($duplicateStudentIds)) {
                 throw new \Exception('Terdapat siswa yang dipilih lebih dari sekali dalam exam ini.');
             }
@@ -181,10 +188,9 @@ class ExamController extends Controller
 
             return redirect()->route('exams.index')
                 ->with('success', 'Exam berhasil dibuat dengan ' . count($validated['student_assignments']) . ' siswa');
-
         } catch (ValidationException $e) {
             DB::rollback();
-            
+
             Log::warning('Validation failed when creating exam', [
                 'errors' => $e->errors(),
                 'request_data' => $request->except(['_token']),
@@ -195,10 +201,9 @@ class ExamController extends Controller
                 ->withErrors($e->errors())
                 ->withInput()
                 ->with('error', 'Data yang dimasukkan tidak valid. Silakan periksa kembali.');
-
         } catch (QueryException $e) {
             DB::rollback();
-            
+
             Log::error('Database error when creating exam', [
                 'error_code' => $e->getCode(),
                 'error_message' => $e->getMessage(),
@@ -213,7 +218,7 @@ class ExamController extends Controller
                         ->with('error', 'Terdapat siswa yang sudah terdaftar dalam exam ini.')
                         ->withInput();
                 }
-                
+
                 return redirect()->back()
                     ->with('error', 'Terjadi kesalahan database. Silakan coba lagi atau hubungi administrator.')
                     ->withInput();
@@ -222,10 +227,9 @@ class ExamController extends Controller
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan database. Silakan coba lagi atau hubungi administrator.')
                 ->withInput();
-
         } catch (\InvalidArgumentException $e) {
             DB::rollback();
-            
+
             Log::warning('Invalid argument when creating exam', [
                 'error_message' => $e->getMessage(),
                 'request_data' => $request->except(['_token']),
@@ -235,10 +239,9 @@ class ExamController extends Controller
             return redirect()->back()
                 ->with('error', 'Data yang diberikan tidak valid: ' . $e->getMessage())
                 ->withInput();
-
         } catch (\OutOfMemoryException $e) {
             DB::rollback();
-            
+
             Log::critical('Memory limit exceeded when creating exam', [
                 'error_message' => $e->getMessage(),
                 'request_data_size' => strlen(json_encode($request->all())),
@@ -248,10 +251,9 @@ class ExamController extends Controller
             return redirect()->back()
                 ->with('error', 'Data terlalu besar untuk diproses. Silakan kurangi jumlah siswa atau coba lagi nanti.')
                 ->withInput();
-
         } catch (\Exception $e) {
             DB::rollback();
-            
+
             Log::error('Unexpected error when creating exam', [
                 'error_message' => $e->getMessage(),
                 'error_file' => $e->getFile(),
@@ -305,8 +307,8 @@ class ExamController extends Controller
                     'nis' => $assignment->student->nis,
                     'class_name' => $assignment->class_name,
                     'class_id' => $assignment->class_id,
-                    'score' => $assignment->score, 
-                    'is_scored'=> $assignment->score !== null
+                    'score' => $assignment->score,
+                    'is_scored' => $assignment->score !== null
                 ];
             });
 
@@ -401,7 +403,7 @@ class ExamController extends Controller
             // Check for duplicate student assignments
             $studentIds = collect($validated['student_assignments'])->pluck('student_id')->toArray();
             $duplicateStudentIds = array_diff_assoc($studentIds, array_unique($studentIds));
-            
+
             if (!empty($duplicateStudentIds)) {
                 throw new \Exception('Terdapat siswa yang dipilih lebih dari sekali dalam exam ini.');
             }
@@ -410,7 +412,7 @@ class ExamController extends Controller
             $assignmentData = [];
             foreach ($validated['student_assignments'] as $assignment) {
                 $existingAssignment = $currentAssignments->get($assignment['student_id']);
-                
+
                 $assignmentData[] = [
                     'exam_id' => $exam->id,
                     'student_id' => $assignment['student_id'],
@@ -429,78 +431,75 @@ class ExamController extends Controller
 
             return redirect()->route('exams.index')
                 ->with('success', 'Exam berhasil diperbarui dengan ' . count($validated['student_assignments']) . ' siswa');
+        } catch (ValidationException $e) {
+            DB::rollback();
 
-            } catch (ValidationException $e) {
-                DB::rollback();
-                
-                Log::warning('Validation failed when updating exam', [
-                    'exam_id' => $id,
-                    'errors' => $e->errors(),
-                    'request_data' => $request->except(['_token']),
-                    'user_id' => auth()->id() ?? 'Guest',
-                ]);
+            Log::warning('Validation failed when updating exam', [
+                'exam_id' => $id,
+                'errors' => $e->errors(),
+                'request_data' => $request->except(['_token']),
+                'user_id' => auth()->id() ?? 'Guest',
+            ]);
 
-                return redirect()->back()
-                    ->withErrors($e->errors())
-                    ->withInput()
-                    ->with('error', 'Data yang dimasukkan tidak valid. Silakan periksa kembali.');
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput()
+                ->with('error', 'Data yang dimasukkan tidak valid. Silakan periksa kembali.');
+        } catch (QueryException $e) {
+            DB::rollback();
 
-            } catch (QueryException $e) {
-                DB::rollback();
-                
-                Log::error('Database error when updating exam', [
-                    'exam_id' => $id,
-                    'error_code' => $e->getCode(),
-                    'error_message' => $e->getMessage(),
-                    'request_data' => $request->except(['_token']),
-                    'user_id' => auth()->id() ?? 'Guest',
-                ]);
+            Log::error('Database error when updating exam', [
+                'exam_id' => $id,
+                'error_code' => $e->getCode(),
+                'error_message' => $e->getMessage(),
+                'request_data' => $request->except(['_token']),
+                'user_id' => auth()->id() ?? 'Guest',
+            ]);
 
-                return redirect()->back()
-                    ->with('error', 'Terjadi kesalahan database. Silakan coba lagi atau hubungi administrator.')
-                    ->withInput();
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan database. Silakan coba lagi atau hubungi administrator.')
+                ->withInput();
+        } catch (\Exception $e) {
+            DB::rollback();
 
-            } catch (\Exception $e) {
-                DB::rollback();
-                
-                Log::error('Unexpected error when updating exam', [
-                    'exam_id' => $id,
-                    'error_message' => $e->getMessage(),
-                    'error_file' => $e->getFile(),
-                    'error_line' => $e->getLine(),
-                    'stack_trace' => $e->getTraceAsString(),
-                    'request_data' => $request->except(['_token']),
-                    'user_id' => auth()->id() ?? 'Guest',
-                    'timestamp' => now()->toISOString(),
-                ]);
+            Log::error('Unexpected error when updating exam', [
+                'exam_id' => $id,
+                'error_message' => $e->getMessage(),
+                'error_file' => $e->getFile(),
+                'error_line' => $e->getLine(),
+                'stack_trace' => $e->getTraceAsString(),
+                'request_data' => $request->except(['_token']),
+                'user_id' => auth()->id() ?? 'Guest',
+                'timestamp' => now()->toISOString(),
+            ]);
 
-                // Check if error message is user-friendly
-                $userFriendlyMessages = [
-                    'sudah ada untuk mata pelajaran',
-                    'dipilih lebih dari sekali',
-                    'tidak ditemukan',
-                    'tidak valid',
-                ];
+            // Check if error message is user-friendly
+            $userFriendlyMessages = [
+                'sudah ada untuk mata pelajaran',
+                'dipilih lebih dari sekali',
+                'tidak ditemukan',
+                'tidak valid',
+            ];
 
-                $isUserFriendly = false;
-                foreach ($userFriendlyMessages as $pattern) {
-                    if (str_contains($e->getMessage(), $pattern)) {
-                        $isUserFriendly = true;
-                        break;
-                    }
+            $isUserFriendly = false;
+            foreach ($userFriendlyMessages as $pattern) {
+                if (str_contains($e->getMessage(), $pattern)) {
+                    $isUserFriendly = true;
+                    break;
                 }
+            }
 
-                if ($isUserFriendly) {
-                    return redirect()->back()
-                        ->with('error', $e->getMessage())
-                        ->withInput();
-                }
-
+            if ($isUserFriendly) {
                 return redirect()->back()
-                    ->with('error', 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi atau hubungi administrator jika masalah berlanjut.')
+                    ->with('error', $e->getMessage())
                     ->withInput();
             }
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan yang tidak terduga. Silakan coba lagi atau hubungi administrator jika masalah berlanjut.')
+                ->withInput();
         }
+    }
 
 
     public function scoring($id): Response
@@ -566,12 +565,10 @@ class ExamController extends Controller
 
             // Untuk Inertia, return redirect dengan flash message
             return redirect()->back()->with('success', 'Nilai berhasil disimpan');
-
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->errors())
                 ->with('error', 'Data tidak valid');
-
         } catch (\Exception $e) {
             Log::error('Error updating exam score', [
                 'exam_id' => $examId,
@@ -622,17 +619,15 @@ class ExamController extends Controller
 
             // Untuk Inertia, return redirect dengan flash message
             return redirect()->back()->with('success', "Berhasil menyimpan {$updatedCount} nilai");
-
         } catch (ValidationException $e) {
             DB::rollback();
-            
+
             return redirect()->back()
                 ->withErrors($e->errors())
                 ->with('error', 'Data tidak valid');
-
         } catch (\Exception $e) {
             DB::rollback();
-            
+
             Log::error('Error updating bulk exam scores', [
                 'exam_id' => $examId,
                 'error' => $e->getMessage(),
