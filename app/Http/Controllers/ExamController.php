@@ -521,6 +521,7 @@ class ExamController extends Controller
                 ];
             });
 
+            $academicYears = AcademicYear::orderBy('start_year')->get();
             return Inertia::render('exams/scoring', [
                 'exam' => [
                     'id' => $exam->id,
@@ -533,6 +534,7 @@ class ExamController extends Controller
                     'subject' => $exam->subject,
                     'student_assignments' => $studentAssignments,
                 ],
+                'academicYears' => $academicYears,
             ]);
         } catch (\Exception $e) {
             Log::error('Error loading exam for scoring', [
