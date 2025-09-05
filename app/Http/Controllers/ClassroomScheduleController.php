@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 use Exception;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -133,12 +134,44 @@ class ClassroomScheduleController extends Controller
         }
     }
 
+    // Pre-validate payload agar tidak ada tabrakan internal (per hari & per guru)
+    protected function assertNoInternalConflicts(array $schedules): void
+    {
+        $byDay = collect($schedules)->groupBy('day');
+        foreach ($byDay as $day => $items) {
+            // Cek overlap antar slot di hari yang sama (tanpa peduli subject)
+            $sorted = collect($items)->sortBy('start_hour')->values();
+            for ($i = 1; $i < $sorted->count(); $i++) {
+                $prev = $sorted[$i - 1];
+                $curr = $sorted[$i];
+                if ($curr['start_hour'] < $prev['end_hour']) {
+                    throw new Exception("Payload overlaps on day {$day} between {$prev['start_hour']}-{$prev['end_hour']} and {$curr['start_hour']}-{$curr['end_hour']}");
+                }
+            }
+
+            // Cek konflik guru pada hari yang sama
+            $byTeacher = collect($items)->groupBy('teacher_id');
+            foreach ($byTeacher as $teacherId => $rows) {
+                if (!$teacherId) continue;
+                $sortedT = $rows->sortBy('start_hour')->values();
+                for ($i = 1; $i < $sortedT->count(); $i++) {
+                    $prev = $sortedT[$i - 1];
+                    $curr = $sortedT[$i];
+                    if ($curr['start_hour'] < $prev['end_hour']) {
+                        throw new Exception("Teacher {$teacherId} has overlapping schedules in payload on day {$day}");
+                    }
+                }
+            }
+        }
+    }
+
     public function saveSubjectSchedule(Request $request, Classroom $classroom)
     {
         try {
             $this->validateAcademicYear(AttendanceMode::PerSubject->value);
 
             $validated = $request->validate($this->getSubjectScheduleValidationRules());
+            $this->assertNoInternalConflicts($validated['schedules']);;
 
             DB::transaction(function () use ($classroom, $validated) {
                 $this->processSubjectSchedules($classroom, $validated['schedules']);
@@ -148,7 +181,9 @@ class ClassroomScheduleController extends Controller
         } catch (ValidationException $e) {
             return $this->handleValidationError($e);
         } catch (Exception $e) {
-            return $this->handleGenericError($e);
+            return redirect()->back()
+                ->with('error', 'Failed to update schedule: ' . $e->getMessage())
+                ->withInput($request->all());
         }
     }
 
@@ -169,32 +204,15 @@ class ClassroomScheduleController extends Controller
         ];
     }
 
-    protected function processSubjectSchedules(Classroom $classroom, array $schedules): void
+    protected function validateTeacherAvailability(array $scheduleData, array $excludeIds = []): void
     {
-        $existingIds = [];
+        $start = Carbon::createFromFormat('H:i', $scheduleData['start_hour'])->format('H:i:s');
+        $end = Carbon::createFromFormat('H:i', $scheduleData['end_hour'])->format('H:i:s');
 
-        foreach ($schedules as $scheduleData) {
-            if (empty($scheduleData['subject_id']) || empty($scheduleData['teacher_id'])) {
-                continue;
-            }
-
-            $this->validateNoTimeOverlaps($classroom, $scheduleData);
-
-            $schedule = $this->updateOrCreateSubjectSchedule($classroom, $scheduleData);
-            $existingIds[] = $schedule->id;
-        }
-
-        $this->removeOrphanedSchedules($classroom, $existingIds);
-    }
-
-    protected function validateNoTimeOverlaps(Classroom $classroom, array $scheduleData): void
-    {
-        $overlappingQuery = ClassSubjectSchedule::where('class_id', $classroom->id)
+        $overlappingQuery = ClassSubjectSchedule::where('teacher_id', $scheduleData['teacher_id'])
             ->where('day', $scheduleData['day'])
-            ->where(function ($query) use ($scheduleData) {
-                $query->where(function ($q) use ($scheduleData) {
-                    $start = Carbon::createFromFormat('H:i', $scheduleData['start_hour'])->format('H:i:s');
-                    $end = Carbon::createFromFormat('H:i', $scheduleData['end_hour'])->format('H:i:s');
+            ->where(function ($query) use ($start, $end) {
+                $query->where(function ($q) use ($start, $end) {
                     $q->where('start_hour', '<', $end)
                         ->where('end_hour', '>', $start);
                 });
@@ -203,9 +221,59 @@ class ClassroomScheduleController extends Controller
         if (!empty($scheduleData['id'])) {
             $overlappingQuery->where('id', '!=', $scheduleData['id']);
         }
+        if (!empty($excludeIds)) {
+            $overlappingQuery->whereNotIn('id', $excludeIds);
+        }
 
         if ($overlappingQuery->exists()) {
-            throw new Exception("Schedule overlaps with another subject on day {$scheduleData['day']}");
+            throw new Exception("Teacher has another schedule at the same time on day {$scheduleData['day']}");
+        }
+    }
+
+    protected function processSubjectSchedules(Classroom $classroom, array $schedules): void
+    {
+        $existingIds = [];
+        $batchIds = collect($schedules)->pluck('id')->filter()->values()->all();
+
+        foreach ($schedules as $scheduleData) {
+            if (empty($scheduleData['subject_id']) || empty($scheduleData['teacher_id'])) {
+                continue;
+            }
+
+            $this->validateNoTimeOverlaps($classroom, $scheduleData, $batchIds);
+            $this->validateTeacherAvailability($scheduleData, $batchIds);
+
+            $schedule = $this->updateOrCreateSubjectSchedule($classroom, $scheduleData);
+            $existingIds[] = $schedule->id;
+        }
+
+        $this->removeOrphanedSchedules($classroom, $existingIds);
+    }
+
+    protected function validateNoTimeOverlaps(Classroom $classroom, array $scheduleData, array $excludeIds = []): void
+    {
+        $start = Carbon::createFromFormat('H:i', $scheduleData['start_hour'])->format('H:i:s');
+        $end = Carbon::createFromFormat('H:i', $scheduleData['end_hour'])->format('H:i:s');
+
+        $overlappingQuery = ClassSubjectSchedule::where('class_id', $classroom->id)
+            ->where('day', $scheduleData['day'])
+            ->where(function ($query) use ($start, $end) {
+                $query->where(function ($q) use ($start, $end) {
+                    $q->where('start_hour', '<', $end)
+                        ->where('end_hour', '>', $start);
+                });
+            });
+
+        if (!empty($scheduleData['id'])) {
+            $overlappingQuery->where('id', '!=', $scheduleData['id']);
+        }
+        if (!empty($excludeIds)) {
+            $overlappingQuery->whereNotIn('id', $excludeIds);
+        }
+
+        if ($overlappingQuery->exists()) {
+            $overlaps = $overlappingQuery->get()->map(fn($o) => "ID {$o->id}: {$o->start_hour} - {$o->end_hour}")->implode(', ');
+            throw new Exception("Schedule overlaps with existing schedules on day {$scheduleData['day']}. Overlapping schedules: {$overlaps}");
         }
     }
 

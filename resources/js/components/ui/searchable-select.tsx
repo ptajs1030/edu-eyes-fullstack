@@ -45,6 +45,13 @@ export default function SearchableSelect({
     }, [initialOption]);
 
     useEffect(() => {
+        if (value === null && selectedOption) {
+            setSelectedOption(null);
+            setInputValue('');
+        }
+    }, [value]);
+
+    useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
@@ -122,6 +129,7 @@ export default function SearchableSelect({
         setInputValue('');
         onChange(null);
         setOptions([]);
+        setIsOpen(false);
     };
 
     const handleFocus = () => {
