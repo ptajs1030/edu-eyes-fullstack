@@ -1,6 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
+import { Link } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 
@@ -27,53 +28,65 @@ interface Student {
     };
 }
 
+interface Subject {
+    id: number;
+    name: string;
+}
+interface Attachment {
+    url: string;
+}
+
 interface Props {
     academicYears: AcademicYear[];
-    selectedStudents?: Student[];
-    payment?: {
+    selectedStudents: number[];
+    tasks?: {
         id: number;
-        academic_year_id: number;
         title: string;
-        nominal: number;
-        due_date: string;
+        academic_year_id: number;
         description: string;
+        due_date: string;
+        due_time: string;
+        attachments: Attachment[];
         student_assignments: {
             student_id: number;
         }[];
     };
+    subjects: Subject[];
     classrooms: Classroom[];
 }
 
 const breadcrumbs = (isEdit: boolean): BreadcrumbItem[] => [
     {
-        title: 'Tagihan',
-        href: '/payments',
+        title: 'Tugas',
+        href: '/tasks',
     },
     {
-        title: isEdit ? 'Edit Tagihan' : 'Buat Tagihan Baru',
+        title: isEdit ? 'Edit Tugas' : 'Buat Tugas Baru',
     },
 ];
 
-export default function PaymentCreate({ academicYears, classrooms, payment, selectedStudents = [] }: Props) {
+export default function CreateTask({ academicYears, selectedStudents, task, classrooms, subjects }: Props) {
     const activeYear = academicYears.find((y) => y.status === 'active');
     const [formData, setFormData] = useState({
-        title: payment?.title || '',
-        nominal: payment?.nominal,
-        due_date: payment?.due_date || '',
-        academic_year_id: payment?.academic_year_id || activeYear?.id || '',
-        description: payment?.description || '',
-        student_assignments: payment?.student_assignments || [],
+        title: task?.title || '',
+        academic_year_id: task?.academic_year_id || activeYear?.id || 0,
+        description: task?.description || '',
+        due_date: task?.due_date || '',
+        due_time: task?.due_time || '',
+        attachments: task?.attachments || [],
+        subject_id: task?.subject_id || '',
+        student_assignments: task?.student_assignments || [],
     });
 
     const [selectedClass, setSelectedClass] = useState<number | null>(null);
     const [students, setStudents] = useState<Student[]>([]);
-    const [nominal, setNominal] = useState<number | null>(payment?.nominal || null);
-    const [academicYear, setAcademicYear] = useState<number>(payment?.academic_year_id || academicYears[0]?.id || 0);
+    const [academicYear, setAcademicYear] = useState<number>(task?.academic_year_id || academicYears[0]?.id || 0);
     const selectedAcademicYear = academicYears.find((y) => y.id === academicYear);
-    const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>(selectedStudents);
+    const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>(selectedStudents || []);
     const [selectedStudentsInfo, setSelectedStudentsInfo] = useState<Student[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
+    const [attachments, setAttachments] = useState<Attachment[]>(task?.attachments || props.attachments || []);
 
     useEffect(() => {
         if (flash?.success) {
@@ -147,6 +160,22 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
         }
     };
 
+    const handleAddAttachment = () => {
+        setAttachments([...attachments, { url: '' }]);
+    };
+
+    const handleRemoveAttachment = (index: number) => {
+        const newAttachments = [...attachments];
+        newAttachments.splice(index, 1);
+        setAttachments(newAttachments);
+    };
+
+    const handleAttachmentChange = (index: number, value: string) => {
+        const newAttachments = [...attachments];
+        newAttachments[index].url = value;
+        setAttachments(newAttachments);
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -155,14 +184,15 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
             return;
         }
 
-        const url = payment?.id ? `/payments/${payment.id}` : '/payments';
-        const method = payment?.id ? 'put' : 'post';
+        const url = task?.id ? `/tasks/${task.id}` : '/tasks';
+        const method = task?.id ? 'put' : 'post';
 
         router[method](
             url,
             {
                 ...formData,
                 student_ids: selectedStudentIds,
+                attachments: attachments.map((a) => ({ url: a.url })),
             },
             {
                 onSuccess: () => {},
@@ -173,19 +203,19 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
     const areAllStudentsSelected = students.length > 0 && students.every((student) => selectedStudentIds.includes(student.id));
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs(!!payment?.id)}>
-            <Head title={payment?.id ? 'Edit Pembayaran' : 'Buat Pembayaran Baru'} />
+        <AppLayout breadcrumbs={breadcrumbs(!!task?.id)}>
+            <Head title={task?.id ? 'Edit Tugas' : 'Buat Tugas Baru'} />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
-                <h1 className="text-2xl font-bold">{payment?.id ? 'Edit Pembayaran' : 'Buat Pembayaran Baru'}</h1>
+                <h1 className="text-2xl font-bold">{task?.id ? 'Edit Tugas' : 'Buat Tugas Baru'}</h1>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                     <div className="rounded-lg border p-4">
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div>
                                 <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                                    Nama Tagihan*
+                                    Nama Tugas*
                                 </label>
                                 <input
                                     id="title"
@@ -228,24 +258,36 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
                                 />
                             </div>
                             <div>
-                                <label htmlFor="nominal" className="block text-sm font-medium text-gray-700">
-                                    Nominal*
+                                <label htmlFor="due_time" className="block text-sm font-medium text-gray-700">
+                                    Batas Waktu (Jam)*
                                 </label>
                                 <input
-                                    id="nominal"
-                                    type="text"
-                                    inputMode="numeric"
-                                    value={formData.nominal ? formData.nominal.toLocaleString('id-ID') : ''}
-                                    onChange={(e) => {
-                                        const rawValue = e.target.value.replace(/\D/g, '');
-                                        const numericValue = rawValue ? parseInt(rawValue, 10) : 0;
-
-                                        setFormData({ ...formData, nominal: numericValue });
-                                    }}
+                                    id="due_time"
+                                    type="time"
+                                    value={formData.due_time}
+                                    onChange={(e) => setFormData({ ...formData, due_time: e.target.value })}
                                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                                     required
                                 />
-                                <p className="mt-1 text-xs text-gray-500">Gunakan angka saja, otomatis diformat dengan pemisah ribuan</p>
+                            </div>
+                            <div>
+                                <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
+                                    Mata Pelajaran*
+                                </label>
+                                <select
+                                    id="subject"
+                                    value={formData.subject_id}
+                                    onChange={(e) => setFormData({ ...formData, subject_id: Number(e.target.value) })}
+                                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                                    required
+                                >
+                                    <option value="">Pilih Mata Pelajaran</option>
+                                    {subjects.map((subject) => (
+                                        <option key={subject.id} value={subject.id}>
+                                            {subject.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div className="md:col-span-2">
@@ -263,6 +305,42 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
                         </div>
                     </div>
 
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">Lampiran</label>
+                        {attachments.map((attachment, index) => (
+                            <div key={index} className="mb-2 flex items-center">
+                                <input
+                                    type="url"
+                                    value={attachment.url}
+                                    onChange={(e) => handleAttachmentChange(index, e.target.value)}
+                                    placeholder="https://example.com/file.pdf"
+                                    className="block w-full flex-1 rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveAttachment(index)}
+                                    className="ml-2 inline-flex items-center rounded-md border border-transparent bg-red-100 px-3 py-2 text-sm leading-4 font-medium text-red-700 hover:cursor-pointer hover:bg-red-200 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
+                                >
+                                    Hapus
+                                </button>
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={handleAddAttachment}
+                            className="rounded-md bg-sky-500 px-3 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-sky-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                        >
+                            Tambah Lampiran
+                        </button>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                        <Link
+                            href="/tasks"
+                            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                        >
+                            Batal
+                        </Link>
+                    </div>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                         {/* Student Selection */}
                         <div className="rounded-lg border p-4">
@@ -373,7 +451,7 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
 
                     <div className="flex justify-end gap-3">
                         <Link
-                            href={route('events.index')}
+                            href={route('tasks.index')}
                             className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
                         >
                             Batal
@@ -382,7 +460,7 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
                             type="submit"
                             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
                         >
-                            {payment?.id ? 'Update' : 'Simpan'}
+                            {task?.id ? 'Update' : 'Simpan'}
                         </button>
                     </div>
                 </form>

@@ -183,13 +183,13 @@ export default function TaskIndex({ tasks, filters }: Props) {
                             </td>
                             <td className="flex gap-2 p-3">
                                 <Link
-                                    href={route('announcements.edit', task.id)}
+                                    href={route('tasks.edit', task.id)}
                                     className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
                                     Edit
                                 </Link>
                                 <Link
-                                    href={route('announcements.show', task.id)}
+                                    href={route('tasks.show', task.id)}
                                     className="rounded bg-sky-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
                                     Detail
