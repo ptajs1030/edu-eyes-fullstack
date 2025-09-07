@@ -114,87 +114,161 @@ class TaskController extends Controller
         }
     }
 
-    public function edit(Task $task){
-        $task->load('attachments', 'assignments','academicYear' );
-
-        $classrooms = Classroom::orderBy('level')->orderBy('name')->get();
-        $academicYears = AcademicYear::where('status', 'active')->get();
-        $selectedStudents = $task->assignments->pluck('student_id')->toArray();
-        $subjects=Subject::orderBy('name')->get();
-
-        return Inertia::render('tasks/form', [
-            'task' => [
-                'id' => $task->id,
-                'title' => $task->title,
-                'description' => $task->description,
-                'due_date' => $this->formatTimeForDisplay($task->due_date),
-                'due_time' => Carbon::parse($task->due_time)->format('H:i'),
-                'academic_year_id' => $task->academic_year_id,
-                'subject_id' => $task->subject_id,
-                'attachments' => $task->attachments,
-            ],
-            'selectedStudents' => $selectedStudents,
-            'classrooms' => $classrooms,
-            'academicYears' => $academicYears,
-            'subjects'=>$subjects,
-        ]);
-    }
-
-    public function update(Request $request, Task $task){
+    public function edit($id){
         try {
-            $validated=$request->validate([
-                'title' => 'required|string|max:255',
-                'description' => 'required|string',
-                'due_date' => 'required|date',
-                'academic_year_id' => 'required|exists:academic_years,id',
-                'subject_id' => 'required|exists:subjects,id',
-                'due_time' => 'required',
-                'attachments' => 'nullable|array',
-                'attachments.*.url' => 'required|url',
-                'student_ids' => 'required|array|min:1',          
-                'student_ids.*' => 'exists:students,id',
-            ]);
+            $task = Task::with(['subject', 'academicYear', 'assignments.student', 'assignments.class'])
+                ->findOrFail($id);
 
-            DB::transaction(function () use ($validated, $task) {
-                $task->update([
-                    'title' => $validated['title'],
-                    'description' => $validated['description'],
-                    'due_date' => $this->formatTimeForDatabase($validated['due_date']),
-                    'due_time' => $validated['due_time'],
-                    'academic_year_id' => $validated['academic_year_id'],
-                    'subject_id' => $validated['subject_id'],
-                ]);
-
-                if (!empty($validated['attachments'])) {
-                    $this->handleAttachments($task->id, $validated['attachments']);
-                } else {
-                    TaskAttachment::where('task_id', $task->id)->delete();
-                }
-
-                TaskAssignment::where('task_id', $task->id)->delete();
-                foreach ($validated['student_ids'] as $studentId) {
-                    $student = Student::find($studentId);
-                    TaskAssignment::create([
-                        'task_id' => $task->id,
-                        'student_id' => $studentId,
-                        'class_id' => $student ? $student->class_id : null,
-                        'class_name' => $student ? $student->classroom->name : null,
-                    ]);
-                }
+        
+            $studentAssignments = $task->assignments->map(function ($assignment) {
+                return [
+                    'student_id' => $assignment->student_id,
+                    'student_name' => $assignment->student->full_name,
+                    'nis' => $assignment->student->nis,
+                    'class_name' => $assignment->class_name,
+                    'class_id' => $assignment->class_id,
+                    'score' => $assignment->score, 
+                    'is_scored'=> $assignment->score !== null
+                ];
             });
 
+            $subjects = Subject::all();
+            $classrooms = Classroom::orderBy('name')->get();
+            $academicYears = AcademicYear::all();
+
+            return Inertia::render('tasks/edit', [
+                'task' => [
+                    'id' => $task->id,
+                    'academic_year_id' => $task->academic_year_id,
+                    'subject_id' => $task->subject_id,
+                    'title' => $task->title,
+                    'description' => $task->description,
+                    'due_date' => $task->due_date->format('Y-m-d'),
+                    'due_time' => $task->due_time->format('H:i'),
+                    'student_assignments' => $studentAssignments,
+                    'academic_year' => $task->academicYear, // Include academic year data
+                ],
+                'subjects' => $subjects,
+                'academicYears' => $academicYears,
+                'classrooms' => $classrooms,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error loading task for edit', [
+                'exam_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
             return redirect()->route('tasks.index')
-                ->with('success', 'Tugas Berhasil Diperbarui');
-        } catch (\ValidationException $e) {
-           return redirect()->back()
-                ->withErrors($e->validator)
+                ->with('error', 'Tugas tidak ditemukan atau terjadi kesalahan.');
+        }
+    }
+
+    public function update(Request $request, $id){
+        try {
+            $validated = $request->validate([
+                'subject_id' => 'required|exists:subjects,id',
+                'title' => 'required|string|max:70',
+                'description' => 'nullable|string|max:70',
+                'due_date' => 'required|date',
+                'due_time' => 'required|date_format:H:i',
+                'student_assignments' => 'required|array|min:1',
+                'student_assignments.*.student_id' => 'required|exists:students,id',
+                'student_assignments.*.student_name' => 'required|string',
+                'student_assignments.*.class_name' => 'required|string',
+                'student_assignments.*.class_id' => 'required|exists:classrooms,id',
+            ], [
+                'subject_id.required' => 'Mata pelajaran harus dipilih',
+                'subject_id.exists' => 'Mata pelajaran tidak valid',
+                'title.required' => 'Nama Tugas harus diisi',
+                'title.max' => 'Nama Tugas maksimal 70 karakter',
+                'description.max' => 'Deskripsi Tugas maksimal 70 karakter',
+                'due_date.required' => 'Tanggal harus dipilih',
+                'due_date.date' => 'Format tanggal tidak valid',
+                'due_time.required' => 'Waktu harus diisi',
+                'due_time.date_format' => 'Format waktu tidak valid',
+                'student_assignments.required' => 'Minimal harus memilih 1 siswa',
+                'student_assignments.min' => 'Minimal harus memilih 1 siswa',
+                'student_assignments.*.student_id.required' => 'ID siswa harus ada',
+                'student_assignments.*.student_id.exists' => 'Siswa tidak ditemukan',
+            ]);
+
+            DB::beginTransaction();
+
+            $task = Task::findOrFail($id);
+
+        
+            $existingTask = Task::where('title', $validated['title'])
+                ->where('subject_id', $validated['subject_id'])
+                ->where('academic_year_id', $task->academic_year_id)
+                ->where('id', '!=', $id)
+                ->first();
+
+            if ($existingTask) {
+                throw new \Exception('Tugas dengan nama "' . $validated['title'] . '" sudah ada untuk mata pelajaran dan tahun ajaran yang sama.');
+            }
+
+     
+            $task->update([
+                'subject_id' => $validated['subject_id'],
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+                'due_date' => $validated['due_date'],
+                'due_time' => $validated['due_time'],
+            ]);
+
+   
+            $currentAssignments = $task->assignments()->get()->keyBy('student_id');
+
+            $task->assignments()->delete();
+
+            $studentIds = collect($validated['student_assignments'])->pluck('student_id')->toArray();
+            $duplicateStudentIds = array_diff_assoc($studentIds, array_unique($studentIds));
+
+            if (!empty($duplicateStudentIds)) {
+                throw new \Exception('Terdapat siswa yang dipilih lebih dari sekali dalam tugas ini.');
+            }
+
+            $assignmentData = [];
+            foreach ($validated['student_assignments'] as $assignment) {
+                $existingAssignment = $currentAssignments->get($assignment['student_id']);
+
+                $assignmentData[] = [
+                    'task_id' => $task->id,
+                    'student_id' => $assignment['student_id'],
+                    'class_id' => $assignment['class_id'],
+                    'class_name' => $assignment['class_name'],
+                    'score' => $existingAssignment ? $existingAssignment->score : null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+
+            TaskAssignment::insert($assignmentData);
+
+            DB::commit();
+
+            return redirect()->route('tasks.index')
+                ->with('success', 'Tugas berhasil diperbarui dengan ' . count($validated['student_assignments']) . ' siswa');
+
+        } catch (ValidationException $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput()
+                ->with('error', 'Data yang dimasukkan tidak valid. Silakan periksa kembali.');
+        } catch (QueryException $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan database. Silakan coba lagi atau hubungi administrator.')
                 ->withInput();
         } catch (\Exception $e) {
+            DB::rollBack();
             return redirect()->back()
-                ->with('error', 'Failed to update task: ' . $e->getMessage())
+                ->with('error', $e->getMessage()) // sudah user-friendly
                 ->withInput();
         }
     }
+
 
     public function show(Task $task){
         try {
@@ -203,7 +277,7 @@ class TaskController extends Controller
 
             $studentAssignments = $task->assignments->map(function ($assignment) {
                 return [
-                    'id' => $assignment->student?->id,
+                    'id' => $assignment->id,
                     'student_name' => $assignment->student?->full_name ?? '-',
                     'class_id' => $assignment->class_id,
                     'class_name' => $assignment->class_name,
@@ -272,5 +346,85 @@ class TaskController extends Controller
         }
         
     }
+
+    public function updateBulkScores(Request $request, $examId)
+    {
+        try {
+            $validated = $request->validate([
+                'scores' => 'required|array|min:1',
+                'scores.*.assignment_id' => 'required|exists:task_assignments,id',
+                'scores.*.score' => 'required|numeric|min:0|max:100',
+            ], [
+                'scores.required' => 'Data nilai harus ada',
+                'scores.array' => 'Format data nilai tidak valid',
+                'scores.min' => 'Minimal harus ada 1 nilai',
+                'scores.*.assignment_id.required' => 'ID assignment harus ada',
+                'scores.*.assignment_id.exists' => 'Assignment tidak ditemukan',
+                'scores.*.score.required' => 'Nilai harus diisi',
+                'scores.*.score.numeric' => 'Nilai harus berupa angka',
+                'scores.*.score.min' => 'Nilai minimal adalah 0',
+                'scores.*.score.max' => 'Nilai maksimal adalah 100',
+            ]);
+
+            DB::beginTransaction();
+
+            $exam = Task::findOrFail($examId);
+            $updatedCount = 0;
+
+            foreach ($validated['scores'] as $scoreData) {
+                $assignment = TaskAssignment::where('id', $scoreData['assignment_id'])
+                    ->where('task_id', $examId)
+                    ->first();
+
+                if ($assignment) {
+                    $assignment->update(['score' => $scoreData['score']]);
+                    $updatedCount++;
+                }
+            }
+
+            DB::commit();
+
+            // Untuk Inertia, return redirect dengan flash message
+            return redirect()->back()->with('success', "Berhasil menyimpan {$updatedCount} nilai");
+
+        } catch (ValidationException $e) {
+            DB::rollback();
+            
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->with('error', 'Data tidak valid');
+
+        } catch (\Exception $e) {
+            DB::rollback();
+            
+            Log::error('Error updating bulk exam scores', [
+                'exam_id' => $examId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan nilai');
+        }
+    }
+
+    public function destroy($id){
+        try {
+            $task = Task::withCount('assignments')->findOrFail($id);
+
+            if ($task->assignments_count > 0) {
+                return redirect()->back()
+                    ->with('error', 'Tugas tidak dapat dihapus karena memiliki keterkaitan dengan data nilai siswa.');
+            }
+
+            $task->delete();
+
+            return redirect()->route('tasks.index')
+                ->with('success', 'Tugas berhasil dihapus.');
+
+        } catch (\Exception $e) {
+            return redirect()->back()
+            ->with('error', 'Terjadi kesalahan saat menghapus tugas: ' . $e->getMessage());
+        }
+    }
+
 
 }

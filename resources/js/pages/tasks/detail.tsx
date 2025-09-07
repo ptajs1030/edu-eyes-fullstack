@@ -186,7 +186,34 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
         return 'Sudah Dinilai';
     };
 
-    const hasUnsavedChanges = Object.keys(editingScores).some((key) => editingScores[parseInt(key)]);
+   const hasUnsavedChanges = Object.keys(editingScores).some((key) => editingScores[parseInt(key)]);
+
+   const handleExportScores = () => {
+       if (!localAssignments || localAssignments.length === 0) {
+           toast.error('Tidak ada data untuk diexport');
+           return;
+       }
+
+       const headers = ['Nama', 'NIS', 'Kelas', 'Nilai', 'Status'];
+       const rows = localAssignments.map((a) => [
+           a.student_name,
+           a.nis || '-',
+           a.class_name,
+           a.score !== null ? a.score.toString() : '-',
+           a.score === null ? 'Belum Dinilai' : 'Sudah Dinilai',
+       ]);
+
+       const csvContent = [headers, ...rows].map((e) => e.join(',')).join('\n');
+       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+       const url = URL.createObjectURL(blob);
+
+       const link = document.createElement('a');
+       link.href = url;
+       link.setAttribute('download', `nilai_${task.title.replace(/\s+/g, '_')}.csv`);
+       document.body.appendChild(link);
+       link.click();
+       document.body.removeChild(link);
+   };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -237,6 +264,12 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                                 Simpan Semua Nilai
                             </button>
                         )}
+                        <button
+                            onClick={handleExportScores}
+                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                        >
+                            Export Nilai
+                        </button>
                     </div>
 
                     <div className="overflow-hidden rounded-lg border border-gray-200">
@@ -330,10 +363,10 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                 {/* Back Button */}
                 <div className="mt-6 flex justify-end border-t pt-6">
                     <button
-                        onClick={() => router.get('/exams')}
+                        onClick={() => router.get('/tasks')}
                         className="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                     >
-                        Kembali ke Daftar Exam
+                        Kembali ke Daftar Tugas
                     </button>
                 </div>
             </div>

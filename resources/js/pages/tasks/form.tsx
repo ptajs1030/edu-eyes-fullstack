@@ -1,7 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
-import { Link } from 'lucide-react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 
@@ -39,69 +38,48 @@ interface Attachment {
 interface Props {
     academicYears: AcademicYear[];
     selectedStudents: number[];
-    tasks?: {
-        id: number;
-        title: string;
-        academic_year_id: number;
-        description: string;
-        due_date: string;
-        due_time: string;
-        attachments: Attachment[];
-        student_assignments: {
-            student_id: number;
-        }[];
-    };
     subjects: Subject[];
     classrooms: Classroom[];
 }
 
-const breadcrumbs = (isEdit: boolean): BreadcrumbItem[] => [
+const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Tugas',
         href: '/tasks',
     },
     {
-        title: isEdit ? 'Edit Tugas' : 'Buat Tugas Baru',
+        title: 'Buat Tugas Baru',
     },
 ];
 
-export default function CreateTask({ academicYears, selectedStudents, task, classrooms, subjects }: Props) {
+export default function CreateTask({ academicYears, selectedStudents, classrooms, subjects }: Props) {
     const activeYear = academicYears.find((y) => y.status === 'active');
+
     const [formData, setFormData] = useState({
-        title: task?.title || '',
-        academic_year_id: task?.academic_year_id || activeYear?.id || 0,
-        description: task?.description || '',
-        due_date: task?.due_date || '',
-        due_time: task?.due_time || '',
-        attachments: task?.attachments || [],
-        subject_id: task?.subject_id || '',
-        student_assignments: task?.student_assignments || [],
+        title: '',
+        academic_year_id: activeYear?.id || 0,
+        description: '',
+        due_date: '',
+        due_time: '',
+        attachments: [] as Attachment[],
+        subject_id: '',
     });
 
     const [selectedClass, setSelectedClass] = useState<number | null>(null);
     const [students, setStudents] = useState<Student[]>([]);
-    const [academicYear, setAcademicYear] = useState<number>(task?.academic_year_id || academicYears[0]?.id || 0);
-    const selectedAcademicYear = academicYears.find((y) => y.id === academicYear);
     const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>(selectedStudents || []);
     const [selectedStudentsInfo, setSelectedStudentsInfo] = useState<Student[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
-    const [attachments, setAttachments] = useState<Attachment[]>(task?.attachments || props.attachments || []);
+    const [attachments, setAttachments] = useState<Attachment[]>([]);
 
     useEffect(() => {
-        if (flash?.success) {
-            toast.success(flash.success);
-        }
-
-        if (flash?.error) {
-            toast.error(flash.error);
-        }
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
     }, [flash]);
 
     useEffect(() => {
-        if (selectedClass) {
-            fetchStudentsByClass(selectedClass);
-        }
+        if (selectedClass) fetchStudentsByClass(selectedClass);
     }, [selectedClass]);
 
     useEffect(() => {
@@ -130,9 +108,7 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
     const fetchSelectedStudentsInfo = async (studentIds: number[]) => {
         try {
             const response = await fetch(route('students.get-by-ids', { ids: studentIds.join(',') }));
-
             if (!response.ok) throw new Error('Failed to fetch student info');
-
             const data = await response.json();
             setSelectedStudentsInfo(data);
         } catch {
@@ -152,8 +128,7 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
 
     const handleSelectAllStudents = (checked: boolean) => {
         if (checked) {
-            const allStudentIds = students.map((student) => student.id);
-            setSelectedStudentIds(allStudentIds);
+            setSelectedStudentIds(students.map((student) => student.id));
         } else {
             const studentIdsToRemove = students.map((student) => student.id);
             setSelectedStudentIds((prev) => prev.filter((id) => !studentIdsToRemove.includes(id)));
@@ -184,31 +159,29 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
             return;
         }
 
-        const url = task?.id ? `/tasks/${task.id}` : '/tasks';
-        const method = task?.id ? 'put' : 'post';
-
-        router[method](
-            url,
+        router.post(
+            '/tasks',
             {
                 ...formData,
                 student_ids: selectedStudentIds,
                 attachments: attachments.map((a) => ({ url: a.url })),
             },
             {
-                onSuccess: () => {},
-                onError: () => {},
+                onSuccess: () => toast.success('Tugas berhasil dibuat'),
+                onError: () => toast.error('Gagal membuat tugas'),
             },
         );
     };
+
     const areAllStudentsSelected = students.length > 0 && students.every((student) => selectedStudentIds.includes(student.id));
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs(!!task?.id)}>
-            <Head title={task?.id ? 'Edit Tugas' : 'Buat Tugas Baru'} />
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Buat Tugas Baru" />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
-                <h1 className="text-2xl font-bold">{task?.id ? 'Edit Tugas' : 'Buat Tugas Baru'}</h1>
+                <h1 className="text-2xl font-bold">Buat Tugas Baru</h1>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                     <div className="rounded-lg border p-4">
@@ -229,19 +202,13 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
                             </div>
 
                             <div>
-                                <label htmlFor="academic_year_id" className="mb-2 block text-sm font-medium text-gray-700">
-                                    Tahun Ajaran*
-                                </label>
+                                <label className="mb-2 block text-sm font-medium text-gray-700">Tahun Ajaran*</label>
                                 <input
                                     type="text"
-                                    id="academic_year_id"
                                     value={academicYears.find((y) => y.id === formData.academic_year_id)?.title || ''}
                                     disabled
                                     className="w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-gray-600"
                                 />
-                                <p className="mt-1 text-xs text-gray-500">
-                                    Tahun ajaran otomatis dipilih dari yang <span className="font-medium">aktif</span>.
-                                </p>
                             </div>
 
                             <div>
@@ -257,6 +224,7 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
                                     required
                                 />
                             </div>
+
                             <div>
                                 <label htmlFor="due_time" className="block text-sm font-medium text-gray-700">
                                     Batas Waktu (Jam)*
@@ -270,6 +238,7 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
                                     required
                                 />
                             </div>
+
                             <div>
                                 <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
                                     Mata Pelajaran*
@@ -277,7 +246,7 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
                                 <select
                                     id="subject"
                                     value={formData.subject_id}
-                                    onChange={(e) => setFormData({ ...formData, subject_id: Number(e.target.value) })}
+                                    onChange={(e) => setFormData({ ...formData, subject_id: e.target.value })}
                                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                                     required
                                 >
@@ -305,6 +274,7 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
                         </div>
                     </div>
 
+                    {/* Attachments */}
                     <div>
                         <label className="mb-2 block text-sm font-medium text-gray-700">Lampiran</label>
                         {attachments.map((attachment, index) => (
@@ -314,12 +284,12 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
                                     value={attachment.url}
                                     onChange={(e) => handleAttachmentChange(index, e.target.value)}
                                     placeholder="https://example.com/file.pdf"
-                                    className="block w-full flex-1 rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                    className="block w-full flex-1 rounded-md border border-gray-300 p-2 shadow-sm"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => handleRemoveAttachment(index)}
-                                    className="ml-2 inline-flex items-center rounded-md border border-transparent bg-red-100 px-3 py-2 text-sm leading-4 font-medium text-red-700 hover:cursor-pointer hover:bg-red-200 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:outline-none"
+                                    className="ml-2 rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-200"
                                 >
                                     Hapus
                                 </button>
@@ -328,21 +298,14 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
                         <button
                             type="button"
                             onClick={handleAddAttachment}
-                            className="rounded-md bg-sky-500 px-3 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-sky-600 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                            className="rounded-md bg-sky-500 px-3 py-2 text-sm font-medium text-white hover:bg-sky-600"
                         >
                             Tambah Lampiran
                         </button>
                     </div>
-                    <div className="flex justify-end space-x-2">
-                        <Link
-                            href="/tasks"
-                            className="inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-                        >
-                            Batal
-                        </Link>
-                    </div>
+
+                    {/* Student Selection */}
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        {/* Student Selection */}
                         <div className="rounded-lg border p-4">
                             <h2 className="mb-4 text-lg font-semibold">Pilih Peserta</h2>
 
@@ -375,7 +338,7 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
                                                 type="checkbox"
                                                 checked={areAllStudentsSelected}
                                                 onChange={(e) => handleSelectAllStudents(e.target.checked)}
-                                                className="rounded border-gray-300 text-indigo-600 hover:cursor-pointer"
+                                                className="rounded border-gray-300 text-indigo-600"
                                             />
                                             Pilih Semua
                                         </label>
@@ -393,7 +356,7 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
                                                         type="checkbox"
                                                         checked={selectedStudentIds.includes(student.id)}
                                                         onChange={() => handleStudentToggle(student.id)}
-                                                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 hover:cursor-pointer"
+                                                        className="h-4 w-4 rounded border-gray-300 text-indigo-600"
                                                     />
                                                 </div>
                                             ))}
@@ -401,10 +364,8 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
                                     </div>
                                 </div>
                             ) : (
-                                <div className="rounded-lg border bg-gray-50 p-6 text-center">
-                                    <div className="text-gray-400">
-                                        {selectedClass ? 'Tidak ada siswa di kelas ini' : 'Pilih kelas untuk melihat siswa'}
-                                    </div>
+                                <div className="rounded-lg border bg-gray-50 p-6 text-center text-gray-400">
+                                    {selectedClass ? 'Tidak ada siswa di kelas ini' : 'Pilih kelas untuk melihat siswa'}
                                 </div>
                             )}
                         </div>
@@ -415,7 +376,7 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
 
                             {selectedStudentsInfo.length > 0 ? (
                                 <div className="space-y-3">
-                                    <div className="max-h-96 divide-y divide-gray-200 overflow-y-auto rounded-lg border border-gray-200">
+                                    <div className="max-h-96 divide-y divide-gray-200 overflow-y-auto rounded-lg border">
                                         {selectedStudentsInfo.map((student) => (
                                             <div key={student.id} className="flex items-center justify-between bg-white p-3">
                                                 <div className="flex-1">
@@ -433,7 +394,7 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
                                                 <button
                                                     type="button"
                                                     onClick={() => handleStudentToggle(student.id)}
-                                                    className="text-red-500 hover:cursor-pointer hover:text-red-700"
+                                                    className="text-red-500 hover:text-red-700"
                                                 >
                                                     ✕
                                                 </button>
@@ -442,9 +403,7 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
                                     </div>
                                 </div>
                             ) : (
-                                <div className="rounded-lg border bg-gray-50 p-6 text-center">
-                                    <div className="text-gray-400">Belum ada peserta terpilih</div>
-                                </div>
+                                <div className="rounded-lg border bg-gray-50 p-6 text-center text-gray-400">Belum ada peserta terpilih</div>
                             )}
                         </div>
                     </div>
@@ -452,15 +411,12 @@ export default function CreateTask({ academicYears, selectedStudents, task, clas
                     <div className="flex justify-end gap-3">
                         <Link
                             href={route('tasks.index')}
-                            className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                            className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                         >
                             Batal
                         </Link>
-                        <button
-                            type="submit"
-                            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
-                        >
-                            {task?.id ? 'Update' : 'Simpan'}
+                        <button type="submit" className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                            Simpan
                         </button>
                     </div>
                 </form>

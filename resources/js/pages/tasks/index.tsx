@@ -79,14 +79,19 @@ export default function TaskIndex({ tasks, filters }: Props) {
         });
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleString('id-ID', {
+    const formatDateOnly = (dateString: string) => {
+        if (!dateString) return '-';
+        return new Date(dateString).toLocaleDateString('id-ID', {
             day: '2-digit',
             month: '2-digit',
             year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
         });
+    };
+
+    const formatTimeOnly = (timeString: string) => {
+        if (!timeString) return '-';
+        // memastikan selalu "HH:MM"
+        return timeString.length === 5 ? timeString : timeString.substring(0, 5);
     };
 
     const tableHeaders = [
@@ -166,8 +171,8 @@ export default function TaskIndex({ tasks, filters }: Props) {
                                     ? `${task.description.substring(0, 70)}...`
                                     : task.description || '-'}
                             </td>
-                            <td className="p-3 text-sm">{formatDate(task.due_date)}</td>
-                            <td className="p-3 text-sm">{formatDate(task.due_time)}</td>
+                            <td className="p-3 text-sm">{formatDateOnly(task.due_date)}</td>
+                            <td className="p-3 text-sm">{formatTimeOnly(task.due_time)}</td>
                             <td className="p-3 text-sm">
                                 {task.attachments && task.attachments.length > 0 ? (
                                     task.attachments.map((a, idx) => (
