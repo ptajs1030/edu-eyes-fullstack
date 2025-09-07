@@ -196,14 +196,40 @@ export default function StudentIndex() {
         { key: 'parent.full_name', label: 'Nama Orang Tua/wali', sortable: false },
         { key: 'classroom.name', label: 'Kelas', sortable: true },
         { key: 'nis', label: 'NIS', sortable: true },
-        { key: 'status', label: 'Status', sortable: true },
         { key: 'entry_year', label: 'Tahun Masuk', sortable: true },
         { key: 'gender', label: 'Gender', sortable: true },
         { key: 'religion', label: 'Agama', sortable: true },
         { key: 'date_of_birth', label: 'Tanggal Lahir', sortable: true },
         { key: 'address', label: 'Alamat', sortable: false },
+        { key: 'status', label: 'Status', sortable: true },
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
+
+    const getStatusBadgeClass = (status: string): string => {
+        switch (status) {
+            case 'active':
+                return 'bg-green-100 text-green-800';
+            case 'inactive':
+                return 'bg-red-100 text-red-800';
+            case 'graduated':
+                return 'bg-blue-100 text-blue-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    const getStatusLabel = (status: string): string => {
+        switch (status) {
+            case 'active':
+                return 'Active';
+            case 'inactive':
+                return 'Inactive';
+            case 'graduated':
+                return 'Graduated';
+            default:
+                return status;
+        }
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -317,7 +343,6 @@ export default function StudentIndex() {
                             <td className="p-3 text-sm">{student.parent?.full_name || '-'}</td>
                             <td className="p-3 text-sm">{student.classroom?.name || '-'}</td>
                             <td className="p-3 text-sm">{student.nis || '-'}</td>
-                            <td className="p-3 text-sm">{student.status}</td>
                             <td className="p-3 text-sm">{student.entry_year}</td>
                             <td className="p-3 text-sm">{student.gender}</td>
                             <td className="p-3 text-sm">{student.religion}</td>
@@ -326,6 +351,13 @@ export default function StudentIndex() {
                             </td>
                             <td className="p-3 text-sm">
                                 {student.address ? (student.address.length > 70 ? student.address.substring(0, 70) + '...' : student.address) : '-'}
+                            </td>
+                            <td className="p-3 text-sm">
+                                <span
+                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(student.status)}`}
+                                >
+                                    {getStatusLabel(student.status)}
+                                </span>
                             </td>
                             <td className="flex justify-center gap-2 p-3">
                                 <button

@@ -123,7 +123,7 @@ class StudentController extends Controller
                     $query->orderBy('students.' . $request->sort, $direction);
             }
         } else {
-            $query->orderBy('students.created_at', 'desc');
+            $query->orderBy('students.full_name', 'asc');
         }
 
         $students = $query->paginate(10)->withQueryString();
@@ -145,7 +145,7 @@ class StudentController extends Controller
                 'parent_id' => 'required|exists:users,id',
                 'class_id' => 'nullable|exists:classrooms,id',
                 'full_name' => 'required|string|max:70',
-                'nis' => 'nullable|string|unique:students,nis',
+                'nis' => 'nullable|numeric|digits_between:4,20|unique:students,nis',
                 'entry_year' => 'required|digits:4|integer|min:1900|max:' . (date('Y') + 1),
                 'gender' => 'required|in:' . implode(',', Sex::getValues()),
                 'status' => 'required|in:' . implode(',', StudentStatus::getValues()),
@@ -186,7 +186,7 @@ class StudentController extends Controller
                 'parent_id' => 'required|exists:users,id',
                 'class_id' => 'nullable|exists:classrooms,id',
                 'full_name' => 'required|string|max:70',
-                'nis' => 'nullable|string|unique:students,nis,' . $student->id,
+                'nis' => 'nullable|numeric|digits_between:4,20|unique:students,nis,' . $student->id,
                 'entry_year' => 'required|digits:4|integer|min:1900|max:' . (date('Y') + 1),
                 'gender' => 'required|in:' . implode(',', Sex::getValues()),
                 'status' => 'required|in:' . implode(',', StudentStatus::getValues()),
@@ -228,9 +228,21 @@ class StudentController extends Controller
             return redirect()->back()
                 ->with('success', 'Student deleted successfully');
         } catch (\Exception $e) {
-            // if it's production environment, don't show detailed error
+            $errorMessage = 'Failed to delete student';
+
+            // Check if it's a foreign key constraint violation
+            if (
+                str_contains($e->getMessage(), 'Integrity constraint violation') &&
+                str_contains($e->getMessage(), 'foreign key constraint')
+            ) {
+
+                $errorMessage = 'Cannot delete student because the data is already associated with other records.';
+            } else if (!app()->environment('production')) {
+                $errorMessage .= ': ' . $e->getMessage();
+            }
+
             return redirect()->back()
-                ->with('error', app()->environment('production') ? 'Failed to delete student' : 'Failed to delete student: ' . $e->getMessage());
+                ->with('error', $errorMessage);
         }
     }
 
