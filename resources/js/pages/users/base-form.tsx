@@ -34,6 +34,7 @@ interface BaseFormProps {
 }
 
 export default function BaseForm({ isOpen, onClose, user, statuses, role, routePrefix }: BaseFormProps) {
+    const [formKey, setFormKey] = useState(0);
     const [formData, setFormData] = useState<User>({
         full_name: '',
         username: '',
@@ -45,9 +46,9 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
         status: 'active',
         ...(role.value === 'admin' || role.value === 'teacher'
             ? {
-                  nip: '',
-                  position: '',
-              }
+                nip: '',
+                position: '',
+            }
             : {}),
         ...(role.value === 'parent' ? { job: '' } : {}),
         address: '',
@@ -85,9 +86,9 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 status: 'active',
                 ...(role.value === 'admin' || role.value === 'teacher'
                     ? {
-                          nip: '',
-                          position: '',
-                      }
+                        nip: '',
+                        position: '',
+                    }
                     : {}),
                 ...(role.value === 'parent' ? { job: '' } : {}),
                 address: '',
@@ -95,21 +96,48 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
             setPreviewImage(null);
             setHasInitialized(true);
         }
-
-        setRemoveProfile(false);
     }, [user, role, isOpen, hasInitialized]);
 
-    // Reset initialization flag when modal closes
     useEffect(() => {
         if (!isOpen) {
-            setHasInitialized(false)
+            // Reset semua state ke default
+            setFormData({
+                full_name: '',
+                username: '',
+                phone: '',
+                email: '',
+                password: '',
+                password_confirmation: '',
+                role_id: role.id,
+                status: 'active',
+                ...(role.value === 'admin' || role.value === 'teacher'
+                    ? {
+                        nip: '',
+                        position: '',
+                    }
+                    : {}),
+                ...(role.value === 'parent' ? { job: '' } : {}),
+                address: '',
+            });
+            setHasInitialized(false);
             setPreviewImage(null);
             setRemoveProfile(false);
+            setFormKey((prev) => prev + 1); // Force re-render
+
+            // Reset file input
+            if (fileInputRef.current) {
+                fileInputRef.current.value = '';
+            }
         }
-    }, [isOpen]);
+    }, [isOpen, role.id, role.value]);
 
     const handleChange = (field: keyof User, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleNumericInputChange = (fieldName: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value.replace(/\D/g, '');
+        setFormData((prev) => ({ ...prev, [fieldName]: value }));
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -183,69 +211,66 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
     };
 
     return (
-        <FormModal isOpen={isOpen} onClose={onClose} title={user ? `Edit ${role.name}` : `Add New ${role.name}`} onSubmit={handleSubmit}>
+        <FormModal
+            key={formKey}
+            isOpen={isOpen}
+            onClose={onClose}
+            title={user ? `Edit ${role.name}` : `Tambah ${role.name} Baru`}
+            onSubmit={handleSubmit}
+        >
             {/* Profile Picture */}
-            <div className="mb-4 flex flex-col items-center">
-                <div className="relative">
-                    <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-gray-300 bg-gray-100">
-                        {previewImage ? (
-                            <img src={previewImage} alt="Profile preview" className="h-full w-full object-cover" />
-                        ) : (
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-12 w-12 text-gray-400"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
+            {(role.value === 'admin' || role.value === 'teacher') && (
+                <div className="mb-4 flex flex-col items-center">
+                    <div className="relative">
+                        <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-gray-300 bg-gray-100">
+                            {previewImage ? (
+                                <img src={previewImage} alt="Profile preview" className="h-full w-full object-cover" />
+                            ) : (
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-12 w-12 text-gray-400"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                    />
+                                </svg>
+                            )}
+                        </div>
+
+                        {(previewImage || (user?.profile_picture && !removeProfile)) && (
+                            <button
+                                type="button"
+                                onClick={handleRemoveImage}
+                                className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white hover:cursor-pointer hover:bg-red-600"
                             >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                />
-                            </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
                         )}
                     </div>
 
-                    {(previewImage || (user?.profile_picture && !removeProfile)) && (
-                        <button
-                            type="button"
-                            onClick={handleRemoveImage}
-                            className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white hover:cursor-pointer hover:bg-red-600"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    )}
+                    <label className="mt-2 cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800">
+                        <span>Upload Photo</span>
+                        <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+                    </label>
+                    <p className="mt-1 text-xs text-gray-500">Max 2MB (300x300)</p>
                 </div>
-
-                <label className="mt-2 cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800">
-                    <span>Upload Photo</span>
-                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
-                </label>
-                <p className="mt-1 text-xs text-gray-500">Max 2MB (300x300)</p>
-            </div>
-
-            {/* Role Field (disabled) */}
-            <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700">Role</label>
-                <input
-                    type="text"
-                    value={role.name}
-                    disabled
-                    className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 p-2 shadow-sm"
-                />
-                <input type="hidden" name="role_id" value={role.id} />
-            </div>
+            )}
 
             {/* Common Fields */}
             <div className="mb-3">
                 <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
-                    Full Name*
+                    Nama Lengkap*
                 </label>
                 <input
+                    autoComplete="off"
                     id="full_name"
                     type="text"
                     maxLength={70}
@@ -261,6 +286,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                     Username*
                 </label>
                 <input
+                    autoComplete="off"
                     id="username"
                     type="text"
                     maxLength={70}
@@ -279,19 +305,24 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                             NIP
                         </label>
                         <input
+                            autoComplete="off"
                             id="nip"
                             type="text"
-                            maxLength={70}
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            minLength={18}
+                            maxLength={18}
                             value={formData.nip || ''}
-                            onChange={(e) => handleChange('nip', e.target.value)}
+                            onChange={handleNumericInputChange('nip')}
                             className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                         />
                     </div>
                     <div className="mb-3">
                         <label htmlFor="position" className="block text-sm font-medium text-gray-700">
-                            Position
+                            Posisi/Jabatan
                         </label>
                         <input
+                            autoComplete="off"
                             id="position"
                             type="text"
                             maxLength={70}
@@ -306,9 +337,10 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
             {role.value === 'parent' && (
                 <div className="mb-3">
                     <label htmlFor="job" className="block text-sm font-medium text-gray-700">
-                        Job
+                        Pekerjaan
                     </label>
                     <input
+                        autoComplete="off"
                         id="job"
                         type="text"
                         maxLength={70}
@@ -322,13 +354,16 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
             {/* Common Contact Fields */}
             <div className="mb-3">
                 <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                    Phone
+                    Nomor Telepon
                 </label>
                 <input
+                    autoComplete="off"
                     id="phone"
                     type="tel"
+                    minLength={7}
+                    maxLength={15}
                     value={formData.phone || ''}
-                    onChange={(e) => handleChange('phone', e.target.value)}
+                    onChange={handleNumericInputChange('phone')}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                 />
             </div>
@@ -338,6 +373,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                     Email
                 </label>
                 <input
+                    autoComplete="off"
                     id="email"
                     type="email"
                     value={formData.email || ''}
@@ -348,7 +384,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
 
             <div className="mb-3">
                 <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                    Address
+                    Alamat
                 </label>
                 <textarea
                     id="address"
@@ -382,9 +418,10 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
             {/* Password Fields */}
             <div className="mb-3">
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                    {user ? 'New Password' : 'Password*'}
+                    {user ? 'Password Baru' : 'Password*'}
                 </label>
                 <input
+                    autoComplete="off"
                     id="password"
                     type="password"
                     value={formData.password || ''}
@@ -397,9 +434,10 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
 
             <div className="mb-3">
                 <label htmlFor="password_confirmation" className="block text-sm font-medium text-gray-700">
-                    {user ? 'Confirm New Password' : 'Confirm Password*'}
+                    {user ? 'Konfirmasi Password Baru' : 'Konfirmasi Password*'}
                 </label>
                 <input
+                    autoComplete="off"
                     id="password_confirmation"
                     type="password"
                     value={formData.password_confirmation || ''}

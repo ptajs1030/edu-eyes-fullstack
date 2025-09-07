@@ -135,6 +135,15 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
+    const handleNisChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let value = e.target.value;
+
+        // Remove any non-digit characters
+        value = value.replace(/\D/g, '');
+
+        setFormData((prev) => ({ ...prev, nis: value }));
+    };
+
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
 
@@ -267,10 +276,13 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                 <input
                     id="nis"
                     name="nis"
-                    maxLength={70}
                     type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    minLength={4}
+                    maxLength={20}
                     value={formData.nis ?? ''}
-                    onChange={(e) => handleChange('nis', e.target.value)}
+                    onChange={handleNisChange}
                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                 />
             </div>
