@@ -65,7 +65,7 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
     };
 
     const tableHeaders = [
-        { key: 'level', label: 'Level', sortable: true },
+        { key: 'level', label: 'Tingkat', sortable: true },
         { key: 'name', label: 'Kelas Asal', sortable: true },
         { key: 'status', label: 'Status', sortable: true },
         { key: 'student_count', label: 'Jumlah Siswa', sortable: false },
@@ -97,7 +97,7 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
     const confirmPopulate = () => {
         setIsPopulating(true);
         setShowPopulateModal(false); // Tutup modal
-        
+
         router.post(
             route('grade-promotions.populate'),
             {},
@@ -151,9 +151,8 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
                     <button
                         onClick={handlePopulate}
                         disabled={isPopulating}
-                        className={`rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-600 ${
-                            isPopulating ? 'cursor-not-allowed opacity-70' : ''
-                        }`}
+                        className={`rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-600 ${isPopulating ? 'cursor-not-allowed opacity-70' : ''
+                            }`}
                     >
                         {isPopulating ? 'Memproses...' : 'Inisialisasi Data'}
                     </button>
@@ -182,13 +181,12 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
                         onSort={handleSortChange}
                         rowRender={(group) => (
                             <tr key={group.class_id} className="border-b hover:bg-gray-50">
-                                <td className="p-4 text-sm">Level {group.classroom.level}</td>
+                                <td className="p-4 text-sm">Tingkat {group.classroom.level}</td>
                                 <td className="p-4 text-sm">{group.classroom.name}</td>
                                 <td className="p-4 text-sm">
                                     <span
-                                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                                            group.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                                        }`}
+                                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${group.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                            }`}
                                     >
                                         {group.status === 'completed' ? 'Selesai' : 'Draf'}
                                     </span>
@@ -238,9 +236,8 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
                                 <button
                                     onClick={handleFinalize}
                                     disabled={!allCompleted}
-                                    className={`rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 ${
-                                        !allCompleted ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                                    }`}
+                                    className={`rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 ${!allCompleted ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                                        }`}
                                 >
                                     Finalisasi
                                 </button>
