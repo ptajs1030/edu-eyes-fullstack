@@ -97,32 +97,40 @@
     "name": "index",
     "imports": [
       "resources/js/app.tsx",
-      "_button-BrsbVeJZ.js"
+      "_button-DoWYOUnh.js"
     ]
   },
-  "_label-S3ElT-Q5.js": {
-    "file": "assets/label-S3ElT-Q5.js",
+  "_index-boZ7SFx8.js": {
+    "file": "assets/index-boZ7SFx8.js",
+    "name": "index",
+    "imports": [
+      "resources/js/app.tsx",
+      "_index-C3x7a7PC.js"
+    ]
+  },
+  "_label-0zzDiXRv.js": {
+    "file": "assets/label-0zzDiXRv.js",
     "name": "label",
     "imports": [
       "resources/js/app.tsx",
-      "_button-BrsbVeJZ.js",
-      "_index-Cpq06bra.js"
+      "_button-DoWYOUnh.js",
+      "_index-Bu5jGai6.js"
     ]
   },
-  "_layout-B19Yhwl8.js": {
-    "file": "assets/layout-B19Yhwl8.js",
+  "_layout-CIdcZq2j.js": {
+    "file": "assets/layout-CIdcZq2j.js",
     "name": "layout",
     "imports": [
       "resources/js/app.tsx",
-      "_button-BrsbVeJZ.js",
-      "_index-Cpq06bra.js"
+      "_button-DoWYOUnh.js",
+      "_index-Bu5jGai6.js"
     ]
   },
-  "_loader-circle-D-ZRPEGD.js": {
-    "file": "assets/loader-circle-D-ZRPEGD.js",
+  "_loader-circle-CGv5PN_P.js": {
+    "file": "assets/loader-circle-CGv5PN_P.js",
     "name": "loader-circle",
     "imports": [
-      "_createLucideIcon-DbgR5XJl.js"
+      "_createLucideIcon-CBTiOSyS.js"
     ]
   },
   "_pagination-CSRG5kOy.js": {
@@ -300,7 +308,7 @@
       "_index-Dl1oFDIc.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/academic-years/index.tsx": {
@@ -326,7 +334,7 @@
       "_form-modal-Ch5GFkyy.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/announcements/create.tsx": {
@@ -347,7 +355,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/announcements/detail.tsx": {
@@ -366,7 +374,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/announcements/edit.tsx": {
@@ -387,7 +395,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/announcements/index.tsx": {
@@ -411,7 +419,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/auth/confirm-password.tsx": {
@@ -431,7 +439,7 @@
       "_createLucideIcon-DbgR5XJl.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/auth/forgot-password.tsx": {
@@ -452,7 +460,7 @@
       "_createLucideIcon-DbgR5XJl.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/auth/login.tsx": {
@@ -473,7 +481,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/auth/register.tsx": {
@@ -493,7 +501,7 @@
       "_createLucideIcon-DbgR5XJl.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/auth/reset-password.tsx": {
@@ -513,7 +521,7 @@
       "_createLucideIcon-DbgR5XJl.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/auth/verify-email.tsx": {
@@ -531,7 +539,7 @@
       "_createLucideIcon-DbgR5XJl.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/classrooms/detail.tsx": {
@@ -551,7 +559,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/classrooms/form.tsx": {
@@ -568,7 +576,7 @@
       "_index-Dl1oFDIc.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/classrooms/history.tsx": {
@@ -588,7 +596,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/classrooms/index.tsx": {
@@ -615,7 +623,7 @@
       "_searchable-select-CGuNfVbL.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/classrooms/schedule.tsx": {
@@ -638,7 +646,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/custom-day-offs/form.tsx": {
@@ -654,7 +662,7 @@
       "_index-Dl1oFDIc.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/custom-day-offs/index.tsx": {
@@ -680,7 +688,7 @@
       "_form-modal-Ch5GFkyy.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/dashboard.tsx": {
@@ -699,7 +707,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/events/attendance.tsx": {
@@ -722,7 +730,7 @@
       "_proxy-D075_gva.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/events/editAttendance.tsx": {
@@ -736,7 +744,7 @@
       "_proxy-D075_gva.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/events/form.tsx": {
@@ -757,7 +765,7 @@
     ],
     "css": [
       "assets/form-GB9GUVwj.css",
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/events/index.tsx": {
@@ -783,7 +791,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/exams/create.tsx": {
@@ -804,7 +812,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/exams/edit.tsx": {
@@ -825,7 +833,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/exams/index.tsx": {
@@ -849,7 +857,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/exams/scoring.tsx": {
@@ -869,7 +877,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/grade-promotions/index.tsx": {
@@ -892,7 +900,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/grade-promotions/promotion-assign.tsx": {
@@ -914,7 +922,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/payments/detail.tsx": {
@@ -935,7 +943,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/payments/form.tsx": {
@@ -955,7 +963,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/payments/index.tsx": {
@@ -981,7 +989,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/roles/form.tsx": {
@@ -997,7 +1005,7 @@
       "_index-Dl1oFDIc.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/roles/index.tsx": {
@@ -1023,7 +1031,7 @@
       "_form-modal-Ch5GFkyy.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/school-settings/form.tsx": {
@@ -1039,7 +1047,7 @@
       "_index-Dl1oFDIc.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/school-settings/index.tsx": {
@@ -1064,7 +1072,7 @@
       "_proxy-D075_gva.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/settings/appearance.tsx": {
@@ -1084,7 +1092,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/settings/password.tsx": {
@@ -1107,7 +1115,7 @@
       "_use-is-mounted-BZBKm4YM.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/settings/profile.tsx": {
@@ -1130,7 +1138,7 @@
       "_use-is-mounted-BZBKm4YM.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/settings/school.tsx": {
@@ -1153,7 +1161,7 @@
       "_use-is-mounted-BZBKm4YM.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/shiftings/form.tsx": {
@@ -1169,7 +1177,7 @@
       "_index-Dl1oFDIc.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/shiftings/index.tsx": {
@@ -1195,7 +1203,7 @@
       "_form-modal-Ch5GFkyy.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/students/attendanceHistory.tsx": {
@@ -1228,7 +1236,7 @@
       "_transition-D8cq3DsS.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/students/editShiftModal.tsx": {
@@ -1245,7 +1253,7 @@
       "_proxy-D075_gva.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/students/editSubjectModal.tsx": {
@@ -1262,7 +1270,7 @@
       "_proxy-D075_gva.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/students/form.tsx": {
@@ -1279,7 +1287,7 @@
       "_index-Dl1oFDIc.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/students/index.tsx": {
@@ -1306,7 +1314,7 @@
       "_searchable-select-CGuNfVbL.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/students/shiftAttendanceTable.tsx": {
@@ -1320,7 +1328,7 @@
       "_id-PlgGTalb.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/students/subjectAttendanceTable.tsx": {
@@ -1338,7 +1346,7 @@
       "_id-PlgGTalb.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/subjects/form.tsx": {
@@ -1354,7 +1362,7 @@
       "_index-Dl1oFDIc.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/subjects/index.tsx": {
@@ -1380,7 +1388,7 @@
       "_form-modal-Ch5GFkyy.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/success.tsx": {
@@ -1395,7 +1403,7 @@
       "_app-logo-icon-DEl5Sqau.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/users/admin/index.tsx": {
@@ -1422,7 +1430,7 @@
       "_form-modal-Ch5GFkyy.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/users/base-form.tsx": {
@@ -1438,7 +1446,7 @@
       "_index-Dl1oFDIc.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/users/base-index.tsx": {
@@ -1464,7 +1472,7 @@
       "_form-modal-Ch5GFkyy.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/users/parent/index.tsx": {
@@ -1491,7 +1499,7 @@
       "_form-modal-Ch5GFkyy.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/users/teacher/index.tsx": {
@@ -1518,7 +1526,7 @@
       "_form-modal-Ch5GFkyy.js"
     ],
     "css": [
-      "assets/app-BPAYmm40.css"
+      "assets/app-BfxLxK4O.css"
     ]
   },
   "resources/js/pages/welcome.tsx": {
