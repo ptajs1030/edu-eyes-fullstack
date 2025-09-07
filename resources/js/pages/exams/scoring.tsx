@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Head, router, usePage } from '@inertiajs/react';
-import { toast, Toaster } from 'sonner';
 import AppLayout from '@/layouts/app-layout';
+import { getActiveAcademicYear, isAcademicYearPassed } from '@/lib/academic-year-utils';
 import { BreadcrumbItem } from '@/types';
+import { Head, router, usePage } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
+import { toast, Toaster } from 'sonner';
 
 interface Subject {
     id: number;
@@ -12,6 +13,8 @@ interface Subject {
 interface AcademicYear {
     id: number;
     title: string;
+    start_year: number;
+    status: 'active' | 'inactive';
 }
 
 interface StudentAssignment {
@@ -38,14 +41,23 @@ interface ExamData {
 
 interface Props {
     exam: ExamData;
+    academicYears: AcademicYear[];
 }
 
-export default function ExamScoring({ exam }: Props) {
+export default function ExamScoring({ exam, academicYears }: Props) {
     const [scores, setScores] = useState<Record<number, string>>({});
     const [editingScores, setEditingScores] = useState<Record<number, boolean>>({});
     const [savingScores, setSavingScores] = useState<Record<number, boolean>>({});
 
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
+
+    const isExamEditable = (examAcademicYear: AcademicYear | undefined, academicYears: AcademicYear[]): boolean => {
+        const activeAcademicYear = getActiveAcademicYear(academicYears);
+        return !isAcademicYearPassed(examAcademicYear, activeAcademicYear);
+    };
+    const examAcademicYear = academicYears.find((year) => year.id === exam.academic_year_id);
+    const isEditable = isExamEditable(examAcademicYear, academicYears);
+    const activeAcademicYear = getActiveAcademicYear(academicYears);
 
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Ujian', href: '/exams' },
@@ -64,7 +76,7 @@ export default function ExamScoring({ exam }: Props) {
     // Initialize scores from exam data
     useEffect(() => {
         const initialScores: Record<number, string> = {};
-        exam.student_assignments.forEach(assignment => {
+        exam.student_assignments.forEach((assignment) => {
             initialScores[assignment.id] = assignment.score?.toString() || '';
         });
         setScores(initialScores);
@@ -73,24 +85,24 @@ export default function ExamScoring({ exam }: Props) {
     const handleScoreChange = (assignmentId: number, value: string) => {
         // Only allow numbers and decimal point
         if (value === '' || /^\d*\.?\d*$/.test(value)) {
-            setScores(prev => ({ ...prev, [assignmentId]: value }));
+            setScores((prev) => ({ ...prev, [assignmentId]: value }));
         }
     };
 
     const handleEditClick = (assignmentId: number) => {
-        setEditingScores(prev => ({ ...prev, [assignmentId]: true }));
+        setEditingScores((prev) => ({ ...prev, [assignmentId]: true }));
     };
 
     const handleCancelEdit = (assignmentId: number) => {
         // Reset to original value
-        const originalScore = exam.student_assignments.find(a => a.id === assignmentId)?.score;
-        setScores(prev => ({ ...prev, [assignmentId]: originalScore?.toString() || '' }));
-        setEditingScores(prev => ({ ...prev, [assignmentId]: false }));
+        const originalScore = exam.student_assignments.find((a) => a.id === assignmentId)?.score;
+        setScores((prev) => ({ ...prev, [assignmentId]: originalScore?.toString() || '' }));
+        setEditingScores((prev) => ({ ...prev, [assignmentId]: false }));
     };
 
     const handleSaveScore = async (assignmentId: number) => {
         const scoreValue = scores[assignmentId];
-        
+
         if (scoreValue === '') {
             toast.error('Nilai tidak boleh kosong');
             return;
@@ -102,7 +114,7 @@ export default function ExamScoring({ exam }: Props) {
             return;
         }
 
-        setSavingScores(prev => ({ ...prev, [assignmentId]: true }));
+        setSavingScores((prev) => ({ ...prev, [assignmentId]: true }));
 
         // Gunakan Inertia router untuk PUT request
         router.put(
@@ -111,10 +123,10 @@ export default function ExamScoring({ exam }: Props) {
             {
                 onSuccess: () => {
                     toast.success('Nilai berhasil disimpan');
-                    setEditingScores(prev => ({ ...prev, [assignmentId]: false }));
-                    
+                    setEditingScores((prev) => ({ ...prev, [assignmentId]: false }));
+
                     // Update the exam data to reflect the new score
-                    const assignmentIndex = exam.student_assignments.findIndex(a => a.id === assignmentId);
+                    const assignmentIndex = exam.student_assignments.findIndex((a) => a.id === assignmentId);
                     if (assignmentIndex !== -1) {
                         exam.student_assignments[assignmentIndex].score = numericScore;
                     }
@@ -125,9 +137,9 @@ export default function ExamScoring({ exam }: Props) {
                     handleCancelEdit(assignmentId);
                 },
                 onFinish: () => {
-                    setSavingScores(prev => ({ ...prev, [assignmentId]: false }));
-                }
-            }
+                    setSavingScores((prev) => ({ ...prev, [assignmentId]: false }));
+                },
+            },
         );
     };
 
@@ -158,10 +170,10 @@ export default function ExamScoring({ exam }: Props) {
                     toast.dismiss(loadingToast);
                     toast.success('Semua nilai berhasil disimpan');
                     setEditingScores({});
-                    
+
                     // Update all scores in the exam data
                     scoresToUpdate.forEach(({ assignment_id, score }) => {
-                        const assignmentIndex = exam.student_assignments.findIndex(a => a.id === assignment_id);
+                        const assignmentIndex = exam.student_assignments.findIndex((a) => a.id === assignment_id);
                         if (assignmentIndex !== -1) {
                             exam.student_assignments[assignmentIndex].score = score;
                         }
@@ -174,8 +186,8 @@ export default function ExamScoring({ exam }: Props) {
                 },
                 onFinish: () => {
                     toast.dismiss(loadingToast);
-                }
-            }
+                },
+            },
         );
     };
 
@@ -191,13 +203,35 @@ export default function ExamScoring({ exam }: Props) {
         else return 'Sudah Dinilai';
     };
 
-    const hasUnsavedChanges = Object.keys(editingScores).some(key => editingScores[parseInt(key)]);
+    const hasUnsavedChanges = Object.keys(editingScores).some((key) => editingScores[parseInt(key)]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Penilaian - ${exam.name}`} />
             <Toaster position="top-right" richColors />
-            
+
+            {/* Warning banner jika tidak bisa scoring */}
+            {!isEditable && (
+                <div className="m-6 mb-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+                    <div className="flex items-center">
+                        <svg className="mr-2 h-5 w-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.99-.833-2.46 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                            />
+                        </svg>
+                        <div>
+                            <span className="font-medium text-yellow-800">
+                                Tahun ajaran {examAcademicYear?.title} sudah lewat dari tahun ajaran aktif ({activeAcademicYear?.title}).
+                            </span>
+                            <p className="mt-1 text-sm text-yellow-700">Penilaian hanya dapat dilihat dan tidak dapat diubah.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="rounded-xl bg-white p-6 shadow-lg">
                 {/* Exam Header */}
                 <div className="mb-6 border-b pb-6">
@@ -234,7 +268,7 @@ export default function ExamScoring({ exam }: Props) {
                 <div className="mb-6">
                     <div className="mb-4 flex items-center justify-between">
                         <h3 className="text-lg font-medium text-gray-900">Student Assignments</h3>
-                        {hasUnsavedChanges && (
+                        {isEditable && hasUnsavedChanges && (
                             <button
                                 onClick={handleSaveAllScores}
                                 className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
@@ -243,7 +277,7 @@ export default function ExamScoring({ exam }: Props) {
                             </button>
                         )}
                     </div>
-                    
+
                     <div className="overflow-hidden rounded-lg border border-gray-200">
                         <table className="w-full">
                             <thead className="bg-gray-50">
@@ -259,22 +293,16 @@ export default function ExamScoring({ exam }: Props) {
                             <tbody>
                                 {exam.student_assignments.map((assignment) => (
                                     <tr key={assignment.id} className="border-t hover:bg-gray-50">
-                                        <td className="px-4 py-3 text-sm font-medium text-gray-900">
-                                            {assignment.student_name}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
-                                            {assignment.nis || '-'}
-                                        </td>
-                                        <td className="px-4 py-3 text-sm text-gray-600">
-                                            {assignment.class_name}
-                                        </td>
+                                        <td className="px-4 py-3 text-sm font-medium text-gray-900">{assignment.student_name}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-600">{assignment.nis || '-'}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-600">{assignment.class_name}</td>
                                         <td className="px-4 py-3 text-center">
                                             {editingScores[assignment.id] ? (
                                                 <input
                                                     type="text"
                                                     value={scores[assignment.id] || ''}
                                                     onChange={(e) => handleScoreChange(assignment.id, e.target.value)}
-                                                    className="w-16 rounded border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                                                    className="w-16 rounded border border-gray-300 px-2 py-1 text-center text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
                                                     placeholder="0-100"
                                                     autoFocus
                                                 />
@@ -287,7 +315,7 @@ export default function ExamScoring({ exam }: Props) {
                                         <td className="px-4 py-3 text-center">
                                             <span
                                                 className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                                                    assignment.score === null ? 'bg-gray-100 text-gray-800': 'bg-green-100 text-green-800'
+                                                    assignment.score === null ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'
                                                 }`}
                                             >
                                                 {getScoreStatus(assignment.score)}
@@ -314,7 +342,8 @@ export default function ExamScoring({ exam }: Props) {
                                             ) : (
                                                 <button
                                                     onClick={() => handleEditClick(assignment.id)}
-                                                    className="rounded bg-yellow-500 px-3 py-1 text-xs text-white hover:bg-yellow-600"
+                                                    className={`rounded px-3 py-1 text-xs text-white ${isEditable ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-yellow-500 disabled:opacity-50 cursor-not-allowed'}`}
+                                                    disabled={!isEditable}
                                                 >
                                                     EDIT
                                                 </button>
