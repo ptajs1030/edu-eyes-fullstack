@@ -82,7 +82,7 @@ class AcademicYearController extends Controller
                     Rule::unique(AcademicYear::class)->ignore($academicYear->id),
                 ],
                 'attendance_mode' => 'required|in:' . implode(',', AttendanceMode::getValues()),
-                'note' => 'nullable|string|max:5',
+                'note' => 'nullable|string',
             ]);
 
             $academicYear->update([

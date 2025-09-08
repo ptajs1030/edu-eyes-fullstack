@@ -17,6 +17,7 @@ interface Attendance {
     clock_out_hour: string | null;
     minutes_of_late: number | null;
     note: string | null;
+    submit_date: string;
 }
 
 interface Props {
@@ -66,6 +67,17 @@ export default function EditAttendanceModal({ attendance, onClose, onSubmit }: P
                         <div>
                             <span className="text-gray-600">Kelas:</span>
                             <p className="font-medium">{attendance.student.classroom?.name || '-'}</p>
+                        </div>
+                        <div>
+                            <span className="text-gray-600">Tanggal Presensi:</span>
+                            <p className="font-medium">
+                                {new Date(attendance.submit_date).toLocaleDateString('id-ID', {
+                                    weekday: 'long',
+                                    year: 'numeric',
+                                    month: 'long',
+                                    day: 'numeric',
+                                })}
+                            </p>
                         </div>
                     </div>
                 </div>
