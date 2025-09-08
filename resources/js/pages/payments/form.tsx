@@ -140,12 +140,13 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
     const handleSelectAllStudents = (checked: boolean) => {
         if (checked) {
             const allStudentIds = students.map((student) => student.id);
-            setSelectedStudentIds(allStudentIds);
+            setSelectedStudentIds((prev) => Array.from(new Set([...prev, ...allStudentIds]))); 
         } else {
             const studentIdsToRemove = students.map((student) => student.id);
             setSelectedStudentIds((prev) => prev.filter((id) => !studentIdsToRemove.includes(id)));
         }
     };
+
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
