@@ -88,7 +88,6 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
     const isSubjectMode = academicYear.attendance_mode === 'per-subject';
     const teacherOptions = useMemo(() => formatTeacherOptions(teachers), [teachers]);
 
-    // Effects
     useEffect(() => {
         if (flash?.success) toast.success(flash.success);
         if (flash?.error) toast.error(flash.error);
@@ -98,7 +97,9 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
         setSelectedTab(isShiftMode ? 0 : 1);
     }, [academicYear.attendance_mode]);
 
-    // Handlers
+    /**
+     * HANDLERS
+     */
     const handleTabChange = (index: number) => {
         if ((index === 0 && isShiftMode) || (index === 1 && isSubjectMode)) {
             setSelectedTab(index);
@@ -148,8 +149,9 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                 updated[index] = editingSchedule.original;
                 return { ...prev, [day]: updated };
             });
-            setEditingSchedule(null);
         }
+
+        setEditingSchedule(null);
     };
 
     const handleAddSubjectSchedule = (day: number) => {
@@ -169,10 +171,24 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
     };
 
     const handleUpdateSubjectSchedule = (day: number, index: number, field: string, value: any) => {
-        setSubjectSchedules((prev) => {
-            const newSchedules = [...prev[day]];
-            newSchedules[index] = { ...newSchedules[index], [field]: value };
-            return { ...prev, [day]: newSchedules };
+        setSubjectSchedules((prev: Record<number, any[]>) => {
+            const next = { ...prev };
+            const arr = [...(next[day] || [])];
+
+            let sanitized = value;
+
+            if ((field === 'start_hour' || field === 'end_hour') && typeof value === 'string') {
+                if (value.length === 5) {
+                    const [hhStr, mmStr] = value.split(':');
+                    const hh = Math.min(Math.max(parseInt(hhStr || '0', 10), 0), 23);
+                    const mm = Math.min(Math.max(parseInt(mmStr || '0', 10), 0), 59);
+                    sanitized = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+                }
+            }
+
+            arr[index] = { ...arr[index], [field]: sanitized };
+            next[day] = arr;
+            return next;
         });
     };
 
@@ -207,16 +223,21 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
             { schedules },
             {
                 onError: (errors) => {
-                    Object.values(errors)
+                    const errorMessages = Object.values(errors)
                         .flat()
-                        .forEach((msg: string) => toast.error(msg));
+                        .filter((msg): msg is string => typeof msg === 'string');
+
+                    errorMessages.forEach((msg: string) => toast.error(msg));
                 },
                 onSuccess: () => {
-                    window.location.reload();
+                    setEditingSchedule(null);
                 },
                 onFinish: () => {
                     setIsSavingSubject(false);
                 },
+
+                preserveState: true,
+                preserveScroll: true,
             },
         );
     };
@@ -259,10 +280,11 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
     function validateSubjectSchedules(schedules: any[]): string[] {
         const errors: string[] = [];
         const daySchedules: Record<number, any[]> = {};
+        const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
 
-        // Group by day and check time validity
+        // Group by day dan cek kelengkapan + validitas waktu dasar
         schedules.forEach((schedule, index) => {
-            if (!schedule.day) {
+            if (!schedule.day && schedule.day !== 0) {
                 errors.push(`Schedule at index ${index + 1} is missing day`);
             }
             if (!schedule.subject_id) {
@@ -274,7 +296,22 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
             if (!schedule.start_hour || !schedule.end_hour) {
                 errors.push(`Schedule on day ${schedule.day} is missing start or end time`);
             }
-            if (schedule.end_hour <= schedule.start_hour) {
+
+            // cek format HH:MM agar perbandingan string aman
+            if (schedule.start_hour && !timeRegex.test(schedule.start_hour)) {
+                errors.push(`Schedule on day ${schedule.day} has invalid start time format (HH:MM)`);
+            }
+            if (schedule.end_hour && !timeRegex.test(schedule.end_hour)) {
+                errors.push(`Schedule on day ${schedule.day} has invalid end time format (HH:MM)`);
+            }
+
+            if (
+                schedule.start_hour &&
+                schedule.end_hour &&
+                timeRegex.test(schedule.start_hour) &&
+                timeRegex.test(schedule.end_hour) &&
+                schedule.end_hour <= schedule.start_hour
+            ) {
                 errors.push(`Day ${schedule.day}: End time must be after start time`);
             }
 
@@ -284,18 +321,39 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
             daySchedules[schedule.day].push(schedule);
         });
 
-        // Check for overlaps per day
-        Object.entries(daySchedules).forEach(([day, schedules]) => {
-            schedules.sort((a, b) => a.start_hour.localeCompare(b.start_hour));
-            for (let i = 1; i < schedules.length; i++) {
-                const prev = schedules[i - 1];
-                const current = schedules[i];
+        // Cek overlap per hari (slot vs slot, tanpa peduli subject)
+        Object.entries(daySchedules).forEach(([day, list]) => {
+            const schedulesOfDay = list as any[];
+            schedulesOfDay.sort((a, b) => a.start_hour.localeCompare(b.start_hour));
+            for (let i = 1; i < schedulesOfDay.length; i++) {
+                const prev = schedulesOfDay[i - 1];
+                const current = schedulesOfDay[i];
                 if (current.start_hour < prev.end_hour) {
                     errors.push(
                         `Day ${day}: Schedule overlaps between ${prev.start_hour}-${prev.end_hour} and ${current.start_hour}-${current.end_hour}`,
                     );
                 }
             }
+
+            // Cek konflik GURU pada hari yang sama
+            const byTeacher: Record<string, any[]> = {};
+            for (const row of schedulesOfDay) {
+                if (!row.teacher_id) continue;
+                if (!byTeacher[row.teacher_id]) byTeacher[row.teacher_id] = [];
+                byTeacher[row.teacher_id].push(row);
+            }
+            Object.entries(byTeacher).forEach(([teacherId, rows]) => {
+                rows.sort((a, b) => a.start_hour.localeCompare(b.start_hour));
+                for (let i = 1; i < rows.length; i++) {
+                    const p = rows[i - 1];
+                    const c = rows[i];
+                    if (c.start_hour < p.end_hour) {
+                        errors.push(
+                            `Day ${day}: Teacher ${teacherId} has overlapping assignments ${p.start_hour}-${p.end_hour} & ${c.start_hour}-${c.end_hour}`,
+                        );
+                    }
+                }
+            });
         });
 
         return errors;

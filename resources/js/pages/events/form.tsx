@@ -295,6 +295,7 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                                     rows={4}
+                                    required
                                 />
                             </div>
                         </div>

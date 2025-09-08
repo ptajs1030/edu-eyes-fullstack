@@ -72,14 +72,20 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function ExamIndex() {
-    const { exams, filters } = usePage<{
+    const { exams, filters, academicYears } = usePage<{
         exams: PaginatedResponse<Exam, Link>;
         subjects: Subject[];
         academicYears: AcademicYear[];
-        filters: { search?: string; sort?: string; direction?: string };
+        filters: {
+            search?: string;
+            sort?: string;
+            direction?: string;
+            academic_year?: string;
+        };
     }>().props;
 
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
+    const academicYearOptions = academicYears || [];
 
     useEffect(() => {
         if (flash?.success) {
@@ -94,17 +100,13 @@ export default function ExamIndex() {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [examToDelete, setExamToDelete] = useState<Exam | null>(null);
 
-
     const openForm = (exam: Exam | null = null) => {
         if (exam) {
-            // Edit - redirect ke edit page
             router.get(`/exams/${exam.id}/edit`);
         } else {
-            // Create - redirect ke create page
             router.get('/exams/create');
         }
     };
-
 
     const handleDelete = async (id: number) => {
         router.delete(`/exams/${id}`, {
@@ -124,10 +126,7 @@ export default function ExamIndex() {
         const selectedData = exams.data.filter((exam) => selectedIds.includes(exam.id));
         const headers = `Tahun Ajaran,Mata Pelajaran,Nama Exam,Tipe,Tanggal,Jumlah Siswa\n`;
         const csv = selectedData
-            .map(
-                (exam) =>
-                    `${exam.academicYear?.title},${exam.subject.name},${exam.name},${exam.type || ''},${exam.date},${exam.student_count}`
-            )
+            .map((exam) => `${exam.academicYear?.title},${exam.subject.name},${exam.name},${exam.type || ''},${exam.date},${exam.student_count}`)
             .join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
@@ -137,15 +136,22 @@ export default function ExamIndex() {
         link.click();
 
         toast.success(`Berhasil mengekspor ${selectedData.length} data ujian`, {
-            description: 'File CSV telah didownload otomatis'
+            description: 'File CSV telah didownload otomatis',
         });
     };
 
     const handleSortChange = (column: string) => {
+        router.get(route('exams.index'), { sort: column, direction: filters.direction === 'asc' ? 'desc' : 'asc' }, { preserveState: true });
+    };
+
+    const handleAcademicYearChange = (academicYearId: string) => {
         router.get(
             route('exams.index'),
-            { sort: column, direction: filters.direction === 'asc' ? 'desc' : 'asc' },
-            { preserveState: true }
+            {
+                ...filters,
+                academic_year: academicYearId || null,
+            },
+            { preserveState: true },
         );
     };
 
@@ -180,16 +186,32 @@ export default function ExamIndex() {
                             type="text"
                             placeholder="Search exam by name or type..."
                             defaultValue={filters.search || ''}
-                            onChange={(e) =>
-                                router.get(route('exams.index'), { search: e.target.value }, { preserveState: true })
-                            }
+                            onChange={(e) => router.get(route('exams.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-80 rounded border px-3 py-1"
                         />
+
+                        <div className="relative">
+                            <div className="rounded bg-gray-200 px-3 py-1 text-sm font-medium text-gray-700">
+                                <select
+                                    value={filters.academic_year || ''}
+                                    onChange={(e) => handleAcademicYearChange(e.target.value)}
+                                    className="cursor-pointer bg-transparent outline-none"
+                                >
+                                    <option value="">Tahun Ajaran</option>
+                                    {academicYearOptions.map((year) => (
+                                        <option key={year.id} value={year.id}>
+                                            {year.title}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
+
                         <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
                             className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                                selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
+                                selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
                             }`}
                         >
                             Ekspor data yang dipilih
@@ -213,14 +235,9 @@ export default function ExamIndex() {
                     onSelectAll={(checked) => setSelectedIds(checked ? exams.data.map((exam) => exam.id) : [])}
                     selectedIds={selectedIds}
                     rowRender={(exam) => (
-                        // log the exam output 
                         <tr key={exam.id} className="border-b">
                             <td className="w-[10px] p-3 text-sm">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedIds.includes(exam.id)}
-                                    onChange={() => toggleSelect(exam.id)}
-                                />
+                                <input type="checkbox" checked={selectedIds.includes(exam.id)} onChange={() => toggleSelect(exam.id)} />
                             </td>
                             <td className="p-3 text-sm">{exam.academic_year?.title}</td>
                             <td className="p-3 text-sm">{exam.subject.name}</td>
@@ -228,9 +245,7 @@ export default function ExamIndex() {
                             <td className="p-3 text-sm">{exam.type}</td>
                             <td className="p-3 text-sm">{formatDate(exam.date)}</td>
                             <td className="p-3 text-sm">
-                                <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-700">
-                                    {exam.student_count} Siswa
-                                </span>
+                                <span className="rounded-full bg-gray-100 px-2 py-1 text-xs text-gray-700">{exam.student_count} Siswa</span>
                             </td>
                             <td className="flex justify-center gap-2 p-3">
                                 <button
@@ -241,7 +256,7 @@ export default function ExamIndex() {
                                 </button>
                                 <Link
                                     href={route('exams.scoring', exam.id)}
-                                    className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                                    className="rounded bg-sky-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
                                 >
                                     Penilaian
                                 </Link>
@@ -266,8 +281,8 @@ export default function ExamIndex() {
                     title="Confirm Deletion"
                     message={
                         <span>
-                            Are you sure you want to delete exam <strong>{examToDelete?.name}</strong>? This action will
-                            delete all student assignments and scores and cannot be undone.
+                            Are you sure you want to delete exam <strong>{examToDelete?.name}</strong>? This action will delete all student
+                            assignments and scores and cannot be undone.
                         </span>
                     }
                     buttons={[
