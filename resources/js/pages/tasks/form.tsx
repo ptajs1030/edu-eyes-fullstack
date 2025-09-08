@@ -27,68 +27,59 @@ interface Student {
     };
 }
 
+interface Subject {
+    id: number;
+    name: string;
+}
+interface Attachment {
+    url: string;
+}
+
 interface Props {
     academicYears: AcademicYear[];
-    selectedStudents?: Student[];
-    payment?: {
-        id: number;
-        academic_year_id: number;
-        title: string;
-        nominal: number;
-        due_date: string;
-        description: string;
-        student_assignments: {
-            student_id: number;
-        }[];
-    };
+    selectedStudents: number[];
+    subjects: Subject[];
     classrooms: Classroom[];
 }
 
-const breadcrumbs = (isEdit: boolean): BreadcrumbItem[] => [
+const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Tagihan',
-        href: '/payments',
+        title: 'Tugas',
+        href: '/tasks',
     },
     {
-        title: isEdit ? 'Edit Tagihan' : 'Buat Tagihan Baru',
+        title: 'Buat Tugas Baru',
     },
 ];
 
-export default function PaymentCreate({ academicYears, classrooms, payment, selectedStudents = [] }: Props) {
+export default function CreateTask({ academicYears, selectedStudents, classrooms, subjects }: Props) {
     const activeYear = academicYears.find((y) => y.status === 'active');
+
     const [formData, setFormData] = useState({
-        title: payment?.title || '',
-        nominal: payment?.nominal,
-        due_date: payment?.due_date || '',
-        academic_year_id: payment?.academic_year_id || activeYear?.id || '',
-        description: payment?.description || '',
-        student_assignments: payment?.student_assignments || [],
+        title: '',
+        academic_year_id: activeYear?.id || 0,
+        description: '',
+        due_date: '',
+        due_time: '',
+        attachments: [] as Attachment[],
+        subject_id: '',
     });
 
     const [selectedClass, setSelectedClass] = useState<number | null>(null);
     const [students, setStudents] = useState<Student[]>([]);
-    const [nominal, setNominal] = useState<number | null>(payment?.nominal || null);
-    const [academicYear, setAcademicYear] = useState<number>(payment?.academic_year_id || academicYears[0]?.id || 0);
-    const selectedAcademicYear = academicYears.find((y) => y.id === academicYear);
-    const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>(selectedStudents);
+    const [selectedStudentIds, setSelectedStudentIds] = useState<number[]>(selectedStudents || []);
     const [selectedStudentsInfo, setSelectedStudentsInfo] = useState<Student[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
+    const [attachments, setAttachments] = useState<Attachment[]>([]);
 
     useEffect(() => {
-        if (flash?.success) {
-            toast.success(flash.success);
-        }
-
-        if (flash?.error) {
-            toast.error(flash.error);
-        }
+        if (flash?.success) toast.success(flash.success);
+        if (flash?.error) toast.error(flash.error);
     }, [flash]);
 
     useEffect(() => {
-        if (selectedClass) {
-            fetchStudentsByClass(selectedClass);
-        }
+        if (selectedClass) fetchStudentsByClass(selectedClass);
     }, [selectedClass]);
 
     useEffect(() => {
@@ -117,9 +108,7 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
     const fetchSelectedStudentsInfo = async (studentIds: number[]) => {
         try {
             const response = await fetch(route('students.get-by-ids', { ids: studentIds.join(',') }));
-
             if (!response.ok) throw new Error('Failed to fetch student info');
-
             const data = await response.json();
             setSelectedStudentsInfo(data);
         } catch {
@@ -139,12 +128,27 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
 
     const handleSelectAllStudents = (checked: boolean) => {
         if (checked) {
-            const allStudentIds = students.map((student) => student.id);
-            setSelectedStudentIds(allStudentIds);
+            setSelectedStudentIds(students.map((student) => student.id));
         } else {
             const studentIdsToRemove = students.map((student) => student.id);
             setSelectedStudentIds((prev) => prev.filter((id) => !studentIdsToRemove.includes(id)));
         }
+    };
+
+    const handleAddAttachment = () => {
+        setAttachments([...attachments, { url: '' }]);
+    };
+
+    const handleRemoveAttachment = (index: number) => {
+        const newAttachments = [...attachments];
+        newAttachments.splice(index, 1);
+        setAttachments(newAttachments);
+    };
+
+    const handleAttachmentChange = (index: number, value: string) => {
+        const newAttachments = [...attachments];
+        newAttachments[index].url = value;
+        setAttachments(newAttachments);
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -155,37 +159,36 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
             return;
         }
 
-        const url = payment?.id ? `/payments/${payment.id}` : '/payments';
-        const method = payment?.id ? 'put' : 'post';
-
-        router[method](
-            url,
+        router.post(
+            '/tasks',
             {
                 ...formData,
                 student_ids: selectedStudentIds,
+                attachments: attachments.map((a) => ({ url: a.url })),
             },
             {
-                onSuccess: () => {},
-                onError: () => {},
+                onSuccess: () => toast.success('Tugas berhasil dibuat'),
+                onError: () => toast.error('Gagal membuat tugas'),
             },
         );
     };
+
     const areAllStudentsSelected = students.length > 0 && students.every((student) => selectedStudentIds.includes(student.id));
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs(!!payment?.id)}>
-            <Head title={payment?.id ? 'Edit Pembayaran' : 'Buat Pembayaran Baru'} />
+        <AppLayout breadcrumbs={breadcrumbs}>
+            <Head title="Buat Tugas Baru" />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
-                <h1 className="text-2xl font-bold">{payment?.id ? 'Edit Pembayaran' : 'Buat Pembayaran Baru'}</h1>
+                <h1 className="text-2xl font-bold">Buat Tugas Baru</h1>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                     <div className="rounded-lg border p-4">
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div>
                                 <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                                    Nama Tagihan*
+                                    Nama Tugas*
                                 </label>
                                 <input
                                     id="title"
@@ -199,19 +202,13 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
                             </div>
 
                             <div>
-                                <label htmlFor="academic_year_id" className="mb-2 block text-sm font-medium text-gray-700">
-                                    Tahun Ajaran*
-                                </label>
+                                <label className="mb-2 block text-sm font-medium text-gray-700">Tahun Ajaran*</label>
                                 <input
                                     type="text"
-                                    id="academic_year_id"
                                     value={academicYears.find((y) => y.id === formData.academic_year_id)?.title || ''}
                                     disabled
                                     className="w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-gray-600"
                                 />
-                                <p className="mt-1 text-xs text-gray-500">
-                                    Tahun ajaran otomatis dipilih dari yang <span className="font-medium">aktif</span>.
-                                </p>
                             </div>
 
                             <div>
@@ -227,25 +224,39 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
                                     required
                                 />
                             </div>
+
                             <div>
-                                <label htmlFor="nominal" className="block text-sm font-medium text-gray-700">
-                                    Nominal*
+                                <label htmlFor="due_time" className="block text-sm font-medium text-gray-700">
+                                    Batas Waktu (Jam)*
                                 </label>
                                 <input
-                                    id="nominal"
-                                    type="text"
-                                    inputMode="numeric"
-                                    value={formData.nominal ? formData.nominal.toLocaleString('id-ID') : ''}
-                                    onChange={(e) => {
-                                        const rawValue = e.target.value.replace(/\D/g, '');
-                                        const numericValue = rawValue ? parseInt(rawValue, 10) : 0;
-
-                                        setFormData({ ...formData, nominal: numericValue });
-                                    }}
+                                    id="due_time"
+                                    type="time"
+                                    value={formData.due_time}
+                                    onChange={(e) => setFormData({ ...formData, due_time: e.target.value })}
                                     className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                                     required
                                 />
-                                <p className="mt-1 text-xs text-gray-500">Gunakan angka saja, otomatis diformat dengan pemisah ribuan</p>
+                            </div>
+
+                            <div>
+                                <label htmlFor="subject" className="block text-sm font-medium text-gray-700">
+                                    Mata Pelajaran*
+                                </label>
+                                <select
+                                    id="subject"
+                                    value={formData.subject_id}
+                                    onChange={(e) => setFormData({ ...formData, subject_id: e.target.value })}
+                                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                                    required
+                                >
+                                    <option value="">Pilih Mata Pelajaran</option>
+                                    {subjects.map((subject) => (
+                                        <option key={subject.id} value={subject.id}>
+                                            {subject.name}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
 
                             <div className="md:col-span-2">
@@ -263,8 +274,38 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
                         </div>
                     </div>
 
+                    {/* Attachments */}
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">Lampiran</label>
+                        {attachments.map((attachment, index) => (
+                            <div key={index} className="mb-2 flex items-center">
+                                <input
+                                    type="url"
+                                    value={attachment.url}
+                                    onChange={(e) => handleAttachmentChange(index, e.target.value)}
+                                    placeholder="https://example.com/file.pdf"
+                                    className="block w-full flex-1 rounded-md border border-gray-300 p-2 shadow-sm"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveAttachment(index)}
+                                    className="ml-2 rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-200"
+                                >
+                                    Hapus
+                                </button>
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={handleAddAttachment}
+                            className="rounded-md bg-sky-500 px-3 py-2 text-sm font-medium text-white hover:bg-sky-600"
+                        >
+                            Tambah Lampiran
+                        </button>
+                    </div>
+
+                    {/* Student Selection */}
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                        {/* Student Selection */}
                         <div className="rounded-lg border p-4">
                             <h2 className="mb-4 text-lg font-semibold">Pilih Peserta</h2>
 
@@ -297,7 +338,7 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
                                                 type="checkbox"
                                                 checked={areAllStudentsSelected}
                                                 onChange={(e) => handleSelectAllStudents(e.target.checked)}
-                                                className="rounded border-gray-300 text-indigo-600 hover:cursor-pointer"
+                                                className="rounded border-gray-300 text-indigo-600"
                                             />
                                             Pilih Semua
                                         </label>
@@ -315,7 +356,7 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
                                                         type="checkbox"
                                                         checked={selectedStudentIds.includes(student.id)}
                                                         onChange={() => handleStudentToggle(student.id)}
-                                                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 hover:cursor-pointer"
+                                                        className="h-4 w-4 rounded border-gray-300 text-indigo-600"
                                                     />
                                                 </div>
                                             ))}
@@ -323,10 +364,8 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
                                     </div>
                                 </div>
                             ) : (
-                                <div className="rounded-lg border bg-gray-50 p-6 text-center">
-                                    <div className="text-gray-400">
-                                        {selectedClass ? 'Tidak ada siswa di kelas ini' : 'Pilih kelas untuk melihat siswa'}
-                                    </div>
+                                <div className="rounded-lg border bg-gray-50 p-6 text-center text-gray-400">
+                                    {selectedClass ? 'Tidak ada siswa di kelas ini' : 'Pilih kelas untuk melihat siswa'}
                                 </div>
                             )}
                         </div>
@@ -337,7 +376,7 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
 
                             {selectedStudentsInfo.length > 0 ? (
                                 <div className="space-y-3">
-                                    <div className="max-h-96 divide-y divide-gray-200 overflow-y-auto rounded-lg border border-gray-200">
+                                    <div className="max-h-96 divide-y divide-gray-200 overflow-y-auto rounded-lg border">
                                         {selectedStudentsInfo.map((student) => (
                                             <div key={student.id} className="flex items-center justify-between bg-white p-3">
                                                 <div className="flex-1">
@@ -355,7 +394,7 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
                                                 <button
                                                     type="button"
                                                     onClick={() => handleStudentToggle(student.id)}
-                                                    className="text-red-500 hover:cursor-pointer hover:text-red-700"
+                                                    className="text-red-500 hover:text-red-700"
                                                 >
                                                     ✕
                                                 </button>
@@ -364,25 +403,20 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
                                     </div>
                                 </div>
                             ) : (
-                                <div className="rounded-lg border bg-gray-50 p-6 text-center">
-                                    <div className="text-gray-400">Belum ada peserta terpilih</div>
-                                </div>
+                                <div className="rounded-lg border bg-gray-50 p-6 text-center text-gray-400">Belum ada peserta terpilih</div>
                             )}
                         </div>
                     </div>
 
                     <div className="flex justify-end gap-3">
                         <Link
-                            href={route('events.index')}
-                            className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50"
+                            href={route('tasks.index')}
+                            className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                         >
                             Batal
                         </Link>
-                        <button
-                            type="submit"
-                            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
-                        >
-                            {payment?.id ? 'Update' : 'Simpan'}
+                        <button type="submit" className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                            Simpan
                         </button>
                     </div>
                 </form>
