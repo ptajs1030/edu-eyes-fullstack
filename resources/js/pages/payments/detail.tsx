@@ -100,6 +100,28 @@ export default function PaymentDetail({ transaction, payment }: Props) {
         router.visit(route('payments.index'));
     };
 
+    const exportToCSV = () => {
+        const headers = ['Nama', 'NIS', 'Kelas', 'Tanggal Pembayaran', 'Status'];
+
+        const rows = combinedData.map(({ student, transaction }) => {
+            const status = transaction.payment_date ? 'Lunas' : 'Belum Lunas';
+            return [student.full_name, student.nis || '-', student.classroom?.name || '-', transaction.payment_date || '-', status];
+        });
+
+        const csvContent = [headers, ...rows].map((row) => row.map((v) => `"${v}"`).join(',')).join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `payment_${payment.id}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs(payment.title)}>
             <Head title={`Detail Tagihan - ${payment.title}`} />
@@ -129,7 +151,15 @@ export default function PaymentDetail({ transaction, payment }: Props) {
                 <div className="rounded-lg border p-4">
                     <div className="mb-4 flex items-center justify-between">
                         <h2 className="text-xl font-bold">Daftar Pembayaran</h2>
-                        <div className="text-sm text-gray-600">Total: {payment.assignments.length} peserta</div>
+                        <div className="flex items-center gap-3">
+                            <div className="text-sm text-gray-600">Total: {payment.assignments.length} peserta</div>
+                            <button
+                                onClick={exportToCSV}
+                                className="rounded bg-green-500 px-3 py-1 text-sm font-medium text-white hover:bg-green-600"
+                            >
+                                Ekspor CSV
+                            </button>
+                        </div>
                     </div>
 
                     <div className="overflow-x-auto">
@@ -184,7 +214,6 @@ export default function PaymentDetail({ transaction, payment }: Props) {
                         </table>
 
                         <div className="mt-4 flex gap-3">
-                            {/* tombol simpan hanya muncul kalau ada perubahan */}
                             {Object.keys(editedTransactions).length > 0 && (
                                 <button
                                     disabled={isSaving}
@@ -195,7 +224,6 @@ export default function PaymentDetail({ transaction, payment }: Props) {
                                 </button>
                             )}
 
-                            {/* tombol kembali */}
                             <button
                                 onClick={() => {
                                     if (Object.keys(editedTransactions).length > 0) {
@@ -213,7 +241,6 @@ export default function PaymentDetail({ transaction, payment }: Props) {
                 </div>
             </div>
 
-            {/* Modal konfirmasi simpan */}
             <ConfirmationModal
                 isOpen={showSaveModal}
                 title="Konfirmasi Simpan"
@@ -222,7 +249,6 @@ export default function PaymentDetail({ transaction, payment }: Props) {
                 onCancel={() => setShowSaveModal(false)}
             />
 
-            {/* Modal konfirmasi kembali */}
             <ConfirmationModal
                 isOpen={showBackModal}
                 title="Konfirmasi Kembali"
