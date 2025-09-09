@@ -78,7 +78,7 @@ export default function CustomDayOffIndex() {
         if (selectedIds.length === 0) return;
 
         const selectedData = customDayOffs.data.filter((a) => selectedIds.includes(a.id));
-        const headers = `Tanggal,Keterangan\n`;
+        const headers = `Tanggal,Nama Hari Libur\n`;
         const csv = selectedData.map((a) => `${a.date},${a.description}`).join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
@@ -105,7 +105,7 @@ export default function CustomDayOffIndex() {
 
     const tableHeaders = [
         { key: 'date', label: 'Tanggal', sortable: true },
-        { key: 'description', label: 'Keterangan', sortable: true },
+        { key: 'description', label: 'Nama Hari Libur', sortable: true },
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
@@ -116,8 +116,11 @@ export default function CustomDayOffIndex() {
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
                 <div className="flex items-center justify-between">
-                    {/* Search and Add Button */}
-                    <div className="flex items-center gap-2">
+                    {/* Search and horizontally scrollable action buttons */}
+                    <div
+                        className="flex items-center gap-2 md:gap-2 gap-1 overflow-x-auto pb-2"
+                        style={{ minWidth: 600, maxWidth: '100%', whiteSpace: 'nowrap', WebkitOverflowScrolling: 'touch' }}
+                    >
                         <input
                             type="text"
                             placeholder="Cari hari libur..."
@@ -128,16 +131,15 @@ export default function CustomDayOffIndex() {
                         <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                                selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                            }`}
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                                }`}
                         >
                             Ekspor data yang dipilih
                         </button>
                     </div>
                     <button
                         onClick={() => openForm(null)}
-                        className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
+                        className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700 whitespace-nowrap"
                     >
                         Tambah Hari Libur
                     </button>

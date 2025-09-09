@@ -104,13 +104,13 @@ export default function CustomDayOffFormModal({ isOpen, onClose, dayOff }: Props
 
             <div className="mb-3">
                 <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                    Keterangan*
+                    Nama Hari Libur*
                 </label>
                 <input
                     id="description"
                     name="description"
                     type="text"
-                    maxLength={255}
+                    maxLength={70}
                     value={formData.description}
                     onChange={(e) => handleChange('description', e.target.value)}
                     className={`mt-1 block w-full rounded-md border ${errors.description ? 'border-red-500' : 'border-gray-300'} p-2 shadow-sm`}
