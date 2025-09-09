@@ -128,7 +128,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                 if (errors.student_assignments) {
                     toast.error('Terjadi kesalahan pada data siswa yang dipilih');
                 } else if (errors.name) {
-                    toast.error('Nama exam tidak valid');
+                    toast.error('Nama ujian tidak valid');
                 } else if (errors.subject_id) {
                     toast.error('Mata pelajaran harus dipilih');
                 } else {
@@ -203,7 +203,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={`Edit Exam - ${exam.name}`} />
+            <Head title={`Edit Ujian - ${exam.name}`} />
             <Toaster position="top-right" richColors />
 
             {/* Warning banner jika tidak bisa edit */}
@@ -229,7 +229,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
             )}
 
             <div className="rounded-xl bg-white p-6 shadow-lg">
-                <h2 className="mb-6 text-2xl font-semibold text-gray-900">Edit Exam: {exam.name}</h2>
+                <h2 className="mb-6 text-2xl font-semibold text-gray-900">Edit Ujian: {exam.name}</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Tahun Ajaran */}
@@ -297,13 +297,13 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
 
                     {/* Nama */}
                     <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">Nama *</label>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">Nama Ujian *</label>
                         <input
                             type="text"
                             value={data.name}
                             onChange={handleNameChange}
                             className={`w-full rounded-lg border border-gray-300 px-4 py-2 ${isEditable ? 'focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none' : 'cursor-not-allowed bg-gray-100 text-gray-600'}`}
-                            placeholder="Masukkan nama exam"
+                            placeholder="Masukkan nama ujian"
                             required
                             disabled={!isEditable}
                         />
@@ -328,7 +328,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
 
                     {/* Tanggal */}
                     <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">Tanggal *</label>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">Tanggal Pelaksanaan *</label>
                         <input
                             type="date"
                             value={data.date}

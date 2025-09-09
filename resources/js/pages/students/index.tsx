@@ -22,6 +22,9 @@ type Student = {
     classroom?: {
         name: string;
     };
+    parent?: {
+        full_name: string;
+    };
 };
 
 type Classroom = {
@@ -136,8 +139,15 @@ export default function StudentIndex() {
         if (selectedIds.length === 0) return;
 
         const selectedData = students.data.filter((a) => selectedIds.includes(a.id));
-        const headers = `Nama,Kelas,Tahun masuk,Jenis kelamin,Agama,Status\n`;
-        const csv = selectedData.map((a) => `${a.full_name},${a.classroom?.name},${a.entry_year},${a.gender},${a.religion},${a.status}`).join('\n');
+        const headers = `Nama Siswa,Nama Orang Tua/Wali,Kelas,NIS,Tahun Masuk,Jenis Kelamin,Agama,Tanggal Lahir,Alamat,Status\n`;
+        const csv = selectedData.map((a) => {
+            const addressOneLine = a.address
+                ? `"${a.address.replace(/[\r\n\u2028\u2029\u0085]+/g, ' ').replace(/"/g, '""')}"`
+                : '""';
+            const formattedDate = a.date_of_birth ? new Date(a.date_of_birth).toISOString().slice(0, 10) : '';
+            const nis = a.nis ? a.nis : '-';
+            return `${a.full_name},${a.parent?.full_name},${a.classroom?.name},${nis},${a.entry_year},${a.gender},${a.religion},${formattedDate},${addressOneLine},${a.status}`;
+        }).join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -197,7 +207,7 @@ export default function StudentIndex() {
         { key: 'classroom.name', label: 'Kelas', sortable: true },
         { key: 'nis', label: 'NIS', sortable: true },
         { key: 'entry_year', label: 'Tahun Masuk', sortable: true },
-        { key: 'gender', label: 'Gender', sortable: true },
+        { key: 'gender', label: 'Jenis Kelamin', sortable: true },
         { key: 'religion', label: 'Agama', sortable: true },
         { key: 'date_of_birth', label: 'Tanggal Lahir', sortable: true },
         { key: 'address', label: 'Alamat', sortable: false },
@@ -286,9 +296,8 @@ export default function StudentIndex() {
                         <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                                selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                            }`}
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                                }`}
                         >
                             Ekspor data yang dipilih
                         </button>
@@ -368,9 +377,8 @@ export default function StudentIndex() {
                                 </button>
                                 <Link
                                     href={route('students.attendance', student.id)}
-                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
-                                        student.classroom?.name ? 'bg-sky-500 hover:cursor-pointer hover:bg-sky-600' : 'cursor-not-allowed bg-sky-300'
-                                    }`}
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${student.classroom?.name ? 'bg-sky-500 hover:cursor-pointer hover:bg-sky-600' : 'cursor-not-allowed bg-sky-300'
+                                        }`}
                                     onClick={(e) => {
                                         if (!student.classroom?.name) {
                                             e.preventDefault();

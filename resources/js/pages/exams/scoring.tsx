@@ -122,7 +122,6 @@ export default function ExamScoring({ exam, academicYears }: Props) {
             { score: numericScore },
             {
                 onSuccess: () => {
-                    toast.success('Nilai berhasil disimpan');
                     setEditingScores((prev) => ({ ...prev, [assignmentId]: false }));
 
                     // Update the exam data to reflect the new score
@@ -168,7 +167,6 @@ export default function ExamScoring({ exam, academicYears }: Props) {
             {
                 onSuccess: (page) => {
                     toast.dismiss(loadingToast);
-                    toast.success('Semua nilai berhasil disimpan');
                     setEditingScores({});
 
                     // Update all scores in the exam data
@@ -256,7 +254,7 @@ export default function ExamScoring({ exam, academicYears }: Props) {
                             </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Tanggal</label>
+                            <label className="block text-sm font-medium text-gray-700">Tanggal Pelaksanaan</label>
                             <div className="mt-1 rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-sm text-gray-600">
                                 {new Date(exam.date).toLocaleDateString('id-ID')}
                             </div>
@@ -314,9 +312,8 @@ export default function ExamScoring({ exam, academicYears }: Props) {
                                         </td>
                                         <td className="px-4 py-3 text-center">
                                             <span
-                                                className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                                                    assignment.score === null ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'
-                                                }`}
+                                                className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${assignment.score === null ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'
+                                                    }`}
                                             >
                                                 {getScoreStatus(assignment.score)}
                                             </span>

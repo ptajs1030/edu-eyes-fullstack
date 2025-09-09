@@ -127,9 +127,9 @@ class ExamController extends Controller
                 'academic_year_id.exists' => 'Tahun ajaran tidak valid',
                 'subject_id.required' => 'Mata pelajaran harus dipilih',
                 'subject_id.exists' => 'Mata pelajaran tidak valid',
-                'name.required' => 'Nama exam harus diisi',
-                'name.max' => 'Nama exam maksimal 70 karakter',
-                'type.max' => 'Tipe exam maksimal 70 karakter',
+                'name.required' => 'Nama ujian harus diisi',
+                'name.max' => 'Nama ujian maksimal 70 karakter',
+                'type.max' => 'Tipe ujian maksimal 70 karakter',
                 'date.required' => 'Tanggal harus dipilih',
                 'date.date' => 'Format tanggal tidak valid',
                 'student_assignments.required' => 'Minimal harus memilih 1 siswa',
@@ -359,9 +359,9 @@ class ExamController extends Controller
             ], [
                 'subject_id.required' => 'Mata pelajaran harus dipilih',
                 'subject_id.exists' => 'Mata pelajaran tidak valid',
-                'name.required' => 'Nama exam harus diisi',
-                'name.max' => 'Nama exam maksimal 70 karakter',
-                'type.max' => 'Tipe exam maksimal 70 karakter',
+                'name.required' => 'Nama ujian harus diisi',
+                'name.max' => 'Nama ujian maksimal 70 karakter',
+                'type.max' => 'Tipe ujian maksimal 70 karakter',
                 'date.required' => 'Tanggal harus dipilih',
                 'date.date' => 'Format tanggal tidak valid',
                 'student_assignments.required' => 'Minimal harus memilih 1 siswa',
@@ -620,7 +620,7 @@ class ExamController extends Controller
             DB::commit();
 
             // Untuk Inertia, return redirect dengan flash message
-            return redirect()->back()->with('success', "Berhasil menyimpan {$updatedCount} nilai");
+            return redirect()->back()->with('success', "Semua nilai berhasil disimpan");
         } catch (ValidationException $e) {
             DB::rollback();
 
