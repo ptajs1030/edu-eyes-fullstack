@@ -11,7 +11,6 @@ use App\Models\ClassShiftingSchedule;
 use App\Models\CustomDayOff;
 use App\Models\ShiftingAttendance;
 use App\Models\Student;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 

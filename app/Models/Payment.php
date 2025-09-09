@@ -33,4 +33,11 @@ class Payment extends Model
     {
         return $this->hasMany(PaymentAssignment::class);
     }
+
+    // public function students()
+    // {
+    //     return $this->belongsToMany(Student::class, 'payment_assignments', 'payment_id', 'student_id')
+    //         ->withPivot('payment_date')
+    //         ->withTimestamps();
+    // }
 }
