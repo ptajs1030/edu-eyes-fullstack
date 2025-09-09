@@ -55,7 +55,6 @@ class CheckPaymentDeadlines extends Command
 
                     $parentUser = $assignment->student->parent;
 
-                    // Pastikan user adalah parent dan punya notification_key
                     if ($this->isParentUser($parentUser) && $parentUser->notification_key) {
                         $this->info("Dispatching reminder for parent: {$parentUser->full_name}");
 
