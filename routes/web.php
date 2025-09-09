@@ -20,7 +20,6 @@ use App\Http\Controllers\EventScheduleController;
 use App\Http\Controllers\GradePromotionController;
 use App\Http\Controllers\StudentAttendanceController;
 use App\Http\Controllers\ExamController;
-use App\Models\CustomDayOff;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Models\Student;
 
