@@ -14,11 +14,13 @@ class SettingSeeder extends Seeder
     public function run(): void
     {
         $data = [
-            ['key' => 'late_tolerance', 'title' => 'Toleransi Keterlambatan', 'value' => '15'],
-            ['key' => 'school_name', 'title' => 'Nama Sekolah', 'value' => 'Sekolah Cemerlang'],
-            ['key' => 'school_address', 'title' => 'Alamat Sekolah', 'value' => 'Jl. Baru No.123'],
-            ['key' => 'admin_phone', 'title' => 'Telepon Admin Sekolah', 'value' => '021-12345678'],
-            ['key' => 'school_logo', 'title' => 'Logo Sekolah', 'value' => 'https://png.pngtree.com/png-vector/20230725/ourmid/pngtree-school-logo-design-template-vector-png-image_8668651.png'],
+            ['key' => 'late_tolerance', 'title' => 'Toleransi Keterlambatan', 'value' => '15', 'type' => 'number'],
+            ['key' => 'early_tolerance', 'title' => 'Toleransi Kepulangan Awal', 'value' => '15', 'type' => 'number'],
+            ['key' => 'school_name', 'title' => 'Nama Sekolah', 'value' => 'Sekolah Cemerlang', 'type' => 'text'],
+            ['key' => 'school_address', 'title' => 'Alamat Sekolah', 'value' => 'Jl. Baru No.123', 'type' => 'text'],
+            ['key' => 'admin_email', 'title' => 'Email Admin Sekolah', 'value' => 'admin@sekolahcemerlang.com', 'type' => 'text'],
+            ['key' => 'admin_phone', 'title' => 'Telepon Admin Sekolah', 'value' => '02112345678', 'type' => 'number'],
+            ['key' => 'school_logo', 'title' => 'Logo Sekolah', 'value' => 'https://png.pngtree.com/png-vector/20230725/ourmid/pngtree-school-logo-design-template-vector-png-image_8668651.png', 'type' => 'text'],
         ];
 
         foreach ($data as $item) {
@@ -31,7 +33,8 @@ class SettingSeeder extends Seeder
                 // Update only if value is different
                 $setting->update([
                     'title' => $item['title'],
-                    'value' => $item['value']
+                    'value' => $item['value'],
+                    'type' => $item['type']
                 ]);
             }
             // Else do nothing (same value)

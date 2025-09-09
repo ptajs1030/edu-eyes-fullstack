@@ -68,7 +68,7 @@ export default function SettingIndex() {
 
     const exportSelected = () => {
         if (selectedIds.length === 0) return;
-        
+
         const selectedData = settings.data.filter((a) => selectedIds.includes(a.id));
         const headers = `Key,Value\n`;
         const csv = selectedData.map((a) => `${a.key},${a.value}`).join('\n');
@@ -117,9 +117,8 @@ export default function SettingIndex() {
                         <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                                selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
-                            }`}
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
+                                }`}
                         >
                             Ekspor data yang dipilih
                         </button>
@@ -141,7 +140,10 @@ export default function SettingIndex() {
                                 <input type="checkbox" checked={selectedIds.includes(setting.id)} onChange={() => toggleSelect(setting.id)} />
                             </td>
                             <td className="p-3 text-sm">{setting.title}</td>
-                            <td className="p-3 text-sm">{setting.value}</td>
+                            <td className="p-3 text-sm">
+                                {setting.value}
+                                {(setting.key === 'late_tolerance' || setting.key === 'early_tolerance') && ' Menit'}
+                            </td>
                             <td className="flex gap-2 p-3">
                                 <button
                                     onClick={() => openForm(setting)}
