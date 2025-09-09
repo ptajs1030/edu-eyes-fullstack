@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\PaymentCreated;
+use App\Events\PaymentUpdated;
 use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\Payment;
 use App\Models\PaymentAssignment;
 use Carbon\Carbon;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
@@ -23,50 +25,53 @@ class PaymentController extends Controller
     {
         return Carbon::parse($time)->format('Y-m-d');
     }
-    public function index(Request $request){
-        $payments=Payment::with('academicYear')
-                    ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
-                    ->orderBy($request->sort ?? 'created_at', $request->direction ?? 'asc')
-                    ->paginate(10)
-                    ->withQueryString();
+    public function index(Request $request)
+    {
+        $payments = Payment::with('academicYear')
+            ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
+            ->orderBy($request->sort ?? 'created_at', $request->direction ?? 'asc')
+            ->paginate(10)
+            ->withQueryString();
 
-        $payments->getCollection()->transform(function ($payments){
-            return[
-                'id'=>$payments->id,
-                'academic_year'=>$payments->academicYear,
-                'title'=>$payments->title,
-                'description'=>$payments->description,
-                'nominal'=>$payments->nominal,
-                'due_date'=>$this->formatTimeForDisplay($payments->due_date),
+        $payments->getCollection()->transform(function ($payments) {
+            return [
+                'id' => $payments->id,
+                'academic_year' => $payments->academicYear,
+                'title' => $payments->title,
+                'description' => $payments->description,
+                'nominal' => $payments->nominal,
+                'due_date' => $this->formatTimeForDisplay($payments->due_date),
             ];
         });
 
         return Inertia::render('payments/index', [
-            'payments'=>$payments,
-            'filters'=>$request->only(['search', 'sort', 'direction'])
+            'payments' => $payments,
+            'filters' => $request->only(['search', 'sort', 'direction'])
         ]);
     }
 
-    public function create(){
+    public function create()
+    {
         $activeAcademicYear = AcademicYear::where('status', 'active')->first();
-        $classrooms=Classroom::orderBy('level')->orderBy('name')->get();
+        $classrooms = Classroom::orderBy('level')->orderBy('name')->get();
         return Inertia::render('payments/form', [
-            'classrooms'=>$classrooms,
-            'academicYears' => [$activeAcademicYear], 
+            'classrooms' => $classrooms,
+            'academicYears' => [$activeAcademicYear],
         ]);
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         try {
-            $validated=$request->validate([
-                'academic_year_id'=>'required|exists:academic_years,id',
-                'title'=>'required|string|max:255',
-                'description'=>'nullable|string',
-                'nominal'=>'required|integer|min:0',
-                'due_date'=>'required|date',
-                'classroom_id'=>'nullable|exists:classrooms,id',
-                'student_ids'=>'nullable|array',
-                'student_ids.*'=>'exists:students,id',
+            $validated = $request->validate([
+                'academic_year_id' => 'required|exists:academic_years,id',
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'nominal' => 'required|integer|min:0',
+                'due_date' => 'required|date',
+                'classroom_id' => 'nullable|exists:classrooms,id',
+                'student_ids' => 'nullable|array',
+                'student_ids.*' => 'exists:students,id',
             ]);
 
             DB::transaction(function () use ($validated) {
@@ -84,12 +89,14 @@ class PaymentController extends Controller
                         'student_id' => $studentId,
                     ]);
                 }
-                
+
+                event(new PaymentCreated($payment));
             });
+
             return redirect()->route('payments.index')
                 ->with('success', 'Tagihan Berhasil Ditambahkan');
-        } catch (\ValidationException $e) {
-           return redirect()->back()
+        } catch (ValidationException $e) {
+            return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
@@ -99,7 +106,8 @@ class PaymentController extends Controller
         }
     }
 
-    public function edit(Payment $payment){
+    public function edit(Payment $payment)
+    {
         $payment->load('academicYear', 'assignments');
 
         $classrooms = Classroom::orderBy('level')->orderBy('name')->get();
@@ -121,7 +129,8 @@ class PaymentController extends Controller
         ]);
     }
 
-    public function update(Request $request, Payment $payment){
+    public function update(Request $request, Payment $payment)
+    {
         try {
             $validated = $request->validate([
                 'academic_year_id' => 'required|exists:academic_years,id',
@@ -151,6 +160,8 @@ class PaymentController extends Controller
                         'student_id' => $studentId,
                     ]);
                 }
+
+                event(new PaymentUpdated($payment));
             });
 
             return redirect()->route('payments.index')
@@ -166,7 +177,8 @@ class PaymentController extends Controller
         }
     }
 
-    public function show(Payment $payment){
+    public function show(Payment $payment)
+    {
         $payment->load('academicYear', 'assignments.student.classroom');
         $transactions = PaymentAssignment::with('student', 'payment')->where('payment_id', $payment->id)->get();
 
@@ -187,7 +199,7 @@ class PaymentController extends Controller
             $transaction = PaymentAssignment::find($id);
             if ($transaction) {
                 if ($validated['status'] === 'lunas') {
-                    $transaction->payment_date = now(); 
+                    $transaction->payment_date = now();
                 } else {
                     $transaction->payment_date = null;
                 }
@@ -198,18 +210,18 @@ class PaymentController extends Controller
         return back()->with('success', 'Status pembayaran berhasil diperbarui.');
     }
 
-    public function destroy(Payment $payment){
+    public function destroy(Payment $payment)
+    {
         try {
 
             if ($payment->assignments()->count() === 0) {
                 $payment->delete();
                 return redirect()->route('payments.index')
-                ->with('success', 'Tagihan Berhasil Dihapus');
-            }else {
+                    ->with('success', 'Tagihan Berhasil Dihapus');
+            } else {
                 return redirect()->back()
                     ->with('error', 'Tagihan tidak dapat dihapus karena memiliki keterkaitan dengan data daftar pembayaran');
             }
-            
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to delete payment: ' . $e->getMessage());
