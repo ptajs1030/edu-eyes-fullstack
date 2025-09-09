@@ -35,6 +35,16 @@ Schedule::command('check:payment-deadlines')
         Log::info('Payment deadline check completed');
     });
 
+Schedule::command('check:task-deadlines')
+    ->dailyAt('10:00')
+    ->timezone('Asia/Jakarta')
+    ->before(function () {
+        Log::info('Starting task deadline check...');
+    })
+    ->after(function () {
+        Log::info('Task deadline check completed');
+    });
+
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
