@@ -6,6 +6,7 @@ use App\DTOs\ChangePasswordData;
 use App\Exceptions\SilentHttpException;
 use App\Models\Announcement;
 use App\Models\ClassSubjectSchedule;
+use App\Models\CustomDayOff;
 use App\Models\Event;
 use App\Models\EventAttendance;
 use App\Models\EventParticipant;
@@ -51,6 +52,11 @@ class ParentService
     }
 
     public function todayAttendance($student){
+        $today = Carbon::now()->format('Y-m-d');
+        $dayOff=CustomDayOff::where('date', Carbon::parse($today)->format('Y-m-d'))->first();
+        if ($dayOff) {
+            throw new SilentHttpException(400, 'Hari ini adalah hari libur');
+        }
         $attendance = ShiftingAttendance::where('student_id', $student->id)
         ->where('submit_date', Carbon::now('Asia/Jakarta')->format('Y-m-d'))
         ->first();
