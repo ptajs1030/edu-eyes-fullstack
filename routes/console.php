@@ -26,7 +26,7 @@ Schedule::command('attendance:generate-shifting')
     ->timezone('Asia/Jakarta');
 
 Schedule::command('check:payment-deadlines')
-    ->dailyAt('08:00')
+    ->dailyAt('01:00')
     ->timezone('Asia/Jakarta')
     ->before(function () {
         Log::info('Starting payment deadline check...');
@@ -36,7 +36,7 @@ Schedule::command('check:payment-deadlines')
     });
 
 Schedule::command('check:task-deadlines')
-    ->dailyAt('10:00')
+    ->dailyAt('02:00')
     ->timezone('Asia/Jakarta')
     ->before(function () {
         Log::info('Starting task deadline check...');
