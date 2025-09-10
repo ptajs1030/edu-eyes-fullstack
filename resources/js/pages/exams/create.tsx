@@ -89,9 +89,9 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
     const [nameLength, setNameLength] = useState(0);
     const [typeLength, setTypeLength] = useState(0);
 
-    const { errors, flash } = usePage<{ 
+    const { errors, flash } = usePage<{
         errors?: Record<string, string>;
-        flash?: { success?: string; error?: string } 
+        flash?: { success?: string; error?: string }
     }>().props;
 
     useEffect(() => {
@@ -103,7 +103,7 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
             console.log('Showing error toast:', flash.error);
             toast.error(flash.error);
         }
-        
+
         // Show validation errors
         if (errors && Object.keys(errors).length > 0) {
             const errorMessages = Object.values(errors);
@@ -115,7 +115,7 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-    
+
         if (!Array.isArray(data.student_assignments) || data.student_assignments.length === 0) {
             toast.error('Minimal harus memilih 1 siswa untuk exam ini');
             return;
@@ -131,12 +131,12 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
             },
             onError: (errors) => {
                 toast.dismiss(loadingToast);
-                
+
                 // Handle specific field errors
                 if (errors.student_assignments) {
                     toast.error('Terjadi kesalahan pada data siswa yang dipilih');
                 } else if (errors.name) {
-                    toast.error('Nama exam tidak valid');
+                    toast.error('Nama ujian tidak valid');
                 } else if (errors.subject_id) {
                     toast.error('Mata pelajaran harus dipilih');
                 } else {
@@ -168,7 +168,7 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
     const handleAddStudents = (students: AssignedStudent[]) => {
         const currentStudentIds = data.student_assignments.map(s => s.student_id);
         const newStudents = students.filter(s => !currentStudentIds.includes(s.student_id));
-        
+
         setData('student_assignments', [...data.student_assignments, ...newStudents]);
         setShowStudentModal(false);
         toast.success(`${newStudents.length} siswa berhasil ditambahkan`);
@@ -181,11 +181,11 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Buat Exam Baru" />
+            <Head title="Buat Ujian" />
             <Toaster position="top-right" richColors />
             <div className="rounded-xl bg-white p-6 shadow-lg">
-                <h2 className="mb-6 text-2xl font-semibold text-gray-900">Buat Exam Baru</h2>
-                
+                <h2 className="mb-6 text-2xl font-semibold text-gray-900">Buat Ujian</h2>
+
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Tahun Ajaran */}
                     <div>
@@ -226,14 +226,14 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
                     {/* Nama */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Nama *
+                            Nama Ujian *
                         </label>
                         <input
                             type="text"
                             value={typeof data.name === 'string' || typeof data.name === 'number' ? data.name : ''}
                             onChange={handleNameChange}
                             className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            placeholder="Masukkan nama exam"
+                            placeholder="Masukkan nama ujian"
                             required
                         />
                         <p className="mt-1 text-xs text-gray-500">String, max 70 char ({nameLength}/70)</p>
@@ -259,7 +259,7 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
                     {/* Tanggal */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Tanggal *
+                            Tanggal Pelaksanaan*
                         </label>
                         <input
                             type="date"
@@ -277,7 +277,7 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
                         <div className="mb-4 flex items-center justify-between">
                             <h3 className="text-lg font-medium text-gray-900">Student Assignments</h3>
                         </div>
-                        
+
                         {data.student_assignments.length > 0 ? (
                             <div className="mb-4 overflow-hidden rounded-lg border border-gray-200">
                                 <table className="w-full">

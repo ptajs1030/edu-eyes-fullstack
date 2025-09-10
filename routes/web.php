@@ -21,7 +21,6 @@ use App\Http\Controllers\EventScheduleController;
 use App\Http\Controllers\GradePromotionController;
 use App\Http\Controllers\StudentAttendanceController;
 use App\Http\Controllers\ExamController;
-use App\Models\CustomDayOff;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 use App\Models\Student;
 
@@ -47,18 +46,21 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('/', [UserController::class, 'storeAdmin'])->name('admins.store');
         Route::put('/{user}', [UserController::class, 'updateAdmin'])->name('admins.update');
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('admins.destroy');
+        Route::put('/{user}/reset-password', [UserController::class, 'resetPassword'])->name('admins.reset-password');
     });
     Route::prefix('teachers')->group(function () {
         Route::get('/', [UserController::class, 'indexTeacher'])->name('teachers.index');
         Route::post('/', [UserController::class, 'storeTeacher'])->name('teachers.store');
         Route::put('/{user}', [UserController::class, 'updateTeacher'])->name('teachers.update');
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('teachers.destroy');
+        Route::put('/{user}/reset-password', [UserController::class, 'resetPassword'])->name('teachers.reset-password');
     });
     Route::prefix('parents')->group(function () {
         Route::get('/', [UserController::class, 'indexParent'])->name('parents.index');
         Route::post('/', [UserController::class, 'storeParent'])->name('parents.store');
         Route::put('/{user}', [UserController::class, 'updateParent'])->name('parents.update');
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('parents.destroy');
+        Route::put('/{user}/reset-password', [UserController::class, 'resetPassword'])->name('parents.reset-password');
     });
     Route::resource('payments', PaymentController::class);
     Route::patch('/payments/{payment}/transactions/update', [PaymentController::class, 'updateTransactions'])

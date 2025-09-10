@@ -1,0 +1,94 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Jobs\TaskDeadlineReminder;
+use App\Models\Role;
+use App\Models\Task;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
+
+class CheckTaskDeadlines extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'check:task-deadlines';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Check task deadlines and send reminders to parents';
+
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+
+        $now = now('Asia/Jakarta');
+        $currentTime = $now->format('H:i');
+
+        // Hanya jalan antara 00:10 - 00:15 WIB
+        if ($currentTime < '00:10' || $currentTime > '00:15') {
+            Log::info('[Cron] Task Deadline Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
+            $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
+            return;
+        }
+
+        $tomorrow = Carbon::tomorrow()->format('Y-m-d');
+
+        $this->info("Checking task deadlines for date: {$tomorrow}");
+        Log::info("Checking task deadlines for date: {$tomorrow}");
+
+        $tasks = Task::whereDate('due_date', $tomorrow)
+            ->with(['subject', 'assignments.student.parent'])
+            ->get();
+
+        if ($tasks->isEmpty()) {
+            $this->info('No tasks found with tomorrow deadline');
+            Log::info('No tasks found with tomorrow deadline');
+            return;
+        }
+
+        $notificationCount = 0;
+
+        foreach ($tasks as $task) {
+            $this->info("Processing task: {$task->title}");
+
+            // Loop melalui assignments
+            foreach ($task->assignments as $assignment) {
+                if ($assignment->student && $assignment->student->parent) {
+
+                    $parentUser = $assignment->student->parent;
+
+                    // Pastikan user adalah parent dan punya notification_key
+                    if ($this->isParentUser($parentUser) && $parentUser->notification_key) {
+                        $this->info("Dispatching reminder for parent: {$parentUser->full_name}");
+
+                        // Dispatch job untuk kirim notifikasi
+                        TaskDeadlineReminder::dispatch($task, $parentUser);
+                        $notificationCount++;
+                    }
+                }
+            }
+        }
+
+        $this->info("Dispatched {$notificationCount} task reminder jobs");
+        Log::info("Dispatched {$notificationCount} task reminder jobs");
+    }
+
+    /**
+     * Check if user is a parent
+     */
+    protected function isParentUser($user)
+    {
+        $parentRole = Role::where('name', 'parent')->first();
+        return $parentRole && $user->role_id === $parentRole->id;
+    }
+}

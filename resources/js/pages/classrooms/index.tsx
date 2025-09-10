@@ -83,8 +83,8 @@ export default function ClassroomIndex() {
         if (selectedIds.length === 0) return;
 
         const selectedData = classrooms.data.filter((a) => selectedIds.includes(a.id));
-        const headers = `Name,level,Main teacher\n`;
-        const csv = selectedData.map((a) => `${a.name},${a.level},${a.main_teacher?.full_name}`).join('\n');
+        const headers = `Tingkat,Nama Kelas,Wali Kelas\n`;
+        const csv = selectedData.map((a) => `${a.level},${a.name},${a.main_teacher?.full_name}`).join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');

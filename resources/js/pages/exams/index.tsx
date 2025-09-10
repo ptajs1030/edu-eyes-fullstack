@@ -124,9 +124,13 @@ export default function ExamIndex() {
         if (selectedIds.length === 0) return;
 
         const selectedData = exams.data.filter((exam) => selectedIds.includes(exam.id));
-        const headers = `Tahun Ajaran,Mata Pelajaran,Nama Exam,Tipe,Tanggal,Jumlah Siswa\n`;
+        const headers = `Tahun Ajaran,Mata Pelajaran,Nama Ujian,Tipe,Tanggal,Jumlah Siswa\n`;
         const csv = selectedData
-            .map((exam) => `${exam.academicYear?.title},${exam.subject.name},${exam.name},${exam.type || ''},${exam.date},${exam.student_count}`)
+            .map((exam) => {
+                // format date to be YYYY-MM-DD
+                const formattedDate = exam.date ? new Date(exam.date).toISOString().slice(0, 10) : '';
+                return `${exam.academic_year?.title},${exam.subject.name},${exam.name},${exam.type || ''},${formattedDate},${exam.student_count}`;
+            })
             .join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
@@ -166,7 +170,7 @@ export default function ExamIndex() {
     const tableHeaders = [
         { key: 'academic_year', label: 'Tahun Ajaran', sortable: true },
         { key: 'subject_name', label: 'Mata Pelajaran', sortable: true },
-        { key: 'name', label: 'Nama Exam', sortable: true },
+        { key: 'name', label: 'Nama Ujian', sortable: true },
         { key: 'type', label: 'Tipe', sortable: true },
         { key: 'date', label: 'Tanggal Pelaksanaan', sortable: true },
         { key: 'student_count', label: 'Jumlah Siswa', sortable: true },
@@ -210,9 +214,8 @@ export default function ExamIndex() {
                         <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                                selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                            }`}
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                                }`}
                         >
                             Ekspor data yang dipilih
                         </button>
@@ -221,7 +224,7 @@ export default function ExamIndex() {
                         onClick={() => openForm(null)}
                         className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
-                        Tambah Exam
+                        Tambah Ujian
                     </button>
                 </div>
 

@@ -307,4 +307,16 @@ class UserController extends Controller
 
         return $query->limit(10)->get();
     }
+
+    public function resetPassword(Request $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $user->password = Hash::make('eduEyes123');
+            $user->save();
+            return redirect()->back()->with('success', 'Password berhasil direset ke default.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal reset password: ' . $e->getMessage());
+        }
+    }
 }

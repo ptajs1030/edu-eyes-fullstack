@@ -56,6 +56,34 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
+    const [userToReset, setUserToReset] = useState<User | null>(null);
+    const [isResetErrorOpen, setIsResetErrorOpen] = useState(false);
+    // Reset password handler
+    const handleResetPassword = async (user: User) => {
+        if (!user.phone) {
+            setUserToReset(user);
+            setIsResetErrorOpen(true);
+            return;
+        }
+        // Call backend to reset password (new endpoint)
+        router.put(route(`${routePrefix}.reset-password`, user.id), {}, {
+            onSuccess: () => {
+                // WhatsApp link
+                const waMsg = encodeURIComponent(`Password akun EduEyes Anda telah direset. Password baru: eduEyes123`);
+                let phone = user.phone?.replace(/[^0-9]/g, '') || '';
+                if (phone.startsWith('08')) {
+                    phone = '628' + phone.slice(2);
+                }
+                const waLink = `https://wa.me/${phone}?text=${waMsg}`;
+                window.open(waLink, '_blank');
+                toast.success('Password berhasil direset dan link WA telah dibuka');
+            },
+            onError: (error) => {
+                console.log(error);
+                toast.error('Gagal reset password');
+            },
+        });
+    };
 
     const { flash } = usePage().props as { flash?: { success?: string; error?: string } };
 
@@ -173,9 +201,8 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                         <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                                selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                            }`}
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                                }`}
                         >
                             Ekspor data yang dipilih
                         </button>
@@ -233,19 +260,27 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                             <td className="p-3 text-sm">
                                 {user.address ? (user.address.length > 70 ? user.address.substring(0, 70) + '...' : user.address) : '-'}
                             </td>
-                            <td className="flex gap-2 p-3 text-sm">
-                                <button
-                                    onClick={() => openForm(user)}
-                                    className="rounded bg-blue-500 px-3 py-1 font-medium text-white hover:cursor-pointer"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => setUserToDelete(user)}
-                                    className="rounded bg-red-500 px-3 py-1 font-medium text-white hover:cursor-pointer"
-                                >
-                                    Hapus
-                                </button>
+                            <td className="p-3 text-sm">
+                                <div className="flex items-center gap-2">
+                                    <button
+                                        onClick={() => openForm(user)}
+                                        className="rounded bg-blue-500 px-3 py-1 font-medium text-white hover:cursor-pointer"
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => setUserToDelete(user)}
+                                        className="rounded bg-red-500 px-3 py-1 font-medium text-white hover:cursor-pointer"
+                                    >
+                                        Hapus
+                                    </button>
+                                    <button
+                                        onClick={() => handleResetPassword(user)}
+                                        className="rounded bg-yellow-500 px-5 py-1 font-medium text-white whitespace-nowrap hover:cursor-pointer"
+                                    >
+                                        Reset Password
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     )}
@@ -289,6 +324,18 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                             variant: 'danger',
                         },
                     ]}
+                />
+
+                <ActionModal
+                    isOpen={isResetErrorOpen}
+                    onClose={() => setIsResetErrorOpen(false)}
+                    title="Reset Password Error"
+                    message={<span>Phone is not set for this user</span>}
+                    buttons={[{
+                        label: 'OK',
+                        onClick: () => setIsResetErrorOpen(false),
+                        variant: 'neutral',
+                    }]}
                 />
             </div>
         </AppLayout>

@@ -1,11 +1,9 @@
-import TimePickerWrapper from '@/components/time-picker-wrapper';
 import MultiSearchableSelectInline from '@/components/ui/multi-searchable-select-inline';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
-import '../../../css/time-picker.css';
 
 interface Teacher {
     id: number;
@@ -180,8 +178,8 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                 selected_students: selectedStudentIds,
             },
             {
-                onSuccess: () => { },
-                onError: () => { },
+                onSuccess: () => {},
+                onError: () => {},
             },
         );
     };
@@ -234,10 +232,12 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                                 <label htmlFor="start_hour" className="block text-sm font-medium text-gray-700">
                                     Jam Mulai*
                                 </label>
-                                <TimePickerWrapper
+                                <input
+                                    type="time"
                                     id="start_hour"
                                     value={formData.start_hour}
-                                    onChange={(e) => setFormData({ ...formData, start_hour: e })}
+                                    onChange={(e) => setFormData({ ...formData, start_hour: e.target.value })}
+                                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                                     required
                                 />
                             </div>
@@ -246,11 +246,13 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                                 <label htmlFor="end_hour" className="block text-sm font-medium text-gray-700">
                                     Jam Selesai*
                                 </label>
-                                <TimePickerWrapper
+                                <input
+                                    type="time"
                                     id="end_hour"
                                     value={formData.end_hour}
-                                    minTime={formData.start_hour}
-                                    onChange={(e) => setFormData({ ...formData, end_hour: e })}
+                                    min={formData.start_hour}
+                                    onChange={(e) => setFormData({ ...formData, end_hour: e.target.value })}
+                                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                                     required
                                 />
                             </div>

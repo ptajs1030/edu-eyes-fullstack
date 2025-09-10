@@ -137,10 +137,20 @@ class ClassroomController extends Controller
             return redirect()->back()
                 ->with('success', 'Classroom deleted successfully');
         } catch (\Exception $e) {
+            $errorMessage = 'Failed to delete classroom';
+
+            // Check if it's a foreign key constraint violation
+            if (
+                str_contains($e->getMessage(), 'Integrity constraint violation') &&
+                str_contains($e->getMessage(), 'foreign key constraint')
+            ) {
+                $errorMessage = 'Cannot delete classroom because the data is already associated with other records.';
+            } else if (!app()->environment('production')) {
+                $errorMessage .= ': ' . $e->getMessage();
+            }
+
             return redirect()->back()
-                ->with('error', app()->environment('production')
-                    ? 'Failed to delete classroom'
-                    : 'Failed to delete classroom: ' . $e->getMessage());
+                ->with('error', $errorMessage);
         }
     }
 

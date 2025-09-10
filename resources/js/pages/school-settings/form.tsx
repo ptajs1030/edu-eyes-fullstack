@@ -7,6 +7,8 @@ interface Setting {
     id?: number;
     key: string;
     value: string;
+    title?: string;
+    type?: 'text' | 'number';
 }
 
 interface Props {
@@ -19,6 +21,7 @@ export default function SettingFormModal({ isOpen, onClose, setting }: Props) {
     const [formData, setFormData] = useState<Setting>({
         key: '',
         value: '',
+        title: '',
     });
 
     useEffect(() => {
@@ -26,18 +29,29 @@ export default function SettingFormModal({ isOpen, onClose, setting }: Props) {
             setFormData({
                 key: setting.key,
                 value: setting.value,
+                title: setting.title || '',
+                type: setting.type || 'text',
             });
         } else {
             setFormData({
                 key: '',
                 value: '',
+                title: '',
+                type: 'text',
             });
         }
     }, [setting]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        const { name, value, type } = e.target;
+        if (formData.type === 'number' && name === 'value') {
+            // Only allow numbers
+            if (value === '' || /^\d+$/.test(value)) {
+                setFormData((prev) => ({ ...prev, [name]: value }));
+            }
+        } else {
+            setFormData((prev) => ({ ...prev, [name]: value }));
+        }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -72,21 +86,34 @@ export default function SettingFormModal({ isOpen, onClose, setting }: Props) {
                 <label htmlFor="key" className="block text-sm font-medium text-gray-700">
                     Key
                 </label>
-                <input id="key" name="key" type="text" value={formData.key} readOnly className="w-full rounded border bg-gray-100 p-2" />
+                <input id="key" name="key" type="text" value={formData.title || formData.key} readOnly className="w-full rounded border bg-gray-100 p-2" />
             </div>
             <div className="mb-3">
                 <label htmlFor="value" className="block text-sm font-medium text-gray-700">
-                    Value
+                    Value{(formData.key === 'late_tolerance' || formData.key === 'early_tolerance') && ' (Menit)'}
                 </label>
-                <textarea
-                    id="value"
-                    name="value"
-                    value={formData.value}
-                    onChange={handleChange}
-                    className="w-full rounded border p-2"
-                    required
-                    rows={5}
-                />
+                {formData.type === 'text' ? (
+                    <textarea
+                        id="value"
+                        name="value"
+                        value={formData.value}
+                        onChange={handleChange}
+                        className="w-full rounded border p-2"
+                        required
+                        rows={5}
+                    />
+                ) : (
+                    <input
+                        id="value"
+                        name="value"
+                        type="text"
+                        value={formData.value}
+                        onChange={handleChange}
+                        className="w-full rounded border p-2"
+                        required
+                        pattern="\d*"
+                    />
+                )}
             </div>
             <div className="flex justify-end">
                 <button
