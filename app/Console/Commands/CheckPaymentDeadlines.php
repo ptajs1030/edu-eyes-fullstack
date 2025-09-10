@@ -30,6 +30,16 @@ class CheckPaymentDeadlines extends Command
      */
     public function handle()
     {
+        $now = now('Asia/Jakarta');
+        $currentTime = $now->format('H:i');
+
+        // Hanya jalan antara 00:05 - 00:10 WIB
+        if ($currentTime < '00:05' || $currentTime > '00:10') {
+            Log::info('[Cron] Payment Deadline Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
+            $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
+            return;
+        }
+
         $tomorrow = Carbon::tomorrow()->format('Y-m-d');
 
         $this->info("Checking payment deadlines for date: {$tomorrow}");

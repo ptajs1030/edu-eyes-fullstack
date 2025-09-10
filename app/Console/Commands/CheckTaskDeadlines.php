@@ -30,6 +30,17 @@ class CheckTaskDeadlines extends Command
      */
     public function handle()
     {
+
+        $now = now('Asia/Jakarta');
+        $currentTime = $now->format('H:i');
+
+        // Hanya jalan antara 00:10 - 00:15 WIB
+        if ($currentTime < '00:10' || $currentTime > '00:15') {
+            Log::info('[Cron] Task Deadline Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
+            $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
+            return;
+        }
+
         $tomorrow = Carbon::tomorrow()->format('Y-m-d');
 
         $this->info("Checking task deadlines for date: {$tomorrow}");
