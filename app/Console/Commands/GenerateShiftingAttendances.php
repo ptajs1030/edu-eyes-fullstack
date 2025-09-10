@@ -42,7 +42,7 @@ class GenerateShiftingAttendances extends Command
 
         // Hanya jalan antara 00:00 - 00:05 WIB
         if ($currentTime < '00:00' || $currentTime > '00:05') {
-            Log::info('[Cron] Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
+            Log::info('[Cron] Shifting Attendance Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
             $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
             return;
         }
@@ -60,16 +60,16 @@ class GenerateShiftingAttendances extends Command
         }
 
         // 2. Check is today is day off
-        $isDayOff = CustomDayOff::where('date', $todayDate)->exists();
+        $customDayOff  = CustomDayOff::where('date', $todayDate)->first();
+        $isDayOff = $customDayOff !== null;
+
         if ($isDayOff) {
-            Log::info('[Cron] Hari ini (' . $todayDate . ') adalah custom day off, command tidak dijalankan.');
-            $this->info('Hari ini adalah custom day off, command tidak dijalankan.');
-            return;
+            Log::info('[Cron] Hari ini (' . $todayDate . ') adalah day off' . $customDayOff->description);
+            $this->info('Hari ini adalah day off' . $customDayOff->description);
         }
+
         // 3. Get class shifting schedules
-        // $today = Carbon::now();
         $today = $now;
-        $todayDate = $today->toDateString();
         $todayDayOfWeek = $today->dayOfWeek;
         $schedules = ClassShiftingSchedule::where('day', $todayDayOfWeek)
             ->with('shifting')
@@ -79,19 +79,22 @@ class GenerateShiftingAttendances extends Command
         $classIds = Classroom::pluck('id')->toArray();
         $generatedCount = 0;
 
-
         foreach ($classIds as $classId) {
-            $students = Student::where('class_id', $classId)->get();
+            $students = Student::where('class_id', $classId)
+                ->where('status', 'active')
+                ->get();
+
             if ($students->isEmpty()) continue;
 
             $schedulesForClass = $schedules->where('class_id', $classId);
 
-            if ($schedulesForClass->isEmpty()) {
+            if ($isDayOff) {
                 foreach ($students as $student) {
                     $exists = ShiftingAttendance::where([
                         'student_id' => $student->id,
                         'submit_date' => $todayDate,
                     ])->exists();
+
                     if ($exists) continue;
 
                     ShiftingAttendance::create([
@@ -103,37 +106,69 @@ class GenerateShiftingAttendances extends Command
                         'shifting_end_hour'   => '',
                         'submit_date'         => $todayDate,
                         'status'              => ShiftAttendanceStatus::DayOff->value,
+                        'day_off_reason'      => $customDayOff->description,
                     ]);
 
                     $generatedCount++;
                 }
             } else {
-                foreach ($schedulesForClass as $schedule) {
+                if ($schedulesForClass->isEmpty()) {
                     foreach ($students as $student) {
                         $exists = ShiftingAttendance::where([
-                            'student_id'    => $student->id,
-                            'submit_date'   => $todayDate,
+                            'student_id' => $student->id,
+                            'submit_date' => $todayDate,
                         ])->exists();
+
                         if ($exists) continue;
 
                         ShiftingAttendance::create([
                             'student_id'          => $student->id,
                             'class_id'            => $classId,
                             'academic_year_id'    => $academicYear->id,
-                            'shifting_name'       => $schedule->shifting->name,
-                            'shifting_start_hour' => $schedule->shifting->start_hour,
-                            'shifting_end_hour'   => $schedule->shifting->end_hour,
+                            'shifting_name'       => '',
+                            'shifting_start_hour' => '',
+                            'shifting_end_hour'   => '',
                             'submit_date'         => $todayDate,
-                            'status'              => ShiftAttendanceStatus::Alpha->value,
+                            'status'              => ShiftAttendanceStatus::DayOff->value,
+                            'day_off_reason'      => 'Tidak ada jadwal shifting untuk kelas ini',
                         ]);
 
                         $generatedCount++;
+                    }
+                } else {
+                    foreach ($schedulesForClass as $schedule) {
+                        foreach ($students as $student) {
+                            $exists = ShiftingAttendance::where([
+                                'student_id'    => $student->id,
+                                'submit_date'   => $todayDate,
+                            ])->exists();
+                            if ($exists) continue;
+
+                            ShiftingAttendance::create([
+                                'student_id'          => $student->id,
+                                'class_id'            => $classId,
+                                'academic_year_id'    => $academicYear->id,
+                                'shifting_name'       => $schedule->shifting->name,
+                                'shifting_start_hour' => $schedule->shifting->start_hour,
+                                'shifting_end_hour'   => $schedule->shifting->end_hour,
+                                'submit_date'         => $todayDate,
+                                'status'              => ShiftAttendanceStatus::Alpha->value,
+                            ]);
+
+                            $generatedCount++;
+                        }
                     }
                 }
             }
         }
 
-        Log::info("Generated {$generatedCount} shifting attendances for {$todayDate}");
-        $this->info("Successfully generated {$generatedCount} shifting attendances.");
+        $logMessage = "Generated {$generatedCount} shifting attendances for {$todayDate}";
+
+        if ($isDayOff) {
+            $logMessage .= " (Day Off: {$customDayOff->description})";
+        }
+        Log::info($logMessage);
+        $this->info("Successfully generated {$generatedCount} shifting attendances." .
+            ($isDayOff ? " Reason: {$customDayOff->description}" : ""));
     }
 }

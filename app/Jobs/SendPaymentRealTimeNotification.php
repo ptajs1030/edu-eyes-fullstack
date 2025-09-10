@@ -11,8 +11,9 @@ use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
-class PaymentDeadlineReminder implements ShouldQueue
+class SendPaymentRealTimeNotification implements ShouldQueue
 {
     use Queueable, Dispatchable, InteractsWithQueue, SerializesModels;
 
@@ -23,7 +24,7 @@ class PaymentDeadlineReminder implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(Payment $payment, User $parentUser, string $type = 'deadline')
+    public function __construct(Payment $payment, User $parentUser, string $type)
     {
         $this->payment = $payment;
         $this->parentUser = $parentUser;
@@ -41,26 +42,30 @@ class PaymentDeadlineReminder implements ShouldQueue
                     'user_id' => $this->parentUser->id,
                     'payment_id' => $this->payment->id
                 ]);
-
                 return;
             }
 
             $formattedNominal = 'Rp ' . number_format($this->payment->nominal, 0, ',', '.');
 
-            if ($this->type === 'deadline') {
-                $title = 'Pengingat Deadline Pembayaran';
-                $body = "Tagihan '{$this->payment->title}' ({$formattedNominal}) untuk anak Anda akan berakhir besok!";
+            if ($this->type === 'created') {
+                $title = 'Pembayaran Baru Ditambahkan';
+                $body = "Pembayaran '{$this->payment->title}' ({$formattedNominal}) telah ditambahkan untuk anak Anda.";
+            } else {
+                $title = 'Pembayaran Diperbarui';
+                $body = "Pembayaran '{$this->payment->title}' ({$formattedNominal}) telah diperbarui.";
             }
 
             $data = [
-                'type' => 'payment_deadline',
+                'type' => 'payment_' . $this->type,
                 'payment_id' => (string) $this->payment->id,
                 'title' => $this->payment->title,
                 'nominal' => (string) $this->payment->nominal,
+                'formatted_nominal' => $formattedNominal,
                 'due_date' => $this->payment->due_date->format('Y-m-d H:i:s'),
                 'action' => 'view_payment'
             ];
 
+            // Kirim notifikasi via Firebase
             $firebaseService->sendToDevice(
                 $this->parentUser->notification_key,
                 $title,
@@ -68,29 +73,25 @@ class PaymentDeadlineReminder implements ShouldQueue
                 $data
             );
 
-            Log::info('Payment reminder sent successfully', [
+            Log::info('Payment real-time notification sent', [
                 'type' => $this->type,
                 'user_id' => $this->parentUser->id,
                 'payment_id' => $this->payment->id
             ]);
-        } catch (\Throwable $th) {
-            Log::error('Gagal kirim payment reminder', [
+        } catch (Throwable $th) {
+            Log::error('Gagal kirim payment real-time notification', [
                 'user_id' => $this->parentUser->id,
                 'payment_id' => $this->payment->id,
                 'error' => $th->getMessage()
             ]);
 
-            // Re-throw exception agar job bisa di-retry
             throw $th;
         }
     }
 
-    /**
-     * Handle a job failure.
-     */
-    public function failed(\Throwable $exception): void
+    public function failed(Throwable $exception): void
     {
-        Log::error('Job PaymentDeadlineReminder failed', [
+        Log::error('Job SendPaymentRealTimeNotification failed', [
             'payment_id' => $this->payment->id,
             'user_id' => $this->parentUser->id,
             'error' => $exception->getMessage()
