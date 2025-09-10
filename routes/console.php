@@ -20,13 +20,18 @@ app()->make(App\Console\Commands\MakeDto::class);
 //         Log::info('[Scheduler] Selesai jalanin generate-shifting');
 //     })
 //     ->appendOutputTo(storage_path('logs/attendance-error.log'));
+
+// Hanya jalan antara 00:00 - 00:05 WIB
 Schedule::command('attendance:generate-shifting')
     ->everyMinute()
     ->withoutOverlapping()
     ->timezone('Asia/Jakarta');
 
+// Hanya jalan antara 00:05 - 00:10 WIB
 Schedule::command('check:payment-deadlines')
-    ->dailyAt('01:00')
+    ->everyMinute()
+    ->withoutOverlapping()
+    // ->dailyAt('01:00')
     ->timezone('Asia/Jakarta')
     ->before(function () {
         Log::info('Starting payment deadline check...');
@@ -35,8 +40,11 @@ Schedule::command('check:payment-deadlines')
         Log::info('Payment deadline check completed');
     });
 
+// Hanya jalan antara 00:10 - 00:15 WIB
 Schedule::command('check:task-deadlines')
-    ->dailyAt('02:00')
+    ->everyMinute()
+    ->withoutOverlapping()
+    // ->dailyAt('02:00')
     ->timezone('Asia/Jakarta')
     ->before(function () {
         Log::info('Starting task deadline check...');

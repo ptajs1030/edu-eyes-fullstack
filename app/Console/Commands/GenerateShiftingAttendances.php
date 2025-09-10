@@ -42,7 +42,7 @@ class GenerateShiftingAttendances extends Command
 
         // Hanya jalan antara 00:00 - 00:05 WIB
         if ($currentTime < '00:00' || $currentTime > '00:05') {
-            Log::info('[Cron] Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
+            Log::info('[Cron] Shifting Attendance Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
             $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
             return;
         }
