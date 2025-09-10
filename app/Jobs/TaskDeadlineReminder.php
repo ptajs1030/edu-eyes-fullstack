@@ -15,14 +15,16 @@ class TaskDeadlineReminder implements ShouldQueue
 
     protected $task;
     protected $parentUser;
+    protected $type;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(Task $task, User $parentUser)
+    public function __construct(Task $task, User $parentUser, string $type)
     {
         $this->task = $task;
         $this->parentUser = $parentUser;
+        $this->type = $type;
     }
 
     /**
@@ -36,20 +38,24 @@ class TaskDeadlineReminder implements ShouldQueue
                     'user_id' => $this->parentUser->id,
                     'task_id' => $this->task->id
                 ]);
+
                 return;
             }
 
             $dueDate = $this->task->due_date->format('d M Y H:i');
+            $subjectName = $this->task->subject->name ?? '';
 
-            $title = 'Pengingat Deadline Tugas';
-            $body = "Tugas '{$this->task->title}' untuk anak Anda akan berakhir pada ({$dueDate})!";
+            if ($this->type === 'deadline') {
+                $title = 'Pengingat Deadline Tugas';
+                $body = "Tugas '{$this->task->title}' ({$subjectName}) untuk anak Anda akan berakhir pada ({$dueDate})!";
+            }
 
             $data = [
                 'type' => 'task_deadline',
                 'task_id' => (string) $this->task->id,
                 'title' => $this->task->title,
                 'due_date' => $this->task->due_date->format('Y-m-d H:i:s'),
-                'subject' => $this->task->subject->name ?? '',
+                'subject' => $subjectName,
                 'action' => 'view_task'
             ];
 
@@ -61,6 +67,7 @@ class TaskDeadlineReminder implements ShouldQueue
             );
 
             Log::info('Task reminder sent successfully', [
+                'type' => $this->type,
                 'user_id' => $this->parentUser->id,
                 'task_id' => $this->task->id
             ]);
