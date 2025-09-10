@@ -6,12 +6,15 @@ use App\Models\Task;
 use App\Models\User;
 use App\Services\FirebaseService;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 
-class TaskDeadlineReminder implements ShouldQueue
+class SendTaskRealTimeNotification implements ShouldQueue
 {
-    use Queueable;
+    use Queueable, Dispatchable, InteractsWithQueue, SerializesModels;
 
     protected $task;
     protected $parentUser;
@@ -43,15 +46,18 @@ class TaskDeadlineReminder implements ShouldQueue
             }
 
             $dueDate = $this->task->due_date->format('d M Y H:i');
-            $subjectName = $this->task->subject->name ?? '';
+            $subjectName = $this->task->subject->name ?? 'Umum';
 
-            if ($this->type === 'deadline') {
-                $title = 'Pengingat Deadline Tugas';
-                $body = "Tugas '{$this->task->title}' ({$subjectName}) untuk anak Anda akan berakhir pada ({$dueDate})!";
+            if ($this->type === 'created') {
+                $title = 'Tugas Baru Ditambahkan';
+                $body = "Tugas '{$this->task->title}' ({$subjectName}) telah ditambahkan untuk anak Anda. Deadline: {$dueDate}";
+            } else {
+                $title = 'Tugas Diperbarui';
+                $body = "Tugas '{$this->task->title}' ({$subjectName}) telah diperbarui. Deadline: {$dueDate}";
             }
 
             $data = [
-                'type' => 'task_deadline',
+                'type' => 'task_' . $this->type,
                 'task_id' => (string) $this->task->id,
                 'title' => $this->task->title,
                 'due_date' => $this->task->due_date->format('Y-m-d H:i:s'),
@@ -66,13 +72,13 @@ class TaskDeadlineReminder implements ShouldQueue
                 $data
             );
 
-            Log::info('Task reminder sent successfully', [
+            Log::info('Task real-time notification sent', [
                 'type' => $this->type,
                 'user_id' => $this->parentUser->id,
                 'task_id' => $this->task->id
             ]);
         } catch (\Throwable $th) {
-            Log::error('Gagal kirim task reminder', [
+            Log::error('Gagal kirim task real-time notification', [
                 'user_id' => $this->parentUser->id,
                 'task_id' => $this->task->id,
                 'error' => $th->getMessage()
@@ -84,7 +90,7 @@ class TaskDeadlineReminder implements ShouldQueue
 
     public function failed(\Throwable $exception): void
     {
-        Log::error('Job TaskDeadlineReminder failed', [
+        Log::error('Job SendTaskRealTimeNotification failed', [
             'task_id' => $this->task->id,
             'user_id' => $this->parentUser->id,
             'error' => $exception->getMessage()
