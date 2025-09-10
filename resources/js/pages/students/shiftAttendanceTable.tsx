@@ -1,6 +1,7 @@
 import { format, parseISO } from 'date-fns';
 import { id } from 'date-fns/locale';
 import { ShiftingAttendance } from './types';
+import { statusOptions } from './constants';
 
 const ShiftAttendanceTable = ({
     shiftAttendances,
@@ -38,7 +39,7 @@ const ShiftAttendanceTable = ({
                         <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.clock_in_hour_formatted || '-'}</td>
                         <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.clock_out_hour_formatted || '-'}</td>
                         <td className="px-4 py-3 text-sm whitespace-nowrap capitalize">
-                            {attendance.status.replace(/_/g, ' ')}
+                            {statusOptions.shift.find((option) => option.value === attendance.status)?.label || attendance.status}
                             {attendance.day_off_reason && <div className="text-xs text-gray-500">({attendance.day_off_reason})</div>}
                         </td>
                         <td className="px-4 py-3 text-sm whitespace-nowrap">{attendance.note || '-'}</td>

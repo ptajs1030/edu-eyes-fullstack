@@ -20,6 +20,8 @@ const EditSubjectModal = ({
 
     useEffect(() => {
         if (attendance) {
+            console.log(attendance);
+
             setFormData({ ...attendance });
         }
     }, [attendance]);
@@ -29,11 +31,24 @@ const EditSubjectModal = ({
         setFormData((prev) => ({
             ...prev,
             day_off_reason: selected?.description,
+            day_off_reason_id: selected?.id
         }));
     };
 
     const handleChange = (field: keyof SubjectAttendance, value: any) => {
-        setFormData((prev) => ({ ...prev, [field]: value }));
+        setFormData((prev) => {
+            // If status changes and is not 'day_off', clear day_off_reason fields
+            if ((field === 'status' && value !== 'day_off') || (field === 'status' && value !== 'leave')) {
+                return {
+                    ...prev,
+                    [field]: value,
+                    day_off_reason: null,
+                    leave_reason: null,
+                    day_off_reason_id: undefined,
+                };
+            }
+            return { ...prev, [field]: value };
+        });
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -102,17 +117,33 @@ const EditSubjectModal = ({
 
             {formData.status === 'day_off' && (
                 <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700">Alasan Libur</label>
+                    <label className="block text-sm font-medium text-gray-700">Pilih Hari Libur</label>
                     <SearchableSelect
-                        value={formData.day_off_reason?.toString() || ''}
+                        value={(() => {
+                            const found = dayOffOptions.find(option => option.description === formData.day_off_reason);
+                            return found ? found.id.toString() : '';
+                        })()}
                         onChange={handleDayOffReasonChange}
                         placeholder="Pilih alasan..."
                         endpoint={route('dayOff.search')}
-                        initialOptions={dayOffOptions.map((option) => ({
-                            id: option.id,
-                            full_name: option.description,
-                        }))}
+                        initialOption={(() => {
+                            const found = dayOffOptions.find(option => option.description === formData.day_off_reason);
+                            return found ? { id: found.id, full_name: found.description } : undefined;
+                        })()}
                         showInitialOptions={true}
+                    />
+                </div>
+            )}
+
+            {formData.status === 'leave' && (
+                <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700">Alasan Izin</label>
+                    <input
+                        type="text"
+                        value={formData.leave_reason || ''}
+                        onChange={(e) => handleChange('leave_reason', e.target.value)}
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                        placeholder="Tulis alasan izin..."
                     />
                 </div>
             )}

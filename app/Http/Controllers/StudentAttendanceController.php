@@ -149,6 +149,7 @@ class StudentAttendanceController extends Controller
                 'minutes_of_late' => 'nullable|integer|min:0',
                 'note' => 'nullable|string|max:255',
                 'day_off_reason' => 'required_if:status,' . ShiftAttendanceStatus::DayOff->value . '|nullable|exists:custom_day_offs,description',
+                'leave_reason' => 'required_if:status,' . ShiftAttendanceStatus::Leave->value . '|nullable|string|max:255',
             ]);
 
             $attendance->update($validated);
@@ -168,6 +169,8 @@ class StudentAttendanceController extends Controller
                 'submit_hour' => 'nullable|date_format:H:i',
                 'status' => 'required|in:' . implode(',', SubjectAttendanceStatus::getValues()),
                 'note' => 'nullable|string|max:255',
+                'day_off_reason' => 'required_if:status,' . SubjectAttendanceStatus::DayOff->value . '|nullable|exists:custom_day_offs,description',
+                'leave_reason' => 'required_if:status,' . SubjectAttendanceStatus::Leave->value . '|nullable|string|max:255',
             ]);
 
             $attendance->update($validated);

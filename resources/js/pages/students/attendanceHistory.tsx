@@ -9,6 +9,7 @@ import EditSubjectModal from './editSubjectModal';
 import ShiftAttendanceTable from './shiftAttendanceTable';
 import SubjectAttendanceTable from './subjectAttendanceTable';
 import { AcademicYear, DayOffOption, ShiftingAttendance, Student, SubjectAttendance } from './types';
+import { statusOptions } from './constants';
 
 export interface Props {
     student: Student;
@@ -92,6 +93,7 @@ export default function AttendanceHistory({
             minutes_of_late: formData.minutes_of_late || null,
             note: formData.note || null,
             day_off_reason: formData.day_off_reason || null,
+            leave_reason: formData.leave_reason || null
         };
 
         router.patch(route('students.attendance.shift.save', selectedShiftAttendance?.id), payload, {
@@ -109,6 +111,7 @@ export default function AttendanceHistory({
             status: formData.status,
             note: formData.note || null,
             day_off_reason: formData.day_off_reason || null,
+            leave_reason: formData.leave_reason || null
         };
 
         router.patch(route('students.attendance.subject.save', selectedSubjectAttendance?.id), payload, {
@@ -199,7 +202,7 @@ export default function AttendanceHistory({
                         {Object.entries(statistics).map(([status, count]) => (
                             <div key={status} className="rounded bg-gray-100 p-3 text-center">
                                 <p className="text-lg font-bold">{count}</p>
-                                <p className="capitalize">{status.replace(/_/g, ' ')}</p>
+                                <p className="capitalize">{statusOptions.shift.find(option => option.value === status)?.label}</p>
                             </div>
                         ))}
                     </div>

@@ -21,6 +21,7 @@ class ShiftingAttendance extends Model
         'minutes_of_late',
         'note',
         'day_off_reason',
+        'leave_reason',
     ];
 
     protected $appends = [

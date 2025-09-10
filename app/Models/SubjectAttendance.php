@@ -20,6 +20,8 @@ class SubjectAttendance extends Model
         'submit_date',
         'submit_hour',
         'status',
+        'day_off_reason',
+        'leave_reason',
         'note'
     ];
 

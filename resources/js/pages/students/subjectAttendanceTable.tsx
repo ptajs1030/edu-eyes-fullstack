@@ -4,6 +4,7 @@ import { id } from 'date-fns/locale';
 import { CheckCircle, ChevronDown, CircleX, TriangleAlert } from 'lucide-react';
 import React from 'react';
 import { DaySummary, SubjectAttendance } from './types';
+import { statusOptions } from './constants';
 
 const SubjectAttendanceTable = ({
     subjectAttendances,
@@ -100,9 +101,8 @@ const SubjectAttendanceTable = ({
                                                     <Disclosure.Button className="flex items-center text-blue-600 hover:cursor-pointer hover:text-blue-800 focus:outline-none">
                                                         <span className="mr-1">{open ? 'Tutup' : 'Detail'}</span>
                                                         <ChevronDown
-                                                            className={`h-5 w-5 transform transition-transform duration-300 ${
-                                                                open ? 'rotate-180' : 'rotate-0'
-                                                            }`}
+                                                            className={`h-5 w-5 transform transition-transform duration-300 ${open ? 'rotate-180' : 'rotate-0'
+                                                                }`}
                                                         />
                                                     </Disclosure.Button>
                                                 </td>
@@ -158,7 +158,7 @@ const SubjectAttendanceTable = ({
                                                                             {att.submit_hour_formatted || '-'}
                                                                         </td>
                                                                         <td className="px-4 py-2 text-sm text-gray-600 capitalize">
-                                                                            {att.status.replace(/_/g, ' ')}
+                                                                            {statusOptions.subject.find((option) => option.value === att.status)?.label || att.status}
                                                                             {att.day_off_reason && (
                                                                                 <div className="text-xs text-gray-400">({att.day_off_reason})</div>
                                                                             )}

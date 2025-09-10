@@ -31,6 +31,7 @@ export interface BaseAttendance {
     status: string;
     note?: string;
     day_off_reason?: string;
+    leave_reason?: string;
 }
 
 export interface ShiftingAttendance extends BaseAttendance {
