@@ -56,7 +56,7 @@
     </div>
 
     <!-- detail siswa -->
-    <div style="padding:2mm; font-size:9px;">
+    <div style="padding:2mm; font-size:9px; margin-top:-5mm;">
         <p style="color:#4b5563; margin:0;">NIS / NISN : {{ $nis }}</p>
         <p style="color:#4b5563; margin:0;">KELAS : {{ $class }}</p>
         <p style="color:#4b5563; margin:0;">ALAMAT : {{ $address }}</p>

@@ -75,6 +75,7 @@
             font-size: 12px;
         }
         .details {
+            margin-top:-5mm
             padding: 2mm;
             font-size: 9px;
         }
