@@ -53,6 +53,18 @@ Schedule::command('check:task-deadlines')
         Log::info('Task deadline check completed');
     });
 
+// Hanya jalan antara 00:15 - 00:20 WIB
+Schedule::command('attendance:generate-event')
+    ->everyMinute()
+    ->withoutOverlapping()
+    ->timezone('Asia/Jakarta')
+    ->before(function () {
+        Log::info('Starting task deadline check...');
+    })
+    ->after(function () {
+        Log::info('Task deadline check completed');
+    });
+
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
