@@ -22,6 +22,7 @@ interface Props {
     nextAcademicYear: string;
     allCompleted: boolean;
     hasData: boolean;
+    hasActiveAcademicYear: boolean;
     attendanceModes: { value: string; label: string }[];
     filters: {
         sort?: string;
@@ -31,7 +32,15 @@ interface Props {
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Kenaikan Kelas', href: '' }];
 
-export default function GradePromotionIndex({ classGroups, nextAcademicYear, allCompleted, hasData, filters, attendanceModes }: Props) {
+export default function GradePromotionIndex({
+    classGroups,
+    nextAcademicYear,
+    allCompleted,
+    hasData,
+    hasActiveAcademicYear,
+    filters,
+    attendanceModes,
+}: Props) {
     const [attendanceMode, setAttendanceMode] = useState('');
     const [showFinalizeModal, setShowFinalizeModal] = useState(false);
     const [showResetModal, setShowResetModal] = useState(false);
@@ -126,11 +135,45 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
         );
     };
 
+    if (!hasActiveAcademicYear) {
+        return (
+            <AppLayout breadcrumbs={breadcrumbs}>
+                <Head title="Kenaikan Kelas" />
+                <Toaster position="top-right" richColors />
+
+                <div className="flex flex-col items-center justify-center gap-6 rounded-xl bg-white p-8 text-center shadow-lg">
+                    <div className="rounded-full bg-yellow-100 p-4">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-12 w-12 text-yellow-600"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                            />
+                        </svg>
+                    </div>
+                    <h2 className="text-xl font-semibold text-gray-800">Tahun Akademik Tidak Ditemukan</h2>
+                    <p className="max-w-md text-sm text-gray-600">
+                        Tidak ada tahun akademik yang aktif. Silakan set tahun akademik aktif terlebih dahulu sebelum melanjutkan proses kenaikan
+                        kelas.
+                    </p>
+                </div>
+            </AppLayout>
+        );
+    }
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Kenaikan Kelas" />
             <Toaster position="top-right" richColors />
 
+            {!hasActiveAcademicYear}
             {!hasData ? (
                 <div className="flex flex-col items-center justify-center gap-6 rounded-xl bg-white p-8 text-center shadow-lg">
                     <div className="rounded-full bg-blue-100 p-4">
@@ -151,8 +194,9 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
                     <button
                         onClick={handlePopulate}
                         disabled={isPopulating}
-                        className={`rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-600 ${isPopulating ? 'cursor-not-allowed opacity-70' : ''
-                            }`}
+                        className={`rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-600 ${
+                            isPopulating ? 'cursor-not-allowed opacity-70' : ''
+                        }`}
                     >
                         {isPopulating ? 'Memproses...' : 'Inisialisasi Data'}
                     </button>
@@ -185,8 +229,9 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
                                 <td className="p-4 text-sm">{group.classroom.name}</td>
                                 <td className="p-4 text-sm">
                                     <span
-                                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${group.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                                            }`}
+                                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                                            group.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                        }`}
                                     >
                                         {group.status === 'completed' ? 'Selesai' : 'Draf'}
                                     </span>
@@ -236,8 +281,9 @@ export default function GradePromotionIndex({ classGroups, nextAcademicYear, all
                                 <button
                                     onClick={handleFinalize}
                                     disabled={!allCompleted}
-                                    className={`rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 ${!allCompleted ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                                        }`}
+                                    className={`rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 ${
+                                        !allCompleted ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                                    }`}
                                 >
                                     Finalisasi
                                 </button>
