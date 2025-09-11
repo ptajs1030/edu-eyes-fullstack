@@ -13,7 +13,6 @@ use App\Models\TemporaryClassStatus;
 use App\Models\TemporaryClassStudent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 use Inertia\Response;
 use Inertia\Inertia;
 
@@ -27,13 +26,14 @@ class GradePromotionController extends Controller
     public function populateData()
     {
         try {
-            TemporaryClassStatus::query()->delete();
-            TemporaryClassStudent::query()->delete();
 
             $currentAcademicYear = $this->getAcademicYear();
-            if (!$currentAcademicYear || !$currentAcademicYear->id) {
-                throw new \Exception('Tahun akademik aktif tidak ditemukan');
+            if (!$currentAcademicYear) {
+                throw new \Exception('Tahun akademik aktif tidak ditemukan. Silakan set tahun akademik aktif terlebih dahulu.');
             }
+
+            TemporaryClassStatus::query()->delete();
+            TemporaryClassStudent::query()->delete();
 
             $students = Student::where('status', StudentStatus::Active->value)
                 ->whereNotNull('class_id')
@@ -75,6 +75,23 @@ class GradePromotionController extends Controller
 
     public function index(Request $request): Response
     {
+        $currentAcademicYear = $this->getAcademicYear();
+        
+        if (!$currentAcademicYear) {
+            return Inertia::render('grade-promotions/index', [
+                'classGroups' => [],
+                'nextAcademicYear' => null,
+                'allCompleted' => false,
+                'hasData' => false,
+                'hasActiveAcademicYear' => false,
+                'attendanceModes' => collect(AttendanceMode::cases())->map(fn($mode) => [
+                    'value' => $mode->value,
+                    'label' => $mode->label(),
+                ]),
+                'filters' => $request->only(['sort', 'direction']),
+            ]);
+        }
+
         $attendanceModes = collect(AttendanceMode::cases())->map(fn($mode) => [
             'value' => $mode->value,
             'label' => $mode->label(),
@@ -113,6 +130,7 @@ class GradePromotionController extends Controller
             'nextAcademicYear' => $this->getAcademicYear()->start_year + 1,
             'allCompleted' => $allCompleted,
             'hasData' => $classGroups->isNotEmpty(),
+            'hasActiveAcademicYear' => true,
             'attendanceModes' => $attendanceModes,
             'filters' => $request->only(['sort', 'direction']),
         ]);

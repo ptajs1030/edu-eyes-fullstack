@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Enums\AcademicYearStatus;
 use App\Enums\AttendanceMode;
 use App\Enums\ShiftAttendanceStatus;
+use App\Enums\StudentStatus;
 use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\ClassShiftingSchedule;
@@ -81,7 +82,7 @@ class GenerateShiftingAttendances extends Command
 
         foreach ($classIds as $classId) {
             $students = Student::where('class_id', $classId)
-                ->where('status', 'active')
+                ->where('status', StudentStatus::Active->value)
                 ->get();
 
             if ($students->isEmpty()) continue;
