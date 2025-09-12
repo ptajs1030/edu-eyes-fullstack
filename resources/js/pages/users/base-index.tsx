@@ -226,7 +226,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
 
                         <button
                             onClick={() => setShowImportModal(true)}
-                            className="inline-flex items-center rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-700"
+                            className="inline-flex items-center rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hhover:bg-indigo-700"
                         >
                             {/* icon upload */}
                             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
