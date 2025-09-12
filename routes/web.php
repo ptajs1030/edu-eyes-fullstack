@@ -54,6 +54,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{user}', [UserController::class, 'updateTeacher'])->name('teachers.update');
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('teachers.destroy');
         Route::put('/{user}/reset-password', [UserController::class, 'resetPassword'])->name('teachers.reset-password');
+        Route::post('/import', [UserController::class, 'importTeacher'])->name('teachers.import');
     });
     Route::prefix('parents')->group(function () {
         Route::get('/', [UserController::class, 'indexParent'])->name('parents.index');
@@ -61,10 +62,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('/{user}', [UserController::class, 'updateParent'])->name('parents.update');
         Route::delete('/{user}', [UserController::class, 'destroy'])->name('parents.destroy');
         Route::put('/{user}/reset-password', [UserController::class, 'resetPassword'])->name('parents.reset-password');
+        Route::post('/import', [UserController::class, 'importParent'])->name('parents.import');
     });
+    Route::get('/users/template/{role}', [UserController::class, 'downloadTemplate'])->name('users.template');
     Route::resource('payments', PaymentController::class);
     Route::patch('/payments/{payment}/transactions/update', [PaymentController::class, 'updateTransactions'])
-    ->name('payments.updateTransactions');
+        ->name('payments.updateTransactions');
     Route::resource('announcements', AnnouncementController::class);
     Route::resource('academic-years', AcademicYearController::class);
     Route::resource('classrooms', ClassroomController::class);

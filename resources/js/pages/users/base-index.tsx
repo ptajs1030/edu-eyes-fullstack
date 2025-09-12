@@ -1,4 +1,5 @@
 import ActionModal from '@/components/action-modal';
+import ImportModal from '@/components/import-modal';
 import Pagination from '@/components/ui/pagination';
 import Table from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
@@ -53,6 +54,7 @@ interface BaseIndexProps {
 
 export default function BaseIndex({ users, statuses, filters, breadcrumbs, title, role, routePrefix }: BaseIndexProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
+    const [showImportModal, setShowImportModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
@@ -66,23 +68,27 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
             return;
         }
         // Call backend to reset password (new endpoint)
-        router.put(route(`${routePrefix}.reset-password`, user.id), {}, {
-            onSuccess: () => {
-                // WhatsApp link
-                const waMsg = encodeURIComponent(`Password akun EduEyes Anda telah direset. Password baru: eduEyes123`);
-                let phone = user.phone?.replace(/[^0-9]/g, '') || '';
-                if (phone.startsWith('08')) {
-                    phone = '628' + phone.slice(2);
-                }
-                const waLink = `https://wa.me/${phone}?text=${waMsg}`;
-                window.open(waLink, '_blank');
-                toast.success('Password berhasil direset dan link WA telah dibuka');
+        router.put(
+            route(`${routePrefix}.reset-password`, user.id),
+            {},
+            {
+                onSuccess: () => {
+                    // WhatsApp link
+                    const waMsg = encodeURIComponent(`Password akun EduEyes Anda telah direset. Password baru: eduEyes123`);
+                    let phone = user.phone?.replace(/[^0-9]/g, '') || '';
+                    if (phone.startsWith('08')) {
+                        phone = '628' + phone.slice(2);
+                    }
+                    const waLink = `https://wa.me/${phone}?text=${waMsg}`;
+                    window.open(waLink, '_blank');
+                    toast.success('Password berhasil direset dan link WA telah dibuka');
+                },
+                onError: (error) => {
+                    console.log(error);
+                    toast.error('Gagal reset password');
+                },
             },
-            onError: (error) => {
-                console.log(error);
-                toast.error('Gagal reset password');
-            },
-        });
+        );
     };
 
     const { flash } = usePage().props as { flash?: { success?: string; error?: string } };
@@ -183,6 +189,16 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         }
     };
 
+    const translateRoleName = (roleName: string): string => {
+        const roleMap: Record<string, string> = {
+            Admin: 'Admin',
+            Teacher: 'Guru',
+            Parent: 'Orang Tua',
+        };
+
+        return roleMap[roleName] || roleName;
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={title} />
@@ -201,17 +217,35 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                         <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                                }`}
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
+                                selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                            }`}
                         >
                             Ekspor data yang dipilih
                         </button>
+
+                        <button
+                            onClick={() => setShowImportModal(true)}
+                            className="inline-flex items-center rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-700"
+                        >
+                            {/* icon upload */}
+                            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 5v14"
+                                />
+                            </svg>
+                            Impor Data
+                        </button>
                     </div>
+
                     <button
                         onClick={() => openForm(null)}
                         className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
-                        Tambah {role.name}
+                        Tambah {translateRoleName(role.name)}
                     </button>
                 </div>
 
@@ -276,7 +310,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                                     </button>
                                     <button
                                         onClick={() => handleResetPassword(user)}
-                                        className="rounded bg-yellow-500 px-5 py-1 font-medium text-white whitespace-nowrap hover:cursor-pointer"
+                                        className="rounded bg-yellow-500 px-5 py-1 font-medium whitespace-nowrap text-white hover:cursor-pointer"
                                     >
                                         Reset Password
                                     </button>
@@ -331,12 +365,19 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                     onClose={() => setIsResetErrorOpen(false)}
                     title="Reset Password Error"
                     message={<span>Phone is not set for this user</span>}
-                    buttons={[{
-                        label: 'OK',
-                        onClick: () => setIsResetErrorOpen(false),
-                        variant: 'neutral',
-                    }]}
+                    buttons={[
+                        {
+                            label: 'OK',
+                            onClick: () => setIsResetErrorOpen(false),
+                            variant: 'neutral',
+                        },
+                    ]}
                 />
+
+                {/* Modal import muncul saat showImportModal = true */}
+                {showImportModal && (
+                    <ImportModal isOpen={showImportModal} onClose={() => setShowImportModal(false)} role={role} routePrefix={routePrefix} />
+                )}
             </div>
         </AppLayout>
     );
