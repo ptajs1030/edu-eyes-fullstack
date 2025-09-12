@@ -4,7 +4,7 @@ import Table from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 import StudentFormModal from './form';
 
@@ -76,6 +76,19 @@ export default function StudentIndex() {
         }
     }, [flash]);
 
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setShowClassroomFilter(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -86,6 +99,7 @@ export default function StudentIndex() {
     const [qrSvgHtml, setQrSvgHtml] = useState<string>('');
     const [selectedClassrooms, setSelectedClassrooms] = useState<number[]>(filters.classrooms || []);
     const [showClassroomFilter, setShowClassroomFilter] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     const handleClassroomFilterChange = (classroomId: number) => {
         const newSelectedClassrooms = selectedClassrooms.includes(classroomId)
@@ -258,7 +272,7 @@ export default function StudentIndex() {
                             className="w-64 rounded border px-3 py-1"
                         />
                         {/* Classroom Filter Dropdown */}
-                        <div className="relative">
+                        <div className="relative"  ref={dropdownRef}>
                             <button
                                 onClick={() => setShowClassroomFilter(!showClassroomFilter)}
                                 className="rounded bg-gray-200 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-300"
