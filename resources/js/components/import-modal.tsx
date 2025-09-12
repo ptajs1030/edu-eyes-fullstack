@@ -128,7 +128,6 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
         router.post(route(`${routePrefix}.import`), formData, {
             onStart: () => setProcessing(true),
             onSuccess: () => {
-                toast.success(`Import data ${role.name} berhasil`);
                 setProcessing(false);
                 handleClose();
 
