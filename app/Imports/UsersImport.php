@@ -20,16 +20,16 @@ class UsersImport implements ToModel, WithHeadingRow
     {
         return new User([
             'role_id'   => $this->roleId,
-            'full_name' => $row['full_name*'] ?? null,
-            'username'  => $row['username*'] ?? null,
+            'full_name' => $row['full_name'] ?? null,
+            'username'  => $row['username'] ?? null,
             'email'     => $row['email'] ?? null,
             'phone'     => $row['phone'] ?? null,
             'address'   => $row['address'] ?? null,
-            'status'    => $row['status*'] ?? 'inactive',
+            'status'    => $row['status'] ?? 'inactive',
             'job'       => $row['job'] ?? null,
             'nip'       => $row['nip'] ?? null,
             'position'  => $row['position'] ?? null,
-            'password'  => isset($row['password*']) ? Hash::make($row['password*']) : Hash::make('password123'),
+            'password'  => isset($row['password']) ? Hash::make($row['password']) : Hash::make('password123'),
         ]);
     }
 }

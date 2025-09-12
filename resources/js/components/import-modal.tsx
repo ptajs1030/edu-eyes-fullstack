@@ -17,6 +17,14 @@ const expectedHeaderByRole = (roleValue: string): string[] => {
         : ['full_name', 'username', 'email', 'phone', 'address', 'password', 'status', 'nip', 'position'];
 };
 
+const prettyHeaderByRole = (roleValue: string): string[] => {
+    return roleValue === 'parent'
+        ? ['full_name*', 'username*', 'email', 'phone', 'address', 'password*', 'status*', 'job']
+        : ['full_name*', 'username*', 'email', 'phone', 'address', 'password*', 'status*', 'nip', 'position'];
+};
+
+const normalizeHeader = (s: string) => s.replace(/\*/g, '').trim().toLowerCase().replace(/\s+/g, '_');
+
 export default function ImportModal({ isOpen, onClose, role, routePrefix }: ImportModalProps) {
     const [file, setFile] = useState<File | null>(null);
     const [errorMsg, setErrorMsg] = useState<string>('');
@@ -61,12 +69,8 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
                 const first = wb.SheetNames[0];
                 const ws = wb.Sheets[first];
                 const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
-                const headerRow = (rows[0] || []).map((v) =>
-                    String(v ?? '')
-                        .trim()
-                        .toLowerCase(),
-                );
-                const expected = expectedHeaderByRole(role.value).map((h) => h.toLowerCase());
+                const headerRow = (rows[0] || []).map((v) => normalizeHeader(String(v ?? '')));
+                const expected = expectedHeaderByRole(role.value).map(normalizeHeader);
                 const match = headerRow.length === expected.length && expected.every((col, idx) => col === headerRow[idx]);
 
                 if (!match) {
@@ -142,76 +146,67 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
     };
 
     return (
-    <FormModal
-        isOpen={isOpen}
-        onClose={handleClose}
-        title={`Import Data ${role.name}`}
-        onSubmit={(e) => {
-            e.preventDefault();
-            handleImport();
-        }}
-    >
-        {/* Body */}
-        <div className="space-y-5">
-            {/* Upload Section */}
-            <div className="rounded-lg border border-dashed border-gray-300 p-4">
-                <label className="mb-2 block text-sm font-medium text-gray-700">
-                    Upload File (.xlsx / .xls)
-                </label>
-                <div className="relative mt-1">
-                    <input
-                        type="file"
-                        accept=".xlsx,.xls,.csv"
-                        onChange={handleFileSelect}
-                        disabled={processing}
-                        className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2.5 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100"
-                    />
-                </div>
-                <p className="mt-2 text-xs text-gray-500">
-                    Gunakan template agar header sesuai. Maks 2MB.
-                </p>
-                
-                {errorMsg && (
-                    <div className="mt-2 text-xs text-red-600">
-                        {errorMsg}
-                    </div>
-                )}
-                
-                {validating && (
-                    <div className="mt-2 inline-flex items-center text-xs text-gray-600">
-                        <svg className="mr-1.5 h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"></circle>
-                            <path className="opacity-75" d="M4 12a8 8 0 018-8v8z" fill="currentColor"></path>
-                        </svg>
-                        Memvalidasi header...
-                    </div>
-                )}
-            </div>
-
-            {/* Template Download Section */}
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <button
-                    type="button"
-                    onClick={handleDownloadTemplate}
-                    className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 hover:cursor-pointer"
-                    disabled={processing}
-                >
-                    <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3"
+        <FormModal
+            isOpen={isOpen}
+            onClose={handleClose}
+            title={`Import Data ${role.name}`}
+            onSubmit={(e) => {
+                e.preventDefault();
+                handleImport();
+            }}
+        >
+            {/* Body */}
+            <div className="space-y-5">
+                {/* Upload Section */}
+                <div className="rounded-lg border border-dashed border-gray-300 p-4">
+                    <label className="mb-2 block text-sm font-medium text-gray-700">Upload File (.xlsx / .xls)</label>
+                    <div className="relative mt-1">
+                        <input
+                            type="file"
+                            accept=".xlsx,.xls,.csv"
+                            onChange={handleFileSelect}
+                            disabled={processing}
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-4 file:py-2.5 file:text-sm file:font-medium file:text-blue-700 hover:file:bg-blue-100"
                         />
-                    </svg>
-                    Template
-                </button>
+                    </div>
+                    <p className="mt-2 text-xs text-gray-500">Gunakan template agar header sesuai. Maks 2MB.</p>
 
-                <div className="text-xs text-gray-500">
-                    Header: {expectedHeaderByRole(role.value).join(', ')}
+                    {errorMsg && <div className="mt-2 text-xs text-red-600">{errorMsg}</div>}
+
+                    {validating && (
+                        <div className="mt-2 inline-flex items-center text-xs text-gray-600">
+                            <svg className="mr-1.5 h-3.5 w-3.5 animate-spin" viewBox="0 0 24 24" fill="none">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor"></circle>
+                                <path className="opacity-75" d="M4 12a8 8 0 018-8v8z" fill="currentColor"></path>
+                            </svg>
+                            Memvalidasi header...
+                        </div>
+                    )}
+                </div>
+
+                {/* Template Download Section */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <button
+                        type="button"
+                        onClick={handleDownloadTemplate}
+                        className="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                        disabled={processing}
+                    >
+                        <svg className="mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V3"
+                            />
+                        </svg>
+                        Template
+                    </button>
+
+                    {/* <div className="text-xs text-gray-500">Header: {expectedHeaderByRole(role.value).join(', ')}</div> */}
+                    <div className="text-xs text-gray-500">Header: {prettyHeaderByRole(role.value).join(', ')}</div>
                 </div>
             </div>
-        </div>
 
             {/* Footer */}
             <div className="mt-6 flex justify-end">
