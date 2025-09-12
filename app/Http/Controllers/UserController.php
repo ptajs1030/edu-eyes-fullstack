@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\Role as EnumsRole;
 use App\Enums\UserStatus;
+use App\Imports\UsersImport;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -318,5 +320,56 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal reset password: ' . $e->getMessage());
         }
+    }
+
+    public function importByRole(Request $request, EnumsRole $role)
+    {
+        try {
+            $request->validate([
+                'file' => 'required|mimes:xlsx,xls,csv|max:2048'
+            ]);
+
+            $roleModel = Role::where('name', $role->value)->firstOrFail();
+
+            Excel::import(new UsersImport($roleModel->id), $request->file('file'));
+            return redirect()->back()->with('success', "Data {$role->label()} berhasil diimpor");
+        } catch (ValidationException $e) {
+            return redirect()->back()->with('error', 'File tidak valid: ' . $e->getMessage())->withInput();
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengimpor data: ' . $e->getMessage())->withInput();
+        }
+    }
+
+    public function importTeacher(Request $request)
+    {
+        return $this->importByRole($request, EnumsRole::Teacher);
+    }
+
+    public function importParent(Request $request)
+    {
+        return $this->importByRole($request, EnumsRole::Parent);
+    }
+
+    public function downloadTemplate(string $role)
+    {
+        $role = strtolower($role);
+        $allowed = ['parent', 'teacher'];
+        if (!in_array($role, $allowed, true)) {
+            return response()->json(['message' => 'Role tidak valid'], 422);
+        }
+
+        $filename = "template-import-{$role}.xlsx";
+        $path = storage_path("app/templates/{$filename}");
+
+        if (!file_exists($path)) {
+            return response()->json(['message' => 'Template tidak ditemukan'], 404);
+        }
+
+        return response()->download($path, $filename, [
+            'Content-Type'              => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'X-Template-Role'           => $role,
+            'X-File-Name'               => $filename,
+            'Access-Control-Expose-Headers' => 'X-Template-Role, X-File-Name',
+        ]);
     }
 }

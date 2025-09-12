@@ -1,4 +1,5 @@
 import ActionModal from '@/components/action-modal';
+import ImportModal from '@/components/import-modal';
 import Pagination from '@/components/ui/pagination';
 import Table from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
@@ -53,6 +54,7 @@ interface BaseIndexProps {
 
 export default function BaseIndex({ users, statuses, filters, breadcrumbs, title, role, routePrefix }: BaseIndexProps) {
     const [isFormOpen, setIsFormOpen] = useState(false);
+    const [showImportModal, setShowImportModal] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
@@ -221,7 +223,24 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                         >
                             Ekspor data yang dipilih
                         </button>
+
+                        <button
+                            onClick={() => setShowImportModal(true)}
+                            className="inline-flex items-center rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-700"
+                        >
+                            {/* icon upload */}
+                            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 5v14"
+                                />
+                            </svg>
+                            Impor Data
+                        </button>
                     </div>
+
                     <button
                         onClick={() => openForm(null)}
                         className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
@@ -354,6 +373,11 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                         },
                     ]}
                 />
+
+                {/* Modal import muncul saat showImportModal = true */}
+                {showImportModal && (
+                    <ImportModal isOpen={showImportModal} onClose={() => setShowImportModal(false)} role={role} routePrefix={routePrefix} />
+                )}
             </div>
         </AppLayout>
     );
