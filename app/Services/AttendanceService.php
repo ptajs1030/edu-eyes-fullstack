@@ -632,13 +632,7 @@ return [
             throw new SilentHttpException(404, 'Siswa tidak ditemukan');
         }
         $parent=$student->parent;
-        $participant=EventParticipant::where('student_id', $student->id)
-            ->where('event_id', $data->getEvent())->with('event')
-            ->first();
-           
-        if (!$participant) {
-            throw new SilentHttpException(404, 'Peserta tidak ditemukan');
-        }
+    
 
         $pics=EventPic::where('event_id', $data->getEvent())->get();
         if ($pics->isEmpty()) {
@@ -646,71 +640,60 @@ return [
         } 
         $attendance=EventAttendance::where('student_id', $student->id)
             ->where('event_id', $data->getEvent())
-            ->where('submit_date', Carbon::now()->format('Y-m-d'))
+            ->where('submit_date', Carbon::now()->format('Y-m-d'))->with('event')
             ->first();
         $late_tolerance = (int)Setting::where('key', 'late_tolerance')->value        ('value');
-        $start_hour=Carbon::parse($participant->event->start_hour);
-        $deadline = Carbon::parse($participant->event->start_hour)->addMinutes($late_tolerance);
+        $start_hour=Carbon::parse($attendance->event->start_hour);
+        $deadline = Carbon::parse($attendance->event->start_hour)->addMinutes($late_tolerance);
         $submit_hour = Carbon::parse($data->getSubmitHour());
         $minutes_of_late = $start_hour->diffInMinutes($submit_hour);
         $isPic = $pics->contains('pic_id', auth()->user()->id);
         if (!$isPic) {
             throw new SilentHttpException(403, 'Anda tidak ditugaskan untuk kegiatan ini.');
         }
-       
-        if ($attendance && $attendance->submit_date != Carbon::now()->format('Y-m-d')) {
-            if ($attendance->clock_in_hour && $attendance->clock_out_hour == '00:00:00') {
-                $minClockOut = Carbon::parse($attendance->clock_in_hour)->addMinutes(2);
-                    if ($submit_hour->lt($minClockOut)) {
-                        throw new SilentHttpException(400, 'Absen keluar harus minimal 2 menit setelah absen masuk');
-                    }
-                $attendance->update([
-                    'clock_out_hour' => $submit_hour->format('H:i:s'),
-                ]);
-                try {
+
+        if ($attendance->clock_out_hour && $attendance->clock_in_hour) {
+            return throw new SilentHttpException(400, 'Siswa telah melakukan absensi');
+        }
+        
+
+        
+        if ($submit_hour <= $start_hour && !$attendance->clock_in_hour ) {
+            $attendance->update([
+                'status' => 'present',
+                'clock_in_hour' => $submit_hour
+            ]);
+            
+             try {
                 if ($parent && $parent->notification_key) {
                     $title= 'Absensi '.$student->full_name;
-                    $body= $student->full_name . ' telah melakukan absensi keluar pada kegitan, ' . $participant->event->name . ' dengan status ' .  $attendance->status;
+                    $body= $student->full_name . ' telah melakukan absensi masuk pada kegitan, ' . $attendance->event->name . ' dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
                         'tipe' => 'absensi_kegiatan',
                     ]);
                 }
-                } catch (\Throwable $th) {
+            } catch (\Throwable $th) {
                 Log::error('Gagal kirim notifikasi Firebase', [
                     'token' => $parent ? $parent->notification_key : null,
                     'error_message' => $th->getMessage(),
                 ]);
-                }
-                return [
-                    'message' => 'Berhasil absen keluar',
-                ];
-            } else {
-           
-            throw new SilentHttpException(400, 'Absensi sudah diisi');
             }
-        } else {
-            if ($submit_hour<=$start_hour) {
-                $status = 'present';
-            }else if($submit_hour<=$deadline){
-                $status = 'present_in_tolerance';
-            }else {
-                $status = 'late';
-            }
-            $attendance = EventAttendance::create([
-                'student_id' => $student->id,
-                'event_id' => $data->getEvent(),
-                'academic_year_id' => AcademicYear::where('status', true)->first()->id,
-                'submit_date' => Carbon::now()->format('Y-m-d'),
-                'clock_in_hour' => $submit_hour->format('H:i:s'),
-                'clock_out_hour' => '00:00:00', 
-                'status' => $status,
-                'minutes_of_late' => $status == 'late' || $status == 'present_in_tolerance' ? (int) $minutes_of_late : 0,
+
+            return [
+                'message' => 'Berhasil Absensi Masuk',
+            ];
+        }else if ($submit_hour <= $deadline && !$attendance->clock_in_hour ) {
+             $attendance->update([
+                'status' => 'present_in_tolerance',
+                'clock_in_hour' => $submit_hour,
+                'minutes_of_late' => (int) $minutes_of_late
             ]);
-            try {
+            
+             try {
                 if ($parent && $parent->notification_key) {
                     $title= 'Absensi '.$student->full_name;
-                    $body= $student->full_name . ' telah melakukan absensi masuk pada kegitan, ' . $participant->event->name . ' dengan status ' .  $attendance->status;
+                   $body= $student->full_name . ' telah melakukan absensi masuk pada kegitan, ' . $attendance->event->name . ' dengan status ' .  $attendance->status;
 
                     $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
                         'tipe' => 'absensi_kegiatan',
@@ -723,9 +706,64 @@ return [
                 ]);
             }
             return [
-                    'message' => 'Berhasil absen masuk',
-                ];
+                'message' => 'Berhasil Absensi Masuk',
+            ];
+        }else if ($submit_hour > $deadline && !$attendance->clock_in_hour ) {
+            $attendance->update([
+                'status' => 'late',
+                'minutes_of_late' => (int) $minutes_of_late,
+                'clock_in_hour' => $submit_hour,
+            ]);
+             try {
+                if ($parent && $parent->notification_key) {
+                    $title= 'Absensi '.$student->full_name;
+                    $body= $student->full_name . ' telah melakukan absensi masuk pada kegitan, ' . $attendance->event->name . ' dengan status ' .  $attendance->status;
+
+                    $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
+                        'tipe' => 'absensi_kegiatan',
+                    ]);
+                }
+            } catch (\Throwable $th) {
+                Log::error('Gagal kirim notifikasi Firebase', [
+                    'token' => $parent ? $parent->notification_key : null,
+                    'error_message' => $th->getMessage(),
+                ]);
+            }
+            return [
+                'message' => 'Berhasil Absensi Masuk',
+            ];
+            
+        }else if (!$attendance->clock_out_hour && $attendance->clock_in_hour ) {
+            if ($submit_hour < Carbon::parse($attendance->clock_in_hour)->addMinutes(2)) {
+                throw new SilentHttpException(400, 'Anda harus menunggu 2 menit untuk melakukan absensi keluar');
+            }
+            $attendance->update([
+                'clock_out_hour' => $submit_hour,
+            ]);
+        
+             try {
+                if ($parent && $parent->notification_key) {
+                    $title= 'Absensi '.$student->full_name;
+                    $body= $student->full_name . ' telah melakukan absensi keluar pada kegitan, ' . $attendance->event->name . ' dengan status ' .  $attendance->status;
+
+                    $this->firebase->sendToDevice($parent->notification_key, $title, $body,     [
+                        'tipe' => 'absensi_kegiatan',
+                    ]);
+                }
+            } catch (\Throwable $th) {
+                Log::error('Gagal kirim notifikasi Firebase', [
+                    'token' => $parent ? $parent->notification_key : null,
+                    'error_message' => $th->getMessage(),
+                ]);
+            }
+            return [
+                'message' => 'Berhasil Absensi Keluar',
+            ];
+        }else{
+            throw new SilentHttpException(400, 'Anda harus melakukan absensi masuk terlebih dahulu');
         }
+       
+        
     }
 
     public function eventAttendanceHistory($search, $date, $event_id){
