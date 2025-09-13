@@ -4,7 +4,7 @@ import Table from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 import StudentFormModal from './form';
 
@@ -76,6 +76,34 @@ export default function StudentIndex() {
         }
     }, [flash]);
 
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setShowClassroomFilter(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    useEffect(() => {
+        const currentClassrooms = filters.classrooms
+            ? Array.isArray(filters.classrooms)
+                ? filters.classrooms.map((id) => Number(id))
+                : [Number(filters.classrooms)]
+            : [];
+
+        setSelectedClassrooms(currentClassrooms);
+    }, [filters.classrooms]);
+
+    const initialClassrooms = filters.classrooms
+        ? Array.isArray(filters.classrooms)
+            ? filters.classrooms.map((id) => Number(id))
+            : [Number(filters.classrooms)]
+        : [];
     const [isFormOpen, setIsFormOpen] = useState(false);
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
@@ -84,37 +112,57 @@ export default function StudentIndex() {
     const [qrStudent, setQrStudent] = useState<Student | null>(null);
     const [qrDownloadUrl, setQrDownloadUrl] = useState<string>('');
     const [qrSvgHtml, setQrSvgHtml] = useState<string>('');
-    const [selectedClassrooms, setSelectedClassrooms] = useState<number[]>(filters.classrooms || []);
+    const [selectedClassrooms, setSelectedClassrooms] = useState<number[]>(initialClassrooms);
     const [showClassroomFilter, setShowClassroomFilter] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
 
     const handleClassroomFilterChange = (classroomId: number) => {
-        const newSelectedClassrooms = selectedClassrooms.includes(classroomId)
-            ? selectedClassrooms.filter((id) => id !== classroomId)
-            : [...selectedClassrooms, classroomId];
+        const numericClassroomId = Number(classroomId);
+        const newSelectedClassrooms = selectedClassrooms.includes(numericClassroomId)
+            ? selectedClassrooms.filter((id) => id !== numericClassroomId)
+            : [...selectedClassrooms, numericClassroomId];
 
         setSelectedClassrooms(newSelectedClassrooms);
 
-        router.get(
-            route('students.index'),
-            {
-                ...filters,
-                classrooms: newSelectedClassrooms.length > 0 ? newSelectedClassrooms : null,
-            },
-            { preserveState: true },
-        );
+        // Update URL dengan filter baru
+        const queryParams: any = {
+            search: filters.search || undefined,
+            sort: filters.sort || undefined,
+            direction: filters.direction || undefined,
+            page: 1, // Reset ke page 1
+        };
+
+        if (newSelectedClassrooms.length > 0) {
+            queryParams.classrooms = newSelectedClassrooms;
+        }
+
+        router.get(route('students.index'), queryParams, {
+            preserveState: true,
+            replace: true,
+            only: ['students', 'filters'], // Hanya update data yang diperlukan
+        });
     };
 
-    // Clear all classroom filters
     const clearClassroomFilters = () => {
         setSelectedClassrooms([]);
-        router.get(
-            route('students.index'),
-            {
-                ...filters,
-                classrooms: null,
-            },
-            { preserveState: true },
-        );
+
+        const queryParams: any = {
+            search: filters.search || undefined,
+            sort: filters.sort || undefined,
+            direction: filters.direction || undefined,
+            page: 1,
+        };
+
+        // Hapus classrooms dari query params
+        if (filters.classrooms) {
+            queryParams.classrooms = undefined;
+        }
+
+        router.get(route('students.index'), queryParams, {
+            preserveState: true,
+            replace: true,
+            only: ['students', 'filters'],
+        });
     };
 
     const openForm = (student: Student | null = null) => {
@@ -125,7 +173,6 @@ export default function StudentIndex() {
     const handleDelete = async (id: number) => {
         router.delete(`/students/${id}`, {
             onSuccess: () => {
-                // Do nothing here – let the flash message logic handle it
                 router.reload();
             },
         });
@@ -140,14 +187,14 @@ export default function StudentIndex() {
 
         const selectedData = students.data.filter((a) => selectedIds.includes(a.id));
         const headers = `Nama Siswa,Nama Orang Tua/Wali,Kelas,NIS,Tahun Masuk,Jenis Kelamin,Agama,Tanggal Lahir,Alamat,Status\n`;
-        const csv = selectedData.map((a) => {
-            const addressOneLine = a.address
-                ? `"${a.address.replace(/[\r\n\u2028\u2029\u0085]+/g, ' ').replace(/"/g, '""')}"`
-                : '""';
-            const formattedDate = a.date_of_birth ? new Date(a.date_of_birth).toISOString().slice(0, 10) : '';
-            const nis = a.nis ? a.nis : '-';
-            return `${a.full_name},${a.parent?.full_name},${a.classroom?.name},${nis},${a.entry_year},${a.gender},${a.religion},${formattedDate},${addressOneLine},${a.status}`;
-        }).join('\n');
+        const csv = selectedData
+            .map((a) => {
+                const addressOneLine = a.address ? `"${a.address.replace(/[\r\n\u2028\u2029\u0085]+/g, ' ').replace(/"/g, '""')}"` : '""';
+                const formattedDate = a.date_of_birth ? new Date(a.date_of_birth).toISOString().slice(0, 10) : '';
+                const nis = a.nis ? a.nis : '-';
+                return `${a.full_name},${a.parent?.full_name},${a.classroom?.name},${nis},${a.entry_year},${a.gender},${a.religion},${formattedDate},${addressOneLine},${a.status}`;
+            })
+            .join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -166,12 +213,20 @@ export default function StudentIndex() {
         const sortDirection = filters.direction === 'asc' ? 'desc' : 'asc';
         let sortColumn = column;
 
-        // Mapping untuk kolom relasi
         if (column === 'classroom.name') {
-            sortColumn = 'class_name'; // Nama yang akan dikenali oleh backend
+            sortColumn = 'class_name';
         }
 
-        router.get(route('students.index'), { sort: sortColumn, direction: sortDirection }, { preserveState: true });
+        router.get(
+            route('students.index'),
+            {
+                sort: sortColumn,
+                direction: sortDirection,
+                classrooms: selectedClassrooms.length > 0 ? selectedClassrooms : undefined,
+                search: filters.search || undefined,
+            },
+            { preserveState: true },
+        );
     };
 
     const handleBulkPrint = async () => {
@@ -258,7 +313,7 @@ export default function StudentIndex() {
                             className="w-64 rounded border px-3 py-1"
                         />
                         {/* Classroom Filter Dropdown */}
-                        <div className="relative">
+                        <div className="relative" ref={dropdownRef}>
                             <button
                                 onClick={() => setShowClassroomFilter(!showClassroomFilter)}
                                 className="rounded bg-gray-200 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-300"
@@ -296,8 +351,9 @@ export default function StudentIndex() {
                         <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                                }`}
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
+                                selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                            }`}
                         >
                             Ekspor data yang dipilih
                         </button>
@@ -377,8 +433,9 @@ export default function StudentIndex() {
                                 </button>
                                 <Link
                                     href={route('students.attendance', student.id)}
-                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${student.classroom?.name ? 'bg-sky-500 hover:cursor-pointer hover:bg-sky-600' : 'cursor-not-allowed bg-sky-300'
-                                        }`}
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
+                                        student.classroom?.name ? 'bg-sky-500 hover:cursor-pointer hover:bg-sky-600' : 'cursor-not-allowed bg-sky-300'
+                                    }`}
                                     onClick={(e) => {
                                         if (!student.classroom?.name) {
                                             e.preventDefault();
