@@ -68,6 +68,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('payments', PaymentController::class);
     Route::patch('/payments/{payment}/transactions/update', [PaymentController::class, 'updateTransactions'])
         ->name('payments.updateTransactions');
+    Route::post('/payments/{payment}/resend-notification', [PaymentController::class, 'resendNotification'])
+        ->name('payments.resend-notification');
     Route::resource('announcements', AnnouncementController::class);
     Route::resource('academic-years', AcademicYearController::class);
     Route::resource('classrooms', ClassroomController::class);
