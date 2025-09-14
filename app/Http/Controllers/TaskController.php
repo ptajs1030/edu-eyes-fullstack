@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Role;
 use App\Events\TaskCreated;
+use App\Jobs\TaskDeadlineReminder;
 use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\Student;
@@ -11,11 +13,13 @@ use App\Models\Task;
 use App\Models\TaskAssignment;
 use App\Models\TaskAttachment;
 use Carbon\Carbon;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB as FacadesDB;
 use Inertia\Inertia;
-use Log;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class TaskController extends Controller
 {
@@ -99,7 +103,7 @@ class TaskController extends Controller
 
             return redirect()->route('tasks.index')
                 ->with('success', 'Tugas Berhasil Ditambahkan');
-        } catch (\ValidationException $e) {
+        } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
@@ -428,6 +432,51 @@ class TaskController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan saat menghapus tugas: ' . $e->getMessage());
+        }
+    }
+
+    public function resendNotification(Task $task)
+    {
+        try {
+            // Validasi: cek apakah task sudah lewat deadline
+            $now = now('Asia/Jakarta');
+
+            // Combine due_date and due_time properly
+            $dueDate = $task->due_date->format('Y-m-d');
+            $dueTime = $task->due_time ? $task->due_time->format('H:i:s') : '23:59:59';
+
+            $dueDateTimeString = $dueDate . ' ' . $dueTime;
+
+            $dueDateTime = Carbon::parse($dueDateTimeString, 'Asia/Jakarta');
+
+            if ($now->greaterThan($dueDateTime)) {
+                return redirect()->route('tasks.index')
+                    ->with('error', 'Tidak dapat mengirim notifikasi karena tugas sudah melewati tenggat waktu.');
+            }
+
+            $task->load(['assignments.student.parent', 'subject']);
+
+            $notificationCount = collect($task->assignments)
+                ->filter(fn($a) => $a->student?->parent?->role->name === Role::Parent->value && $a->student->parent->notification_key)
+                ->each(fn($a) => TaskDeadlineReminder::dispatch($task, $a->student->parent, 'manual'))
+                ->count();
+
+            return redirect()->route('tasks.index')
+                ->with(
+                    $notificationCount > 0 ? 'success' : 'info',
+                    $notificationCount > 0
+                        ? "Notifikasi berhasil dikirim ke {$notificationCount} orang tua."
+                        : 'Tidak ada orang tua yang dapat menerima notifikasi.'
+                );
+        } catch (\Exception $e) {
+            Log::error('Gagal mengirim notifikasi', [
+                'task_id' => $task->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->route('tasks.index')
+                ->with('error', 'Gagal mengirim notifikasi: ' . $e->getMessage());
         }
     }
 }
