@@ -4,7 +4,6 @@ import Table from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { set } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 
@@ -39,6 +38,7 @@ const breadcrumbs: BreadcrumbItem[] = [{ title: 'Tugas', href: '' }];
 export default function TaskIndex({ tasks, filters }: Props) {
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
+    const [taskToNotify, setTaskToNotify] = useState<Task | null>(null);
 
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
 
@@ -118,6 +118,27 @@ export default function TaskIndex({ tasks, filters }: Props) {
         });
     };
 
+    const isTaskExpired = (task: Task) => {
+        const now = new Date();
+
+        // Create due date from due_date and due_time
+        const dueDate = new Date(task.due_date);
+        if (isNaN(dueDate.getTime())) {
+            console.error('Invalid base date:', task.due_date);
+            return true; // Consider invalid dates as expired
+        }
+
+        // If due_time exists, parse and set the time
+        if (task.due_time) {
+            const [hours, minutes] = task.due_time.split(':');
+            dueDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        } else {
+            dueDate.setHours(23, 59, 59, 999);
+        }
+
+        return now > dueDate;
+    };
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Daftar Tugas" />
@@ -165,7 +186,9 @@ export default function TaskIndex({ tasks, filters }: Props) {
                             <td className="w-[10px] p-3 text-sm">
                                 <input type="checkbox" checked={selectedIds.includes(task.id)} onChange={() => toggleSelect(task.id)} />
                             </td>
-                            <td className="p-3 text-sm">{task.title}</td>
+                            <td className="p-3 text-sm">
+                                {task.title} {isTaskExpired(task)}
+                            </td>
                             <td className="p-3 text-sm">
                                 {task.description && task.description.length > 70
                                     ? `${task.description.substring(0, 70)}...`
@@ -199,6 +222,16 @@ export default function TaskIndex({ tasks, filters }: Props) {
                                 >
                                     Detail
                                 </Link>
+                                <button
+                                    onClick={() => setTaskToNotify(task)}
+                                    disabled={isTaskExpired(task)}
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
+                                        isTaskExpired(task) ? 'cursor-not-allowed bg-sky-300' : 'bg-sky-500 hover:cursor-pointer'
+                                    }`}
+                                    title={isTaskExpired(task) ? 'Tugas sudah melewati deadline' : 'Kirim notifikasi'}
+                                >
+                                    Kirim Notif
+                                </button>
                                 <button
                                     onClick={() => setTaskToDelete(task)}
                                     className="rounded bg-red-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
@@ -236,6 +269,34 @@ export default function TaskIndex({ tasks, filters }: Props) {
                                 }
                             },
                             variant: 'danger',
+                        },
+                    ]}
+                />
+
+                <ActionModal
+                    isOpen={!!taskToNotify}
+                    onClose={() => setTaskToNotify(null)}
+                    title="Confirm Notification"
+                    message={
+                        <span>
+                            Are you sure you want to send notification for task <strong>{taskToNotify?.title}</strong>?
+                        </span>
+                    }
+                    buttons={[
+                        {
+                            label: 'Cancel',
+                            onClick: () => setTaskToNotify(null),
+                            variant: 'neutral',
+                        },
+                        {
+                            label: 'Send Notification',
+                            onClick: () => {
+                                if (taskToNotify) {
+                                    router.post(route('tasks.resend-notification', taskToNotify.id));
+                                    setTaskToNotify(null);
+                                }
+                            },
+                            variant: 'primary',
                         },
                     ]}
                 />
