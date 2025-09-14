@@ -48,11 +48,8 @@ class SendPaymentRealTimeNotification implements ShouldQueue
             $formattedNominal = 'Rp ' . number_format($this->payment->nominal, 0, ',', '.');
 
             if ($this->type === 'created') {
-                $title = 'Pembayaran Baru Ditambahkan';
-                $body = "Pembayaran '{$this->payment->title}' ({$formattedNominal}) telah ditambahkan untuk anak Anda.";
-            } else {
-                $title = 'Pembayaran Diperbarui';
-                $body = "Pembayaran '{$this->payment->title}' ({$formattedNominal}) telah diperbarui.";
+                $title = 'Tagihan Baru Ditambahkan';
+                $body = "Tagihan '{$this->payment->title}' ({$formattedNominal}) telah ditambahkan untuk anak Anda.";
             }
 
             $data = [

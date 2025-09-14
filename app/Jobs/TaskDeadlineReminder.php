@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Models\Setting;
 use App\Models\Task;
 use App\Models\User;
 use App\Services\FirebaseService;
@@ -42,12 +43,14 @@ class TaskDeadlineReminder implements ShouldQueue
                 return;
             }
 
+            $reminderDays = (int) Setting::getValue('task_reminder_days', 1);
             $dueDate = $this->task->due_date->format('d M Y H:i');
+
             $subjectName = $this->task->subject->name ?? '';
 
             if ($this->type === 'deadline') {
                 $title = 'Pengingat Deadline Tugas';
-                $body = "Tugas '{$this->task->title}' ({$subjectName}) untuk anak Anda akan berakhir pada ({$dueDate})!";
+                $body = "Tugas '{$this->task->title}' ({$subjectName}) untuk anak Anda akan berakhir dalam {$reminderDays} hari pada {$dueDate}!";
             }
 
             $data = [
