@@ -2,8 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\PaymentCreated;
-use App\Events\PaymentUpdated;
+use App\Events\PaymentCreated;\
 use App\Jobs\SendPaymentRealTimeNotification;
 use App\Models\Role;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -25,20 +24,19 @@ class SendPaymentNotification implements ShouldQueue
     /**
      * Handle the event.
      */
-    public function handle(PaymentCreated|PaymentUpdated $event): void
+    public function handle(PaymentCreated $event): void
     {
         $payment = $event->payment;
-        $type = $event instanceof PaymentCreated ? 'created' : 'updated';
 
         $payment->load(['assignments.student.parent']);
 
         foreach ($payment->assignments as $assignment) {
             if ($assignment->student && $assignment->student->parent) {
                 $parentUser = $assignment->student->parent;
-                
+
                 // Pastikan parent dan punya notification_key
                 if ($this->isParentUser($parentUser) && $parentUser->notification_key) {
-                    SendPaymentRealTimeNotification::dispatch($payment, $parentUser, $type);
+                    SendPaymentRealTimeNotification::dispatch($payment, $parentUser, 'created');
                 }
             }
         }

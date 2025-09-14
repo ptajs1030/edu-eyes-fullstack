@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Events\PaymentCreated;
-use App\Events\PaymentUpdated;
 use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\Payment;
@@ -160,8 +159,6 @@ class PaymentController extends Controller
                         'student_id' => $studentId,
                     ]);
                 }
-
-                event(new PaymentUpdated($payment));
             });
 
             return redirect()->route('payments.index')
