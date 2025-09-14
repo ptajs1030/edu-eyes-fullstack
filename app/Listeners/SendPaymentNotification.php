@@ -2,7 +2,7 @@
 
 namespace App\Listeners;
 
-use App\Events\PaymentCreated;\
+use App\Events\PaymentCreated;
 use App\Jobs\SendPaymentRealTimeNotification;
 use App\Models\Role;
 use Illuminate\Contracts\Queue\ShouldQueue;
