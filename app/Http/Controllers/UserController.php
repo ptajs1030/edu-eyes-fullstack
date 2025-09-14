@@ -316,7 +316,7 @@ class UserController extends Controller
             $user = User::findOrFail($id);
             $user->password = Hash::make('eduEyes123');
             $user->save();
-            return redirect()->back()->with('success', 'Password berhasil direset ke default.');
+            return redirect()->back()->with('success', 'Password berhasil direset dan link WA telah dibuka');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Gagal reset password: ' . $e->getMessage());
         }
