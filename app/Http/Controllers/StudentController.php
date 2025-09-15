@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\Religion;
 use App\Enums\Sex;
 use App\Enums\StudentStatus;
+use App\Imports\StudentsImport;
 use App\Models\Classroom;
 use App\Models\Student;
 use Illuminate\Http\Request;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Maatwebsite\Excel\Facades\Excel;
 
 class StudentController extends Controller
 {
@@ -276,4 +278,32 @@ class StudentController extends Controller
 
         return response()->json($students);
     }
+
+    public function import(Request $request){
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048'
+        ]);
+
+        try {
+            Excel::import(new StudentsImport, $request->file('file'));
+            return redirect()->back()->with('success', 'Data siswa berhasil diimpor');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal impor siswa: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate(){
+        $filename = "template-import-siswa.xlsx";
+        $path = storage_path("app/templates/{$filename}");
+        
+        if (!file_exists($path)) {
+            return response()->json(['message' => 'Template tidak ditemukan'], 404);
+            
+        }
+
+        return response()->file($path, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        ]);
+    }   
+
 }

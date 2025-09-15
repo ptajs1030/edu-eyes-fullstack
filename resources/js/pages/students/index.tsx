@@ -1,4 +1,5 @@
 import ActionModal from '@/components/action-modal';
+import ImportStudentModal from '@/components/ui/import-student-modal';
 import Pagination from '@/components/ui/pagination';
 import Table from '@/components/ui/table';
 import AppLayout from '@/layouts/app-layout';
@@ -105,6 +106,8 @@ export default function StudentIndex() {
             : [Number(filters.classrooms)]
         : [];
     const [isFormOpen, setIsFormOpen] = useState(false);
+    const [isImportOpen, setIsImportOpen] = useState(false);
+
     const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
@@ -364,6 +367,20 @@ export default function StudentIndex() {
                         >
                             Bulk Print Kartu Siswa
                         </button>
+                        <button
+                            onClick={() => setIsImportOpen(true)}
+                            className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700"
+                        >
+                            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth="2"
+                                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 5v14"
+                                />
+                            </svg>
+                            Impor Data
+                        </button>
                     </div>
                     <button
                         onClick={() => openForm(null)}
@@ -538,6 +555,7 @@ export default function StudentIndex() {
                     ]}
                 />
             </div>
+            <ImportStudentModal isOpen={isImportOpen} onClose={() => setIsImportOpen(false)} />
         </AppLayout>
     );
 }
