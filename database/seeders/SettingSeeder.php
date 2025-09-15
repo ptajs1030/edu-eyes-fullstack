@@ -21,6 +21,8 @@ class SettingSeeder extends Seeder
             ['key' => 'admin_email', 'title' => 'Email Admin Sekolah', 'value' => 'admin@sekolahcemerlang.com', 'type' => 'text'],
             ['key' => 'admin_phone', 'title' => 'Telepon Admin Sekolah', 'value' => '02112345678', 'type' => 'number'],
             ['key' => 'school_logo', 'title' => 'Logo Sekolah', 'value' => 'https://png.pngtree.com/png-vector/20230725/ourmid/pngtree-school-logo-design-template-vector-png-image_8668651.png', 'type' => 'text'],
+            ['key' => 'payment_reminder_days', 'title' => 'Jumlah hari sebelum deadline tugas untuk mengirimkan notifikasi pengingat. Nilai 2 berarti H-2', 'value' => '2', 'type' => 'number'],
+            ['key' => 'task_reminder_days', 'title' => 'Jumlah hari sebelum deadline tugas untuk mengirimkan notifikasi pengingat. Nilai 1 berarti H-1', 'value' => '1', 'type' => 'number'],
         ];
 
         foreach ($data as $item) {
