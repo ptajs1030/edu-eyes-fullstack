@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Jobs\TaskDeadlineReminder;
 use App\Models\Role;
+use App\Models\Setting;
 use App\Models\Task;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -41,18 +42,19 @@ class CheckTaskDeadlines extends Command
             return;
         }
 
-        $tomorrow = Carbon::tomorrow()->format('Y-m-d');
+        $reminderDays = (int) Setting::getValue('task_reminder_days', 1);
+        $targetDate = Carbon::today()->addDays($reminderDays)->format('Y-m-d');
 
-        $this->info("Checking task deadlines for date: {$tomorrow}");
-        Log::info("Checking task deadlines for date: {$tomorrow}");
+        $this->info("Checking task deadlines for date: {$targetDate}");
+        Log::info("Checking task deadlines for date: {$targetDate}");
 
-        $tasks = Task::whereDate('due_date', $tomorrow)
+        $tasks = Task::whereDate('due_date', $targetDate)
             ->with(['subject', 'assignments.student.parent'])
             ->get();
 
         if ($tasks->isEmpty()) {
-            $this->info('No tasks found with tomorrow deadline');
-            Log::info('No tasks found with tomorrow deadline');
+            $this->info("No tasks found with {$targetDate} deadline");
+            Log::info("No tasks found with {$targetDate} deadline");
             return;
         }
 

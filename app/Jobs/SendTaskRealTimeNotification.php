@@ -51,9 +51,11 @@ class SendTaskRealTimeNotification implements ShouldQueue
             if ($this->type === 'created') {
                 $title = 'Tugas Baru Ditambahkan';
                 $body = "Tugas '{$this->task->title}' ({$subjectName}) telah ditambahkan untuk anak Anda. Deadline: {$dueDate}";
+            } elseif ($this->type === 'manual') {
+                $title = 'Pengingat Tugas';
+                $body = "Pengingat: Tugas '{$this->task->title}' ({$subjectName}) untuk anak Anda. Deadline: {$dueDate}";
             } else {
-                $title = 'Tugas Diperbarui';
-                $body = "Tugas '{$this->task->title}' ({$subjectName}) telah diperbarui. Deadline: {$dueDate}";
+                Log::warning("Type tidak sesuai");
             }
 
             $data = [

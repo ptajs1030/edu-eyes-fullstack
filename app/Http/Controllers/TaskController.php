@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Role;
+use App\Events\TaskCreated;
+use App\Jobs\TaskDeadlineReminder;
 use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\Student;
@@ -10,14 +13,17 @@ use App\Models\Task;
 use App\Models\TaskAssignment;
 use App\Models\TaskAttachment;
 use Carbon\Carbon;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB as FacadesDB;
 use Inertia\Inertia;
-use Log;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\Log;
 
 class TaskController extends Controller
 {
-      private function formatTimeForDisplay($time)
+    private function formatTimeForDisplay($time)
     {
         return Carbon::parse($time)->format('Y-m-d');
     }
@@ -26,24 +32,26 @@ class TaskController extends Controller
     {
         return Carbon::parse($time)->format('Y-m-d');
     }
-    public function index (Request $request){
-        $tasks= Task::query()
+    public function index(Request $request)
+    {
+        $tasks = Task::query()
             ->with('attachments')
             ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
             ->orderBy($request->sort ?? 'created_at', $request->direction ?? 'desc')
             ->paginate(10)
             ->withQueryString();
 
-        return Inertia::render('tasks/index',[
+        return Inertia::render('tasks/index', [
             'tasks' => $tasks,
             'filters' => $request->only(['search', 'sort', 'direction']),
         ]);
     }
 
-    public function create (){
+    public function create()
+    {
         $activeAcademicYear = AcademicYear::where('status', 'active')->first();
-        $classrooms=Classroom::orderBy('level')->orderBy('name')->get();
-        $subjects=Subject::orderBy('name')->get();
+        $classrooms = Classroom::orderBy('level')->orderBy('name')->get();
+        $subjects = Subject::orderBy('name')->get();
         return Inertia::render('tasks/form', [
             'academicYears' => AcademicYear::all(),
             'classrooms' => $classrooms,
@@ -51,9 +59,10 @@ class TaskController extends Controller
         ]);
     }
 
-    public function store(Request $request){
+    public function store(Request $request)
+    {
         try {
-            $validated=$request->validate([
+            $validated = $request->validate([
                 'title' => 'required|string|max:255',
                 'description' => 'required|string',
                 'due_date' => 'required|date',
@@ -62,10 +71,10 @@ class TaskController extends Controller
                 'due_time' => 'required',
                 'attachments' => 'nullable|array',
                 'attachments.*.url' => 'required|url',
-                'student_ids' => 'required|array|min:1',          
+                'student_ids' => 'required|array|min:1',
                 'student_ids.*' => 'exists:students,id',
             ]);
-            DB::transaction(function () use ($validated) {
+            FacadesDB::transaction(function () use ($validated) {
                 $task = Task::create([
                     'title' => $validated['title'],
                     'description' => $validated['description'],
@@ -88,12 +97,14 @@ class TaskController extends Controller
                         'class_name' => $student ? $student->classroom->name : null,
                     ]);
                 }
+
+                event(new TaskCreated($task));
             });
 
             return redirect()->route('tasks.index')
                 ->with('success', 'Tugas Berhasil Ditambahkan');
-        } catch (\ValidationException $e) {
-           return redirect()->back()
+        } catch (ValidationException $e) {
+            return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
@@ -114,12 +125,13 @@ class TaskController extends Controller
         }
     }
 
-    public function edit($id){
+    public function edit($id)
+    {
         try {
             $task = Task::with(['subject', 'academicYear', 'assignments.student', 'assignments.class'])
                 ->findOrFail($id);
 
-        
+
             $studentAssignments = $task->assignments->map(function ($assignment) {
                 return [
                     'student_id' => $assignment->student_id,
@@ -127,8 +139,8 @@ class TaskController extends Controller
                     'nis' => $assignment->student->nis,
                     'class_name' => $assignment->class_name,
                     'class_id' => $assignment->class_id,
-                    'score' => $assignment->score, 
-                    'is_scored'=> $assignment->score !== null
+                    'score' => $assignment->score,
+                    'is_scored' => $assignment->score !== null
                 ];
             });
 
@@ -163,7 +175,8 @@ class TaskController extends Controller
         }
     }
 
-    public function update(Request $request, $id){
+    public function update(Request $request, $id)
+    {
         try {
             $validated = $request->validate([
                 'subject_id' => 'required|exists:subjects,id',
@@ -196,7 +209,7 @@ class TaskController extends Controller
 
             $task = Task::findOrFail($id);
 
-        
+
             $existingTask = Task::where('title', $validated['title'])
                 ->where('subject_id', $validated['subject_id'])
                 ->where('academic_year_id', $task->academic_year_id)
@@ -207,7 +220,7 @@ class TaskController extends Controller
                 throw new \Exception('Tugas dengan nama "' . $validated['title'] . '" sudah ada untuk mata pelajaran dan tahun ajaran yang sama.');
             }
 
-     
+
             $task->update([
                 'subject_id' => $validated['subject_id'],
                 'title' => $validated['title'],
@@ -216,7 +229,7 @@ class TaskController extends Controller
                 'due_time' => $validated['due_time'],
             ]);
 
-   
+
             $currentAssignments = $task->assignments()->get()->keyBy('student_id');
 
             $task->assignments()->delete();
@@ -249,7 +262,6 @@ class TaskController extends Controller
 
             return redirect()->route('tasks.index')
                 ->with('success', 'Tugas berhasil diperbarui dengan ' . count($validated['student_assignments']) . ' siswa');
-
         } catch (ValidationException $e) {
             DB::rollBack();
             return redirect()->back()
@@ -270,7 +282,8 @@ class TaskController extends Controller
     }
 
 
-    public function show(Task $task){
+    public function show(Task $task)
+    {
         try {
             $task->load('attachments', 'assignments.student', 'academicYear', 'subject');
 
@@ -286,7 +299,7 @@ class TaskController extends Controller
             });
 
 
-              return inertia::render('tasks/detail', [
+            return inertia::render('tasks/detail', [
                 'task' => [
                     'id' => $task->id,
                     'title' => $task->title,
@@ -294,12 +307,12 @@ class TaskController extends Controller
                     'due_date' => $this->formatTimeForDisplay($task->due_date),
                     'due_time' => Carbon::parse($task->due_time)->format('H:i'),
                     'academic_year' => $task->academicYear,
-                    'subject' => $task->subject ,
+                    'subject' => $task->subject,
                     'attachments' => $task->attachments,
                     'studentAssignments' => $studentAssignments,
                 ],
                 'studentAssignments' => $studentAssignments,
-              ]);
+            ]);
         } catch (\Exception $e) {
             Log::error('Error loading task for scoring', [
                 'task_id' => $task->id ?? null,
@@ -311,8 +324,9 @@ class TaskController extends Controller
         }
     }
 
-    public function updateScore(Request $request, $taskId, $assignmentId){
-         try {
+    public function updateScore(Request $request, $taskId, $assignmentId)
+    {
+        try {
             $validated = $request->validate([
                 'score' => 'required|numeric|min:0|max:100',
             ], [
@@ -328,14 +342,12 @@ class TaskController extends Controller
 
             $assignment->update(['score' => $validated['score']]);
 
-         
-            return redirect()->back()->with('success', 'Nilai berhasil disimpan');
 
+            return redirect()->back()->with('success', 'Nilai berhasil disimpan');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->errors())
                 ->with('error', 'Data tidak valid');
-
         } catch (\Exception $e) {
             Log::error('Error updating task score', [
                 'task_id' => $taskId ?? null,
@@ -344,7 +356,6 @@ class TaskController extends Controller
             ]);
             return redirect()->back()->with('error', 'Terjadi kesalahan saat menyimpan nilai');
         }
-        
     }
 
     public function updateBulkScores(Request $request, $examId)
@@ -386,17 +397,15 @@ class TaskController extends Controller
 
             // Untuk Inertia, return redirect dengan flash message
             return redirect()->back()->with('success', "Berhasil menyimpan {$updatedCount} nilai");
-
         } catch (ValidationException $e) {
             DB::rollback();
-            
+
             return redirect()->back()
                 ->withErrors($e->errors())
                 ->with('error', 'Data tidak valid');
-
         } catch (\Exception $e) {
             DB::rollback();
-            
+
             Log::error('Error updating bulk exam scores', [
                 'exam_id' => $examId,
                 'error' => $e->getMessage(),
@@ -406,7 +415,8 @@ class TaskController extends Controller
         }
     }
 
-    public function destroy($id){
+    public function destroy($id)
+    {
         try {
             $task = Task::withCount('assignments')->findOrFail($id);
 
@@ -419,12 +429,54 @@ class TaskController extends Controller
 
             return redirect()->route('tasks.index')
                 ->with('success', 'Tugas berhasil dihapus.');
-
         } catch (\Exception $e) {
             return redirect()->back()
-            ->with('error', 'Terjadi kesalahan saat menghapus tugas: ' . $e->getMessage());
+                ->with('error', 'Terjadi kesalahan saat menghapus tugas: ' . $e->getMessage());
         }
     }
 
+    public function resendNotification(Task $task)
+    {
+        try {
+            // Validasi: cek apakah task sudah lewat deadline
+            $now = now('Asia/Jakarta');
 
+            // Combine due_date and due_time properly
+            $dueDate = $task->due_date->format('Y-m-d');
+            $dueTime = $task->due_time ? $task->due_time->format('H:i:s') : '23:59:59';
+
+            $dueDateTimeString = $dueDate . ' ' . $dueTime;
+
+            $dueDateTime = Carbon::parse($dueDateTimeString, 'Asia/Jakarta');
+
+            if ($now->greaterThan($dueDateTime)) {
+                return redirect()->route('tasks.index')
+                    ->with('error', 'Tidak dapat mengirim notifikasi karena tugas sudah melewati tenggat waktu.');
+            }
+
+            $task->load(['assignments.student.parent', 'subject']);
+
+            $notificationCount = collect($task->assignments)
+                ->filter(fn($a) => $a->student?->parent?->role->name === Role::Parent->value && $a->student->parent->notification_key)
+                ->each(fn($a) => TaskDeadlineReminder::dispatch($task, $a->student->parent, 'manual'))
+                ->count();
+
+            return redirect()->route('tasks.index')
+                ->with(
+                    $notificationCount > 0 ? 'success' : 'info',
+                    $notificationCount > 0
+                        ? "Notifikasi berhasil dikirim ke {$notificationCount} orang tua."
+                        : 'Tidak ada orang tua yang dapat menerima notifikasi.'
+                );
+        } catch (\Exception $e) {
+            Log::error('Gagal mengirim notifikasi', [
+                'task_id' => $task->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->route('tasks.index')
+                ->with('error', 'Gagal mengirim notifikasi: ' . $e->getMessage());
+        }
+    }
 }

@@ -3,7 +3,6 @@
 namespace App\Listeners;
 
 use App\Events\TaskCreated;
-use App\Events\TaskUpdated;
 use App\Jobs\SendTaskRealTimeNotification;
 use App\Models\Role;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -24,19 +23,18 @@ class SendTaskNotification implements ShouldQueue
     /**
      * Handle the event.
      */
-    public function handle(TaskCreated|TaskUpdated $event): void
+    public function handle(TaskCreated $event): void
     {
         $task = $event->task;
-        $type = $event instanceof TaskCreated ? 'created' : 'updated';
 
         $task->load(['assignments.student.parent', 'subject']);
 
         foreach ($task->assignments as $assignment) {
             if ($assignment->student && $assignment->student->parent) {
                 $parentUser = $assignment->student->parent;
-                
+
                 if ($this->isParentUser($parentUser) && $parentUser->notification_key) {
-                    SendTaskRealTimeNotification::dispatch($task, $parentUser, $type);
+                    SendTaskRealTimeNotification::dispatch($task, $parentUser, "created");
                 }
             }
         }

@@ -68,6 +68,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('payments', PaymentController::class);
     Route::patch('/payments/{payment}/transactions/update', [PaymentController::class, 'updateTransactions'])
         ->name('payments.updateTransactions');
+    Route::post('/payments/{payment}/resend-notification', [PaymentController::class, 'resendNotification'])
+        ->name('payments.resend-notification');
     Route::resource('announcements', AnnouncementController::class);
     Route::resource('academic-years', AcademicYearController::class);
     Route::resource('classrooms', ClassroomController::class);
@@ -114,6 +116,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
     Route::put('/tasks/{task}/assignments/{assignment}/score', [TaskController::class, 'updateScore'])->name('tasks.updateScore');
     Route::put('/tasks/{task}/scores/bulk', [TaskController::class, 'updateBulkScores'])->name('tasks.updateBulkScores');
+    Route::post('/tasks/{task}/resend-notification', [TaskController::class, 'resendNotification'])->name('tasks.resend-notification');
     Route::resource('events', EventController::class);
     Route::prefix('events/{event}')->group(function () {
         Route::get('/attendance', [EventScheduleController::class, 'showAttendance'])->name('events.attendance');
