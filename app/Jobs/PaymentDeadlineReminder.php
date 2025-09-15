@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Payment;
+use App\Models\Setting;
 use App\Models\User;
 use App\Services\FirebaseService;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -45,11 +46,14 @@ class PaymentDeadlineReminder implements ShouldQueue
                 return;
             }
 
+            $reminderDays = (int) Setting::getValue('payment_reminder_days', 1);
+            $dueDate = $this->payment->due_date->format('d M Y');
+
             $formattedNominal = 'Rp ' . number_format($this->payment->nominal, 0, ',', '.');
 
             if ($this->type === 'deadline') {
-                $title = 'Pengingat Deadline Pembayaran';
-                $body = "Tagihan '{$this->payment->title}' ({$formattedNominal}) untuk anak Anda akan berakhir besok!";
+                $title = 'Pengingat Deadline Tagihan';
+                $body = "Tagihan '{$this->payment->title}' ({$formattedNominal}) untuk anak Anda akan berakhir dalam {$reminderDays} hari pada {$dueDate}";
             }
 
             $data = [

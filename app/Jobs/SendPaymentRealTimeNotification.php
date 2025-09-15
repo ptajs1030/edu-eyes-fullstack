@@ -45,14 +45,21 @@ class SendPaymentRealTimeNotification implements ShouldQueue
                 return;
             }
 
+            $dueDate = $this->payment->due_date->format('d M Y');
+            $nominal = number_format($this->payment->nominal, 0, ',', '.');
+            $academicYear = $this->payment->academicYear->name ?? 'Tahun Ajaran';
+
             $formattedNominal = 'Rp ' . number_format($this->payment->nominal, 0, ',', '.');
 
             if ($this->type === 'created') {
-                $title = 'Pembayaran Baru Ditambahkan';
-                $body = "Pembayaran '{$this->payment->title}' ({$formattedNominal}) telah ditambahkan untuk anak Anda.";
+                $title = 'Tagihan Baru Ditambahkan';
+                $body = "Tagihan '{$this->payment->title}' ({$formattedNominal}) telah ditambahkan untuk anak Anda.";
+            } elseif ($this->type === 'manual') {
+                $title = 'Pengingat Tagihan';
+                $body = "Pengingat: Tagihan '{$this->payment->title}' ({$academicYear}) sebesar Rp {$nominal} untuk anak Anda. Deadline: {$dueDate}";
             } else {
-                $title = 'Pembayaran Diperbarui';
-                $body = "Pembayaran '{$this->payment->title}' ({$formattedNominal}) telah diperbarui.";
+                Log::warning("Type tidak sesuai: {$this->type}");
+                return;
             }
 
             $data = [
@@ -61,7 +68,7 @@ class SendPaymentRealTimeNotification implements ShouldQueue
                 'title' => $this->payment->title,
                 'nominal' => (string) $this->payment->nominal,
                 'formatted_nominal' => $formattedNominal,
-                'due_date' => $this->payment->due_date->format('Y-m-d H:i:s'),
+                'due_date' => $this->payment->due_date->format('Y-m-d'),
                 'action' => 'view_payment'
             ];
 

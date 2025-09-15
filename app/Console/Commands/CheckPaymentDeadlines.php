@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Jobs\PaymentDeadlineReminder;
 use App\Models\Payment;
 use App\Models\Role;
+use App\Models\Setting;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
@@ -40,18 +41,19 @@ class CheckPaymentDeadlines extends Command
             return;
         }
 
-        $tomorrow = Carbon::tomorrow()->format('Y-m-d');
+        $reminderDays = (int) Setting::getValue('payment_reminder_days', 1);
+        $targetDate = Carbon::today()->addDays($reminderDays)->format('Y-m-d');
 
-        $this->info("Checking payment deadlines for date: {$tomorrow}");
-        Log::info("Checking payment deadlines for date: {$tomorrow}");
+        $this->info("Checking payment deadlines for date: {$targetDate}");
+        Log::info("Checking payment deadlines for date: {$targetDate}");
 
-        $payments = Payment::whereDate('due_date', $tomorrow)
+        $payments = Payment::whereDate('due_date', $targetDate)
             ->with(['academicYear', 'assignments.student.parent'])
             ->get();
 
         if ($payments->isEmpty()) {
-            $this->info('No payments found with tomorrow deadline');
-            Log::info('No payments found with tomorrow deadline');
+            $this->info("No payments found with {$reminderDays} deadline");
+            Log::info("No payments found with {$reminderDays} deadline");
             return;
         }
 
