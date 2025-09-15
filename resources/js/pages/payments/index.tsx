@@ -51,6 +51,7 @@ export default function PaymentIndex() {
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [paymentToDelete, setPaymentToDelete] = useState<Payment | null>(null);
+    const [paymentToNotify, setPaymentToNotify] = useState<Payment | null>(null);
 
     useEffect(() => {
         if (flash?.success) {
@@ -110,6 +111,14 @@ export default function PaymentIndex() {
             },
             { preserveState: true },
         );
+    };
+
+    const isPaymentExpired = (payment: Payment) => {
+        const now = new Date();
+        const dueDate = new Date(payment.due_date);
+        dueDate.setHours(23, 59, 59, 999);
+
+        return now > dueDate;
     };
 
     const tableHeaders = [
@@ -186,6 +195,17 @@ export default function PaymentIndex() {
                                     Detail
                                 </Link>
 
+                                <button
+                                    onClick={() => setPaymentToNotify(payment)}
+                                    disabled={isPaymentExpired(payment)}
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
+                                        isPaymentExpired(payment) ? 'cursor-not-allowed bg-sky-300' : 'bg-sky-500 hover:cursor-pointer'
+                                    }`}
+                                    title={isPaymentExpired(payment) ? 'Tagihan sudah melewati deadline' : 'Kirim notifikasi'}
+                                >
+                                    Kirim Notif
+                                </button>
+
                                 {/* Delete Button */}
                                 <button
                                     onClick={() => setPaymentToDelete(payment)}
@@ -216,6 +236,36 @@ export default function PaymentIndex() {
                             label: 'Hapus',
                             onClick: () => paymentToDelete && handleDelete(paymentToDelete.id),
                             variant: 'danger',
+                        },
+                    ]}
+                />
+
+                <ActionModal
+                    isOpen={!!paymentToNotify}
+                    onClose={() => setPaymentToNotify(null)}
+                    title="Confirm Notification"
+                    message={
+                        <span>
+                            Are you sure you want to send notification for payment <strong>{paymentToNotify?.title}</strong>?
+                            <br />
+                            <small className="text-gray-500">Notifikasi akan dikirim ke orang tua siswa yang belum melakukan pembayaran.</small>
+                        </span>
+                    }
+                    buttons={[
+                        {
+                            label: 'Cancel',
+                            onClick: () => setPaymentToNotify(null),
+                            variant: 'neutral',
+                        },
+                        {
+                            label: 'Send Notification',
+                            onClick: () => {
+                                if (paymentToNotify) {
+                                    router.post(route('payments.resend-notification', paymentToNotify.id));
+                                    setPaymentToNotify(null);
+                                }
+                            },
+                            variant: 'primary',
                         },
                     ]}
                 />

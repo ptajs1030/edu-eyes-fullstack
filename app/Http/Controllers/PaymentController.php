@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\Role;
 use App\Events\PaymentCreated;
-use App\Events\PaymentUpdated;
+use App\Jobs\SendPaymentRealTimeNotification;
 use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\Payment;
@@ -11,6 +12,7 @@ use App\Models\PaymentAssignment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
 
@@ -160,8 +162,6 @@ class PaymentController extends Controller
                         'student_id' => $studentId,
                     ]);
                 }
-
-                event(new PaymentUpdated($payment));
             });
 
             return redirect()->route('payments.index')
@@ -225,6 +225,53 @@ class PaymentController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Failed to delete payment: ' . $e->getMessage());
+        }
+    }
+
+    public function resendNotification(Payment $payment)
+    {
+        try {
+            // Validasi: cek apakah payment sudah lewat deadline
+            $now = now('Asia/Jakarta');
+            $dueDate = $payment->due_date->format('Y-m-d');
+            $dueDateTime = Carbon::parse($dueDate . ' 23:59:59', 'Asia/Jakarta');
+
+            if ($now->greaterThan($dueDateTime)) {
+                return redirect()->route('payments.index')
+                    ->with('error', 'Tidak dapat mengirim notifikasi karena pembayaran sudah melewati tenggat waktu.');
+            }
+
+            $payment->load(['assignments.student.parent', 'academicYear']);
+
+            $notificationCount = collect($payment->assignments)
+                ->filter(
+                    fn($assignment) =>
+                    $assignment->student?->parent?->role->name === Role::Parent->value &&
+                        $assignment->student->parent->notification_key &&
+                        !$assignment->payment_date // Hanya kirim untuk yang belum bayar
+                )
+                ->each(
+                    fn($assignment) =>
+                    SendPaymentRealTimeNotification::dispatch($payment, $assignment->student->parent, 'manual')
+                )
+                ->count();
+
+            return redirect()->route('payments.index')
+                ->with(
+                    $notificationCount > 0 ? 'success' : 'info',
+                    $notificationCount > 0
+                        ? "Notifikasi berhasil dikirim ke {$notificationCount} orang tua."
+                        : 'Tidak ada orang tua yang dapat menerima notifikasi atau semua pembayaran sudah lunas.'
+                );
+        } catch (\Exception $e) {
+            Log::error('Gagal mengirim notifikasi pembayaran', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->route('payments.index')
+                ->with('error', 'Gagal mengirim notifikasi: ' . $e->getMessage());
         }
     }
 }
