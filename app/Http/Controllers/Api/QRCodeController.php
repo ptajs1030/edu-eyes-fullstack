@@ -25,26 +25,16 @@ class QRCodeController extends BaseApiController
     public function bulkGenerate(Request $request)
     {
         try {
-            //code...
             $studentIds = $request->input('student_ids', []);
-            $students = \App\Models\Student::whereIn('id', $studentIds)->get();
-    
-            if ($students->isEmpty()) {
-                return response()->json(['message' => 'No students found.'], 404);
-            }
-    
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('qrcode_bulk_pdf', [
-                'students' => $students,
-            ]);
-    
-            return response($pdf->output(), 200, [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="kartu-siswa.pdf"',
-            ]);
+            $pdf = $this->service->generateBulk($studentIds);
+
+            return $pdf->download('kartu-siswa-bulk.pdf');
         } catch (\Throwable $th) {
-            //throw $th;
-            dd($th);exit;
-            throw $th;
+            \Log::error('Bulk kartu siswa error: '.$th->getMessage());
+            return response()->json([
+                'message' => 'Gagal generate kartu siswa',
+                'error'   => $th->getMessage()
+            ], 500);
         }
     }
 }
