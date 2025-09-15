@@ -42,10 +42,10 @@ class CheckPaymentDeadlines extends Command
         }
 
         $reminderDays = (int) Setting::getValue('payment_reminder_days', 1);
-        $targetDate = Carbon::today()->addDays($reminderDays)->format('Y-m-d');
+        $targetDate = Carbon::now()->addDays($reminderDays)->format('Y-m-d');
 
-        $this->info("Checking payment deadlines for date: {$targetDate}");
-        Log::info("Checking payment deadlines for date: {$targetDate}");
+        $this->info("Checking payment deadlines for date: {$targetDate} UTC");
+        Log::info("Checking payment deadlines for date: {$targetDate} UTC");
 
         $payments = Payment::whereDate('due_date', $targetDate)
             ->with(['academicYear', 'assignments.student.parent'])
