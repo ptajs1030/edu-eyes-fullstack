@@ -118,7 +118,7 @@ class UsersImport extends DefaultValueBinder implements
             'job'       => $job,
             'nip'       => $nip,
             'position'  => $position,
-            'password'  => Hash::make($password ?? 'password123'),
+            'password'  => Hash::make($password ?? 'eduEyes123'),
         ]);
     }
 
