@@ -12,15 +12,55 @@ interface ImportModalProps {
 }
 
 const expectedHeaderByRole = (roleValue: string): string[] => {
-    return roleValue === 'parent'
-        ? ['full_name', 'username', 'email', 'phone', 'address', 'password', 'status', 'job']
-        : ['full_name', 'username', 'email', 'phone', 'address', 'password', 'status', 'nip', 'position'];
+    switch (roleValue) {
+        case 'parent':
+            return ['full_name', 'username', 'email', 'phone', 'address', 'password', 'status', 'job'];
+            break;
+        case 'teacher':
+            return ['full_name', 'username', 'email', 'phone', 'address', 'password', 'status', 'nip', 'position'];
+            break;
+        default:
+            return [
+                'parent',
+                'classroom',
+                'full_name',
+                'nis',
+                'entry_year',
+                'gender',
+                'status',
+                'religion',
+                'birth_place',
+                'date_of_birth',
+                'address',
+            ];
+            break;
+    }
 };
 
 const prettyHeaderByRole = (roleValue: string): string[] => {
-    return roleValue === 'parent'
-        ? ['full_name*', 'username*', 'email', 'phone', 'address', 'password*', 'status*', 'job']
-        : ['full_name*', 'username*', 'email', 'phone', 'address', 'password*', 'status*', 'nip', 'position'];
+    switch (roleValue) {
+        case 'parent':
+            return ['full_name', 'username', 'email', 'phone', 'address', 'password', 'status', 'job'];
+            break;
+        case 'teacher':
+            return ['full_name', 'username', 'email', 'phone', 'address', 'password', 'status', 'nip', 'position'];
+            break;
+        default:
+            return [
+                'parent',
+                'classroom',
+                'full_name',
+                'nis',
+                'entry_year',
+                'gender',
+                'status',
+                'religion',
+                'birth_place',
+                'date_of_birth',
+                'address',
+            ];
+            break;
+    }
 };
 
 const normalizeHeader = (s: string) => s.replace(/\*/g, '').trim().toLowerCase().replace(/\s+/g, '_');

@@ -87,8 +87,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     });
 
     Route::get('/classrooms/{id}/students', [ClassroomController::class, 'getStudents']);
-    Route::resource('students', StudentController::class);
-
+    Route::resource('students', StudentController::class)->except(['show']);
+    Route::get('/students/template', [StudentController::class, 'downloadTemplate'])->name('students.template');
+    Route::post('/students/import', [StudentController::class, 'import'])->name('students.import');
     Route::prefix('students/{student}')->group(function () {
         Route::get('attendance', [StudentAttendanceController::class, 'showAttendanceHistory'])->name('students.attendance');
         Route::patch('attendance/shift', [StudentAttendanceController::class, 'updateShiftAttendance'])->name('students.attendance.shift.save');
