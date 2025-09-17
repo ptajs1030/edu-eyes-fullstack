@@ -81,11 +81,9 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                     }
                     const waLink = `https://wa.me/${phone}?text=${waMsg}`;
                     window.open(waLink, '_blank');
-                    toast.success('Password berhasil direset dan link WA telah dibuka');
                 },
                 onError: (error) => {
                     console.log(error);
-                    toast.error('Gagal reset password');
                 },
             },
         );
@@ -112,10 +110,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         router.delete(route(`${routePrefix}.destroy`, id), {
             onSuccess: () => {
                 router.reload();
-            },
-            onError: () => {
-                toast.error('Failed to delete user');
-            },
+            }
         });
     };
 
@@ -217,9 +212,8 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                         <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                                selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                            }`}
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                                }`}
                         >
                             Ekspor data yang dipilih
                         </button>
