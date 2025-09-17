@@ -90,7 +90,9 @@ export default function SettingFormModal({ isOpen, onClose, setting }: Props) {
             </div>
             <div className="mb-3">
                 <label htmlFor="value" className="block text-sm font-medium text-gray-700">
-                    Value{(formData.key === 'late_tolerance' || formData.key === 'early_tolerance') && ' (Menit)'}
+                    Value
+                    {['late_tolerance', 'early_tolerance'].includes(formData.key) && ' (Menit)'}
+                    {['payment_reminder_days', 'task_reminder_days'].includes(formData.key) && ' (Hari)'}
                 </label>
                 {formData.type === 'text' ? (
                     <textarea
