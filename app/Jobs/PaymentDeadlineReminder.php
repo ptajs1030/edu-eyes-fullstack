@@ -50,14 +50,8 @@ class PaymentDeadlineReminder implements ShouldQueue
             $dueDate = $this->payment->due_date->format('d M Y');
 
             $formattedNominal = 'Rp ' . number_format($this->payment->nominal, 0, ',', '.');
-
-            $title = 'Pengingat Tagihan';
-            $body = "Tagihan '{$this->payment->title}' ({$formattedNominal}) untuk anak Anda akan berakhir dalam {$reminderDays} hari pada {$dueDate}!";
-
-            if ($this->type === 'deadline') {
-                $title = 'Pengingat Deadline Tagihan';
-                $body = "Tagihan '{$this->payment->title}' ({$formattedNominal}) untuk anak Anda akan berakhir dalam {$reminderDays} hari pada {$dueDate}";
-            }
+            $title = 'Pengingat Deadline Tagihan';
+            $body = "Tagihan '{$this->payment->title}' ({$formattedNominal}) untuk anak Anda akan berakhir dalam {$reminderDays} hari pada {$dueDate}";
 
             $data = [
                 'type' => 'payment_deadline',

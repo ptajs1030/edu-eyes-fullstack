@@ -47,14 +47,8 @@ class TaskDeadlineReminder implements ShouldQueue
             $dueDate = $this->task->due_date->format('d M Y H:i');
 
             $subjectName = $this->task->subject->name ?? '';
-
-            $title = 'Pengingat Tugas';
+            $title = 'Pengingat Deadline Tugas';
             $body = "Tugas '{$this->task->title}' ({$subjectName}) untuk anak Anda akan berakhir dalam {$reminderDays} hari pada {$dueDate}!";
-
-            if ($this->type === 'deadline') {
-                $title = 'Pengingat Deadline Tugas';
-                $body = "Tugas '{$this->task->title}' ({$subjectName}) untuk anak Anda akan berakhir dalam {$reminderDays} hari pada {$dueDate}!";
-            }
 
             $data = [
                 'type' => 'task_deadline',

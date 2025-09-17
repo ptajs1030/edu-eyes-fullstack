@@ -34,15 +34,15 @@ class CheckPaymentDeadlines extends Command
         $now = now('Asia/Jakarta');
         $currentTime = $now->format('H:i');
 
-        // Hanya jalan antara 00:05 - 00:10 WIB
-        if ($currentTime < '00:05' || $currentTime > '00:10') {
+        // Hanya jalan antara 00:20 - 00:25 WIB
+        if ($currentTime < '00:20' || $currentTime > '00:25') {
             Log::info('[Cron] Payment Deadline Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
             $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
             return;
         }
 
         $reminderDays = (int) Setting::getValue('payment_reminder_days', 1);
-        $targetDate = Carbon::now()->addDays($reminderDays)->format('Y-m-d');
+        $targetDate = $now->copy()->addDays($reminderDays)->format('Y-m-d');
 
         $this->info("Checking payment deadlines for date: {$targetDate} UTC");
         Log::info("Checking payment deadlines for date: {$targetDate} UTC");

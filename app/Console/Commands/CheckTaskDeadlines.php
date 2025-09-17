@@ -35,15 +35,15 @@ class CheckTaskDeadlines extends Command
         $now = now('Asia/Jakarta');
         $currentTime = $now->format('H:i');
 
-        // Hanya jalan antara 00:10 - 00:15 WIB
-        if ($currentTime < '00:10' || $currentTime > '00:15') {
+        // Hanya jalan antara 00:20 - 00:25 WIB
+        if ($currentTime < '00:20' || $currentTime > '00:25') {
             Log::info('[Cron] Task Deadline Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
             $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
             return;
         }
 
         $reminderDays = (int) Setting::getValue('task_reminder_days', 1);
-        $targetDate = Carbon::now()->addDays($reminderDays)->format('Y-m-d');
+        $targetDate = $now->copy()->addDays($reminderDays)->format('Y-m-d');
 
         $this->info("Checking task deadlines for date: {$targetDate} UTC");
         Log::info("Checking task deadlines for date: {$targetDate} UTC");
