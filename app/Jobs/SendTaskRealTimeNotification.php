@@ -45,15 +45,16 @@ class SendTaskRealTimeNotification implements ShouldQueue
                 return;
             }
 
-            $dueDate = $this->task->due_date->format('d M Y H:i');
+            $dueDate = $this->task->due_date->format('d M Y');
+            $dueTime = $this->task->due_time ? $this->task->due_time->format('H:i') : '-';
             $subjectName = $this->task->subject->name ?? 'Umum';
 
             if ($this->type === 'created') {
                 $title = 'Tugas Baru Ditambahkan';
-                $body = "Tugas '{$this->task->title}' ({$subjectName}) telah ditambahkan untuk anak Anda. Deadline: {$dueDate}";
+                $body = "Tugas '{$this->task->title}' ({$subjectName}) telah ditambahkan untuk anak Anda. Deadline: {$dueDate} {$dueTime}";
             } elseif ($this->type === 'manual') {
                 $title = 'Pengingat Tugas';
-                $body = "Pengingat: Tugas '{$this->task->title}' ({$subjectName}) untuk anak Anda. Deadline: {$dueDate}";
+                $body = "Pengingat: Tugas '{$this->task->title}' ({$subjectName}) untuk anak Anda. Deadline: {$dueDate} {$dueTime}";
             } else {
                 Log::warning("Type tidak sesuai");
             }
@@ -62,7 +63,7 @@ class SendTaskRealTimeNotification implements ShouldQueue
                 'type' => 'task_' . $this->type,
                 'task_id' => (string) $this->task->id,
                 'title' => $this->task->title,
-                'due_date' => $this->task->due_date->format('Y-m-d H:i:s'),
+                'due_date' => $this->task->due_date->format('Y-m-d').' '.$dueTime,
                 'subject' => $subjectName,
                 'action' => 'view_task'
             ];

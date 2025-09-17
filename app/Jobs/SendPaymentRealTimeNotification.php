@@ -47,13 +47,13 @@ class SendPaymentRealTimeNotification implements ShouldQueue
 
             $dueDate = $this->payment->due_date->format('d M Y');
             $nominal = number_format($this->payment->nominal, 0, ',', '.');
-            $academicYear = $this->payment->academicYear->name ?? 'Tahun Ajaran';
+            $academicYear = $this->payment->academicYear->title ?? 'Tahun Ajaran';
 
             $formattedNominal = 'Rp ' . number_format($this->payment->nominal, 0, ',', '.');
 
             if ($this->type === 'created') {
                 $title = 'Tagihan Baru Ditambahkan';
-                $body = "Tagihan '{$this->payment->title}' ({$formattedNominal}) telah ditambahkan untuk anak Anda.";
+                $body = "Tagihan '{$this->payment->title}' ({$formattedNominal}) telah ditambahkan untuk anak Anda. Deadline: {$dueDate}";
             } elseif ($this->type === 'manual') {
                 $title = 'Pengingat Tagihan';
                 $body = "Pengingat: Tagihan '{$this->payment->title}' ({$academicYear}) sebesar Rp {$nominal} untuk anak Anda. Deadline: {$dueDate}";

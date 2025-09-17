@@ -21,7 +21,7 @@ class TaskDeadlineReminder implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(Task $task, User $parentUser, string $type)
+    public function __construct(Task $task, User $parentUser, string $type = 'deadline')
     {
         $this->task = $task;
         $this->parentUser = $parentUser;
@@ -44,17 +44,18 @@ class TaskDeadlineReminder implements ShouldQueue
             }
 
             $reminderDays = (int) Setting::getValue('task_reminder_days', 1);
-            $dueDate = $this->task->due_date->format('d M Y H:i');
+            $dueDate = $this->task->due_date->format('d M Y');
+            $dueTime = $this->task->due_time ? $this->task->due_time->format('H:i') : '-';
 
             $subjectName = $this->task->subject->name ?? '';
             $title = 'Pengingat Deadline Tugas';
-            $body = "Tugas '{$this->task->title}' ({$subjectName}) untuk anak Anda akan berakhir dalam {$reminderDays} hari pada {$dueDate}!";
+            $body = "Tugas '{$this->task->title}' ({$subjectName}) untuk anak Anda akan berakhir dalam {$reminderDays} hari pada {$dueDate} {$dueTime}!";
 
             $data = [
                 'type' => 'task_deadline',
                 'task_id' => (string) $this->task->id,
                 'title' => $this->task->title,
-                'due_date' => $this->task->due_date->format('Y-m-d H:i:s'),
+                'due_date' => $this->task->due_date->format('Y-m-d').' '.$dueTime,
                 'subject' => $subjectName,
                 'action' => 'view_task'
             ];
