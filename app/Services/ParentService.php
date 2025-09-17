@@ -331,21 +331,18 @@ class ParentService
             ];
         }
 
-        $attendancesWithRelations = [];
-        foreach ($attendances->items() as $item) {
-            $attendancesWithRelations[] = [
-                'id' => $item->id,
-                'student' => optional($item->student)->full_name,
-                'event'=> optional($item->event)->name,
-                'academic_year'=> optional($item->academicYear)->title,
-                'submit_date' => $item->submit_date,
-                'clock_in_hour' => $item->clock_in_hour,
-                'clock_out_hour' => $item->clock_out_hour,
-                'status' => $item->status,
-                'minutes_late' => $item->minutes_late,
-                'note' => $item->note,
+        $attendancesWithRelations= $attendances->map(function ($attendance) {
+            return [
+                'id' => $attendance->id,
+                'student' => optional($attendance->student)->full_name,
+                'classroom' => optional($attendance->student->classroom)->name,
+                'event' => optional($attendance->event)->name,
+                'academic_year' => optional($attendance->academicYear)->title,
+                'submit_date' => $attendance->submit_date,
+                'status' => $attendance->status,
+                'note' => $attendance->note,
             ];
-        };
+        })->toArray();
         return [
             'number_of_attendances' => $attendances->total(),
             'current_page' => $attendances->currentPage(),
