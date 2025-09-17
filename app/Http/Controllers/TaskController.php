@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Enums\Role;
 use App\Events\TaskCreated;
-use App\Jobs\TaskDeadlineReminder;
+use App\Jobs\SendTaskRealTimeNotification;
 use App\Models\AcademicYear;
 use App\Models\Classroom;
 use App\Models\Student;
@@ -458,7 +458,7 @@ class TaskController extends Controller
 
             $notificationCount = collect($task->assignments)
                 ->filter(fn($a) => $a->student?->parent?->role->name === Role::Parent->value && $a->student->parent->notification_key)
-                ->each(fn($a) => TaskDeadlineReminder::dispatch($task, $a->student->parent, 'manual'))
+                ->each(fn($a) => SendTaskRealTimeNotification::dispatch($task, $a->student->parent, 'manual'))
                 ->count();
 
             return redirect()->route('tasks.index')

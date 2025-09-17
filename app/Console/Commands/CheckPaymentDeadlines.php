@@ -34,8 +34,8 @@ class CheckPaymentDeadlines extends Command
         $now = now('Asia/Jakarta');
         $currentTime = $now->format('H:i');
 
-        // Hanya jalan antara 00:20 - 00:25 WIB
-        if ($currentTime < '00:20' || $currentTime > '00:25') {
+        // Hanya jalan antara 01:45 - 02:00 WIB
+        if ($currentTime < '01:45' || $currentTime > '02:00') {
             Log::info('[Cron] Payment Deadline Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
             $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
             return;
