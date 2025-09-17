@@ -47,8 +47,11 @@ npm run build
 # 6. Jalankan aplikasi
 php artisan serve
 
+# 7. Execute cronjob generate attendance (shifting & event)
+* * * * * cd /path-to-your-laravel-project && php artisan schedule:run >> /dev/null 2>&1
 
-
+# 8. Execute cronjob run queue worker for payment & task reminder 
+* * * * * cd /path-to-your-laravel-project && php artisan queue:work --once --tries=3 >> /dev/null 2>&1
 
 # Custom command (sudah disiapkan):
 php artisan make:dto User

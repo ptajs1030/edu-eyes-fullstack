@@ -143,6 +143,7 @@ export default function SettingIndex() {
                             <td className="p-3 text-sm">
                                 {setting.value}
                                 {(setting.key === 'late_tolerance' || setting.key === 'early_tolerance') && ' Menit'}
+                                {(setting.key === 'payment_reminder_days' || setting.key === 'task_reminder_days') && ' Hari'}
                             </td>
                             <td className="flex gap-2 p-3">
                                 <button
