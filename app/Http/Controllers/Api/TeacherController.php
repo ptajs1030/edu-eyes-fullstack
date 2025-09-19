@@ -64,7 +64,7 @@ class TeacherController extends BaseApiController
             return $this->resource(EventResource::make(Event::findOrFail($id)));
         }
         return $this->resource(
-            EventResource::collection(Event::get()->sortByDesc('start_date')->sortByDesc('end_date'))
+            EventResource::collection(Event::get()->sortByDesc('start_date')->sortByDesc('end_date')->values())
         );
     }
 
