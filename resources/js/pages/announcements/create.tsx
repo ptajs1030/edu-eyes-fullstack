@@ -7,7 +7,7 @@ import { toast, Toaster } from 'sonner';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Pengumuman', href: '/announcements' },
-    { title: 'Buat Baru', href: '' },
+    { title: 'Buat Pengumuman Baru', href: '' },
 ];
 
 interface Attachment {

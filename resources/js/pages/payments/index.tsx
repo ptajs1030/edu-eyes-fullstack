@@ -97,7 +97,7 @@ export default function PaymentIndex() {
         link.click();
         document.body.removeChild(link);
 
-        toast.success(`Berhasil mengekspor ${selectedData.length} data pembayaran`, {
+        toast.success(`Berhasil mengekspor ${selectedData.length} data tagihan`, {
             description: 'File CSV telah didownload otomatis',
         });
     };

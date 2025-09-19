@@ -175,11 +175,11 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
 
     return (
         <AppLayout breadcrumbs={breadcrumbs(!!payment?.id)}>
-            <Head title={payment?.id ? 'Edit Pembayaran' : 'Buat Pembayaran Baru'} />
+            <Head title={payment?.id ? 'Edit Tagihan' : 'Buat Tagihan Baru'} />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
-                <h1 className="text-2xl font-bold">{payment?.id ? 'Edit Pembayaran' : 'Buat Pembayaran Baru'}</h1>
+                <h1 className="text-2xl font-bold">{payment?.id ? 'Edit Tagihan' : 'Buat Tagihan Baru'}</h1>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                     <div className="rounded-lg border p-4">

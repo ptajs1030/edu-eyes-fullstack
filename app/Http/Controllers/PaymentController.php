@@ -207,7 +207,7 @@ class PaymentController extends Controller
             }
         }
 
-        return back()->with('success', 'Status pembayaran berhasil diperbarui.');
+        return back()->with('success', 'Status tagihan berhasil diperbarui.');
     }
 
     public function destroy(Payment $payment)
@@ -238,7 +238,7 @@ class PaymentController extends Controller
 
             if ($now->greaterThan($dueDateTime)) {
                 return redirect()->route('payments.index')
-                    ->with('error', 'Tidak dapat mengirim notifikasi karena pembayaran sudah melewati tenggat waktu.');
+                    ->with('error', 'Tidak dapat mengirim notifikasi karena tagihan sudah melewati tenggat waktu.');
             }
 
             $payment->load(['assignments.student.parent', 'academicYear']);
@@ -261,10 +261,10 @@ class PaymentController extends Controller
                     $notificationCount > 0 ? 'success' : 'info',
                     $notificationCount > 0
                         ? "Notifikasi berhasil dikirim ke {$notificationCount} orang tua."
-                        : 'Tidak ada orang tua yang dapat menerima notifikasi atau semua pembayaran sudah lunas.'
+                        : 'Tidak ada orang tua yang dapat menerima notifikasi atau semua tagihan sudah lunas.'
                 );
         } catch (\Exception $e) {
-            Log::error('Gagal mengirim notifikasi pembayaran', [
+            Log::error('Gagal mengirim notifikasi tagihan', [
                 'payment_id' => $payment->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
