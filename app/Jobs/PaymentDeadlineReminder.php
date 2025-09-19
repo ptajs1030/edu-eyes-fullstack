@@ -19,15 +19,17 @@ class PaymentDeadlineReminder implements ShouldQueue
 
     protected $payment;
     protected $parentUser;
+    protected $student;
     protected $type;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(Payment $payment, User $parentUser, string $type = 'deadline')
+    public function __construct(Payment $payment, User $parentUser, $student, string $type = 'deadline')
     {
         $this->payment = $payment;
         $this->parentUser = $parentUser;
+        $this->student = $student;
         $this->type = $type;
     }
 
@@ -50,8 +52,9 @@ class PaymentDeadlineReminder implements ShouldQueue
             $dueDate = $this->payment->due_date->format('d M Y');
 
             $formattedNominal = 'Rp ' . number_format($this->payment->nominal, 0, ',', '.');
+            $studentText = ($this->student && isset($this->student->full_name)) ? $this->student->full_name : 'Anak Anda';
             $title = 'Pengingat Deadline Tagihan';
-            $body = "Tagihan '{$this->payment->title}' ({$formattedNominal}) untuk anak Anda akan berakhir dalam {$reminderDays} hari pada {$dueDate}";
+            $body = "Tagihan '{$this->payment->title}' ({$formattedNominal}) untuk {$studentText} akan berakhir dalam {$reminderDays} hari pada {$dueDate}";
 
             $data = [
                 'type' => 'payment_deadline',

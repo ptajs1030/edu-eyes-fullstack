@@ -19,15 +19,17 @@ class SendPaymentRealTimeNotification implements ShouldQueue
 
     protected $payment;
     protected $parentUser;
+    protected $student;
     protected $type;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(Payment $payment, User $parentUser, string $type)
+    public function __construct(Payment $payment, User $parentUser, $student, string $type)
     {
         $this->payment = $payment;
         $this->parentUser = $parentUser;
+        $this->student = $student;
         $this->type = $type;
     }
 
@@ -51,12 +53,13 @@ class SendPaymentRealTimeNotification implements ShouldQueue
 
             $formattedNominal = 'Rp ' . number_format($this->payment->nominal, 0, ',', '.');
 
+            $studentText = ($this->student && isset($this->student->full_name)) ? $this->student->full_name : 'Anak Anda';
             if ($this->type === 'created') {
                 $title = 'Tagihan Baru Ditambahkan';
-                $body = "Tagihan '{$this->payment->title}' ({$formattedNominal}) telah ditambahkan untuk anak Anda. Deadline: {$dueDate}";
+                $body = "Tagihan '{$this->payment->title}' ({$formattedNominal}) telah ditambahkan untuk {$studentText}. Deadline: {$dueDate}";
             } elseif ($this->type === 'manual') {
                 $title = 'Pengingat Tagihan';
-                $body = "Pengingat: Tagihan '{$this->payment->title}' ({$academicYear}) sebesar Rp {$nominal} untuk anak Anda. Deadline: {$dueDate}";
+                $body = "Pengingat: Tagihan '{$this->payment->title}' ({$academicYear}) sebesar Rp {$nominal} untuk {$studentText}. Deadline: {$dueDate}";
             } else {
                 Log::warning("Type tidak sesuai: {$this->type}");
                 return;
