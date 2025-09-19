@@ -149,7 +149,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
             case 'late':
                 return 'Terlambat';
             case 'alpha':
-                return 'Alpha';
+                return 'Tidak Masuk';
             default:
                 return 'Belum Diisi';
         }

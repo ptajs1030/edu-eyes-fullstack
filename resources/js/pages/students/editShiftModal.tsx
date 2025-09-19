@@ -156,7 +156,8 @@ const EditShiftModal = ({
                     min="0"
                     value={formData.minutes_of_late || ''}
                     onChange={(e) => handleChange('minutes_of_late', parseInt(e.target.value) || 0)}
-                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                    className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 p-2 shadow-sm"
+                    disabled
                 />
             </div>
 

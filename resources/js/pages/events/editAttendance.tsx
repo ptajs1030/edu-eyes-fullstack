@@ -95,7 +95,7 @@ export default function EditAttendanceModal({ attendance, onClose, onSubmit }: P
                         <option value="present">Hadir</option>
                         <option value="present_in_tolerance">Hadir (Toleransi)</option>
                         <option value="late">Terlambat</option>
-                        <option value="alpha">Alpha</option>
+                        <option value="alpha">Tidak Masuk</option>
                     </select>
                 </div>
 
@@ -129,8 +129,9 @@ export default function EditAttendanceModal({ attendance, onClose, onSubmit }: P
                         min="0"
                         value={formData.minutes_of_late}
                         onChange={(e) => setFormData({ ...formData, minutes_of_late: e.target.value })}
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                        className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 p-2 shadow-sm"
                         placeholder="0"
+                        disabled
                     />
                 </div>
 

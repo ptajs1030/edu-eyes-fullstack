@@ -2,7 +2,7 @@ export const statusOptions = {
     shift: [
         { value: 'present', label: 'Hadir' },
         { value: 'present_in_tolerance', label: 'Hadir Dalam Toleransi' },
-        { value: 'alpha', label: 'Alpha' },
+        { value: 'alpha', label: 'Tidak Masuk' },
         { value: 'late', label: 'Terlambat' },
         { value: 'leave', label: 'Izin' },
         { value: 'sick_leave', label: 'Izin Sakit' },
@@ -10,7 +10,7 @@ export const statusOptions = {
     ],
     subject: [
         { value: 'present', label: 'Hadir' },
-        { value: 'alpha', label: 'Alpha' },
+        { value: 'alpha', label: 'Tidak Masuk' },
         { value: 'leave', label: 'Izin' },
         { value: 'sick_leave', label: 'Izin Sakit' },
         { value: 'day_off', label: 'Hari Libur' },

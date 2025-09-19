@@ -26,9 +26,10 @@ type ProfileForm = {
 export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: boolean; status?: string }) {
     const { auth } = usePage<SharedData>().props;
 
-    const { data, setData, patch, errors, processing, recentlySuccessful } = useForm<Required<ProfileForm>>({
+    const { data, setData, patch, errors, processing, recentlySuccessful } = useForm<Required<ProfileForm & { phone: string }>>({
         full_name: auth.user.full_name,
         email: auth.user.email,
+        phone: auth.user.phone || '',
     });
 
     const submit: FormEventHandler = (e) => {
@@ -50,7 +51,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                     <form onSubmit={submit} className="space-y-6">
                         <div className="grid gap-2">
                             <Label htmlFor="full_name">Nama Admin</Label>
-
                             <Input
                                 id="full_name"
                                 className="mt-1 block w-full"
@@ -60,8 +60,22 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 autoComplete="full_name"
                                 placeholder="Nama Admin"
                             />
-
                             <InputError className="mt-2" message={errors.full_name} />
+                        </div>
+                        <div className="grid gap-2">
+                            <Label htmlFor="phone">Nomor Telepon</Label>
+                            <Input
+                                id="phone"
+                                type="tel"
+                                inputMode="numeric"
+                                pattern="[0-9]*"
+                                className="mt-1 block w-full"
+                                value={data.phone}
+                                onChange={(e) => setData('phone', e.target.value.replace(/[^0-9]/g, ''))}
+                                autoComplete="phone"
+                                placeholder="Nomor Telepon"
+                            />
+                            <InputError className="mt-2" message={errors.phone} />
                         </div>
 
                         <div className="grid gap-2">

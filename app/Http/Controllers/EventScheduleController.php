@@ -107,15 +107,12 @@ class EventScheduleController extends Controller
                 'status' => 'required|in:present,present_in_tolerance,alpha,late',
                 'clock_in_hour' => 'nullable|date_format:H:i',
                 'clock_out_hour' => 'nullable|date_format:H:i',
-                'minutes_of_late' => 'nullable|integer|min:0',
                 'note' => 'nullable|string|max:255',
             ]);
 
             $attendanceData = [
                 'academic_year_id' => 1, // Sesuaikan dengan academic year yang aktif
-                'submit_date' => now()->format('Y-m-d'),
                 'status' => $validated['status'],
-                'minutes_of_late' => $validated['minutes_of_late'] ?? null,
                 'note' => $validated['note'] ?? null,
             ];
 

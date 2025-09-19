@@ -163,6 +163,10 @@ class UserController extends Controller
 
         $users = User::with('role')
             ->whereHas('role', fn($q) => $q->where('name', $role->value))
+            // Exclude current logged-in user for admin list
+            ->when($role === EnumsRole::Admin, function ($q) {
+                $q->where('id', '!=', auth()->id());
+            })
             ->when($request->search, fn($q) => $q->where('full_name', 'like', "%{$request->search}%"))
             ->orderBy($request->sort ?? 'full_name', $request->direction ?? 'asc')
             ->paginate(10)
