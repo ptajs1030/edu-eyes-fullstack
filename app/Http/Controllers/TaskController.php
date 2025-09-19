@@ -458,7 +458,7 @@ class TaskController extends Controller
 
             $notificationCount = collect($task->assignments)
                 ->filter(fn($a) => $a->student?->parent?->role->name === Role::Parent->value && $a->student->parent->notification_key)
-                ->each(fn($a) => SendTaskRealTimeNotification::dispatch($task, $a->student->parent, 'manual'))
+                ->each(fn($a) => SendTaskRealTimeNotification::dispatch($task, $a->student->parent, $a->student, 'manual'))
                 ->count();
 
             return redirect()->route('tasks.index')

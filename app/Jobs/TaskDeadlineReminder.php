@@ -16,15 +16,17 @@ class TaskDeadlineReminder implements ShouldQueue
 
     protected $task;
     protected $parentUser;
+    protected $student;
     protected $type;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(Task $task, User $parentUser, string $type = 'deadline')
+    public function __construct(Task $task, User $parentUser, $student, string $type = 'deadline')
     {
         $this->task = $task;
         $this->parentUser = $parentUser;
+        $this->student = $student;
         $this->type = $type;
     }
 
@@ -48,8 +50,9 @@ class TaskDeadlineReminder implements ShouldQueue
             $dueTime = $this->task->due_time ? $this->task->due_time->format('H:i') : '-';
 
             $subjectName = $this->task->subject->name ?? '';
+            $studentText = ($this->student && isset($this->student->full_name)) ? $this->student->full_name : 'Anak Anda';
             $title = 'Pengingat Deadline Tugas';
-            $body = "Tugas '{$this->task->title}' ({$subjectName}) untuk anak Anda akan berakhir dalam {$reminderDays} hari pada {$dueDate} {$dueTime}!";
+            $body = "Tugas '{$this->task->title}' ({$subjectName}) untuk {$studentText} akan berakhir dalam {$reminderDays} hari pada {$dueDate} {$dueTime}!";
 
             $data = [
                 'type' => 'task_deadline',

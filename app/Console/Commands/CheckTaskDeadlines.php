@@ -35,8 +35,8 @@ class CheckTaskDeadlines extends Command
         $now = now('Asia/Jakarta');
         $currentTime = $now->format('H:i');
 
-         // Hanya jalan antara 02:00 - 02:15 WIB
-        if ($currentTime < '02:00' || $currentTime > '02:15') {
+         // Hanya jalan antara 00:28 - 00:33 WIB (make sure only running once at 00:30)
+        if ($currentTime < '00:28' || $currentTime > '00:33') {
             Log::info('[Cron] Task Deadline Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
             $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
             return;
@@ -68,15 +68,12 @@ class CheckTaskDeadlines extends Command
             // Loop melalui assignments
             foreach ($task->assignments as $assignment) {
                 if ($assignment->student && $assignment->student->parent) {
-
                     $parentUser = $assignment->student->parent;
-
                     // Pastikan user adalah parent dan punya notification_key
                     if ($this->isParentUser($parentUser) && $parentUser->notification_key) {
-                        $this->info("Dispatching reminder for parent: {$parentUser->full_name}");
-
-                        // Dispatch job untuk kirim notifikasi
-                        TaskDeadlineReminder::dispatch($task, $parentUser);
+                        $this->info("Dispatching reminder for parent: {$parentUser->full_name} (student: {$assignment->student->full_name})");
+                        // Dispatch job untuk kirim notifikasi, sertakan student
+                        TaskDeadlineReminder::dispatch($task, $parentUser, $assignment->student);
                         $notificationCount++;
                     }
                 }

@@ -34,8 +34,8 @@ class CheckPaymentDeadlines extends Command
         $now = now('Asia/Jakarta');
         $currentTime = $now->format('H:i');
 
-        // Hanya jalan antara 01:45 - 02:00 WIB
-        if ($currentTime < '01:45' || $currentTime > '02:00') {
+        // Hanya jalan antara 00:34 - 00:39 WIB (make sure only running once at 00:36)
+        if ($currentTime < '00:34' || $currentTime > '00:39') {
             Log::info('[Cron] Payment Deadline Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
             $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
             return;
@@ -64,14 +64,11 @@ class CheckPaymentDeadlines extends Command
 
             foreach ($payment->assignments as $assignment) {
                 if ($assignment->student && $assignment->student->parent) {
-
                     $parentUser = $assignment->student->parent;
-
                     if ($this->isParentUser($parentUser) && $parentUser->notification_key) {
-                        $this->info("Dispatching reminder for parent: {$parentUser->full_name}");
-
-                        // Dispatch job untuk kirim notifikasi
-                        PaymentDeadlineReminder::dispatch($payment, $parentUser);
+                        $this->info("Dispatching reminder for parent: {$parentUser->full_name} (student: {$assignment->student->full_name})");
+                        // Dispatch job untuk kirim notifikasi, sertakan student
+                        PaymentDeadlineReminder::dispatch($payment, $parentUser, $assignment->student);
                         $notificationCount++;
                     }
                 }

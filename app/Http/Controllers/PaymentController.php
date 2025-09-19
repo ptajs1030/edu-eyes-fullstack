@@ -252,7 +252,7 @@ class PaymentController extends Controller
                 )
                 ->each(
                     fn($assignment) =>
-                    SendPaymentRealTimeNotification::dispatch($payment, $assignment->student->parent, 'manual')
+                    SendPaymentRealTimeNotification::dispatch($payment, $assignment->student->parent, $assignment->student, 'manual')
                 )
                 ->count();
 

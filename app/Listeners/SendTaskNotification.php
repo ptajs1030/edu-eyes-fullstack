@@ -26,15 +26,13 @@ class SendTaskNotification implements ShouldQueue
     public function handle(TaskCreated $event): void
     {
         $task = $event->task;
-
         $task->load(['assignments.student.parent', 'subject']);
-
         foreach ($task->assignments as $assignment) {
             if ($assignment->student && $assignment->student->parent) {
                 $parentUser = $assignment->student->parent;
-
+                $student = $assignment->student;
                 if ($this->isParentUser($parentUser) && $parentUser->notification_key) {
-                    SendTaskRealTimeNotification::dispatch($task, $parentUser, "created");
+                    SendTaskRealTimeNotification::dispatch($task, $parentUser, $student, "created");
                 }
             }
         }

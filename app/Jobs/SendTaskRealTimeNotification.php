@@ -18,15 +18,17 @@ class SendTaskRealTimeNotification implements ShouldQueue
 
     protected $task;
     protected $parentUser;
+    protected $student;
     protected $type;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(Task $task, User $parentUser, string $type)
+    public function __construct(Task $task, User $parentUser, $student, string $type)
     {
         $this->task = $task;
         $this->parentUser = $parentUser;
+        $this->student = $student;
         $this->type = $type;
     }
 
@@ -48,13 +50,14 @@ class SendTaskRealTimeNotification implements ShouldQueue
             $dueDate = $this->task->due_date->format('d M Y');
             $dueTime = $this->task->due_time ? $this->task->due_time->format('H:i') : '-';
             $subjectName = $this->task->subject->name ?? 'Umum';
+            $studentName = $this->student ? $this->student->full_name : 'Anak Anda';
 
             if ($this->type === 'created') {
                 $title = 'Tugas Baru Ditambahkan';
-                $body = "Tugas '{$this->task->title}' ({$subjectName}) telah ditambahkan untuk anak Anda. Deadline: {$dueDate} {$dueTime}";
+                $body = "Tugas '{$this->task->title}' ({$subjectName}) telah ditambahkan untuk {$studentName}. Deadline: {$dueDate} {$dueTime}";
             } elseif ($this->type === 'manual') {
                 $title = 'Pengingat Tugas';
-                $body = "Pengingat: Tugas '{$this->task->title}' ({$subjectName}) untuk anak Anda. Deadline: {$dueDate} {$dueTime}";
+                $body = "Pengingat: Tugas '{$this->task->title}' ({$subjectName}) untuk {$studentName}. Deadline: {$dueDate} {$dueTime}";
             } else {
                 Log::warning("Type tidak sesuai");
             }

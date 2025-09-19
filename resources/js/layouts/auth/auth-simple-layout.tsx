@@ -12,20 +12,19 @@ export default function AuthSimpleLayout({ children, title, description }: Props
     const { schoolLogo } = usePage().props as unknown as { schoolLogo: string };
 
     return (
-        <div className="bg-background flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
-            <div className="w-full max-w-sm">
+        <div className="min-h-svh flex items-center justify-center bg-[#f5f6f7]">
+            <div className="w-full max-w-md p-8 md:p-10 rounded-xl border border-[#e2e2e2] shadow-lg bg-white" style={{ boxShadow: '0 4px 24px rgba(0,0,0,0.08)', border: '1.5px solid #e2e2e2' }}>
                 <div className="flex flex-col gap-8">
                     <div className="flex flex-col items-center gap-4">
                         <Link href={route('home')} className="flex flex-col items-center gap-2 font-medium">
-                            <div className="mb-1 flex h-35 w-35 items-center justify-center rounded-md">
-                                <AppLogoIcon logoUrl={schoolLogo} logoSize="h-35 w-auto mx-auto" className="size-9 fill-current text-[var(--foreground)] dark:text-white"/>
+                            <div className="mb-1 flex h-28 w-28 items-center justify-center">
+                                <AppLogoIcon logoUrl={schoolLogo} logoSize="h-24 w-auto mx-auto" className="size-9 fill-current text-[var(--foreground)] dark:text-white"/>
                             </div>
                             <span className="sr-only">{title}</span>
                         </Link>
-
                         <div className="space-y-2 text-center">
-                            <h1 className="text-xl font-medium">{title}</h1>
-                            <p className="text-muted-foreground text-center text-sm">{description}</p>
+                            <h1 className="text-2xl font-semibold text-gray-800">{title}</h1>
+                            <p className="text-gray-500 text-center text-base">{description}</p>
                         </div>
                     </div>
                     {children}

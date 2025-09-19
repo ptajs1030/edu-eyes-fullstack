@@ -36,7 +36,7 @@ class SendPaymentNotification implements ShouldQueue
 
                 // Pastikan parent dan punya notification_key
                 if ($this->isParentUser($parentUser) && $parentUser->notification_key) {
-                    SendPaymentRealTimeNotification::dispatch($payment, $parentUser, 'created');
+                    SendPaymentRealTimeNotification::dispatch($payment, $parentUser, $assignment->student, 'created');
                 }
             }
         }
