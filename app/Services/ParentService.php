@@ -339,6 +339,8 @@ class ParentService
                 'event' => optional($attendance->event)->name,
                 'academic_year' => optional($attendance->academicYear)->title,
                 'submit_date' => $attendance->submit_date,
+                'clockInHour'=> $attendance->clock_in_hour,
+                'clockOutHour'=> $attendance->clock_out_hour,
                 'status' => $attendance->status,
                 'note' => $attendance->note,
             ];
