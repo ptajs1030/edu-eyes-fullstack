@@ -63,7 +63,7 @@ interface FormData {
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Ujian', href: '/exams' },
-    { title: 'Buat Ujian', href: '' },
+    { title: 'Buat Ujian Baru', href: '' },
 ];
 
 export default function ExamCreate({ subjects, academicYears, classrooms }: Props) {
@@ -184,7 +184,7 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
             <Head title="Buat Ujian" />
             <Toaster position="top-right" richColors />
             <div className="rounded-xl bg-white p-6 shadow-lg">
-                <h2 className="mb-6 text-2xl font-semibold text-gray-900">Buat Ujian</h2>
+                <h2 className="mb-6 text-2xl font-semibold text-gray-900">Buat Ujian Baru</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Tahun Ajaran */}

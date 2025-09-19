@@ -150,7 +150,7 @@ export default function PaymentDetail({ transaction, payment }: Props) {
                 {/* Tabel */}
                 <div className="rounded-lg border p-4">
                     <div className="mb-4 flex items-center justify-between">
-                        <h2 className="text-xl font-bold">Daftar Pembayaran</h2>
+                        <h2 className="text-xl font-bold">Daftar Tagihan</h2>
                         <div className="flex items-center gap-3">
                             <div className="text-sm text-gray-600">Total: {payment.assignments.length} peserta</div>
                             <button

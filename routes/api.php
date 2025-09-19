@@ -138,3 +138,4 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
     });
     Route::get('/students/{id?}', 'getStudents');
 });
+Route::get('/school-stats', [\App\Http\Controllers\SchoolStatsController::class, 'index']);
