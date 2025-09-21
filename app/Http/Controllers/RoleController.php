@@ -35,14 +35,14 @@ class RoleController extends Controller
             Role::create($validated);
 
             return redirect()->back()
-                ->with('success', 'New roles successfully added.');
+                ->with('success', 'Role baru berhasil ditambahkan.');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to create role: ' . $e->getMessage())
+                ->with('error', 'Gagal menambahkan role: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -60,14 +60,14 @@ class RoleController extends Controller
             $role->update($validated);
 
             return redirect()->back()
-                ->with('success', 'Role updated successfully');
+                ->with('success', 'Role berhasil diperbarui');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to update role: ' . $e->getMessage())
+                ->with('error', 'Gagal memperbarui role: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -79,12 +79,12 @@ class RoleController extends Controller
             $role->delete();
 
             return redirect()->back()
-                ->with('success', 'Role deleted successfully');
+                ->with('success', 'Role berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', app()->environment('production')
-                    ? 'Failed to delete role'
-                    : 'Failed to delete role: ' . $e->getMessage());
+                    ? 'Gagal menghapus role'
+                    : 'Gagal menghapus role: ' . $e->getMessage());
         }
     }
 }

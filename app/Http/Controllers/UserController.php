@@ -214,14 +214,23 @@ class UserController extends Controller
             $userData['profile_picture'] = $this->handleProfilePicture($request);
             User::create($userData);
 
-            return redirect()->back()->with('success', "New {$role->label()} created successfully");
+            $roleName = $role->label() ? strtolower($role->label()) : 'user';
+            if ($roleName === 'teacher') {
+                $roleLabel = 'Guru';
+            } else if ($roleName === 'parent') {
+                $roleLabel = 'Wali';
+            } else {
+                $roleLabel = ucfirst($roleName);
+            }
+
+            return redirect()->back()->with('success', $roleLabel . ' baru berhasil ditambahkan');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to create user: ' . $e->getMessage())
+                ->with('error', 'Gagal menambahkan user: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -253,14 +262,23 @@ class UserController extends Controller
             $userData['profile_picture'] = $this->handleProfilePicture($request, $user);
             $user->update($userData);
 
-            return redirect()->back()->with('success', "{$role->label()} updated successfully");
+            $roleName = $role->label() ? strtolower($role->label()) : 'user';
+            if ($roleName === 'teacher') {
+                $roleLabel = 'Guru';
+            } else if ($roleName === 'parent') {
+                $roleLabel = 'Wali';
+            } else {
+                $roleLabel = ucfirst($roleName);
+            }
+
+            return redirect()->back()->with('success', $roleLabel . ' berhasil diperbarui');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to update user: ' . $e->getMessage())
+                ->with('error', 'Gagal memperbarui user: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -268,16 +286,24 @@ class UserController extends Controller
     public function destroy($id)
     {
         try {
-            $user = User::findOrFail($id);
+            $user = User::with('role')->findOrFail($id);
+            $roleName = $user->role ? strtolower($user->role->name) : 'user';
+            if ($roleName === 'teacher') {
+                $roleLabel = 'Guru';
+            } else if ($roleName === 'parent') {
+                $roleLabel = 'Wali';
+            } else {
+                $roleLabel = ucfirst($roleName);
+            }
             $user->delete();
 
             return redirect()->back()
-                ->with('success', 'User deleted successfully');
+                ->with('success', $roleLabel . ' berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', app()->environment('production')
-                    ? 'Failed to delete user'
-                    : 'Failed to delete user: ' . $e->getMessage());
+                    ? 'Gagal menghapus user'
+                    : 'Gagal menghapus user: ' . $e->getMessage());
         }
     }
 

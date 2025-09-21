@@ -135,7 +135,7 @@ export default function CustomDayOffFormModal({ isOpen, onClose, dayOff }: Props
                     className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700 disabled:opacity-50"
                     disabled={isSubmitting}
                 >
-                    {isSubmitting ? 'Memproses...' : dayOff ? 'Update' : 'Simpan'}
+                    {isSubmitting ? 'Memproses...' : dayOff ? 'Ubah' : 'Simpan'}
                 </button>
             </div>
         </FormModal>

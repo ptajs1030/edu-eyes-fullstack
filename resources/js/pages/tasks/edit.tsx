@@ -201,7 +201,7 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
                             className="w-full cursor-not-allowed rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-gray-600"
                             readOnly
                         />
-                        <p className="mt-1 text-xs text-amber-600">Tahun ajaran tidak dapat diubah setelah exam dibuat</p>
+                        <p className="mt-1 text-xs text-amber-600">Tahun ajaran tidak dapat diperbarui setelah ujian ditambahkan</p>
                     </div>
 
                     {/* Mata Pelajaran */}
@@ -397,7 +397,7 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
                             disabled={processing}
                             className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                         >
-                            {processing ? 'Memperbarui...' : 'Update'}
+                            {processing ? 'Memperbarui...' : 'Ubah'}
                         </button>
                     </div>
                 </form>

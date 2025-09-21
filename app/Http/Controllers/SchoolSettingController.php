@@ -36,10 +36,10 @@ class SchoolSettingController extends Controller
             $setting->update($validated);
 
             return redirect()->back()
-                ->with('success', 'Setting updated successfully');
+                ->with('success', 'Pengaturan berhasil diperbarui');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to update setting: ' . $e->getMessage())
+                ->with('error', 'Gagal memperbarui pengaturan: ' . $e->getMessage())
                 ->withInput();
         }
     }

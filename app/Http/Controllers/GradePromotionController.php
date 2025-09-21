@@ -244,7 +244,7 @@ class GradePromotionController extends Controller
                 );
             });
 
-            return redirect()->back()->with('success', 'Student assignments updated successfully');
+            return redirect()->back()->with('success', 'Target kelas siswa berhasil diperbarui');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()

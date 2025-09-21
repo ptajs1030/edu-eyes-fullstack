@@ -216,12 +216,12 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                                 selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
                             }`}
                         >
-                            Ekspor data yang dipilih
+                            Ekspor Data
                         </button>
 
                         <button
                             onClick={() => setShowImportModal(true)}
-                            className="inline-flex items-center rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hhover:bg-indigo-700"
+                            className="inline-flex items-center rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hhover:bg-indigo-700"
                         >
                             {/* icon upload */}
                             <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -330,20 +330,20 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                 <ActionModal
                     isOpen={!!userToDelete}
                     onClose={() => setUserToDelete(null)}
-                    title="Confirm Deletion"
+                    title="Konfirmasi Penghapusan"
                     message={
                         <span>
-                            Are you sure you want to delete user <strong>{userToDelete?.full_name}</strong>?
+                            Apakah Anda yakin ingin menghapus user <strong>{userToDelete?.full_name}</strong>?
                         </span>
                     }
                     buttons={[
                         {
-                            label: 'Cancel',
+                            label: 'Batal',
                             onClick: () => setUserToDelete(null),
                             variant: 'neutral',
                         },
                         {
-                            label: 'Delete',
+                            label: 'Ya, Hapus',
                             onClick: () => {
                                 if (userToDelete) {
                                     handleDelete(userToDelete.id);

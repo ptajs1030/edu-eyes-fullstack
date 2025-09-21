@@ -176,20 +176,20 @@ export default function RoleIndex() {
                 <ActionModal
                     isOpen={!!roleToDelete}
                     onClose={() => setRoleToDelete(null)}
-                    title="Confirm Deletion"
+                    title="Konfirmasi Penghapusan"
                     message={
                         <span>
-                            Are you sure you want to delete role <strong>{roleToDelete?.name}</strong>?
+                            Apakah Anda yakin ingin menghapus role <strong>{roleToDelete?.name}</strong>?
                         </span>
                     }
                     buttons={[
                         {
-                            label: 'Cancel',
+                            label: 'Batal',
                             onClick: () => setRoleToDelete(null),
                             variant: 'neutral',
                         },
                         {
-                            label: 'Delete',
+                            label: 'Ya, Hapus',
                             onClick: () => {
                                 if (roleToDelete) {
                                     handleDelete(roleToDelete.id);

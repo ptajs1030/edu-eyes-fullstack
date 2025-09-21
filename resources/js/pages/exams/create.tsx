@@ -67,7 +67,10 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function ExamCreate({ subjects, academicYears, classrooms }: Props) {
-    const activeAcademicYear = academicYears.find(year => year.status === 'active');
+    // const activeAcademicYear = academicYears.find(year => year.status === 'active');
+    const activeAcademicYear = Array.isArray(academicYears) 
+        ? academicYears.find(year => year.status === 'active')
+        : undefined
 
     const { data, setData, post, processing } = useForm<{
         academic_year_id: string | number;

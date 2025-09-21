@@ -70,7 +70,7 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
                     },
                     onError: (errors) => {
                         const errorMessage = Object.values(errors).join('\n');
-                        toast.error(`Failed to update shifting: ${errorMessage}`);
+                        toast.error(`Gagal memperbarui shifting: ${errorMessage}`);
                     },
                 },
             );
@@ -86,7 +86,7 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
                     },
                     onError: (errors) => {
                         const errorMessage = Object.values(errors).join('\n');
-                        toast.error(`Failed to add new shifting: ${errorMessage}`);
+                        toast.error(`Gagal menambahkan shifting baru: ${errorMessage}`);
                     },
                 },
             );
@@ -146,13 +146,13 @@ export default function ShiftingFormModal({ isOpen, onClose, shifting }: Props) 
                     onClick={onClose}
                     className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
                 >
-                    Cancel
+                    Batal
                 </button>
                 <button
                     type="submit"
                     className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
                 >
-                    {shifting ? 'Update' : 'Create'}
+                    {shifting ? 'Ubah' : 'Simpan'}
                 </button>
             </div>
         </FormModal>

@@ -84,7 +84,7 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                     },
                     onError: (errors) => {
                         const errorMessage = Object.values(errors).join('\n');
-                        toast.error('Failed to update academic year: ' + errorMessage);
+                        toast.error('Gagal memperbarui tahun ajaran: ' + errorMessage);
                     },
                 },
             );
@@ -92,12 +92,12 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
             router.post('/academic-years', payload, {
                 onSuccess: () => {
                     closeModal();
-                    toast.success('Academic year created successfully.');
+                    toast.success('Tahun ajaran berhasil ditambahkan.');
                     router.reload();
                 },
                 onError: (errors) => {
                     const errorMessage = Object.values(errors).join('\n');
-                    toast.error('Failed to create academic year: ' + errorMessage);
+                    toast.error('Gagal menambahkan tahun ajaran: ' + errorMessage);
                 },
             });
         }
@@ -171,22 +171,22 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                         type="submit"
                         className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
                     >
-                        {academicYear ? 'Update' : 'Simpan'}
+                        {academicYear ? 'Ubah' : 'Simpan'}
                     </button>
                 </div>
             </FormModal>
             <ActionModal
                 isOpen={showConfirm}
-                title="Confirmation"
-                message="Are you sure you want to create new academic year?"
+                title="Konfirmasi"
+                message="Apakah Anda yakin ingin menambahkan tahun ajaran baru?"
                 buttons={[
                     {
-                        label: 'Cancel',
+                        label: 'Batal',
                         onClick: () => setShowConfirm(false),
                         variant: 'neutral',
                     },
                     {
-                        label: 'Confirm',
+                        label: 'Ya',
                         onClick: () => {
                             handleConfirm();
                             setShowConfirm(false);

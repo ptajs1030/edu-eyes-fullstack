@@ -32,7 +32,7 @@ class ParentService
         $user->password = bcrypt($data->getNewPassword());
         $user->save();
         return [
-            'message' => 'Password berhasil diubah',
+            'message' => 'Password berhasil diperbarui',
         ];
 
     }

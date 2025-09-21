@@ -66,9 +66,7 @@ class ClassroomController extends Controller
                 'main_teacher_id' => 'nullable|exists:users,id',
             ]);
 
-            $existingClassroom = Classroom::where('name', $validated['name'])
-                ->whereNull('deleted_at')
-                ->first();
+            $existingClassroom = Classroom::where('name', $validated['name'])->first();
 
             if ($existingClassroom) {
                 throw ValidationException::withMessages([
@@ -79,14 +77,14 @@ class ClassroomController extends Controller
             Classroom::create($validated);
 
             return redirect()->back()
-                ->with('success', 'New classroom successfully added.');
+                ->with('success', 'Kelas baru berhasil ditambahkan.');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to create classroom: ' . $e->getMessage())
+                ->with('error', 'Gagal menambahkan kelas: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -103,7 +101,6 @@ class ClassroomController extends Controller
             ]);
 
             $existingClassroom = Classroom::where('name', $validated['name'])
-                ->whereNull('deleted_at')
                 ->where('id', '!=', $classroom->id)
                 ->first();
 
@@ -116,14 +113,14 @@ class ClassroomController extends Controller
             $classroom->update($validated);
 
             return redirect()->back()
-                ->with('success', 'Classroom updated successfully');
+                ->with('success', 'Kelas berhasil diperbarui.');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to update classroom: ' . $e->getMessage())
+                ->with('error', 'Gagal memperbarui kelas: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -135,16 +132,16 @@ class ClassroomController extends Controller
             $classroom->delete();
 
             return redirect()->back()
-                ->with('success', 'Classroom deleted successfully');
+                ->with('success', 'Kelas berhasil dihapus');
         } catch (\Exception $e) {
-            $errorMessage = 'Failed to delete classroom';
+            $errorMessage = 'Gagal menghapus kelas';
 
             // Check if it's a foreign key constraint violation
             if (
                 str_contains($e->getMessage(), 'Integrity constraint violation') &&
                 str_contains($e->getMessage(), 'foreign key constraint')
             ) {
-                $errorMessage = 'Cannot delete classroom because the data is already associated with other records.';
+                $errorMessage = 'Kelas tidak dapat dihapus karena masih dipakai di data lain.';
             } else if (!app()->environment('production')) {
                 $errorMessage .= ': ' . $e->getMessage();
             }

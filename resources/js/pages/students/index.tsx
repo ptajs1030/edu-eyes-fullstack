@@ -62,7 +62,7 @@ export default function StudentIndex() {
         sexes: { value: string; label: string }[];
         statuses: { value: string; label: string }[];
         religions: { value: string; label: string }[];
-        filters: { search?: string; sort?: string; direction?: string; classrooms?: number[] };
+        filters: { search?: string; sort?: string; direction?: string; classrooms?: number[]; status?: string; show?: string };
     }>().props;
 
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
@@ -126,12 +126,14 @@ export default function StudentIndex() {
             : [...selectedClassrooms, numericClassroomId];
 
         setSelectedClassrooms(newSelectedClassrooms);
+        setSelectedIds([]); // Unselect all checkboxes when filter changes
 
-        // Update URL dengan filter baru
+        // Update URL dengan filter baru, pastikan status tetap ter-attach
         const queryParams: any = {
             search: filters.search || undefined,
             sort: filters.sort || undefined,
             direction: filters.direction || undefined,
+            status: filters.status || undefined,
             page: 1, // Reset ke page 1
         };
 
@@ -148,11 +150,13 @@ export default function StudentIndex() {
 
     const clearClassroomFilters = () => {
         setSelectedClassrooms([]);
+        setSelectedIds([]); // Unselect all checkboxes when filter changes
 
         const queryParams: any = {
             search: filters.search || undefined,
             sort: filters.sort || undefined,
             direction: filters.direction || undefined,
+            status: filters.status || undefined,
             page: 1,
         };
 
@@ -245,7 +249,7 @@ export default function StudentIndex() {
                 body: JSON.stringify({ student_ids: selectedIds }),
             });
 
-            if (!response.ok) throw new Error('Failed to download PDF');
+            if (!response.ok) throw new Error('Gagal download file PDF');
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -306,15 +310,45 @@ export default function StudentIndex() {
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
                 <div className="flex items-center justify-between">
-                    {/* Search and Add Button */}
+                    {/* Search, Status Filter, Show Data, Add Button */}
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
                             placeholder="Cari siswa..."
                             defaultValue={filters.search || ''}
-                            onChange={(e) => router.get(route('students.index'), { search: e.target.value }, { preserveState: true })}
+                            onChange={(e) => {
+                                setSelectedIds([]); // Unselect all checkboxes when search changes
+                                router.get(route('students.index'), { ...filters, search: e.target.value }, { preserveState: true });
+                            }}
                             className="w-64 rounded border px-3 py-1"
                         />
+                        {/* Show Data Filter */}
+                        <select
+                            value={filters.show || '10'}
+                            onChange={e => {
+                                setSelectedIds([]); // Deselect all when show data filter changes
+                                router.get(route('students.index'), { ...filters, show: e.target.value }, { preserveState: true });
+                            }}
+                            className="rounded border px-2 py-1 text-sm"
+                        >
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="all">Show All</option>
+                        </select>
+                        {/* Status Filter */}
+                        <select
+                            value={filters.status || ''}
+                            onChange={e => {
+                                setSelectedIds([]); // Unselect all checkboxes when filter changes
+                                router.get(route('students.index'), { ...filters, status: e.target.value }, { preserveState: true });
+                            }}
+                            className="rounded border px-2 py-1 text-sm"
+                        >
+                            <option value="">Semua Status</option>
+                            {statuses.map(s => (
+                                <option key={s.value} value={s.value}>{s.label}</option>
+                            ))}
+                        </select>
                         {/* Classroom Filter Dropdown */}
                         <div className="relative" ref={dropdownRef}>
                             <button
@@ -352,26 +386,32 @@ export default function StudentIndex() {
                         </div>
 
                         <button
-                            disabled={selectedIds.length === 0}
+                            disabled={selectedIds.length === 0 || students.data.length === 0}
                             onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                                selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white transition ${
+                                selectedIds.length === 0 || students.data.length === 0
+                                    ? 'cursor-not-allowed opacity-50'
+                                    : 'hover:bg-indigo-700 hover:cursor-pointer'
                             }`}
                         >
-                            Ekspor data yang dipilih
+                            Ekspor Data
                         </button>
                         <button
-                            disabled={selectedIds.length === 0}
+                            disabled={selectedIds.length === 0 || students.data.length === 0}
                             onClick={handleBulkPrint}
-                            className="rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+                            className={`rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white transition ${
+                                selectedIds.length === 0 || students.data.length === 0
+                                    ? 'cursor-not-allowed opacity-50'
+                                    : 'hover:bg-indigo-700 hover:cursor-pointer'
+                            }`}
                         >
-                            Bulk Print Kartu Siswa
+                            Print Kartu
                         </button>
                         <button
                             onClick={() => setIsImportOpen(true)}
-                            className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700"
+                            className="flex items-center gap-2 rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700"
                         >
-                            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
@@ -379,7 +419,7 @@ export default function StudentIndex() {
                                     d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 5v14"
                                 />
                             </svg>
-                            Impor Data
+                            <span>Impor Data</span>
                         </button>
                     </div>
                     <button
@@ -504,20 +544,20 @@ export default function StudentIndex() {
                 <ActionModal
                     isOpen={!!studentToDelete}
                     onClose={() => setStudentToDelete(null)}
-                    title="Confirm Deletion"
+                    title="Konfirmasi Penghapusan"
                     message={
                         <span>
-                            Are you sure you want to delete student <strong>{studentToDelete?.full_name}</strong>?
+                            Apakah Anda yakin ingin menghapus siswa <strong>{studentToDelete?.full_name}</strong>?
                         </span>
                     }
                     buttons={[
                         {
-                            label: 'Cancel',
+                            label: 'Batal',
                             onClick: () => setStudentToDelete(null),
                             variant: 'neutral',
                         },
                         {
-                            label: 'Delete',
+                            label: 'Ya, Hapus',
                             onClick: () => {
                                 if (studentToDelete) {
                                     handleDelete(studentToDelete.id);

@@ -211,14 +211,14 @@ export default function ExamIndex() {
                             </div>
                         </div>
 
-                        <button
+                        {/* <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
                             className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
                                 }`}
                         >
-                            Ekspor data yang dipilih
-                        </button>
+                            Ekspor Data
+                        </button> */}
                     </div>
                     <button
                         onClick={() => openForm(null)}
@@ -281,21 +281,20 @@ export default function ExamIndex() {
                 <ActionModal
                     isOpen={!!examToDelete}
                     onClose={() => setExamToDelete(null)}
-                    title="Confirm Deletion"
+                    title="Konfirmasi Penghapusan"
                     message={
                         <span>
-                            Are you sure you want to delete exam <strong>{examToDelete?.name}</strong>? This action will delete all student
-                            assignments and scores and cannot be undone.
+                            Apakah Anda yakin ingin menghapus ujian <strong>{examToDelete?.name}</strong>? Aksi ini akan menghapus semua data penilaian siswa dan tidak dapat dikembalikan.
                         </span>
                     }
                     buttons={[
                         {
-                            label: 'Cancel',
+                            label: 'Batal',
                             onClick: () => setExamToDelete(null),
                             variant: 'neutral',
                         },
                         {
-                            label: 'Delete',
+                            label: 'Ya, Hapus',
                             onClick: () => {
                                 if (examToDelete) {
                                     handleDelete(examToDelete.id);

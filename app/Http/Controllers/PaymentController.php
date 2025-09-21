@@ -58,7 +58,7 @@ class PaymentController extends Controller
         $classrooms = Classroom::orderBy('level')->orderBy('name')->get();
         return Inertia::render('payments/form', [
             'classrooms' => $classrooms,
-            'academicYears' => [$activeAcademicYear],
+            'academicYears' => $activeAcademicYear ? [$activeAcademicYear] : [],
         ]);
     }
 
@@ -103,7 +103,7 @@ class PaymentController extends Controller
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to create payment: ' . $e->getMessage())
+                ->with('error', 'Gagal menambahkan tagihan: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -172,7 +172,7 @@ class PaymentController extends Controller
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to update payment: ' . $e->getMessage())
+                ->with('error', 'Gagal memperbarui tagihan: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -224,7 +224,7 @@ class PaymentController extends Controller
             }
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to delete payment: ' . $e->getMessage());
+                ->with('error', 'Gagal menghapus tagihan: ' . $e->getMessage());
         }
     }
 

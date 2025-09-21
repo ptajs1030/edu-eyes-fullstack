@@ -323,14 +323,14 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                                                         disabled={savingScores[assignment.id]}
                                                         className="rounded bg-blue-500 px-2 py-1 text-xs text-white hover:bg-blue-600 disabled:opacity-50"
                                                     >
-                                                        {savingScores[assignment.id] ? '...' : 'SAVE'}
+                                                        {savingScores[assignment.id] ? '...' : 'Simpan'}
                                                     </button>
                                                     <button
                                                         onClick={() => handleCancelEdit(assignment.id)}
                                                         disabled={savingScores[assignment.id]}
                                                         className="rounded bg-gray-500 px-2 py-1 text-xs text-white hover:bg-gray-600 disabled:opacity-50"
                                                     >
-                                                        CANCEL
+                                                        Batal
                                                     </button>
                                                 </div>
                                             ) : (
@@ -338,7 +338,7 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                                                     onClick={() => handleEditClick(assignment.id)}
                                                     className="rounded bg-yellow-500 px-3 py-1 text-xs text-white hover:bg-yellow-600"
                                                 >
-                                                    EDIT
+                                                    Edit
                                                 </button>
                                             )}
                                         </td>
@@ -353,9 +353,9 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                 <div className="rounded-lg bg-blue-50 p-4">
                     <h4 className="text-sm font-medium text-blue-900">Petunjuk:</h4>
                     <ul className="mt-2 text-sm text-blue-800">
-                        <li>• Klik tombol "EDIT" untuk mengubah nilai siswa</li>
+                        <li>• Klik tombol "Edit" untuk mengubah nilai siswa</li>
                         <li>• Nilai harus antara 0-100</li>
-                        <li>• Klik "SAVE" untuk menyimpan nilai atau "CANCEL" untuk membatalkan</li>
+                        <li>• Klik "Simpan" untuk menyimpan nilai atau "Batal" untuk membatalkan</li>
                         <li>• Jika ada beberapa perubahan, gunakan tombol "Simpan Semua Nilai" untuk menyimpan sekaligus</li>
                     </ul>
                 </div>

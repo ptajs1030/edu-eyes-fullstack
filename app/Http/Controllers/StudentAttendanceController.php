@@ -154,9 +154,9 @@ class StudentAttendanceController extends Controller
 
             $attendance->update($validated);
 
-            return redirect()->back()->with('success', 'Attendance updated successfully');
+            return redirect()->back()->with('success', 'Kehadiran berhasil diperbarui');
         } catch (Exception $e) {
-            return redirect()->back()->with('error', 'Failed to update attendance: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal memperbarui kehadiran: ' . $e->getMessage());
         }
     }
 
@@ -175,9 +175,9 @@ class StudentAttendanceController extends Controller
 
             $attendance->update($validated);
 
-            return redirect()->back()->with('success', 'Attendance updated successfully');
+            return redirect()->back()->with('success', 'Kehadiran berhasil diperbarui');
         } catch (Exception $e) {
-            return redirect()->back()->with('error', 'Failed to update attendance: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal memperbarui kehadiran: ' . $e->getMessage());
         }
     }
 }

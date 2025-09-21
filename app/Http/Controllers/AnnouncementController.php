@@ -66,14 +66,14 @@ class AnnouncementController extends Controller
 
             $this->handleAttachments($announcement->id, $validated['attachments'] ?? []);
 
-            return redirect()->route('announcements.index')->with('success', 'Announcement created successfully.');
+            return redirect()->route('announcements.index')->with('success', 'Pengumuman berhasil ditambahkan.');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Gagal membuat pengumuman: ' . $e->getMessage())
+                ->with('error', 'Gagal menambahkan pengumuman: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -117,7 +117,7 @@ class AnnouncementController extends Controller
             // Sync attachments
             $this->handleAttachments($announcement->id, $validated['attachments'] ?? []);
 
-            return redirect()->route('announcements.index')->with('success', 'Announcement updated successfully.');
+            return redirect()->route('announcements.index')->with('success', 'Pengumuman berhasil diperbarui.');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
@@ -191,7 +191,7 @@ class AnnouncementController extends Controller
         $decodedImage = base64_decode($imageData, true);
 
         if ($decodedImage === false) {
-            throw new \Exception('Failed to decode base64 image');
+            throw new \Exception('Gagal decode base64 gambar');
         }
 
         $folder = 'uploads/announcement-images/';
@@ -199,7 +199,7 @@ class AnnouncementController extends Controller
         $path = $folder . $filename;
 
         if (!Storage::disk('public')->put($path, $decodedImage)) {
-            throw new \Exception('Failed to save image to storage');
+            throw new \Exception('Gagal menyimpan gambar ke storage');
         }
 
         return [
@@ -245,9 +245,9 @@ class AnnouncementController extends Controller
     {
         try {
             Announcement::destroy($id);
-            return redirect()->route('announcements.index')->with('success', 'Announcement deleted successfully.');
+            return redirect()->route('announcements.index')->with('success', 'Announcement berhasil dihapus.');
         } catch (\Throwable $th) {
-            return redirect()->route('announcements.index')->with('error', 'Failed to delete announcement: ' . $th->getMessage());
+            return redirect()->route('announcements.index')->with('error', 'Gagal menghapus announcement: ' . $th->getMessage());
         }
     }
 }

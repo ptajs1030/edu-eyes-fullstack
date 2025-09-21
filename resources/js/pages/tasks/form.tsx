@@ -94,7 +94,7 @@ export default function CreateTask({ academicYears, selectedStudents, classrooms
         setIsLoading(true);
         try {
             const response = await fetch(route('students.by-class', classId));
-            if (!response.ok) throw new Error('Failed to fetch students');
+            if (!response.ok) throw new Error('Gagal memuat data siswa');
             const data = await response.json();
             setStudents(data);
         } catch {
@@ -108,7 +108,7 @@ export default function CreateTask({ academicYears, selectedStudents, classrooms
     const fetchSelectedStudentsInfo = async (studentIds: number[]) => {
         try {
             const response = await fetch(route('students.get-by-ids', { ids: studentIds.join(',') }));
-            if (!response.ok) throw new Error('Failed to fetch student info');
+            if (!response.ok) throw new Error('Gagal memuat data siswa terpilih');
             const data = await response.json();
             setSelectedStudentsInfo(data);
         } catch {
@@ -167,8 +167,8 @@ export default function CreateTask({ academicYears, selectedStudents, classrooms
                 attachments: attachments.map((a) => ({ url: a.url })),
             },
             {
-                onSuccess: () => toast.success('Tugas berhasil dibuat'),
-                onError: () => toast.error('Gagal membuat tugas'),
+                onSuccess: () => toast.success('Tugas berhasil ditambahkan'),
+                onError: () => toast.error('Gagal menambahkan tugas'),
             },
         );
     };

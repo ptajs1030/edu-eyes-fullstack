@@ -95,7 +95,7 @@ const mainNavItems: NavItem[] = [
         icon: BadgeInfo,
     },
     {
-        title: 'Pengaturan',
+        title: 'Pengaturan Sekolah',
         href: '/school-settings',
         icon: Settings2,
     },

@@ -51,14 +51,14 @@ class ShiftingController extends Controller
             Shifting::create($validated);
 
             return redirect()->back()
-                ->with('success', 'New shifting successfully added.');
+                ->with('success', 'Shifting baru berhasil ditambahkan.');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to create shifting: ' . $e->getMessage())
+                ->with('error', 'Gagal menambahkan shifting: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -77,14 +77,14 @@ class ShiftingController extends Controller
             $shifting->update($validated);
 
             return redirect()->back()
-                ->with('success', 'Shifting updated successfully');
+                ->with('success', 'Shifting berhasil diperbarui');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to update shifting: ' . $e->getMessage())
+                ->with('error', 'Gagal memperbarui shifting: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -96,7 +96,7 @@ class ShiftingController extends Controller
             $shifting->delete();
 
             return redirect()->back()
-                ->with('success', 'Shifting deleted successfully');
+                ->with('success', 'Shifting berhasil dihapus');
         } catch (QueryException $e) {
             if ($e->getCode() === "23000") {
                 return redirect()->back()
@@ -110,8 +110,8 @@ class ShiftingController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', app()->environment('production')
-                    ? 'Failed to delete shifting'
-                    : 'Failed to delete shifting: ' . $e->getMessage());
+                    ? 'Gagal menghapus shifting'
+                    : 'Gagal menghapus shifting: ' . $e->getMessage());
         }
     }
 }

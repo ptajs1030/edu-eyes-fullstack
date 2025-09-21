@@ -109,7 +109,7 @@ class TaskController extends Controller
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to create task: ' . $e->getMessage())
+                ->with('error', 'Gagal menambahkan tugas: ' . $e->getMessage())
                 ->withInput();
         }
     }
