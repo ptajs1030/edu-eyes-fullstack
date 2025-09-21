@@ -177,21 +177,37 @@ class UserController extends Controller
             'label' => $status->label(),
         ]);
 
-        $users = User::with('role')
-            ->whereHas('role', fn($q) => $q->where('name', $role->value))
-            // Exclude current logged-in user for admin list
-            ->when($role === EnumsRole::Admin, function ($q) {
-                $q->where('id', '!=', auth()->id());
-            })
-            ->when($request->search, fn($q) => $q->where('full_name', 'like', "%{$request->search}%"))
-            ->orderBy($request->sort ?? 'full_name', $request->direction ?? 'asc')
-            ->paginate(10)
-            ->withQueryString();
+        $query = User::with('role')
+            ->whereHas('role', fn($q) => $q->where('name', $role->value));
+
+        // Exclude current logged-in user for admin list
+        if ($role === EnumsRole::Admin) {
+            $query->where('id', '!=', auth()->id());
+        }
+
+        if ($request->search) {
+            $query->where('full_name', 'like', "%{$request->search}%");
+        }
+
+        // Filter by status
+        if ($request->has('status') && $request->status !== null && $request->status !== '') {
+            $query->where('status', $request->status);
+        }
+
+        $query->orderBy($request->sort ?? 'full_name', $request->direction ?? 'asc');
+
+        // Show data (pagination size)
+        $perPage = 10;
+        if ($request->has('show') && in_array($request->show, ['10','20','all'])) {
+            $perPage = $request->show === 'all' ? $query->count() : (int)$request->show;
+        }
+
+        $users = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render("users/{$role->value}/index", [
             'users' => $users,
             'statuses' => $statuses,
-            'filters' => $request->only(['search', 'sort', 'direction']),
+            'filters' => $request->only(['search', 'sort', 'direction', 'show', 'status']),
             'role' => [
                 'id' => Role::where('name', $role->value)->first()->id,
                 'name' => $role->label(),

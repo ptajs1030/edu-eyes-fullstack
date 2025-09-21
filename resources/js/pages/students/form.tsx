@@ -293,7 +293,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                 <SearchableSelect
                     value={formData.parent_id ?? null}
                     onChange={(value) => handleChange('parent_id', value ? Number(value) : null)}
-                    placeholder="Search parent by name..."
+                    placeholder="Cari orang tua dengan nama..."
                     endpoint={route('parents.search')}
                     initialOption={initialParent}
                     required={true}

@@ -140,7 +140,7 @@ export default function EventIndex() {
                             placeholder="Cari event..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('events.index'), { search: e.target.value }, { preserveState: true })}
-                            className="w-64 rounded border px-3 py-1"
+                            className="w-64 rounded border px-3 py-1 text-sm"
                         />
                         {/* <button
                             disabled={selectedIds.length === 0}

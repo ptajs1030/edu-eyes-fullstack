@@ -41,7 +41,7 @@ interface PaginatedResponse {
 interface BaseIndexProps {
     users: PaginatedResponse;
     statuses: Array<{ value: string; label: string }>;
-    filters: { search?: string; sort?: string; direction?: string };
+    filters: { search?: string; sort?: string; direction?: string; show?: string; status?: string };
     breadcrumbs: BreadcrumbItem[];
     title: string;
     role: {
@@ -60,6 +60,14 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
     const [userToDelete, setUserToDelete] = useState<User | null>(null);
     const [userToReset, setUserToReset] = useState<User | null>(null);
     const [isResetErrorOpen, setIsResetErrorOpen] = useState(false);
+    const [show, setShow] = useState<string>(filters.show || '10');
+    const [statusFilter, setStatusFilter] = useState<string>(filters.status || '');
+
+    // Reset selectedIds when filter/search/show changes
+    useEffect(() => {
+        setSelectedIds([]);
+    }, [show, statusFilter, filters.search, filters.sort, filters.direction]);
+
     // Reset password handler
     const handleResetPassword = async (user: User) => {
         if (!user.phone) {
@@ -131,7 +139,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         link.download = `${role.value}-users.csv`;
         link.click();
 
-        toast.success(`Berhasil mengekspor ${selectedData.length} data user`, {
+        toast.success(`Berhasil mengekspor ${selectedData.length} data ${translateRoleName(role.name)}`, {
             description: 'File CSV telah didownload otomatis',
         });
     };
@@ -144,6 +152,36 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                 direction: filters.direction === 'asc' ? 'desc' : 'asc',
             },
             { preserveState: true },
+        );
+    };
+
+    const handleShowChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+        setShow(value);
+        setSelectedIds([]);
+        router.get(
+            route(`${routePrefix}.index`),
+            {
+                ...filters,
+                show: value,
+                status: statusFilter || undefined,
+            },
+            { preserveState: true, replace: true },
+        );
+    };
+
+    const handleStatusChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const value = e.target.value;
+        setStatusFilter(value);
+        setSelectedIds([]);
+        router.get(
+            route(`${routePrefix}.index`),
+            {
+                ...filters,
+                status: value || undefined,
+                show,
+            },
+            { preserveState: true, replace: true },
         );
     };
 
@@ -198,52 +236,74 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={title} />
             <Toaster position="top-right" richColors />
+            {/* Filter & Show Controls - styled and ordered like student, aligned with table */}
+            <div className="flex items-center gap-3 px-6 pt-6 pb-1">
+                {/* Search box */}
+                <input
+                    type="text"
+                    placeholder="Cari pengguna..."
+                    defaultValue={filters.search || ''}
+                    onChange={e => {
+                        setSelectedIds([]);
+                        router.get(route(`${routePrefix}.index`), { ...filters, search: e.target.value, show, status: statusFilter }, { preserveState: true });
+                    }}
+                    className="w-64 rounded border px-3 py-1 text-sm bg-white"
+                />
+                {/* Show per page */}
+                <select
+                    value={show}
+                    onChange={handleShowChange}
+                    className="rounded border px-2 py-1 text-sm min-w-[100px] bg-white"
+                >
+                    <option value="10">10</option>
+                    <option value="20">20</option>
+                    <option value="all">Show All</option>
+                </select>
+                {/* Status Filter */}
+                <select
+                    value={statusFilter}
+                    onChange={handleStatusChange}
+                    className="rounded border px-2 py-1 text-sm min-w-[120px] bg-white"
+                >
+                    <option value="">Semua Status</option>
+                    <option value="active">Aktif</option>
+                    <option value="inactive">Nonaktif</option>
+                </select>
+                {/* Export & Import Buttons - moved to left after status filter */}
+                <button
+                    disabled={selectedIds.length === 0}
+                    onClick={exportSelected}
+                    className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
+                        selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                    }`}
+                >
+                    Ekspor Data
+                </button>
+                <button
+                    onClick={() => setShowImportModal(true)}
+                    className="inline-flex items-center rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-indigo-700"
+                >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 5v14"
+                        />
+                    </svg>
+                    Impor Data
+                </button>
+                {/* Add Button stays at right */}
+                <div className="flex-1" />
+                <button
+                    onClick={() => openForm(null)}
+                    className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700 ml-2"
+                >
+                    Tambah {translateRoleName(role.name)}
+                </button>
+            </div>
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="text"
-                            placeholder="Cari pengguna..."
-                            defaultValue={filters.search || ''}
-                            onChange={(e) => router.get(route(`${routePrefix}.index`), { search: e.target.value }, { preserveState: true })}
-                            className="w-64 rounded border px-3 py-1"
-                        />
-                        <button
-                            disabled={selectedIds.length === 0}
-                            onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                                selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                            }`}
-                        >
-                            Ekspor Data
-                        </button>
-
-                        <button
-                            onClick={() => setShowImportModal(true)}
-                            className="inline-flex items-center rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hhover:bg-indigo-700"
-                        >
-                            {/* icon upload */}
-                            <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 5v14"
-                                />
-                            </svg>
-                            Impor Data
-                        </button>
-                    </div>
-
-                    <button
-                        onClick={() => openForm(null)}
-                        className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
-                    >
-                        Tambah {translateRoleName(role.name)}
-                    </button>
-                </div>
-
                 <Table
                     headers={tableHeaders}
                     data={users.data}

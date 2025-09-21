@@ -130,7 +130,7 @@ export default function AcademicYearIndex() {
                             defaultValue={filters.search || ''}
                             onChange={handleSearchChange}
                             placeholder="Cari berdasarkan tahun..."
-                            className="w-64 rounded border px-3 py-1"
+                            className="w-64 rounded border px-3 py-1 text-sm"
                         />
                         {/* <button
                             disabled={selectedIds.length === 0}

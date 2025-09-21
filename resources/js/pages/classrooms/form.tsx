@@ -143,7 +143,7 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
                     key={resetSelectKey}
                     value={formData.main_teacher_id}
                     onChange={(value) => handleChange('main_teacher_id', value ? Number(value) : null)}
-                    placeholder="Search teacher by name..."
+                    placeholder="Cari guru dengan nama..."
                     endpoint={route('teachers.search')}
                     initialOption={initialTeacher}
                     showInitialOptions={true}

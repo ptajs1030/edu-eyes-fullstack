@@ -124,7 +124,7 @@ export default function ShiftingIndex() {
                             placeholder="Cari shift..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('shiftings.index'), { search: e.target.value }, { preserveState: true })}
-                            className="w-64 rounded border px-3 py-1"
+                            className="w-64 rounded border px-3 py-1 text-sm"
                         />
                         {/* <button
                             disabled={selectedIds.length === 0}

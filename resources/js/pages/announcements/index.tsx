@@ -125,7 +125,7 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
                             placeholder="Cari pengumuman..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('announcements.index'), { search: e.target.value })}
-                            className="w-64 rounded border px-3 py-1"
+                            className="w-64 rounded border px-3 py-1 text-sm"
                         />
                         {/* <button
                             disabled={selectedIds.length === 0}
