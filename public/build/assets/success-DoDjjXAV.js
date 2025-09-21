@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:public/build/assets/success-DoDjjXAV.js
 import{j as e,H as r}from"./app-CxDcWqRO.js";import{A as a}from"./auth-layout-DF4CA3kW.js";import{c as t}from"./createLucideIcon-iqrbMhJH.js";/* empty css            */import"./app-logo-icon-DU5Y0KZv.js";/**
+========
+import{j as e,H as r}from"./app-CRhh2Pn9.js";import{A as a}from"./auth-layout-CKausM9t.js";import{c as t}from"./createLucideIcon-COWQGMEl.js";/* empty css            */import"./app-logo-icon-DI3jlOHR.js";/**
+>>>>>>>> 62c411688497b5bae208b803c5e7ade7accb975e:public/build/assets/success-OYby4SIJ.js
  * @license lucide-react v0.475.0 - ISC
  *
  * This source code is licensed under the ISC license.
