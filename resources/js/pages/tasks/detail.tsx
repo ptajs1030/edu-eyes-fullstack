@@ -353,7 +353,7 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                 <div className="rounded-lg bg-blue-50 p-4">
                     <h4 className="text-sm font-medium text-blue-900">Petunjuk:</h4>
                     <ul className="mt-2 text-sm text-blue-800">
-                        <li>• Klik tombol "Edit" untuk mengubah nilai siswa</li>
+                        <li>• Klik tombol "Edit" untuk memperbarui nilai siswa</li>
                         <li>• Nilai harus antara 0-100</li>
                         <li>• Klik "Simpan" untuk menyimpan nilai atau "Batal" untuk membatalkan</li>
                         <li>• Jika ada beberapa perubahan, gunakan tombol "Simpan Semua Nilai" untuk menyimpan sekaligus</li>

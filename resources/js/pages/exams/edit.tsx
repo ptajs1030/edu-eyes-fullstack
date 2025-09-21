@@ -352,7 +352,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                             </div>
                             {!isEditable ? (
                                 <p className="max-w-md text-right text-sm text-red-600">
-                                    ⚠️ Tahun ajaran sudah lewat, tidak dapat mengubah data siswa
+                                    ⚠️ Tahun ajaran sudah lewat, tidak dapat memperbarui data siswa
                                 </p>
                             ) : (
                                 <p className="max-w-md text-right text-sm text-red-600">
