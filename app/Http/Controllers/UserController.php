@@ -14,6 +14,7 @@ use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -21,9 +22,24 @@ class UserController extends Controller
     {
         $rules = [
             'full_name' => 'required|string|max:70',
-            'username' => 'required|string|max:70|unique:users,username' . ($user ? ",{$user->id}" : ''),
-            'phone' => 'nullable|string|max:20|unique:users,phone' . ($user ? ",{$user->id}" : ''),
-            'email' => 'nullable|email|max:70|unique:users,email' . ($user ? ",{$user->id}" : ''),
+            'username' => [
+                'required',
+                'string',
+                'max:70',
+                Rule::unique('users', 'username')->whereNull('deleted_at')->ignore($user?->id),
+            ],
+            'phone' => [
+                'nullable',
+                'string',
+                'max:20',
+                Rule::unique('users', 'phone')->whereNull('deleted_at')->ignore($user?->id),
+            ],
+            'email' => [
+                'nullable',
+                'email',
+                'max:70',
+                Rule::unique('users', 'email')->whereNull('deleted_at')->ignore($user?->id),
+            ],
             'address' => 'nullable|string',
             'status' => 'required|in:' . implode(',', UserStatus::getValues()),
             'profile_picture' => 'nullable|image|max:2048', // 2MB max
@@ -206,7 +222,11 @@ class UserController extends Controller
 
             $validationRules = $this->getValidationRules($role, null);
 
-            $validated = $request->validate($validationRules);
+            $validated = $request->validate($validationRules, [
+                'username.unique' => 'Username sudah digunakan',
+                'phone.unique' => 'Nomor telepon sudah digunakan',
+                'email.unique' => 'Email sudah digunakan',
+            ]);
 
             $userData = $this->prepareUserData($validated, $role);
             $userData['role_id'] = $roleModel->id;
@@ -255,7 +275,11 @@ class UserController extends Controller
         try {
             $validationRules = $this->getValidationRules($role, $user);
 
-            $validated = $request->validate($validationRules);
+            $validated = $request->validate($validationRules, [
+                'username.unique' => 'Username sudah digunakan',
+                'phone.unique' => 'Nomor telepon sudah digunakan',
+                'email.unique' => 'Email sudah digunakan',
+            ]);
 
             $userData = $this->prepareUserData($validated, $role);
 
