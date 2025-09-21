@@ -222,7 +222,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                             <span className="font-medium text-yellow-800">
                                 Tahun ajaran {examAcademicYear?.title} sudah lewat dari tahun ajaran aktif ({activeAcademicYear?.title}).
                             </span>
-                            <p className="mt-1 text-sm text-yellow-700">Data hanya dapat dilihat dan tidak dapat diubah.</p>
+                            <p className="mt-1 text-sm text-yellow-700">Data hanya dapat dilihat dan tidak dapat diperbarui.</p>
                         </div>
                     </div>
                 </div>
@@ -263,7 +263,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.99-.833-2.46 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
                                 />
                             </svg>
-                            Tahun ajaran tidak dapat diubah setelah exam dibuat
+                            Tahun ajaran tidak dapat diperbarui setelah ujian ditambahkan
                         </p>
                     </div>
 
@@ -471,7 +471,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                                 disabled={processing || !isEditable}
                                 className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                             >
-                                {processing ? 'Memperbarui...' : 'Update'}
+                                {processing ? 'Memperbarui...' : 'Ubah'}
                             </button>
                         </div>
                     )}

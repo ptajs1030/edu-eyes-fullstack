@@ -26,14 +26,14 @@ export default function AnnouncementDeleteConfirmationModal({
                 transition={{ duration: 0.1 }}
                 className="bg-white p-6 rounded-lg w-full max-w-xl shadow-xl"
             >
-                <h2 className='text-lg font-bold mb-4'>Confirm Deletion</h2>
-                <p>Are you sure you want to delete <strong>{announcementToDelete?.title}</strong>?</p>
+                <h2 className='text-lg font-bold mb-4'>Konfirmasi Penghapusan</h2>
+                <p>Apakah Anda yakin ingin menghapus <strong>{announcementToDelete?.title}</strong>?</p>
                 <div className='mt-4 flex justify-end gap-2'>
                     <button
                         onClick={() => setIsDeleteModalOpen(false)}
                         className='px-4 py-2 bg-gray-300 rounded hover:cursor-pointer'
                     >
-                        Cancel
+                        Batal
                     </button>
                     <button
                         onClick={() => {

@@ -13,7 +13,7 @@ import SettingsLayout from '@/layouts/settings/layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Profile settings',
+        title: 'Pengaturan profile',
         href: '/settings/profile',
     },
 ];
@@ -42,11 +42,11 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Profile settings" />
+            <Head title="Pengaturan profile" />
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Profile information" description="Update your name and email address" />
+                    <HeadingSmall title="Informasi profile" description="Perbarui nama dan alamat email Anda" />
 
                     <form onSubmit={submit} className="space-y-6">
                         <div className="grid gap-2">
@@ -118,7 +118,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         )}
 
                         <div className="flex items-center gap-4">
-                            <Button disabled={processing}>Save</Button>
+                            <Button disabled={processing}>Simpan</Button>
 
                             <Transition
                                 show={recentlySuccessful}
@@ -127,7 +127,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 leave="transition ease-in-out"
                                 leaveTo="opacity-0"
                             >
-                                <p className="text-sm text-neutral-600">Saved</p>
+                                <p className="text-sm text-neutral-600">Tersimpan</p>
                             </Transition>
                         </div>
                     </form>

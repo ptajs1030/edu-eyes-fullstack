@@ -36,7 +36,7 @@ class SubjectController extends Controller
             Subject::create($validated);
 
             return back()
-                ->with('success', 'Subject created successfully.')
+                ->with('success', 'Mata pelajaran berhasil ditambahkan.')
                 ->with('queryParams', request()->query());
         } catch (ValidationException $e) {
             return redirect()->back()
@@ -44,7 +44,7 @@ class SubjectController extends Controller
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to create subject: ' . $e->getMessage())
+                ->with('error', 'Gagal menambahkan mata pelajaran: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -63,14 +63,14 @@ class SubjectController extends Controller
             $subject->update($validated);
 
             return redirect()->back()
-                ->with('success', 'Subject updated successfully');
+                ->with('success', 'Mata pelajaran berhasil diperbarui');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to update subject: ' . $e->getMessage())
+                ->with('error', 'Gagal memperbarui mata pelajaran: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -82,12 +82,12 @@ class SubjectController extends Controller
             $subject->delete();
 
             return redirect()->back()
-                ->with('success', 'Subject deleted successfully');
+                ->with('success', 'Mata pelajaran berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', app()->environment('production')
-                    ? 'Failed to delete subject'
-                    : 'Failed to delete subject: ' . $e->getMessage());
+                    ? 'Gagal menghapus mata pelajaran'
+                    : 'Gagal menghapus mata pelajaran: ' . $e->getMessage());
         }
     }
 

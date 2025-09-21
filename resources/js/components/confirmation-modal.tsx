@@ -29,10 +29,10 @@ export default function ConfirmationModal({ isOpen, title, message, onConfirm, o
                 <p className="mb-4">{message}</p>
                 <div className="flex justify-end gap-2">
                     <button onClick={onCancel} className="rounded bg-gray-300 px-4 py-2 hover:cursor-pointer">
-                        Cancel
+                        Batal
                     </button>
                     <button onClick={onConfirm} className="rounded bg-blue-600 px-4 py-2 text-white hover:cursor-pointer">
-                        Confirm
+                        Konfirmasi
                     </button>
                 </div>
             </motion.div>

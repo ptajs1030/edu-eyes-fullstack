@@ -331,7 +331,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                         className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                         required
                     >
-                        <option value="">Select Gender</option>
+                        <option value="">--Pilih Jenis Kelamin--</option>
                         {sexes.map((sex) => (
                             <option key={sex.value} value={sex.value}>
                                 {sex.label}
@@ -352,7 +352,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                         className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
                         required
                     >
-                        <option value="">Select Religion</option>
+                        <option value="">--Pilih Agama--</option>
                         {religions.map((religion) => (
                             <option key={religion.value} value={religion.value}>
                                 {religion.label}
@@ -459,13 +459,13 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                     onClick={onClose}
                     className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
                 >
-                    Cancel
+                    Batal
                 </button>
                 <button
                     type="submit"
                     className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
                 >
-                    {student ? 'Update' : 'Create'}
+                    {student ? 'Ubah' : 'Simpan'}
                 </button>
             </div>
         </FormModal>

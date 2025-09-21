@@ -128,14 +128,14 @@ export default function CustomDayOffIndex() {
                             onChange={(e) => router.get(route('custom-day-offs.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
                         />
-                        <button
+                        {/* <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
                             className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
                                 }`}
                         >
-                            Ekspor data yang dipilih
-                        </button>
+                            Ekspor Data
+                        </button> */}
                     </div>
                     <button
                         onClick={() => openForm(null)}
@@ -201,7 +201,7 @@ export default function CustomDayOffIndex() {
                             variant: 'neutral',
                         },
                         {
-                            label: 'Hapus',
+                            label: 'Ya, Hapus',
                             onClick: () => {
                                 if (dayOffToDelete) {
                                     handleDelete(dayOffToDelete.id);

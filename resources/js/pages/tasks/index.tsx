@@ -154,15 +154,15 @@ export default function TaskIndex({ tasks, filters }: Props) {
                             onChange={(e) => router.get(route('tasks.index'), { search: e.target.value })}
                             className="w-64 rounded border px-3 py-1"
                         />
-                        <button
+                        {/* <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
                             className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
                                 selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
                             }`}
                         >
-                            Ekspor data yang dipilih
-                        </button>
+                            Ekspor Data
+                        </button> */}
                     </div>
                     <Link
                         href={route('tasks.create')}
@@ -189,10 +189,8 @@ export default function TaskIndex({ tasks, filters }: Props) {
                             <td className="p-3 text-sm">
                                 {task.title} {isTaskExpired(task)}
                             </td>
-                            <td className="p-3 text-sm">
-                                {task.description && task.description.length > 70
-                                    ? `${task.description.substring(0, 70)}...`
-                                    : task.description || '-'}
+                            <td className="p-3 text-sm max-w-[180px] truncate" style={{whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>
+                                {task.description || '-'}
                             </td>
                             <td className="p-3 text-sm">{formatDateOnly(task.due_date)}</td>
                             <td className="p-3 text-sm">{formatTimeOnly(task.due_time)}</td>
@@ -248,20 +246,20 @@ export default function TaskIndex({ tasks, filters }: Props) {
                 <ActionModal
                     isOpen={!!taskToDelete}
                     onClose={() => setTaskToDelete(null)}
-                    title="Confirm Deletion"
+                    title="Konfirmasi Penghapusan"
                     message={
                         <span>
-                            Are you sure you want to delete task <strong>{taskToDelete?.title}</strong>?
+                            Apakah Anda yakin ingin menghapus tugas <strong>{taskToDelete?.title}</strong>?
                         </span>
                     }
                     buttons={[
                         {
-                            label: 'Cancel',
+                            label: 'Batal',
                             onClick: () => setTaskToDelete(null),
                             variant: 'neutral',
                         },
                         {
-                            label: 'Delete',
+                            label: 'Ya, Hapus',
                             onClick: () => {
                                 if (taskToDelete) {
                                     handleDelete(taskToDelete.id);
@@ -276,20 +274,20 @@ export default function TaskIndex({ tasks, filters }: Props) {
                 <ActionModal
                     isOpen={!!taskToNotify}
                     onClose={() => setTaskToNotify(null)}
-                    title="Confirm Notification"
+                    title="Konfirmasi Notifikasi"
                     message={
                         <span>
-                            Are you sure you want to send notification for task <strong>{taskToNotify?.title}</strong>?
+                            Apakah Anda yakin ingin mengirim notifikasi untuk tugas <strong>{taskToNotify?.title}</strong>?
                         </span>
                     }
                     buttons={[
                         {
-                            label: 'Cancel',
+                            label: 'Batal',
                             onClick: () => setTaskToNotify(null),
                             variant: 'neutral',
                         },
                         {
-                            label: 'Send Notification',
+                            label: 'Kirim Notifikasi',
                             onClick: () => {
                                 if (taskToNotify) {
                                     router.post(route('tasks.resend-notification', taskToNotify.id));

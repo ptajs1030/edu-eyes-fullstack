@@ -117,14 +117,14 @@ class EventController extends Controller
             });
 
             return redirect()->route('events.index')
-                ->with('success', 'Event created successfully');
+                ->with('success', 'Kegiatan berhasil ditambahkan');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to create event: ' . $e->getMessage())
+                ->with('error', 'Gagal menambahkan kegiatan: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -185,7 +185,7 @@ class EventController extends Controller
 
         if ($event->start_date < $today || ($event->start_date === $today && $eventStartHour <= $currentTime)) {
             return redirect()->route('events.index')
-                ->with('error', 'Cannot update event that has already started or passed');
+                ->with('error', 'Tidak dapat mengubah kegiatan yang sudah dimulai atau berlalu');
         }
 
         try {
@@ -232,14 +232,14 @@ class EventController extends Controller
             });
 
             return redirect()->route('events.index')
-                ->with('success', 'Event updated successfully');
+                ->with('success', 'Kegiatan berhasil diperbarui');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to update event: ' . $e->getMessage())
+                ->with('error', 'Gagal memperbarui kegiatan: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -252,16 +252,16 @@ class EventController extends Controller
 
         if ($event->start_date < $today || ($event->start_date === $today && $eventStartHour <= $currentTime)) {
             return redirect()->route('events.index')
-                ->with('error', 'Cannot delete event that has already started or passed');
+                ->with('error', 'Tidak dapat menghapus kegiatan yang sudah dimulai atau berlalu');
         }
 
         try {
             $event->delete();
             return redirect()->back()
-                ->with('success', 'Event deleted successfully');
+                ->with('success', 'Kegiatan berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to delete event: ' . $e->getMessage());
+                ->with('error', 'Gagal menghapus kegiatan: ' . $e->getMessage());
         }
     }
 }

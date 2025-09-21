@@ -75,7 +75,7 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
                     },
                     onError: (errors) => {
                         const errorMessage = Object.values(errors).join('\n');
-                        toast.error(`Failed to update subject: ${errorMessage}`);
+                        toast.error(`Gagal memperbarui mata pelajaran: ${errorMessage}`);
                     },
                 },
             );
@@ -91,7 +91,7 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
                     },
                     onError: (errors) => {
                         const errorMessage = Object.values(errors).join('\n');
-                        toast.error(`Failed to add new subject: ${errorMessage}`);
+                        toast.error(`Gagal menambahkan mata pelajaran baru: ${errorMessage}`);
                     },
                 },
             );
@@ -161,7 +161,7 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
                     type="submit"
                     className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
                 >
-                    {subject ? 'Update' : 'Simpan'}
+                    {subject ? 'Ubah' : 'Simpan'}
                 </button>
             </div>
         </FormModal>

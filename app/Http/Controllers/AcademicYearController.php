@@ -56,7 +56,7 @@ class AcademicYearController extends Controller
             ]);
 
             return back()
-                ->with('success', 'Academic Year created successfully.')
+                ->with('success', 'Tahun ajaran berhasil ditambahkan.')
                 ->with('queryParams', request()->query());
         } catch (ValidationException $e) {
             return redirect()->back()
@@ -64,7 +64,7 @@ class AcademicYearController extends Controller
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to create academic year: ' . $e->getMessage())
+                ->with('error', 'Gagal menambahkan tahun ajaran: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -93,7 +93,7 @@ class AcademicYearController extends Controller
             ]);
 
             return back()
-                ->with('success', 'Academic Year updated successfully.')
+                ->with('success', 'Tahun ajaran berhasil diperbarui.')
                 ->with('queryParams', request()->query());
         } catch (ValidationException $e) {
             return redirect()->back()
@@ -101,7 +101,7 @@ class AcademicYearController extends Controller
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to update academic year: ' . $e->getMessage())
+                ->with('error', 'Gagal memperbarui tahun ajaran: ' . $e->getMessage())
                 ->withInput();
         }
     }

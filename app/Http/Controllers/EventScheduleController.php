@@ -134,14 +134,14 @@ class EventScheduleController extends Controller
             );
 
             return redirect()->back()
-                ->with('success', 'Attendance updated successfully');
+                ->with('success', 'Kehadiran berhasil diperbarui');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to update attendance: ' . $e->getMessage());
+                ->with('error', 'Gagal memperbarui kehadiran: ' . $e->getMessage());
         }
     }
 }

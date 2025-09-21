@@ -87,10 +87,10 @@ class ExamController extends Controller
             $exam->delete();
 
             return redirect()->back()
-                ->with('success', 'Exam berhasil dihapus.');
+                ->with('success', 'Ujian berhasil dihapus.');
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Gagal menghapus exam: ' . $e->getMessage());
+                ->with('error', 'Gagal menghapus ujian: ' . $e->getMessage());
         }
     }
 
@@ -102,7 +102,7 @@ class ExamController extends Controller
 
         return Inertia::render('exams/create', [
             'subjects' => $subjects,
-            'academicYears' => [$activeAcademicYear], // Hanya active year
+            'academicYears' => $activeAcademicYear ? [$activeAcademicYear] : [], // Hanya active year
             'classrooms' => $classrooms,
         ]);
     }
@@ -147,7 +147,7 @@ class ExamController extends Controller
                 ->first();
 
             if ($existingExam) {
-                throw new \Exception('Exam dengan nama "' . $validated['name'] . '" sudah ada untuk mata pelajaran dan tahun ajaran yang sama.');
+                throw new \Exception('Ujian dengan nama "' . $validated['name'] . '" sudah ada untuk mata pelajaran dan tahun ajaran yang sama.');
             }
 
             // Create exam
@@ -164,7 +164,7 @@ class ExamController extends Controller
             $duplicateStudentIds = array_diff_assoc($studentIds, array_unique($studentIds));
 
             if (!empty($duplicateStudentIds)) {
-                throw new \Exception('Terdapat siswa yang dipilih lebih dari sekali dalam exam ini.');
+                throw new \Exception('Terdapat siswa yang dipilih lebih dari sekali dalam ujian ini.');
             }
 
             // Create exam assignments
@@ -187,11 +187,11 @@ class ExamController extends Controller
             DB::commit();
 
             return redirect()->route('exams.index')
-                ->with('success', 'Exam berhasil dibuat dengan ' . count($validated['student_assignments']) . ' siswa');
+                ->with('success', 'Ujian berhasil ditambahkan dengan ' . count($validated['student_assignments']) . ' siswa');
         } catch (ValidationException $e) {
             DB::rollback();
 
-            Log::warning('Validation failed when creating exam', [
+            Log::warning('Validation failed when updating exam', [
                 'errors' => $e->errors(),
                 'request_data' => $request->except(['_token']),
                 'user_id' => auth()->id() ?? 'Guest',
@@ -215,7 +215,7 @@ class ExamController extends Controller
             if ($e->getCode() === '23000') { // Integrity constraint violation
                 if (str_contains($e->getMessage(), 'exam_assignments_exam_id_student_id_unique')) {
                     return redirect()->back()
-                        ->with('error', 'Terdapat siswa yang sudah terdaftar dalam exam ini.')
+                        ->with('error', 'Terdapat siswa yang sudah terdaftar dalam ujian ini.')
                         ->withInput();
                 }
 
@@ -338,7 +338,7 @@ class ExamController extends Controller
             ]);
 
             return redirect()->route('exams.index')
-                ->with('error', 'Exam tidak ditemukan atau terjadi kesalahan.');
+                ->with('error', 'Ujian tidak ditemukan atau terjadi kesalahan.');
         }
     }
 
@@ -382,7 +382,7 @@ class ExamController extends Controller
                 ->first();
 
             if ($existingExam) {
-                throw new \Exception('Exam dengan nama "' . $validated['name'] . '" sudah ada untuk mata pelajaran dan tahun ajaran yang sama.');
+                throw new \Exception('Ujian dengan nama "' . $validated['name'] . '" sudah ada untuk mata pelajaran dan tahun ajaran yang sama.');
             }
 
             // Update exam (without academic_year_id)
@@ -405,7 +405,7 @@ class ExamController extends Controller
             $duplicateStudentIds = array_diff_assoc($studentIds, array_unique($studentIds));
 
             if (!empty($duplicateStudentIds)) {
-                throw new \Exception('Terdapat siswa yang dipilih lebih dari sekali dalam exam ini.');
+                throw new \Exception('Terdapat siswa yang dipilih lebih dari sekali dalam ujian ini.');
             }
 
             // Create new assignments (preserve existing scores if student was already assigned)
@@ -430,7 +430,7 @@ class ExamController extends Controller
             DB::commit();
 
             return redirect()->route('exams.index')
-                ->with('success', 'Exam berhasil diperbarui dengan ' . count($validated['student_assignments']) . ' siswa');
+                ->with('success', 'Ujian berhasil diperbarui dengan ' . count($validated['student_assignments']) . ' siswa');
         } catch (ValidationException $e) {
             DB::rollback();
 
@@ -543,7 +543,7 @@ class ExamController extends Controller
             ]);
 
             return redirect()->route('exams.index')
-                ->with('error', 'Exam tidak ditemukan atau terjadi kesalahan.');
+                ->with('error', 'Ujian tidak ditemukan atau terjadi kesalahan.');
         }
     }
 

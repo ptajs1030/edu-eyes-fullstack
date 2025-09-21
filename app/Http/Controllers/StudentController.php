@@ -110,6 +110,11 @@ class StudentController extends Controller
             $query->where('students.full_name', 'like', "%{$request->search}%");
         }
 
+        // Filter by status
+        if ($request->has('status') && $request->status !== null && $request->status !== '') {
+            $query->where('students.status', $request->status);
+        }
+
         if ($request->sort) {
             $direction = $request->direction === 'asc' ? 'asc' : 'desc';
 
@@ -128,7 +133,13 @@ class StudentController extends Controller
             $query->orderBy('students.full_name', 'asc');
         }
 
-        $students = $query->paginate(10)->withQueryString();
+        // Show data (pagination size)
+        $perPage = 10;
+        if ($request->has('show') && in_array($request->show, ['5','10','20','all'])) {
+            $perPage = $request->show === 'all' ? $query->count() : (int)$request->show;
+        }
+
+        $students = $query->paginate($perPage)->withQueryString();
 
         return Inertia::render('students/index', [
             'students' => $students,
@@ -136,7 +147,7 @@ class StudentController extends Controller
             'sexes' => $sexes,
             'statuses' => $statuses,
             'religions' => $religions,
-            'filters' => $request->only(['search', 'sort', 'direction', 'classrooms']),
+            'filters' => $request->only(['search', 'sort', 'direction', 'classrooms', 'status', 'show']),
         ]);
     }
 
@@ -169,14 +180,14 @@ class StudentController extends Controller
             Student::create($validated);
 
             return redirect()->back()
-                ->with('success', 'New student successfully added.');
+                ->with('success', 'Siswa baru berhasil ditambahkan.');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to create student: ' . $e->getMessage())
+                ->with('error', 'Gagal menambahkan siswa: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -209,14 +220,14 @@ class StudentController extends Controller
             $student->update($validated);
 
             return redirect()->back()
-                ->with('success', 'Student updated successfully');
+                ->with('success', 'Siswa berhasil diperbarui');
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)
                 ->withInput();
         } catch (\Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to update student: ' . $e->getMessage())
+                ->with('error', 'Gagal memperbarui siswa: ' . $e->getMessage())
                 ->withInput();
         }
     }
@@ -228,9 +239,9 @@ class StudentController extends Controller
             $student->delete();
 
             return redirect()->back()
-                ->with('success', 'Student deleted successfully');
+                ->with('success', 'Siswa berhasil dihapus');
         } catch (\Exception $e) {
-            $errorMessage = 'Failed to delete student';
+            $errorMessage = 'Gagal menghapus siswa';
 
             // Check if it's a foreign key constraint violation
             if (
@@ -238,7 +249,7 @@ class StudentController extends Controller
                 str_contains($e->getMessage(), 'foreign key constraint')
             ) {
 
-                $errorMessage = 'Cannot delete student because the data is already associated with other records.';
+                $errorMessage = 'Siswa tidak dapat dihapus karena masih dipakai di data lain';
             } else if (!app()->environment('production')) {
                 $errorMessage .= ': ' . $e->getMessage();
             }

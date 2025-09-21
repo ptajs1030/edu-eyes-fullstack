@@ -84,7 +84,7 @@ class ExamSeeder extends Seeder
             }
         }
 
-        $this->command->info('Data ujian dan nilai berhasil dibuat!');
+        $this->command->info('Data ujian dan nilai berhasil ditambahkan!');
     }
 
     /**

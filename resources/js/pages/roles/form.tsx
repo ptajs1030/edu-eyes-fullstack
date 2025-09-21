@@ -53,7 +53,7 @@ export default function RoleFormModal({ isOpen, onClose, role }: Props) {
                 },
                 onError: (errors) => {
                     const errorMessage = Object.values(errors).join('\n');
-                    toast.error(`Failed to update role: ${errorMessage}`);
+                    toast.error(`Gagal memperbarui role: ${errorMessage}`);
                 },
             });
         } else {
@@ -65,7 +65,7 @@ export default function RoleFormModal({ isOpen, onClose, role }: Props) {
                 },
                 onError: (errors) => {
                     const errorMessage = Object.values(errors).join('\n');
-                    toast.error(`Failed to add new role: ${errorMessage}`);
+                    toast.error(`Gagal menambahkan role baru: ${errorMessage}`);
                 },
             });
         }
@@ -90,10 +90,10 @@ export default function RoleFormModal({ isOpen, onClose, role }: Props) {
             </div>
             <div className="flex justify-end">
                 <button type="button" onClick={onClose} className="mr-2 rounded bg-gray-500 px-4 py-2 text-white hover:cursor-pointer">
-                    Cancel
+                    Batal
                 </button>
                 <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white hover:cursor-pointer">
-                    {role ? 'Update' : 'Create'}
+                    {role ? 'Ubah' : 'Simpan'}
                 </button>
             </div>
         </FormModal>

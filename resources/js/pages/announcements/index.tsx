@@ -93,7 +93,7 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
         { key: 'short_content', label: 'Ringkasan', sortable: false },
         { key: 'content', label: 'Konten', sortable: false },
         { key: 'attachments.url', label: 'Lampiran', sortable: false },
-        { key: 'updated_at', label: 'Terakhir Diupdate', sortable: true },
+        { key: 'updated_at', label: 'Terakhir Diperbarui', sortable: true },
         { key: 'actions', label: 'Aksi', sortable: false },
     ];
 
@@ -127,15 +127,15 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
                             onChange={(e) => router.get(route('announcements.index'), { search: e.target.value })}
                             className="w-64 rounded border px-3 py-1"
                         />
-                        <button
+                        {/* <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
                             className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
                                 selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
                             }`}
                         >
-                            Ekspor data yang dipilih
-                        </button>
+                            Ekspor Data
+                        </button> */}
                     </div>
                     <Link
                         href={route('announcements.create')}
@@ -213,20 +213,20 @@ export default function AnnouncementIndex({ announcements, filters }: Props) {
                 <ActionModal
                     isOpen={!!announcementToDelete}
                     onClose={() => setAnnouncementToDelete(null)}
-                    title="Confirm Deletion"
+                    title="Konfirmasi Penghapusan"
                     message={
                         <span>
-                            Are you sure you want to delete annpuncement <strong>{announcementToDelete?.title}</strong>?
+                            Apakah Anda yakin ingin menghapus announcement <strong>{announcementToDelete?.title}</strong>?
                         </span>
                     }
                     buttons={[
                         {
-                            label: 'Cancel',
+                            label: 'Batal',
                             onClick: () => setAnnouncementToDelete(null),
                             variant: 'neutral',
                         },
                         {
-                            label: 'Delete',
+                            label: 'Ya, Hapus',
                             onClick: () => {
                                 if (announcementToDelete) {
                                     handleDelete(announcementToDelete.id);

@@ -143,15 +143,15 @@ export default function PaymentIndex() {
                             onChange={(e) => router.get(route('payments.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
                         />
-                        <button
+                        {/* <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
                             className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
                                 selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
                             }`}
                         >
-                            Ekspor data yang dipilih
-                        </button>
+                            Ekspor Data
+                        </button> */}
                     </div>
                     <Link
                         href={route('payments.create')}
@@ -233,7 +233,7 @@ export default function PaymentIndex() {
                             variant: 'neutral',
                         },
                         {
-                            label: 'Hapus',
+                            label: 'Ya, Hapus',
                             onClick: () => paymentToDelete && handleDelete(paymentToDelete.id),
                             variant: 'danger',
                         },
@@ -243,22 +243,22 @@ export default function PaymentIndex() {
                 <ActionModal
                     isOpen={!!paymentToNotify}
                     onClose={() => setPaymentToNotify(null)}
-                    title="Confirm Notification"
+                    title="Konfirmasi Notifikasi"
                     message={
                         <span>
-                            Are you sure you want to send notification for payment <strong>{paymentToNotify?.title}</strong>?
+                            Apakah Anda yakin ingin mengirim notifikasi untuk tagihan <strong>{paymentToNotify?.title}</strong>?
                             <br />
                             <small className="text-gray-500">Notifikasi akan dikirim ke orang tua siswa yang belum melakukan pembayaran.</small>
                         </span>
                     }
                     buttons={[
                         {
-                            label: 'Cancel',
+                            label: 'Batal',
                             onClick: () => setPaymentToNotify(null),
                             variant: 'neutral',
                         },
                         {
-                            label: 'Send Notification',
+                            label: 'Kirim Notifikasi',
                             onClick: () => {
                                 if (paymentToNotify) {
                                     router.post(route('payments.resend-notification', paymentToNotify.id));

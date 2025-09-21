@@ -30,7 +30,7 @@ type Link = {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Pengaturan',
+        title: 'Pengaturan Sekolah',
         href: '/school-settings',
     },
 ];
@@ -114,14 +114,14 @@ export default function SettingIndex() {
                             onChange={(e) => router.get(route('school-settings.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
                         />
-                        <button
+                        {/* <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
                             className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
                                 }`}
                         >
-                            Ekspor data yang dipilih
-                        </button>
+                            Ekspor Data
+                        </button> */}
                     </div>
                 </div>
 

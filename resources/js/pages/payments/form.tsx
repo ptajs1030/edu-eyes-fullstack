@@ -103,7 +103,7 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
         setIsLoading(true);
         try {
             const response = await fetch(route('students.by-class', classId));
-            if (!response.ok) throw new Error('Failed to fetch students');
+            if (!response.ok) throw new Error('Gagal memuat data siswa');
             const data = await response.json();
             setStudents(data);
         } catch {
@@ -118,7 +118,7 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
         try {
             const response = await fetch(route('students.get-by-ids', { ids: studentIds.join(',') }));
 
-            if (!response.ok) throw new Error('Failed to fetch student info');
+            if (!response.ok) throw new Error('Gagal memuat data siswa terpilih');
 
             const data = await response.json();
             setSelectedStudentsInfo(data);
@@ -383,7 +383,7 @@ export default function PaymentCreate({ academicYears, classrooms, payment, sele
                             type="submit"
                             className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
                         >
-                            {payment?.id ? 'Update' : 'Simpan'}
+                            {payment?.id ? 'Ubah' : 'Simpan'}
                         </button>
                     </div>
                 </form>

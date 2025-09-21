@@ -13,7 +13,7 @@ import SettingsLayout from '@/layouts/settings/layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'School settings',
+        title: 'Pengaturan sekolah',
         href: '/settings/school',
     },
 ];
@@ -45,11 +45,11 @@ export default function School({
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="School settings" />
+            <Head title="Pengaturan sekolah" />
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="School information" description="Update school information" />
+                    <HeadingSmall title="Informasi sekolah" description="Update informasi sekolah" />
 
                     <form onSubmit={submit} className="space-y-6">
                         <div className="grid gap-2">
@@ -105,7 +105,7 @@ export default function School({
                         </div>
 
                         <div className="flex items-center gap-4">
-                            <Button disabled={processing}>Save</Button>
+                            <Button disabled={processing}>Simpan</Button>
 
                             <Transition
                                 show={recentlySuccessful}
@@ -114,7 +114,7 @@ export default function School({
                                 leave="transition ease-in-out"
                                 leaveTo="opacity-0"
                             >
-                                <p className="text-sm text-neutral-600">Saved</p>
+                                <p className="text-sm text-neutral-600">Tersimpan</p>
                             </Transition>
                         </div>
                     </form>

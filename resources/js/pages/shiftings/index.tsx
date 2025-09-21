@@ -126,15 +126,15 @@ export default function ShiftingIndex() {
                             onChange={(e) => router.get(route('shiftings.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1"
                         />
-                        <button
+                        {/* <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
                             className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
                                 selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
                             }`}
                         >
-                            Ekspor data yang dipilih
-                        </button>
+                            Ekspor Data
+                        </button> */}
                     </div>
                     <button
                         onClick={() => openForm(null)}
@@ -188,20 +188,20 @@ export default function ShiftingIndex() {
                 <ActionModal
                     isOpen={!!shiftingToDelete}
                     onClose={() => setShiftingToDelete(null)}
-                    title="Confirm Deletion"
+                    title="Konfirmasi Penghapusan"
                     message={
                         <span>
-                            Are you sure you want to delete shifting <strong>{shiftingToDelete?.name}</strong>?
+                            Apakah Anda yakin ingin menghapus shifting <strong>{shiftingToDelete?.name}</strong>?
                         </span>
                     }
                     buttons={[
                         {
-                            label: 'Cancel',
+                            label: 'Batal',
                             onClick: () => setShiftingToDelete(null),
                             variant: 'neutral',
                         },
                         {
-                            label: 'Delete',
+                            label: 'Ya, Hapus',
                             onClick: () => {
                                 if (shiftingToDelete) {
                                     handleDelete(shiftingToDelete.id);

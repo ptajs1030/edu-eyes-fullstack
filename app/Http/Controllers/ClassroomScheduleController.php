@@ -177,12 +177,12 @@ class ClassroomScheduleController extends Controller
                 $this->processSubjectSchedules($classroom, $validated['schedules']);
             });
 
-            return redirect()->back()->with('success', 'Subject schedule successfully updated');
+            return redirect()->back()->with('success', 'Jadwal mata pelajaran berhasil diperbarui');
         } catch (ValidationException $e) {
             return $this->handleValidationError($e);
         } catch (Exception $e) {
             return redirect()->back()
-                ->with('error', 'Failed to update schedule: ' . $e->getMessage())
+                ->with('error', 'Gagal memperbarui jadwal: ' . $e->getMessage())
                 ->withInput($request->all());
         }
     }
@@ -316,7 +316,7 @@ class ClassroomScheduleController extends Controller
                 $this->processShiftSchedules($classroom, $validated['days']);
             });
 
-            return redirect()->back()->with('success', 'Schedule successfully updated');
+            return redirect()->back()->with('success', 'Jadwal berhasil diperbarui');
         } catch (ValidationException $e) {
             return $this->handleValidationError($e);
         } catch (Exception $e) {
@@ -386,7 +386,7 @@ class ClassroomScheduleController extends Controller
     protected function handleGenericError(Exception $e)
     {
         return redirect()->back()
-            ->with('error', 'Failed to update schedule: ' . $e->getMessage())
+            ->with('error', 'Gagal mengubah jadwal: ' . $e->getMessage())
             ->withInput();
     }
 }

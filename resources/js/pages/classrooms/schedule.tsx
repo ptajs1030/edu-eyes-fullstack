@@ -549,7 +549,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                                                 onClick={() => handleRemoveSubjectSchedule(day, index)}
                                                                                 className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:cursor-pointer hover:bg-gray-50"
                                                                             >
-                                                                                Cancel
+                                                                                Batal
                                                                             </button>
                                                                         </>
                                                                     ) : isEditing ? (
@@ -559,14 +559,14 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                                                 onClick={() => handleCancelEdit(day, index)}
                                                                                 className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:cursor-pointer hover:bg-gray-50"
                                                                             >
-                                                                                Cancel
+                                                                                Batal
                                                                             </button>
                                                                             <button
                                                                                 type="button"
                                                                                 onClick={() => setEditingSchedule(null)}
                                                                                 className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer"
                                                                             >
-                                                                                Done
+                                                                                Selesai
                                                                             </button>
                                                                         </>
                                                                     ) : (
@@ -583,7 +583,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                                                 onClick={() => handleRemoveSubjectSchedule(day, index)}
                                                                                 className="rounded-md bg-red-500 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-red-700"
                                                                             >
-                                                                                Remove
+                                                                                Hapus
                                                                             </button>
                                                                         </>
                                                                     )}
@@ -595,7 +595,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                             </div>
 
                                             {subjectSchedules[day]?.length === 0 && (
-                                                <div className="py-4 text-center text-gray-500">No subjects scheduled for this day</div>
+                                                <div className="py-4 text-center text-gray-500">Tidak ada jadwal mata pelajaran untuk hari ini</div>
                                             )}
                                         </div>
                                     ))}
@@ -606,8 +606,8 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                         <div className="mb-4 text-5xl">⚠️</div>
                                         <h3 className="mb-2 text-xl font-semibold">Attendance Mode Mismatch</h3>
                                         <p className="text-gray-600">
-                                            Currently active attendance mode is "Per Shift". Switch to "Per Subject" mode in Academic Year settings to
-                                            use this feature.
+                                            Saat ini attendance mode yang aktif adalah "Per Shift". Ganti ke "Per Subject" mode di setting tahun ajaran untuk
+                                            dapat menggunakan fitur ini.
                                         </p>
                                     </div>
                                 </div>
