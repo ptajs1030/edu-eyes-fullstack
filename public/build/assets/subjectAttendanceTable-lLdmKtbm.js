@@ -1,8 +1,4 @@
-<<<<<<<< HEAD:public/build/assets/subjectAttendanceTable-lLdmKtbm.js
 import{R as y,r as c,j as t}from"./app-DiACb4PV.js";import{s as Y}from"./constants-BwyCeSHr.js";import{$ as Q,a as Z,w as ee,e as te,o as k,b as se}from"./use-resolve-button-type-CPNlPNuD.js";import{K as D,y as I,T as ae,o as v,L as _,u as T,_ as z,O as L}from"./use-is-mounted-BI9KCMjV.js";import{c as re,i as w,u as ne,x as le,R as oe,s as ie,z as ce}from"./transition-B0lHBqAD.js";import{c as C}from"./createLucideIcon-BLh1dqaJ.js";import{f as ue,p as de}from"./parseISO-C9VBp7jN.js";import{i as pe}from"./id-PlgGTalb.js";/* empty css            *//**
-========
-import{R as y,r as c,j as t}from"./app-6uGljjzj.js";import{s as Y}from"./constants-BwyCeSHr.js";import{$ as Q,a as Z,w as ee,e as te,o as k,b as se}from"./use-resolve-button-type-BriCs1Tq.js";import{K as D,y as I,T as ae,o as v,L as _,u as T,_ as z,O as L}from"./use-is-mounted-n8FTGiK4.js";import{c as re,i as w,u as ne,x as le,R as oe,s as ie,z as ce}from"./transition-Cvmzu9kt.js";import{c as C}from"./createLucideIcon-uIMYACeP.js";import{f as ue,p as de}from"./parseISO-C9VBp7jN.js";import{i as pe}from"./id-PlgGTalb.js";/* empty css            *//**
->>>>>>>> 29ae11e9c19a2dcef45cfaec61ce114727ce3ea1:public/build/assets/subjectAttendanceTable-CVooIrYT.js
  * @license lucide-react v0.475.0 - ISC
  *
  * This source code is licensed under the ISC license.
