@@ -141,7 +141,7 @@ export default function PaymentIndex() {
                             placeholder="Cari tagihan..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('payments.index'), { search: e.target.value }, { preserveState: true })}
-                            className="w-64 rounded border px-3 py-1"
+                            className="w-64 rounded border px-3 py-1 text-sm"
                         />
                         {/* <button
                             disabled={selectedIds.length === 0}

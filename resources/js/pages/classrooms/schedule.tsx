@@ -427,7 +427,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                                                 <MultiSearchableSelect
                                                     value={daySchedule.teachers}
                                                     onChange={(value) => handleTeachersChange(index, value)}
-                                                    placeholder="Search teachers..."
+                                                    placeholder="Cari guru..."
                                                     options={teacherOptions}
                                                 />
                                             </div>

@@ -320,7 +320,7 @@ export default function StudentIndex() {
                                 setSelectedIds([]); // Unselect all checkboxes when search changes
                                 router.get(route('students.index'), { ...filters, search: e.target.value }, { preserveState: true });
                             }}
-                            className="w-64 rounded border px-3 py-1"
+                            className="w-64 rounded border px-3 py-1 text-sm"
                         />
                         {/* Show Data Filter */}
                         <select

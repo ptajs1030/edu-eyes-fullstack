@@ -188,10 +188,10 @@ export default function ExamIndex() {
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
-                            placeholder="Search exam by name or type..."
+                            placeholder="Cari ujian dengan nama atau tipe..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('exams.index'), { search: e.target.value }, { preserveState: true })}
-                            className="w-80 rounded border px-3 py-1"
+                            className="w-80 rounded border px-3 py-1 text-sm"
                         />
 
                         <div className="relative">

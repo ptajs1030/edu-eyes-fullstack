@@ -112,7 +112,7 @@ export default function SettingIndex() {
                             placeholder="Cari pengaturan..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('school-settings.index'), { search: e.target.value }, { preserveState: true })}
-                            className="w-64 rounded border px-3 py-1"
+                            className="w-64 rounded border px-3 py-1 text-sm"
                         />
                         {/* <button
                             disabled={selectedIds.length === 0}

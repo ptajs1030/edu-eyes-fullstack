@@ -117,10 +117,10 @@ export default function RoleIndex() {
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
-                            placeholder="Search roles..."
+                            placeholder="Cari roles..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('roles.index'), { search: e.target.value }, { preserveState: true })}
-                            className="w-64 rounded border px-3 py-1"
+                            className="w-64 rounded border px-3 py-1 text-sm"
                         />
                         <button
                             onClick={exportSelected}

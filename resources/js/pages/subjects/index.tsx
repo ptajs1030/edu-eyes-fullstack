@@ -125,7 +125,7 @@ export default function SubjectIndex() {
                             placeholder="Cari mata pelajaran..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('subjects.index'), { search: e.target.value }, { preserveState: true })}
-                            className="w-64 rounded border px-3 py-1"
+                            className="w-64 rounded border px-3 py-1 text-sm"
                         />
                         {/* <button
                             disabled={selectedIds.length === 0}
