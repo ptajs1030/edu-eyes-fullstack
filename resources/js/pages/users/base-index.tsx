@@ -255,8 +255,8 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                     onChange={handleShowChange}
                     className="rounded border px-2 py-1 text-sm min-w-[100px] bg-white"
                 >
-                    <option value="10">10</option>
-                    <option value="20">20</option>
+                    <option value="10">Show 10 data</option>
+                    <option value="20">Show 20 data</option>
                     <option value="all">Show All</option>
                 </select>
                 {/* Status Filter */}
