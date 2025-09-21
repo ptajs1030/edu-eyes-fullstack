@@ -185,7 +185,7 @@ class EventController extends Controller
 
         if ($event->start_date < $today || ($event->start_date === $today && $eventStartHour <= $currentTime)) {
             return redirect()->route('events.index')
-                ->with('error', 'Tidak dapat mengubah kegiatan yang sudah dimulai atau berlalu');
+                ->with('error', 'Tidak dapat memperbarui kegiatan yang sudah dimulai atau berlalu');
         }
 
         try {

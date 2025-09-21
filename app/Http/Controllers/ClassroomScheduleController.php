@@ -386,7 +386,7 @@ class ClassroomScheduleController extends Controller
     protected function handleGenericError(Exception $e)
     {
         return redirect()->back()
-            ->with('error', 'Gagal mengubah jadwal: ' . $e->getMessage())
+            ->with('error', 'Gagal memperbarui jadwal: ' . $e->getMessage())
             ->withInput();
     }
 }
