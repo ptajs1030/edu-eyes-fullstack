@@ -1,4 +1,5 @@
 // resources/js/Pages/Tasks/TaskEdit.tsx
+import ConfirmationModal from '@/components/confirmation-modal';
 import StudentAssignmentModal from '@/components/student-assignment-modal';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
@@ -77,7 +78,7 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
 
     const [showStudentModal, setShowStudentModal] = useState(false);
     const [titleLength, setTitleLength] = useState(task.title.length);
-    const [descLength, setDescLength] = useState((task.description || '').length);
+    // const [descLength, setDescLength] = useState((task.description || '').length);
 
     const { errors, flash } = usePage<{
         errors?: Record<string, string>;
@@ -136,13 +137,13 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
         }
     };
 
-    const handleDescChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        if (value.length <= 70) {
-            setData('description', value);
-            setDescLength(value.length);
-        }
-    };
+    // const handleDescChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const value = e.target.value;
+    //     if (value.length <= 70) {
+    //         setData('description', value);
+    //         setDescLength(value.length);
+    //     }
+    // };
 
     const handleAddStudents = (students: AssignedStudent[]) => {
         const currentStudentIds = data.student_assignments.map((s) => s.student_id);
@@ -163,18 +164,38 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
         toast.success(`${newStudents.length} siswa berhasil ditambahkan`);
     };
 
-    const handleRemoveStudent = (studentId: number, isScored: boolean = false) => {
+    const [showConfirm, setShowConfirm] = useState(false);
+    const [pendingStudentId, setPendingStudentId] = useState<number | null>(null);
+
+    const handleRemoveStudent = (studentId: number, isScored: boolean) => {
         if (isScored) {
-            const confirmed = window.confirm(
-                'Siswa ini sudah memiliki nilai. Menghapus siswa akan menghilangkan data nilai tersebut. Apakah Anda yakin ingin melanjutkan?',
-            );
-            if (!confirmed) return;
+            setPendingStudentId(studentId);
+            setShowConfirm(true);
+            return;
         }
+
         setData(
             'student_assignments',
             data.student_assignments.filter((s) => s.student_id !== studentId),
         );
         toast.success('Siswa berhasil dihapus dari Tugas');
+    };
+
+    const confirmRemove = () => {
+        if (pendingStudentId !== null) {
+            setData(
+                'student_assignments',
+                data.student_assignments.filter((s) => s.student_id !== pendingStudentId),
+            );
+            toast.success('Siswa berhasil dihapus dari Tugas');
+        }
+        setShowConfirm(false);
+        setPendingStudentId(null);
+    };
+
+    const cancelRemove = () => {
+        setShowConfirm(false);
+        setPendingStudentId(null);
     };
 
     const academicYear = academicYears.find((year) => year.id === task.academic_year_id) || task.academic_year;
@@ -244,12 +265,10 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
                         <input
                             type="text"
                             value={data.description}
-                            onChange={handleDescChange}
+                            onChange={(e) => setData('description', e.target.value)}
                             className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                             placeholder="Deskripsi tugas..."
                         />
-                        <p className="mt-1 text-xs text-gray-500">String, max 70 char (optional) ({descLength}/70)</p>
-                        {errors.description && <p className="mt-1 text-xs text-red-500">{errors.description}</p>}
                     </div>
 
                     {/* Due Date */}
@@ -409,6 +428,13 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
                 onSubmit={handleAddStudents}
                 classrooms={classrooms}
                 assignedStudentIds={data.student_assignments.map((s) => s.student_id)}
+            />
+            <ConfirmationModal
+                isOpen={showConfirm}
+                title="Konfirmasi Hapus"
+                message="Siswa ini sudah memiliki nilai. Menghapus siswa akan menghilangkan data nilai tersebut. Apakah Anda yakin ingin melanjutkan?"
+                onConfirm={confirmRemove}
+                onCancel={cancelRemove}
             />
         </AppLayout>
     );
