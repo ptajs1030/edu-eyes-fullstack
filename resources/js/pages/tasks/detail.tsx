@@ -151,7 +151,7 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
             {
                 onSuccess: () => {
                     toast.dismiss(loadingToast);
-                    toast.success('Semua nilai berhasil disimpan');
+                    // toast.success('Semua nilai berhasil disimpan');
                     setEditingScores({});
 
                     // ✅ Update semua nilai di state lokal
@@ -186,34 +186,34 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
         return 'Sudah Dinilai';
     };
 
-   const hasUnsavedChanges = Object.keys(editingScores).some((key) => editingScores[parseInt(key)]);
+    const hasUnsavedChanges = Object.keys(editingScores).some((key) => editingScores[parseInt(key)]);
 
-   const handleExportScores = () => {
-       if (!localAssignments || localAssignments.length === 0) {
-           toast.error('Tidak ada data untuk diexport');
-           return;
-       }
+    const handleExportScores = () => {
+        if (!localAssignments || localAssignments.length === 0) {
+            toast.error('Tidak ada data untuk diexport');
+            return;
+        }
 
-       const headers = ['Nama', 'NIS', 'Kelas', 'Nilai', 'Status'];
-       const rows = localAssignments.map((a) => [
-           a.student_name,
-           a.nis || '-',
-           a.class_name,
-           a.score !== null ? a.score.toString() : '-',
-           a.score === null ? 'Belum Dinilai' : 'Sudah Dinilai',
-       ]);
+        const headers = ['Nama', 'NIS', 'Kelas', 'Nilai', 'Status'];
+        const rows = localAssignments.map((a) => [
+            a.student_name,
+            a.nis || '-',
+            a.class_name,
+            a.score !== null ? a.score.toString() : '-',
+            a.score === null ? 'Belum Dinilai' : 'Sudah Dinilai',
+        ]);
 
-       const csvContent = [headers, ...rows].map((e) => e.join(',')).join('\n');
-       const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-       const url = URL.createObjectURL(blob);
+        const csvContent = [headers, ...rows].map((e) => e.join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
 
-       const link = document.createElement('a');
-       link.href = url;
-       link.setAttribute('download', `nilai_${task.title.replace(/\s+/g, '_')}.csv`);
-       document.body.appendChild(link);
-       link.click();
-       document.body.removeChild(link);
-   };
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `nilai_${task.title.replace(/\s+/g, '_')}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -240,13 +240,18 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Tenggat Waktu</label>
                             <div className="mt-1 rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-sm text-gray-600">
-                                {task.due_date ? new Date(task.due_date).toLocaleDateString('id-ID') : '-'}
+                                {task.due_date
+                                    ? (() => {
+                                          const date = new Date(task.due_date.replace(/-/g, '/'));
+                                          return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('id-ID');
+                                      })()
+                                    : '-'}
                             </div>
                         </div>
                         <div>
                             <label className="block text-sm font-medium text-gray-700">Tenggat Waktu (Jam)</label>
                             <div className="mt-1 rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-sm text-gray-600">
-                                {task.due_time ? new Date(task.due_time).toLocaleTimeString('id-ID') : '-'}
+                                {task.due_time ? task.due_time.substring(0, 5) : '-'}
                             </div>
                         </div>
                     </div>
