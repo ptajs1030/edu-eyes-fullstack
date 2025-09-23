@@ -95,8 +95,16 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
             a.minutes_of_late !== null ? a.minutes_of_late : '-',
             a.note || '-',
         ]);
+        // Escape only if needed, and join with comma
+        const escape = (v: any) => {
+            const s = String(v ?? '');
+            if (s.includes(',') || s.includes('"') || s.includes('\n')) {
+                return '"' + s.replace(/"/g, '""') + '"';
+            }
+            return s;
+        };
         const csvContent = [headers, ...rows]
-            .map((row) => row.map((v) => `"${String(v).replace(/"/g, '""')}`).join(',')).join('\n');
+            .map(row => row.map(escape).join(',')).join('\r\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
