@@ -121,7 +121,10 @@ class EventScheduleController extends Controller
         return Inertia::render('events/attendance', [
             'event' => $formattedEvent,
             'attendances' => $attendances,
-            'filters' => $request->only(['dates']),
+            'filters' => [
+                'dates' => $request->input('dates', []),
+                'limit' => $limit,
+            ],
             'canEditAttendance' => $event->start_date <= now()->format('Y-m-d') && $attendances->isNotEmpty(),
         ]);
     }

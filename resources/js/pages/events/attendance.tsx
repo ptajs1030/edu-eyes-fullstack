@@ -48,6 +48,7 @@ interface Props {
     };
     filters: {
         dates?: string[];
+        limit?: string | number;
     };
     canEditAttendance: boolean;
 }
@@ -62,19 +63,23 @@ const breadcrumbs = (eventName: string): BreadcrumbItem[] => [
     },
 ];
 
-export default function EventAttendance({ event, attendances, canEditAttendance }: Props) {
+export default function EventAttendance({ event, attendances, canEditAttendance, filters }: Props) {
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
+    // Destructure filters langsung dari parameter
+    // export default function EventAttendance({ event, attendances, canEditAttendance, filters }: Props)
     const [selectedAttendance, setSelectedAttendance] = useState<Attendance | null>(null);
     const [selectedDates, setSelectedDates] = useState<string[]>([]);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
-    // Default limit: selalu 10
-    const [limit, setLimit] = useState<string | number>(10);
+    // Jangan simpan limit di state, gunakan filters.limit langsung agar dropdown selalu sinkron
+    const limit = typeof filters?.limit !== 'undefined' ? filters.limit : 10;
     // Reset selectedIds saat filter tanggal atau limit berubah
     useEffect(() => {
         setSelectedIds([]);
     }, [selectedDates, limit]);
+
+    // Hapus sync state limit, gunakan filters.limit langsung
     // Export CSV
     const handleExportCSV = () => {
         if (selectedIds.length === 0) return;
@@ -244,7 +249,6 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
                                 onChange={e => {
                                     const val = e.target.value;
                                     let newLimit = val === 'all' ? 'all' : Number(val);
-                                    setLimit(newLimit);
                                     // Kirim ke backend, reset ke page 1
                                     const params: any = { limit: newLimit, page: 1 };
                                     if (selectedDates.length > 0) params.dates = selectedDates;
@@ -421,7 +425,21 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
                         ) : (
                             // Show single page if Show All
                             <div className="flex justify-center gap-2">
-                                <button className="rounded bg-blue-500 px-4 py-2 text-white font-bold">1</button>
+                                <button
+                                    disabled
+                                    className="rounded px-3 py-1 text-sm bg-gray-100 text-black"
+                                    dangerouslySetInnerHTML={{ __html: '&laquo;' }}
+                                />
+                                <button
+                                    className="rounded px-3 py-1 text-sm bg-blue-500 text-white font-bold"
+                                >
+                                    1
+                                </button>
+                                <button
+                                    disabled
+                                    className="rounded px-3 py-1 text-sm bg-gray-100 text-black"
+                                    dangerouslySetInnerHTML={{ __html: '&raquo;' }}
+                                />
                             </div>
                         )}
                     </div>
