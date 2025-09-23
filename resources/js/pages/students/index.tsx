@@ -196,10 +196,12 @@ export default function StudentIndex() {
         const headers = `Nama Siswa,Nama Orang Tua/Wali,Kelas,NIS,Tahun Masuk,Jenis Kelamin,Agama,Tanggal Lahir,Alamat,Status\n`;
         const csv = selectedData
             .map((a) => {
-                const addressOneLine = a.address ? `"${a.address.replace(/[\r\n\u2028\u2029\u0085]+/g, ' ').replace(/"/g, '""')}"` : '""';
-                const formattedDate = a.date_of_birth ? new Date(a.date_of_birth).toISOString().slice(0, 10) : '';
+                const addressOneLine = a.address ? `"${a.address.replace(/[\r\n\u2028\u2029\u0085]+/g, ' ').replace(/"/g, '""')}"` : '"-"';
+                const formattedDate = a.date_of_birth ? new Date(a.date_of_birth).toISOString().slice(0, 10) : '-';
                 const nis = a.nis ? a.nis : '-';
-                return `${a.full_name},${a.parent?.full_name},${a.classroom?.name},${nis},${a.entry_year},${a.gender},${a.religion},${formattedDate},${addressOneLine},${a.status}`;
+                const classroom = a.classroom?.name ? a.classroom?.name : '-';
+                const religion = a.religion ? a.religion : '-';
+                return `${a.full_name},${a.parent?.full_name},${classroom},${nis},${a.entry_year},${a.gender},${religion},${formattedDate},${addressOneLine},${a.status}`;
             })
             .join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
@@ -271,7 +273,7 @@ export default function StudentIndex() {
         { key: 'entry_year', label: 'Tahun Masuk', sortable: true },
         { key: 'gender', label: 'Jenis Kelamin', sortable: true },
         { key: 'religion', label: 'Agama', sortable: true },
-        { key: 'date_of_birth', label: 'Tanggal Lahir', sortable: true },
+        { key: 'date_of_birth', label: 'Tempat, Tanggal Lahir', sortable: true },
         { key: 'address', label: 'Alamat', sortable: false },
         { key: 'status', label: 'Status', sortable: true },
         { key: 'actions', label: 'Aksi', sortable: false },
@@ -388,22 +390,20 @@ export default function StudentIndex() {
                         <button
                             disabled={selectedIds.length === 0 || students.data.length === 0}
                             onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white transition ${
-                                selectedIds.length === 0 || students.data.length === 0
-                                    ? 'cursor-not-allowed opacity-50'
-                                    : 'hover:bg-indigo-700 hover:cursor-pointer'
-                            }`}
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white transition ${selectedIds.length === 0 || students.data.length === 0
+                                ? 'cursor-not-allowed opacity-50'
+                                : 'hover:bg-indigo-700 hover:cursor-pointer'
+                                }`}
                         >
                             Ekspor Data
                         </button>
                         <button
                             disabled={selectedIds.length === 0 || students.data.length === 0}
                             onClick={handleBulkPrint}
-                            className={`rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white transition ${
-                                selectedIds.length === 0 || students.data.length === 0
-                                    ? 'cursor-not-allowed opacity-50'
-                                    : 'hover:bg-indigo-700 hover:cursor-pointer'
-                            }`}
+                            className={`rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white transition ${selectedIds.length === 0 || students.data.length === 0
+                                ? 'cursor-not-allowed opacity-50'
+                                : 'hover:bg-indigo-700 hover:cursor-pointer'
+                                }`}
                         >
                             Print Kartu
                         </button>
@@ -467,9 +467,16 @@ export default function StudentIndex() {
                             <td className="p-3 text-sm">{student.nis || '-'}</td>
                             <td className="p-3 text-sm">{student.entry_year}</td>
                             <td className="p-3 text-sm">{student.gender}</td>
-                            <td className="p-3 text-sm">{student.religion}</td>
+                            <td className="p-3 text-sm">{student.religion || '-'}</td>
                             <td className="p-3 text-sm">
-                                {student.birth_place}, {student.date_of_birth}
+                                {(() => {
+                                    const bp = student.birth_place;
+                                    const dob = student.date_of_birth;
+                                    if (bp && dob) return `${bp}, ${dob}`;
+                                    if (bp) return bp;
+                                    if (dob) return dob;
+                                    return '-';
+                                })()}
                             </td>
                             <td className="p-3 text-sm">
                                 {student.address ? (student.address.length > 70 ? student.address.substring(0, 70) + '...' : student.address) : '-'}
@@ -490,9 +497,8 @@ export default function StudentIndex() {
                                 </button>
                                 <Link
                                     href={route('students.attendance', student.id)}
-                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
-                                        student.classroom?.name ? 'bg-sky-500 hover:cursor-pointer hover:bg-sky-600' : 'cursor-not-allowed bg-sky-300'
-                                    }`}
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${student.classroom?.name ? 'bg-sky-500 hover:cursor-pointer hover:bg-sky-600' : 'cursor-not-allowed bg-sky-300'
+                                        }`}
                                     onClick={(e) => {
                                         if (!student.classroom?.name) {
                                             e.preventDefault();

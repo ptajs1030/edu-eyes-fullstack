@@ -26,34 +26,70 @@ class StudentsImport implements ToCollection, WithHeadingRow
     public function collection(Collection $rows)
     {
         foreach ($rows as $index => $row) {
-         
-            if (empty($row['nama_lengkap'])) {
-                continue;
+            // --- FULL NAME ---
+            $fullName = isset($row['nama_lengkap']) ? preg_replace('/\s+/', ' ', trim($row['nama_lengkap'])) : null;
+            if ($fullName === '' || $fullName === null) {
+                throw new \Exception('nama lengkap wajib diisi');
             }
 
-  
-            $parent = User::where('full_name', trim($row['nama_orang_tua']))
-                ->whereHas('role', fn($q) => $q->where('name', 'parent'))
-                ->first();
+            // --- ENTRY YEAR ---
+            $entryYear = isset($row['tahun_masuk']) ? trim($row['tahun_masuk']) : null;
+            if ($entryYear === '' || $entryYear === null) {
+                throw new \Exception('tahun masuk wajib diisi');
+            }
+            if (!preg_match('/^\d{4}$/', $entryYear) || (int)$entryYear < 2000 || (int)$entryYear > 2100) {
+                throw new \Exception('format tahun masuk tidak valid');
+            }
+
+            // --- GENDER ---
+            $gender = isset($row['jenis_kelamin']) ? strtolower(trim($row['jenis_kelamin'])) : null;
+            if ($gender === '' || $gender === null) {
+                throw new \Exception('jenis kelamin wajib diisi');
+            }
+            if (!in_array($gender, ['male', 'female'])) {
+                throw new \Exception('jenis kelamin harus "male" atau "female"');
+            }
+
+            // Normalize and trim parent name
+            $parentName = isset($row['nama_orang_tua']) ? preg_replace('/\s+/', ' ', trim($row['nama_orang_tua'])) : null;
+            if ($parentName === '' || $parentName === null) {
+                $parentName = null;
+            }
+
+            // Normalize and trim class name
+            $className = isset($row['kelas']) ? preg_replace('/\s+/', ' ', trim($row['kelas'])) : null;
+            if ($className === '' || $className === null) {
+                $className = null;
+            }
+
+            // parent is required (must filled & exist in database)
+            $parent = null;
+            if ($parentName !== null) {
+                $parent = User::where('full_name', $parentName)
+                    ->whereHas('role', fn($q) => $q->where('name', 'parent'))
+                    ->first();
+            }
 
             if (!$parent) {
-                
-                continue;
+                throw new \Exception('data orang tua/wali tidak ditemukan');
             }
 
-            
+            // classroom is optional (but if exist in excel, data must be valid)
             $classroom = null;
-            if (!empty($row['kelas'])) {
-                $classroom = Classroom::where('name', trim($row['kelas']))->first();
+            if ($className !== null) {
+                $classroom = Classroom::where('name', $className)->first();
+                if (!$classroom) {
+                    throw new \Exception('data kelas tidak ditemukan');
+                }
             }
 
             Student::create([
-                'full_name'     => $row['nama_lengkap'],
+                'full_name'     => $fullName,
                 'parent_id'     => $parent->id,
                 'class_id'      => $classroom?->id,
                 'nis'           => $row['nis'] ?? null,
-                'entry_year'    => $row['tahun_masuk'],
-                'gender'        => strtolower($row['jenis_kelamin']),
+                'entry_year'    => $entryYear,
+                'gender'        => $gender,
                 'status'        => strtolower($row['status']),
                 'religion'      => $row['agama'],
                 'birth_place'   => $row['tempat_lahir'],

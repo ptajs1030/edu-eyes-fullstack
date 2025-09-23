@@ -131,7 +131,17 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
 
         const selectedData = users.data.filter((a) => selectedIds.includes(a.id));
         const headers = `Name,Username,Role,Phone,Email,Status\n`;
-        const csv = selectedData.map((a) => `${a.full_name},${a.username},${a.role.name},${a.phone},${a.email},${a.status}`).join('\n');
+        const toDash = (v: any) => (v === null || v === undefined || v === '' ? '-' : v);
+        const csv = selectedData
+            .map((a) => [
+                toDash(a.full_name),
+                toDash(a.username),
+                toDash(a.role?.name),
+                toDash(a.phone),
+                toDash(a.email),
+                toDash(a.status)
+            ].join(','))
+            .join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -273,9 +283,8 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                 <button
                     disabled={selectedIds.length === 0}
                     onClick={exportSelected}
-                    className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                        selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                    }`}
+                    className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                        }`}
                 >
                     Ekspor Data
                 </button>

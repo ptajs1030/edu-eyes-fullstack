@@ -279,8 +279,8 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                                 }}
                                 className="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700 bg-white"
                             >
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
+                                <option value={10}>Show 10 data</option>
+                                <option value={20}>Show 20 data</option>
                                 <option value={'all'}>Show All</option>
                             </select>
                             <button
