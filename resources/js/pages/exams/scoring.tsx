@@ -189,6 +189,31 @@ export default function ExamScoring({ exam, academicYears }: Props) {
         );
     };
 
+    const handleExportScoresCSV = () => {
+        const headers = ['Nama', 'NIS', 'Kelas', 'Nilai'];
+        const rows = exam.student_assignments.map((a) => [
+            a.student_name,
+            a.nis || '-',
+            a.class_name || '-',
+            a.score !== null && a.score !== undefined ? a.score : '-',
+        ]);
+
+        const csvContent = [headers, ...rows]
+            .map((row) => row.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(','))
+            .join('\n');
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `exam_${exam.id}_scores.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+
     const getScoreColor = (score: number | null) => {
         if (score === null) return 'text-gray-400';
         if (score >= 80) return 'text-green-600';
@@ -264,16 +289,33 @@ export default function ExamScoring({ exam, academicYears }: Props) {
 
                 {/* Student Assignments Table */}
                 <div className="mb-6">
-                    <div className="mb-4 flex items-center justify-between">
-                        <h3 className="text-lg font-medium text-gray-900">Student Assignments</h3>
-                        {isEditable && hasUnsavedChanges && (
-                            <button
-                                onClick={handleSaveAllScores}
-                                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
-                            >
-                                Simpan Semua Nilai
-                            </button>
-                        )}
+                    <div className="mb-6">
+                        <div className="mb-4 flex items-center">
+                            <h3 className="text-lg font-medium text-gray-900">Student Assignments</h3>
+
+                            {/* kanan */}
+                            <div className="ml-auto flex items-center gap-3">
+                                <div className="text-sm text-gray-700">
+                                    Total: <span className="font-semibold">{exam.student_assignments.length}</span> siswa
+                                </div>
+
+                                <button
+                                    onClick={handleExportScoresCSV}
+                                    className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                                >
+                                    Ekspor CSV
+                                </button>
+
+                                {isEditable && hasUnsavedChanges && (
+                                    <button
+                                        onClick={handleSaveAllScores}
+                                        className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                                    >
+                                        Simpan Semua Nilai
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     </div>
 
                     <div className="overflow-hidden rounded-lg border border-gray-200">
