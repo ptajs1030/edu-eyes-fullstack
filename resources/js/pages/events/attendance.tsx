@@ -83,19 +83,16 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
     const handleExportCSV = () => {
         if (selectedIds.length === 0) return;
         const selectedData = attendances.data.filter((a) => selectedIds.includes(a.id!));
+        // Group data by tanggal
+        const grouped: { [key: string]: Attendance[] } = {};
+        selectedData.forEach(a => {
+            if (!grouped[a.submit_date]) grouped[a.submit_date] = [];
+            grouped[a.submit_date].push(a);
+        });
+        // Urutkan tanggal
+        const sortedDates = Object.keys(grouped).sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
         const headers = ['Tanggal', 'Nama', 'NIS', 'Kelas', 'Status', 'Jam Masuk', 'Jam Keluar', 'Keterlambatan', 'Catatan'];
-        const rows = selectedData.map((a) => [
-            a.submit_date,
-            a.student.full_name,
-            a.student.nis || '-',
-            a.student.classroom?.name || '-',
-            getStatusLabel(a.status),
-            a.clock_in_hour || '-',
-            a.clock_out_hour || '-',
-            a.minutes_of_late !== null ? a.minutes_of_late : '-',
-            a.note || '-',
-        ]);
-        // Escape only if needed, and join with comma
+        // Escape only if needed
         const escape = (v: any) => {
             const s = String(v ?? '');
             if (s.includes(',') || s.includes('"') || s.includes('\n')) {
@@ -103,8 +100,29 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
             }
             return s;
         };
-        const csvContent = [headers, ...rows]
-            .map(row => row.map(escape).join(',')).join('\r\n');
+        let csvRows: string[] = [];
+        // Baris header di paling atas
+        csvRows.push(headers.map(escape).join(','));
+        // Data per tanggal
+        sortedDates.forEach(date => {
+            const attendancesForDate = grouped[date];
+            attendancesForDate.forEach((a, idx) => {
+                // Format tanggal tanpa jam
+                const formattedDate = new Date(a.submit_date).toLocaleDateString('id-ID');
+                csvRows.push([
+                    idx === 0 ? escape(formattedDate) : '',
+                    escape(a.student.full_name),
+                    escape(a.student.nis || '-'),
+                    escape(a.student.classroom?.name || '-'),
+                    escape(getStatusLabel(a.status)),
+                    escape(a.clock_in_hour || '-'),
+                    escape(a.clock_out_hour || '-'),
+                    escape(a.minutes_of_late !== null ? a.minutes_of_late : '-'),
+                    escape(a.note || '-')
+                ].join(','));
+            });
+        });
+        const csvContent = csvRows.join('\r\n');
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
