@@ -2,7 +2,7 @@ import Pagination from '@/components/ui/pagination';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { toast, Toaster } from 'sonner';
 import EditAttendanceModal from './editAttendance';
 
@@ -68,6 +68,53 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
     const [selectedDates, setSelectedDates] = useState<string[]>([]);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
+    const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    // Default limit: selalu 10
+    const [limit, setLimit] = useState<string | number>(10);
+    // Reset selectedIds saat filter tanggal atau limit berubah
+    useEffect(() => {
+        setSelectedIds([]);
+    }, [selectedDates, limit]);
+    // Export CSV
+    const handleExportCSV = () => {
+        if (selectedIds.length === 0) return;
+        const selectedData = attendances.data.filter((a) => selectedIds.includes(a.id!));
+        const headers = ['Tanggal', 'Nama', 'NIS', 'Kelas', 'Status', 'Jam Masuk', 'Jam Keluar', 'Keterlambatan', 'Catatan'];
+        const rows = selectedData.map((a) => [
+            a.submit_date,
+            a.student.full_name,
+            a.student.nis || '-',
+            a.student.classroom?.name || '-',
+            getStatusLabel(a.status),
+            a.clock_in_hour || '-',
+            a.clock_out_hour || '-',
+            a.minutes_of_late !== null ? a.minutes_of_late : '-',
+            a.note || '-',
+        ]);
+        const csvContent = [headers, ...rows]
+            .map((row) => row.map((v) => `"${String(v).replace(/"/g, '""')}`).join(',')).join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `attendance_event_${event.id}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    };
+    // Handle select all
+    const handleSelectAll = (checked: boolean) => {
+        if (checked) {
+            setSelectedIds(attendances.data.map((a) => a.id!));
+        } else {
+            setSelectedIds([]);
+        }
+    };
+    // Handle select row
+    const handleSelectRow = (id: number) => {
+        setSelectedIds((prev) => prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]);
+    };
 
     // Handle flash messages
     if (flash?.success) {
@@ -89,30 +136,30 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
 
     // Handle select/deselect all dates
     const toggleAllDates = () => {
+        let newDates: string[];
         if (selectedDates.length === allDates.length) {
-            setSelectedDates([]);
-            updateUrlWithDates([]);
+            newDates = [];
         } else {
-            setSelectedDates([...allDates]);
-            updateUrlWithDates(allDates);
+            newDates = [...allDates];
         }
+        setSelectedDates(newDates);
+        // Kirim ke backend, reset ke page 1
+        const params: any = { dates: newDates, limit, page: 1 };
+        router.get(route('events.attendance', event.id), params, { preserveState: true });
     };
 
     // Handle individual date selection
     const toggleDate = (date: string) => {
-        let newDates;
+        let newDates: string[];
         if (selectedDates.includes(date)) {
             newDates = selectedDates.filter((d) => d !== date);
         } else {
             newDates = [...selectedDates, date];
         }
         setSelectedDates(newDates);
-        updateUrlWithDates(newDates);
-    };
-
-    // Update URL with selected dates
-    const updateUrlWithDates = (dates: string[]) => {
-        router.get(route('events.attendance', event.id), { dates }, { preserveState: true });
+        // Kirim ke backend, reset ke page 1
+        const params: any = { dates: newDates, limit, page: 1 };
+        router.get(route('events.attendance', event.id), params, { preserveState: true });
     };
 
     const handleUpdateAttendance = (formData: any) => {
@@ -188,95 +235,117 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
                     </div>
                 </div>
 
-                {/* Attendance Table */}
                 <div className="rounded-lg border p-4">
-                    <div className="mb-4 flex items-center justify-between">
+                    <div className="mb-4 flex flex-wrap items-center gap-3 justify-between">
                         <h2 className="text-xl font-bold">Daftar Kehadiran</h2>
-
-                        {/* Filter Button */}
-                        <div className="relative">
-                            <button
-                                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                                className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                        <div className="flex flex-wrap items-center gap-3">
+                            <select
+                                value={limit}
+                                onChange={e => {
+                                    const val = e.target.value;
+                                    let newLimit = val === 'all' ? 'all' : Number(val);
+                                    setLimit(newLimit);
+                                    // Kirim ke backend, reset ke page 1
+                                    const params: any = { limit: newLimit, page: 1 };
+                                    if (selectedDates.length > 0) params.dates = selectedDates;
+                                    router.get(route('events.attendance', event.id), params, { preserveState: true });
+                                }}
+                                className="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700 bg-white"
                             >
-                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth={2}
-                                        d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                                    />
-                                </svg>
-                                Filter Tanggal
-                                {selectedDates.length > 0 && (
-                                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-800 text-xs">
-                                        {selectedDates.length}
-                                    </span>
-                                )}
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={'all'}>Show All</option>
+                            </select>
+                            <button
+                                onClick={handleExportCSV}
+                                disabled={selectedIds.length === 0}
+                                className={`rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 ${selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                Ekspor CSV
                             </button>
-
-                            {/* Filter Dropdown */}
-                            {isFilterOpen && (
-                                <div className="absolute top-full right-0 z-10 mt-2 w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-lg">
-                                    <div className="mb-3 flex items-center justify-between">
-                                        <h3 className="text-sm font-semibold text-gray-900">Filter Berdasarkan Tanggal</h3>
-                                        <button
-                                            onClick={() => setIsFilterOpen(false)}
-                                            className="text-gray-400 hover:cursor-pointer hover:text-gray-600"
-                                        >
-                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </div>
-
-                                    <div className="space-y-3">
-                                        <label className="flex items-center space-x-2">
-                                            <input
-                                                type="checkbox"
-                                                checked={selectedDates.length === allDates.length}
-                                                onChange={toggleAllDates}
-                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                            />
-                                            <span className="text-sm font-medium text-gray-900">Pilih Semua Tanggal</span>
-                                        </label>
-
-                                        <div className="max-h-60 overflow-y-auto border-t border-gray-200 pt-3">
-                                            {allDates.map((date) => (
-                                                <label key={date} className="flex items-center space-x-2 py-1">
-                                                    <input
-                                                        type="checkbox"
-                                                        checked={selectedDates.includes(date)}
-                                                        onChange={() => toggleDate(date)}
-                                                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                                    />
-                                                    <span className="text-sm text-gray-700">
-                                                        {new Date(date).toLocaleDateString('id-ID', {
-                                                            weekday: 'short',
-                                                            year: 'numeric',
-                                                            month: 'short',
-                                                            day: 'numeric',
-                                                        })}
-                                                    </span>
-                                                </label>
-                                            ))}
-                                        </div>
-
-                                        <div className="flex justify-between border-t border-gray-200 pt-3">
-                                            <span className="text-sm text-gray-600">{selectedDates.length} tanggal dipilih</span>
+                            <div className="relative">
+                                <button
+                                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                                    className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                                >
+                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                                        />
+                                    </svg>
+                                    Filter Tanggal
+                                    {selectedDates.length > 0 && (
+                                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-blue-800 text-xs">
+                                            {selectedDates.length}
+                                        </span>
+                                    )}
+                                </button>
+                                {/* ...existing filter dropdown code... */}
+                                {isFilterOpen && (
+                                    <div className="absolute top-full right-0 z-10 mt-2 w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-lg">
+                                        {/* ...existing filter dropdown content... */}
+                                        <div className="mb-3 flex items-center justify-between">
+                                            <h3 className="text-sm font-semibold text-gray-900">Filter Berdasarkan Tanggal</h3>
                                             <button
-                                                onClick={() => {
-                                                    setSelectedDates([]);
-                                                    updateUrlWithDates([]);
-                                                }}
-                                                className="text-sm text-blue-600 hover:cursor-pointer hover:text-blue-800"
+                                                onClick={() => setIsFilterOpen(false)}
+                                                className="text-gray-400 hover:cursor-pointer hover:text-gray-600"
                                             >
-                                                Reset Filter
+                                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
                                             </button>
                                         </div>
+                                        <div className="space-y-3">
+                                            <label className="flex items-center space-x-2">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={selectedDates.length === allDates.length}
+                                                    onChange={toggleAllDates}
+                                                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                />
+                                                <span className="text-sm font-medium text-gray-900">Pilih Semua Tanggal</span>
+                                            </label>
+                                            <div className="max-h-60 overflow-y-auto border-t border-gray-200 pt-3">
+                                                {allDates.map((date) => (
+                                                    <label key={date} className="flex items-center space-x-2 py-1">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={selectedDates.includes(date)}
+                                                            onChange={() => toggleDate(date)}
+                                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                        />
+                                                        <span className="text-sm text-gray-700">
+                                                            {new Date(date).toLocaleDateString('id-ID', {
+                                                                weekday: 'short',
+                                                                year: 'numeric',
+                                                                month: 'short',
+                                                                day: 'numeric',
+                                                            })}
+                                                        </span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                            <div className="flex justify-between border-t border-gray-200 pt-3">
+                                                <span className="text-sm text-gray-600">{selectedDates.length} tanggal dipilih</span>
+                                                <button
+                                                    onClick={() => {
+                                                        setSelectedDates([]);
+                                                        // Kirim ke backend, reset ke page 1
+                                                        const params: any = { dates: [], limit, page: 1 };
+                                                        router.get(route('events.attendance', event.id), params, { preserveState: true });
+                                                    }}
+                                                    className="text-sm text-blue-600 hover:cursor-pointer hover:text-blue-800"
+                                                >
+                                                    Reset Filter
+                                                </button>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     </div>
 
@@ -284,6 +353,14 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
+                                    <th className="px-4 py-3 text-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedIds.length === attendances.data.length && attendances.data.length > 0}
+                                            onChange={e => handleSelectAll(e.target.checked)}
+                                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                        />
+                                    </th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nama</th>
                                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">NIS</th>
@@ -297,37 +374,35 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 bg-white">
-                                {attendances.data.map((attendance) => (
+                                {attendances.data.map(attendance => (
                                     <tr key={`${attendance.submit_date}-${attendance.student.id}`}>
-                                        <td className="px-4 py-3 text-sm text-gray-500">
-                                            {new Date(attendance.submit_date).toLocaleDateString('id-ID')}
+                                        <td className="px-4 py-3 text-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedIds.includes(attendance.id!)}
+                                                onChange={() => handleSelectRow(attendance.id!)}
+                                                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            />
                                         </td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">{new Date(attendance.submit_date).toLocaleDateString('id-ID')}</td>
                                         <td className="px-4 py-3 text-sm font-medium text-gray-900">{attendance.student.full_name}</td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.student.nis || '-'}</td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.student.classroom?.name || '-'}</td>
                                         <td className="px-4 py-3 text-sm">
-                                            <span
-                                                className={`inline-flex rounded-full px-2 py-1 text-xs font-medium ${getStatusColor(
-                                                    attendance.status,
-                                                )}`}
-                                            >
-                                                {getStatusLabel(attendance.status)}
-                                            </span>
+                                            <span className={`inline-block rounded px-2 py-1 text-xs font-semibold ${getStatusColor(attendance.status)}`}>{getStatusLabel(attendance.status)}</span>
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.clock_in_hour || '-'}</td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.clock_out_hour || '-'}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-500">
-                                            {attendance.minutes_of_late ? `${attendance.minutes_of_late} menit` : '-'}
-                                        </td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">{attendance.minutes_of_late !== null ? attendance.minutes_of_late : '-'}</td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.note || '-'}</td>
                                         {canEditAttendance && (
                                             <td className="px-4 py-3 text-sm">
                                                 <button
+                                                    className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:bg-blue-600"
                                                     onClick={() => {
                                                         setSelectedAttendance(attendance);
                                                         setIsEditModalOpen(true);
                                                     }}
-                                                    className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-600"
                                                 >
                                                     Edit
                                                 </button>
@@ -341,7 +416,14 @@ export default function EventAttendance({ event, attendances, canEditAttendance 
 
                     {/* Pagination */}
                     <div className="mt-4">
-                        <Pagination links={attendances.links} />
+                        {attendances.links && attendances.links.length > 0 ? (
+                            <Pagination links={attendances.links} />
+                        ) : (
+                            // Show single page if Show All
+                            <div className="flex justify-center gap-2">
+                                <button className="rounded bg-blue-500 px-4 py-2 text-white font-bold">1</button>
+                            </div>
+                        )}
                     </div>
 
                     {/* No data message */}

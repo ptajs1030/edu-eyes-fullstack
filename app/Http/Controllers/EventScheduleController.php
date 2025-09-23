@@ -25,7 +25,8 @@ class EventScheduleController extends Controller
     {
         $event->load(['eventPics.user', 'participants.student.classroom']);
 
-        // Build query untuk attendance dengan filter dan sorting
+        // Ambil limit dari request, default 10, jika 'all' maka ambil semua
+        $limit = $request->get('limit', 10);
         $attendancesQuery  = EventAttendance::where('event_id', $event->id)
             ->with(['student.classroom']);
 
@@ -36,27 +37,58 @@ class EventScheduleController extends Controller
         $attendancesQuery->orderBy('submit_date')
             ->orderBy('student_id');
 
-        $attendances = $attendancesQuery->paginate(10);
+        if ($limit === 'all') {
+            $attendances = $attendancesQuery->get();
+            // Simulasikan struktur pagination agar frontend tidak error
+            $attendances = collect([
+                'data' => $attendances,
+                'links' => [],
+                'current_page' => 1,
+                'last_page' => 1,
+            ]);
+        } else {
+            $attendances = $attendancesQuery->paginate((int)$limit);
+        }
 
-        $formattedAttendances = $attendances->getCollection()->map(function ($attendance) {
-            return [
-                'id' => $attendance->id,
-                'student' => [
-                    'id' => $attendance->student->id,
-                    'full_name' => $attendance->student->full_name,
-                    'nis' => $attendance->student->nis,
-                    'classroom' => $attendance->student->classroom
-                ],
-                'status' => $attendance->status,
-                'clock_in_hour' => $attendance->clock_in_hour ? $this->formatTimeForDisplay($attendance->clock_in_hour) : null,
-                'clock_out_hour' => $attendance->clock_out_hour ? $this->formatTimeForDisplay($attendance->clock_out_hour) : null,
-                'minutes_of_late' => $attendance->minutes_of_late,
-                'note' => $attendance->note,
-                'submit_date' => $attendance->submit_date,
-            ];
-        });
-
-        $attendances->setCollection($formattedAttendances);
+        if ($limit === 'all') {
+            $formattedAttendances = collect($attendances['data'])->map(function ($attendance) {
+                return [
+                    'id' => $attendance->id,
+                    'student' => [
+                        'id' => $attendance->student->id,
+                        'full_name' => $attendance->student->full_name,
+                        'nis' => $attendance->student->nis,
+                        'classroom' => $attendance->student->classroom
+                    ],
+                    'status' => $attendance->status,
+                    'clock_in_hour' => $attendance->clock_in_hour ? $this->formatTimeForDisplay($attendance->clock_in_hour) : null,
+                    'clock_out_hour' => $attendance->clock_out_hour ? $this->formatTimeForDisplay($attendance->clock_out_hour) : null,
+                    'minutes_of_late' => $attendance->minutes_of_late,
+                    'note' => $attendance->note,
+                    'submit_date' => $attendance->submit_date,
+                ];
+            });
+            $attendances['data'] = $formattedAttendances;
+        } else {
+            $formattedAttendances = $attendances->getCollection()->map(function ($attendance) {
+                return [
+                    'id' => $attendance->id,
+                    'student' => [
+                        'id' => $attendance->student->id,
+                        'full_name' => $attendance->student->full_name,
+                        'nis' => $attendance->student->nis,
+                        'classroom' => $attendance->student->classroom
+                    ],
+                    'status' => $attendance->status,
+                    'clock_in_hour' => $attendance->clock_in_hour ? $this->formatTimeForDisplay($attendance->clock_in_hour) : null,
+                    'clock_out_hour' => $attendance->clock_out_hour ? $this->formatTimeForDisplay($attendance->clock_out_hour) : null,
+                    'minutes_of_late' => $attendance->minutes_of_late,
+                    'note' => $attendance->note,
+                    'submit_date' => $attendance->submit_date,
+                ];
+            });
+            $attendances->setCollection($formattedAttendances);
+        }
 
         // Format waktu event untuk display
         $formattedEvent = [
