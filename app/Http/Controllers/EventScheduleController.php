@@ -31,7 +31,11 @@ class EventScheduleController extends Controller
             ->with(['student.classroom']);
 
         if ($request->has('dates') && !empty($request->dates)) {
-            $attendancesQuery->whereIn('submit_date', $request->dates);
+            $dates = $request->dates;
+            if (is_string($dates)) {
+                $dates = [$dates];
+            }
+            $attendancesQuery->whereIn('submit_date', $dates);
         }
 
         $attendancesQuery->orderBy('submit_date')

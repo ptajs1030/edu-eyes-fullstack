@@ -65,14 +65,13 @@ const breadcrumbs = (eventName: string): BreadcrumbItem[] => [
 
 export default function EventAttendance({ event, attendances, canEditAttendance, filters }: Props) {
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
-    // Destructure filters langsung dari parameter
-    // export default function EventAttendance({ event, attendances, canEditAttendance, filters }: Props)
     const [selectedAttendance, setSelectedAttendance] = useState<Attendance | null>(null);
-    const [selectedDates, setSelectedDates] = useState<string[]>([]);
+    // Selalu gunakan filters.dates dari props
+    const selectedDates = filters.dates ?? [];
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
-    // Jangan simpan limit di state, gunakan filters.limit langsung agar dropdown selalu sinkron
+    // Limit langsung dari props
     const limit = typeof filters?.limit !== 'undefined' ? filters.limit : 10;
     // Reset selectedIds saat filter tanggal atau limit berubah
     useEffect(() => {
@@ -147,7 +146,6 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
         } else {
             newDates = [...allDates];
         }
-        setSelectedDates(newDates);
         // Kirim ke backend, reset ke page 1
         const params: any = { dates: newDates, limit, page: 1 };
         router.get(route('events.attendance', event.id), params, { preserveState: true });
@@ -161,7 +159,6 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
         } else {
             newDates = [...selectedDates, date];
         }
-        setSelectedDates(newDates);
         // Kirim ke backend, reset ke page 1
         const params: any = { dates: newDates, limit, page: 1 };
         router.get(route('events.attendance', event.id), params, { preserveState: true });
@@ -336,8 +333,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                                                 <span className="text-sm text-gray-600">{selectedDates.length} tanggal dipilih</span>
                                                 <button
                                                     onClick={() => {
-                                                        setSelectedDates([]);
-                                                        // Kirim ke backend, reset ke page 1
+                                                        // Reset filter tanggal, kirim ke backend, reset ke page 1
                                                         const params: any = { dates: [], limit, page: 1 };
                                                         router.get(route('events.attendance', event.id), params, { preserveState: true });
                                                     }}
@@ -421,7 +417,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                     {/* Pagination */}
                     <div className="mt-4">
                         {attendances.links && attendances.links.length > 0 ? (
-                            <Pagination links={attendances.links} />
+                            <Pagination links={attendances.links} dates={selectedDates} limit={limit} />
                         ) : (
                             // Show single page if Show All
                             <div className="flex justify-center gap-2">

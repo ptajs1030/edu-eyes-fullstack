@@ -6,12 +6,9 @@ type Link = {
     active: boolean;
 };
 
-export default function Pagination({ links }: { links: Link[] }) {
-    // Ambil query params dari window.location agar limit dan dates tetap dikirim
-    const currentParams = new URLSearchParams(window.location.search);
-    const limit = currentParams.get('limit');
-    const dates = currentParams.getAll('dates');
-
+export default function Pagination({ links, dates = [], limit }: { links: Link[], dates?: string[], limit?: string | number }) {
+    // Pastikan dates selalu array
+    const safeDates = Array.isArray(dates) ? dates : dates ? [dates] : [];
     return (
         <div className="mt-4 flex justify-center gap-2">
             {links.map((link, i) => {
@@ -21,11 +18,10 @@ export default function Pagination({ links }: { links: Link[] }) {
                 let url = link.url;
                 if (url) {
                     const urlObj = new URL(url, window.location.origin);
-                    if (limit) urlObj.searchParams.set('limit', limit);
-                    if (dates.length > 0) {
-                        urlObj.searchParams.delete('dates');
-                        dates.forEach(d => urlObj.searchParams.append('dates', d));
-                    }
+                    if (limit !== undefined) urlObj.searchParams.set('limit', String(limit));
+                    urlObj.searchParams.delete('dates');
+                    // Kirim dates sebagai indexed array: dates[0]=..., dates[1]=...
+                    safeDates.forEach((d, idx) => urlObj.searchParams.append(`dates[${idx}]`, d));
                     url = urlObj.pathname + urlObj.search;
                 }
                 return (
