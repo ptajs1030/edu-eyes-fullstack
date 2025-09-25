@@ -22,7 +22,6 @@ class UsersImport extends DefaultValueBinder implements
     ToModel,
     WithHeadingRow,
     WithValidation,
-    // SkipsOnFailure,
     SkipsEmptyRows,
     WithCustomValueBinder
 {
@@ -62,7 +61,6 @@ class UsersImport extends DefaultValueBinder implements
             'nama_lengkap' => ['required', 'string', 'max:70'],
             'username'  => ['required', 'string', 'max:70', Rule::unique('users', 'username')],
             'password'  => ['required', 'string', 'min:8', 'max:100'],
-            // 'status'    => ['required', Rule::in(['active', 'inactive'])],
 
             'email'     => ['nullable', 'email', 'max:100', Rule::unique('users', 'email')],
             'nomor_telepon'     => ['nullable', 'regex:/^\d{7,15}$/'], // 7-15 digit (boleh diatur)
@@ -96,7 +94,6 @@ class UsersImport extends DefaultValueBinder implements
         $phone    = $this->digitsOnly($row['nomor_telepon'] ?? null);
         $address  = $this->norm($row['alamat'] ?? null);
         $password = $this->norm($row['password'] ?? null);
-        // $status   = \'inactive') ?? 'inactive');
 
         $job      = $this->norm($row['pekerjaan'] ?? null);
         $nip      = $this->digitsOnly($row['nip'] ?? null);

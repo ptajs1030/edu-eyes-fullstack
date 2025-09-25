@@ -14,7 +14,7 @@ interface ImportModalProps {
 const expectedHeaderByRole = (roleValue: string): string[] => {
     switch (roleValue) {
         case 'parent':
-            return ['full_name', 'username', 'email', 'phone', 'address', 'password', 'status', 'job'];
+            return ['nama_lengkap', 'username', 'pekerjaan', 'nomor_telepon', 'email', 'alamat', 'password'];
             break;
         case 'teacher':
             return ['nama_lengkap', 'username', 'nip', 'email', 'nomor_telepon', 'alamat', 'password', 'posisi'];
@@ -28,7 +28,7 @@ const expectedHeaderByRole = (roleValue: string): string[] => {
 const prettyHeaderByRole = (roleValue: string): string[] => {
     switch (roleValue) {
         case 'parent':
-            return ['full_name', 'username', 'email', 'phone', 'address', 'password', 'status', 'job'];
+            return ['Nama Lengkap', 'Username', 'Pekerjaan', 'Nomor Telepon', 'Email', 'Alamat', 'Password'];
             break;
         case 'teacher':
             return ['Nama Lengkap', 'Username', 'NIP', 'Email', 'Nomor Telepon', 'Alamat', 'Password', 'Posisi'];
