@@ -260,9 +260,8 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
                 <button
                     type="submit"
                     disabled={processing || !file || !!errorMsg || validating}
-                    className={`inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm ${
-                        processing ? 'cursor-not-allowed bg-blue-400' : 'bg-blue-600 hover:cursor-pointer hover:bg-blue-700'
-                    }`}
+                    className={`inline-flex items-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm ${processing ? 'cursor-not-allowed bg-blue-400' : 'bg-blue-600 hover:cursor-pointer hover:bg-blue-700'
+                        }`}
                 >
                     {processing && (
                         <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
