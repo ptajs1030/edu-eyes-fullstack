@@ -299,7 +299,10 @@ class StudentController extends Controller
             Excel::import(new StudentsImport, $request->file('file'));
             return redirect()->back()->with('success', 'Data siswa berhasil diimpor');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal impor siswa: ' . $e->getMessage());
+            $errorMsg = $e->getMessage() === 'data kelas tidak ditemukan'
+                ? 'Gagal impor siswa: data kelas tidak ditemukan'
+                : 'Gagal impor siswa: ' . $e->getMessage();
+            return redirect()->back()->with('error', $errorMsg);
         }
     }
 
