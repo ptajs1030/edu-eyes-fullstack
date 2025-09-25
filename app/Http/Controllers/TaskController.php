@@ -181,7 +181,7 @@ class TaskController extends Controller
             $validated = $request->validate([
                 'subject_id' => 'required|exists:subjects,id',
                 'title' => 'required|string|max:70',
-                'description' => 'nullable|string|max:70',
+                'description' => 'nullable|string',
                 'due_date' => 'required|date',
                 'due_time' => 'required|date_format:H:i',
                 'student_assignments' => 'required|array|min:1',
