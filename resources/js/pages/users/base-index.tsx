@@ -118,7 +118,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         router.delete(route(`${routePrefix}.destroy`, id), {
             onSuccess: () => {
                 router.reload();
-            }
+            },
         });
     };
 
@@ -133,14 +133,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         const headers = `Name,Username,Role,Phone,Email,Status\n`;
         const toDash = (v: any) => (v === null || v === undefined || v === '' ? '-' : v);
         const csv = selectedData
-            .map((a) => [
-                toDash(a.full_name),
-                toDash(a.username),
-                toDash(a.role?.name),
-                toDash(a.phone),
-                toDash(a.email),
-                toDash(a.status)
-            ].join(','))
+            .map((a) => [toDash(a.full_name), toDash(a.username), toDash(a.role?.name), toDash(a.phone), toDash(a.email), toDash(a.status)].join(','))
             .join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
         const url = URL.createObjectURL(blob);
@@ -253,28 +246,24 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                     type="text"
                     placeholder="Cari pengguna..."
                     defaultValue={filters.search || ''}
-                    onChange={e => {
+                    onChange={(e) => {
                         setSelectedIds([]);
-                        router.get(route(`${routePrefix}.index`), { ...filters, search: e.target.value, show, status: statusFilter }, { preserveState: true });
+                        router.get(
+                            route(`${routePrefix}.index`),
+                            { ...filters, search: e.target.value, show, status: statusFilter },
+                            { preserveState: true },
+                        );
                     }}
-                    className="w-64 rounded border px-3 py-1 text-sm bg-white"
+                    className="w-64 rounded border bg-white px-3 py-1 text-sm"
                 />
                 {/* Show per page */}
-                <select
-                    value={show}
-                    onChange={handleShowChange}
-                    className="rounded border px-2 py-1 text-sm min-w-[100px] bg-white"
-                >
+                <select value={show} onChange={handleShowChange} className="min-w-[100px] rounded border bg-white px-2 py-1 text-sm">
                     <option value="10">Show 10 data</option>
                     <option value="20">Show 20 data</option>
                     <option value="all">Show All</option>
                 </select>
                 {/* Status Filter */}
-                <select
-                    value={statusFilter}
-                    onChange={handleStatusChange}
-                    className="rounded border px-2 py-1 text-sm min-w-[120px] bg-white"
-                >
+                <select value={statusFilter} onChange={handleStatusChange} className="min-w-[120px] rounded border bg-white px-2 py-1 text-sm">
                     <option value="">Semua Status</option>
                     <option value="active">Aktif</option>
                     <option value="inactive">Nonaktif</option>
@@ -283,30 +272,35 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                 <button
                     disabled={selectedIds.length === 0}
                     onClick={exportSelected}
-                    className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                        }`}
+                    className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
+                        selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                    }`}
                 >
                     Ekspor Data
                 </button>
-                <button
-                    onClick={() => setShowImportModal(true)}
-                    className="inline-flex items-center rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-indigo-700"
-                >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 5v14"
-                        />
-                    </svg>
-                    Impor Data
-                </button>
+
+                {role.value !== 'admin' && (
+                    <button
+                        onClick={() => setShowImportModal(true)}
+                        className="inline-flex items-center rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-indigo-700"
+                    >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 5v14"
+                            />
+                        </svg>
+                        Impor Data
+                    </button>
+                )}
+
                 {/* Add Button stays at right */}
                 <div className="flex-1" />
                 <button
                     onClick={() => openForm(null)}
-                    className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700 ml-2"
+                    className="ml-2 rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                 >
                     Tambah {translateRoleName(role.name)}
                 </button>
