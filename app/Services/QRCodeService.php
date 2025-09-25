@@ -123,7 +123,7 @@ class QRCodeService
             ];
         }
 
-        return Pdf::loadView('kartu-siswa-bulk', ['cards' => $cardsData])->setPaper('A4', 'portrait');
+        return Pdf::loadView('kartu-siswa-bulk', ['cards' => $cardsData],)->setPaper('A4', 'portrait', );
     }
 
     

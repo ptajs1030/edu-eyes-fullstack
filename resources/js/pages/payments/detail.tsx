@@ -87,7 +87,6 @@ export default function PaymentDetail({ transaction, payment }: Props) {
                 preserveScroll: true,
                 onSuccess: () => {
                     setEditedTransactions({});
-                    toast.success('Perubahan berhasil disimpan');
                 },
                 onError: () => setIsSaving(false),
                 onFinish: () => setIsSaving(false),
@@ -120,6 +119,7 @@ export default function PaymentDetail({ transaction, payment }: Props) {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+        toast.success('Data berhasil diekspor ke CSV!');
     };
 
     return (

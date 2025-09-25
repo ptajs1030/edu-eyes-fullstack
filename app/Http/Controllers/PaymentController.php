@@ -31,9 +31,10 @@ class PaymentController extends Controller
     {
         $payments = Payment::with('academicYear')
             ->when($request->search, fn($q) => $q->where('title', 'like', "%{$request->search}%"))
-            ->orderBy($request->sort ?? 'created_at', $request->direction ?? 'asc')
+            ->orderBy($request->sort ?? 'created_at', $request->direction ?? 'desc')
             ->paginate(10)
             ->withQueryString();
+            
 
         $payments->getCollection()->transform(function ($payments) {
             return [
@@ -48,7 +49,8 @@ class PaymentController extends Controller
 
         return Inertia::render('payments/index', [
             'payments' => $payments,
-            'filters' => $request->only(['search', 'sort', 'direction'])
+            'filters' => $request->only(['search', 'sort', 'direction']),
+            'academicYears' => AcademicYear::select('id', 'title')->get(),
         ]);
     }
 
@@ -154,9 +156,16 @@ class PaymentController extends Controller
                     'due_date' => $this->formatTimeForDatabase($validated['due_date']),
                 ]);
 
-                // Update assignments
-                $payment->assignments()->delete();
-                foreach ($validated['student_ids'] as $studentId) {
+                $existingAssignments = $payment->assignments()->pluck('student_id')->toArray();
+                $newAssignments = $validated['student_ids'] ?? [];
+
+                $studentsToDelete = array_diff($existingAssignments, $newAssignments);
+                if (!empty($studentsToDelete)) {
+                    $payment->assignments()->whereIn('student_id', $studentsToDelete)->delete();
+                }
+
+                $studentsToAdd = array_diff($newAssignments, $existingAssignments);
+                foreach ($studentsToAdd as $studentId) {
                     PaymentAssignment::create([
                         'payment_id' => $payment->id,
                         'student_id' => $studentId,
