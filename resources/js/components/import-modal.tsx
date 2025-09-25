@@ -17,22 +17,10 @@ const expectedHeaderByRole = (roleValue: string): string[] => {
             return ['full_name', 'username', 'email', 'phone', 'address', 'password', 'status', 'job'];
             break;
         case 'teacher':
-            return ['full_name', 'username', 'email', 'phone', 'address', 'password', 'status', 'nip', 'position'];
+            return ['nama_lengkap', 'username', 'nip', 'email', 'nomor_telepon', 'alamat', 'password', 'posisi'];
             break;
         default:
-            return [
-                'parent',
-                'classroom',
-                'full_name',
-                'nis',
-                'entry_year',
-                'gender',
-                'status',
-                'religion',
-                'birth_place',
-                'date_of_birth',
-                'address',
-            ];
+            return [];
             break;
     }
 };
@@ -43,25 +31,14 @@ const prettyHeaderByRole = (roleValue: string): string[] => {
             return ['full_name', 'username', 'email', 'phone', 'address', 'password', 'status', 'job'];
             break;
         case 'teacher':
-            return ['full_name', 'username', 'email', 'phone', 'address', 'password', 'status', 'nip', 'position'];
+            return ['Nama Lengkap', 'Username', 'NIP', 'Email', 'Nomor Telepon', 'Alamat', 'Password', 'Posisi'];
             break;
         default:
-            return [
-                'parent',
-                'classroom',
-                'full_name',
-                'nis',
-                'entry_year',
-                'gender',
-                'status',
-                'religion',
-                'birth_place',
-                'date_of_birth',
-                'address',
-            ];
+            return [];
             break;
     }
 };
+
 
 const normalizeHeader = (s: string) => s.replace(/\*/g, '').trim().toLowerCase().replace(/\s+/g, '_');
 
@@ -92,6 +69,7 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
             setFile(null);
             return;
         }
+
         const validTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'text/csv'];
         if (f.type && !validTypes.includes(f.type)) {
             setErrorMsg('Tipe file tidak didukung. Harap upload .xlsx / .xls');
@@ -109,8 +87,10 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
                 const first = wb.SheetNames[0];
                 const ws = wb.Sheets[first];
                 const rows: any[][] = XLSX.utils.sheet_to_json(ws, { header: 1 });
+                // const headerRow = (rows[0] || []).map((v) => normalizeHeader(String(v ?? '')));
+                // const expected = expectedHeaderByRole(role.value).map(normalizeHeader);
                 const headerRow = (rows[0] || []).map((v) => normalizeHeader(String(v ?? '')));
-                const expected = expectedHeaderByRole(role.value).map(normalizeHeader);
+                const expected = expectedHeaderByRole(role.value);
                 const match = headerRow.length === expected.length && expected.every((col, idx) => col === headerRow[idx]);
 
                 if (!match) {
@@ -242,7 +222,6 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
                         Template
                     </button>
 
-                    {/* <div className="text-xs text-gray-500">Header: {expectedHeaderByRole(role.value).join(', ')}</div> */}
                     <div className="text-xs text-gray-500">Header: {prettyHeaderByRole(role.value).join(', ')}</div>
                 </div>
             </div>

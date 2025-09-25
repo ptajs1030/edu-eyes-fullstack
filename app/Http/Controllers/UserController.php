@@ -423,7 +423,7 @@ class UserController extends Controller
     public function downloadTemplate(string $role)
     {
         $role = strtolower($role);
-        $allowed = ['parent', 'teacher', 'admin'];
+        $allowed = ['parent', 'teacher'];
         if (!in_array($role, $allowed, true)) {
             return response()->json(['message' => 'Role tidak valid'], 422);
         }

@@ -58,52 +58,49 @@ class UsersImport extends DefaultValueBinder implements
 
     public function rules(): array
     {
-        // heading row default akan slug: 'Full Name*' -> 'full_name'
         return [
-            'full_name' => ['required', 'string', 'max:70'],
+            'nama_lengkap' => ['required', 'string', 'max:70'],
             'username'  => ['required', 'string', 'max:70', Rule::unique('users', 'username')],
             'password'  => ['required', 'string', 'min:8', 'max:100'],
-            'status'    => ['required', Rule::in(['active', 'inactive'])],
+            // 'status'    => ['required', Rule::in(['active', 'inactive'])],
 
             'email'     => ['nullable', 'email', 'max:100', Rule::unique('users', 'email')],
-            'phone'     => ['nullable', 'regex:/^\d{7,15}$/'], // 7-15 digit (boleh diatur)
-            'address'   => ['nullable', 'string', 'max:255'],
+            'nomor_telepon'     => ['nullable', 'regex:/^\d{7,15}$/'], // 7-15 digit (boleh diatur)
+            'alamat'   => ['nullable', 'string', 'max:255'],
 
             // role-specific
-            'job'       => ['nullable', 'string', 'max:70'],
+            'pekerjaan'       => ['nullable', 'string', 'max:70'],
             'nip'       => ['nullable', 'regex:/^\d{18,18}$/'], // 18-18 digit
-            'position'  => ['nullable', 'string', 'max:70'],
+            'posisi'  => ['nullable', 'string', 'max:70'],
         ];
     }
 
     public function customValidationMessages()
     {
         return [
-            'full_name.required' => 'Nama lengkap wajib diisi',
-            'username.required'  => 'Username wajib diisi',
-            'password.required'  => 'Password wajib diisi',
-            'status.required'    => 'Status wajib diisi',
-            'status.in'          => 'Status harus active atau inactive',
-            'email.email'        => 'Format email tidak valid',
-            'phone.regex'        => 'Nomor telepon harus 7-15 digit',
-            'nip.regex'          => 'NIP harus angka (18 digit)',
+            'nama_lengkap.required' => 'Nama lengkap wajib diisi',
+            'username.required'     => 'Username wajib diisi',
+            'password.required'     => 'Password wajib diisi',
+            'email.email'           => 'Format email tidak valid',
+            'nomor_telepon.regex'   => 'Nomor telepon harus 7-15 digit',
+            'nip.regex'             => 'NIP harus angka (18 digit)',
         ];
     }
 
     public function model(array $row)
     {
         // Normalisasi nilai
-        $fullName = $this->norm($row['full_name'] ?? null);
+        $fullName = $this->norm($row['nama_lengkap'] ?? null);
         $username = $this->norm($row['username'] ?? null);
         $email    = $this->norm($row['email'] ?? null);
-        $phone    = $this->digitsOnly($row['phone'] ?? null);
-        $address  = $this->norm($row['address'] ?? null);
+        $phone    = $this->digitsOnly($row['nomor_telepon'] ?? null);
+        $address  = $this->norm($row['alamat'] ?? null);
         $password = $this->norm($row['password'] ?? null);
-        $status   = strtolower($this->norm($row['status'] ?? 'inactive') ?? 'inactive');
+        // $status   = \'inactive') ?? 'inactive');
 
-        $job      = $this->norm($row['job'] ?? null);
+        $job      = $this->norm($row['pekerjaan'] ?? null);
         $nip      = $this->digitsOnly($row['nip'] ?? null);
-        $position = $this->norm($row['position'] ?? null);
+        $position = $this->norm($row['posisi'] ?? null);
 
         $this->inserted++;
 
@@ -114,7 +111,7 @@ class UsersImport extends DefaultValueBinder implements
             'email'     => $email,
             'phone'     => $phone,
             'address'   => $address,
-            'status'    => $status,
+            'status'    => 'active',
             'job'       => $job,
             'nip'       => $nip,
             'position'  => $position,
