@@ -231,6 +231,7 @@ export default function ClassroomSchedule({ classroom, days, shiftings, teachers
                 },
                 onSuccess: () => {
                     setEditingSchedule(null);
+                    window.location.reload();
                 },
                 onFinish: () => {
                     setIsSavingSubject(false);
