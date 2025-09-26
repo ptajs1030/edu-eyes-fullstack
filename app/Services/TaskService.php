@@ -31,19 +31,18 @@ class TaskService
         if ($tasks->isEmpty()) {
             throw new SilentHttpException(404, 'tugas tidak ditemukan');
         }
-        $tasksWithRelations = [];
-
-        foreach ($tasks as $i) {
-            $tasksWithRelations[] = [
-                'id' => $i->id,
+        $tasksWithRelations=$tasks->map(function($i) {
+            return [
+                'id'=>$i->id,
                 'subject'=>$i->task->subject->name,
                 'title'=>$i->task->title,
                 'description'=>$i->task->description,
+                'score' => $i->score ?? 0, 
                 'due_date'=>Carbon::parse($i->task->due_date)->format('Y-m-d'),
                 'due_time'=>Carbon::parse($i->task->due_time)->format('H:i'),
                 'created_at'=>$i->task->created_at
             ];
-        }
+        })->toArray();
 
         return [
             'current_page'=>$tasks->currentPage(),
@@ -70,8 +69,9 @@ class TaskService
             'title'=>$task->task->title,
             'description'=>$task->task->description,
             'attachments'=>$attachments,
+            'score' => $task->score ?? 0, 
             'due_date'=>Carbon::parse($task->task->due_date)->format('Y-m-d'),
-                'due_time'=>Carbon::parse($task->task->due_time)->format('H:i'),
+            'due_time'=>Carbon::parse($task->task->due_time)->format('H:i'),
             'created_at'=>$task->task->created_at
         ];
     }
