@@ -139,7 +139,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                 case 'parent':
                     return {
                         headers: ['Nama Lengkap', 'Username', 'Pekerjaan', 'Nomor Telepon', 'Email', 'Alamat', 'Role', 'Status'],
-                        baseFilename: 'data-orangtua',
+                        baseFilename: 'data-orang-tua',
                         getRow: (user: any) => ({
                             'Nama Lengkap': user.full_name || '-',
                             Username: user.username || '-',
@@ -186,7 +186,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                 default:
                     return {
                         headers: ['Nama Lengkap', 'Username', 'Email', 'Nomor Telepon', 'Alamat', 'Role', 'Status'],
-                        baseFilename: 'data-guru',
+                        baseFilename: 'data-user',
                         getRow: (user: any) => ({
                             'Nama Lengkap': user.full_name || '-',
                             Username: user.username || '-',
