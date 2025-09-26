@@ -132,28 +132,14 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
 
         const selectedData = users.data.filter((a) => selectedIds.includes(a.id));
 
-        const formatForExcel = (v: any, isNumericField: boolean = false) => {
-            if (v === null || v === undefined || v === '') return '-';
-
-            // Untuk field seperti NIP, telepon, dll - tambahkan tab untuk force text
-            if (isNumericField && typeof v === 'string' && /^\d+$/.test(v)) {
-                return `\t"${v}"`; // Tab + quoted value
-            }
-
-            // Handle string dengan koma (harus di-quote untuk CSV)
-            if (typeof v === 'string' && v.includes(',')) {
-                return `"${v}"`;
-            }
-
-            return v;
-        };
+        const timestamp = Date.now();
 
         const getExportConfig = (roleValue: string) => {
             switch (roleValue) {
                 case 'parent':
                     return {
                         headers: ['Nama Lengkap', 'Username', 'Pekerjaan', 'Nomor Telepon', 'Email', 'Alamat', 'Role', 'Status'],
-                        filename: 'data-orangtua.xlsx',
+                        baseFilename: 'data-orangtua',
                         getRow: (user: any) => ({
                             'Nama Lengkap': user.full_name || '-',
                             Username: user.username || '-',
@@ -168,7 +154,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                 case 'teacher':
                     return {
                         headers: ['Nama Lengkap', 'Username', 'NIP', 'Email', 'Nomor Telepon', 'Alamat', 'Posisi/Jabatan', 'Role', 'Status'],
-                        filename: 'data-guru.xlsx',
+                        baseFilename: 'data-guru',
                         getRow: (user: any) => ({
                             'Nama Lengkap': user.full_name || '-',
                             Username: user.username || '-',
@@ -184,7 +170,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                 case 'admin':
                     return {
                         headers: ['Nama Lengkap', 'Username', 'NIP', 'Email', 'Nomor Telepon', 'Alamat', 'Posisi/Jabatan', 'Role', 'Status'],
-                        filename: 'data-guru.xlsx',
+                        baseFilename: 'data-admin',
                         getRow: (user: any) => ({
                             'Nama Lengkap': user.full_name || '-',
                             Username: user.username || '-',
@@ -200,7 +186,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                 default:
                     return {
                         headers: ['Nama Lengkap', 'Username', 'Email', 'Nomor Telepon', 'Alamat', 'Role', 'Status'],
-                        filename: 'data-guru.xlsx',
+                        baseFilename: 'data-guru',
                         getRow: (user: any) => ({
                             'Nama Lengkap': user.full_name || '-',
                             Username: user.username || '-',
@@ -212,9 +198,12 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                         }),
                     };
             }
+            
         };
 
         const config = getExportConfig(role.value);
+
+        const filename = `${timestamp}-${config.baseFilename}.xlsx`;
 
         const worksheetData = selectedData.map((user) => config.getRow(user));
         const worksheet = XLSX.utils.json_to_sheet(worksheetData);
@@ -225,7 +214,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
 
-        XLSX.writeFile(workbook, config.filename);
+        XLSX.writeFile(workbook, filename);
 
         toast.success(`Berhasil mengekspor ${selectedData.length} data ${translateRoleName(role.name)}`, {
             description: 'File CSV telah didownload otomatis',
