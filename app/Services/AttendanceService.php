@@ -790,9 +790,25 @@ return [
             throw new SilentHttpException(404, "Data Kosong");
         }
         
-        $attendancesWithRelations=[];
-        foreach ($attendances as $attendance) {
-            $attendancesWithRelations[]=[
+        // $attendancesWithRelations=[];
+        // foreach ($attendances as $attendance) {
+        //     $attendancesWithRelations[]=[
+        //         'id' => $attendance->id,
+        //         'student' => optional($attendance->student)->full_name,
+        //         'classroom' => optional($attendance->student->classroom)->name,
+        //         'academic_year'=> optional($attendance->student->classroom->academicYear)->title,
+        //         'event_name' => optional($attendance->event)->name,  
+        //         'submit_date'=> $attendance->submit_date,
+        //         'clock_in_hour'=>$attendance->clock_in_hour,
+        //         'clock_out_hour'=>$attendance->clock_out_hour,
+        //         'status'=>$attendance->status,
+        //         'minutes_of_late'=>$attendance->minutes_of_late,
+        //         'note'=>$attendance->note
+        //     ];
+        // }
+
+        $attendancesWithRelations = $attendances->map(function ($attendance) {
+            return [
                 'id' => $attendance->id,
                 'student' => optional($attendance->student)->full_name,
                 'classroom' => optional($attendance->student->classroom)->name,
@@ -805,9 +821,9 @@ return [
                 'minutes_of_late'=>$attendance->minutes_of_late,
                 'note'=>$attendance->note
             ];
-        }
+        });
         return [
-            'number_of_attendances' => $attendances->total(),
+            'number_of_attendances' => $attendances->whereIn('status', ['present', 'late', 'present_in_tolerance'])->count() ,
             'current_page' => $attendances->currentPage(),
             'last_page' => $attendances->lastPage(),
             'per_page' => $attendances->perPage(),
