@@ -7,6 +7,7 @@ import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { Toaster, toast } from 'sonner';
+import * as XLSX from 'xlsx';
 import BaseForm from './base-form';
 
 interface User {
@@ -130,17 +131,101 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         if (selectedIds.length === 0) return;
 
         const selectedData = users.data.filter((a) => selectedIds.includes(a.id));
-        const headers = `Name,Username,Role,Phone,Email,Status\n`;
-        const toDash = (v: any) => (v === null || v === undefined || v === '' ? '-' : v);
-        const csv = selectedData
-            .map((a) => [toDash(a.full_name), toDash(a.username), toDash(a.role?.name), toDash(a.phone), toDash(a.email), toDash(a.status)].join(','))
-            .join('\n');
-        const blob = new Blob([headers, csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${role.value}-users.csv`;
-        link.click();
+
+        const formatForExcel = (v: any, isNumericField: boolean = false) => {
+            if (v === null || v === undefined || v === '') return '-';
+
+            // Untuk field seperti NIP, telepon, dll - tambahkan tab untuk force text
+            if (isNumericField && typeof v === 'string' && /^\d+$/.test(v)) {
+                return `\t"${v}"`; // Tab + quoted value
+            }
+
+            // Handle string dengan koma (harus di-quote untuk CSV)
+            if (typeof v === 'string' && v.includes(',')) {
+                return `"${v}"`;
+            }
+
+            return v;
+        };
+
+        const getExportConfig = (roleValue: string) => {
+            switch (roleValue) {
+                case 'parent':
+                    return {
+                        headers: ['Nama Lengkap', 'Username', 'Pekerjaan', 'Nomor Telepon', 'Email', 'Alamat', 'Role', 'Status'],
+                        filename: 'data-orangtua.xlsx',
+                        getRow: (user: any) => ({
+                            'Nama Lengkap': user.full_name || '-',
+                            Username: user.username || '-',
+                            Pekerjaan: user.job || '-',
+                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
+                            Email: user.email || '-',
+                            Alamat: user.address || '-',
+                            Role: user.role?.name || '-',
+                            Status: user.status || '-',
+                        }),
+                    };
+                case 'teacher':
+                    return {
+                        headers: ['Nama Lengkap', 'Username', 'NIP', 'Email', 'Nomor Telepon', 'Alamat', 'Posisi/Jabatan', 'Role', 'Status'],
+                        filename: 'data-guru.xlsx',
+                        getRow: (user: any) => ({
+                            'Nama Lengkap': user.full_name || '-',
+                            Username: user.username || '-',
+                            NIP: { v: user.nip || '-', t: 's' }, // Force as string
+                            Email: user.email || '-',
+                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
+                            Alamat: user.address || '-',
+                            'Posisi/Jabatan': user.position || '-',
+                            Role: user.role?.name || '-',
+                            Status: user.status || '-',
+                        }),
+                    };
+                case 'admin':
+                    return {
+                        headers: ['Nama Lengkap', 'Username', 'NIP', 'Email', 'Nomor Telepon', 'Alamat', 'Posisi/Jabatan', 'Role', 'Status'],
+                        filename: 'data-guru.xlsx',
+                        getRow: (user: any) => ({
+                            'Nama Lengkap': user.full_name || '-',
+                            Username: user.username || '-',
+                            NIP: { v: user.nip || '-', t: 's' }, // Force as string
+                            Email: user.email || '-',
+                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
+                            Alamat: user.address || '-',
+                            'Posisi/Jabatan': user.position || '-',
+                            Role: user.role?.name || '-',
+                            Status: user.status || '-',
+                        }),
+                    };
+                default:
+                    return {
+                        headers: ['Nama Lengkap', 'Username', 'Email', 'Nomor Telepon', 'Alamat', 'Role', 'Status'],
+                        filename: 'data-guru.xlsx',
+                        getRow: (user: any) => ({
+                            'Nama Lengkap': user.full_name || '-',
+                            Username: user.username || '-',
+                            Email: user.email || '-',
+                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
+                            Alamat: user.address || '-',
+                            Role: user.role?.name || '-',
+                            Status: user.status || '-',
+                        }),
+                    };
+            }
+        };
+
+        const config = getExportConfig(role.value);
+
+        const worksheetData = selectedData.map((user) => config.getRow(user));
+        const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+
+        const colWidths = config.headers.map(() => ({ width: 20 }));
+        worksheet['!cols'] = colWidths;
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
+
+        XLSX.writeFile(workbook, config.filename);
 
         toast.success(`Berhasil mengekspor ${selectedData.length} data ${translateRoleName(role.name)}`, {
             description: 'File CSV telah didownload otomatis',
