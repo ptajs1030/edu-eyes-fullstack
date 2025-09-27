@@ -198,7 +198,7 @@ class UserController extends Controller
 
         // Show data (pagination size)
         $perPage = 10;
-        if ($request->has('show') && in_array($request->show, ['10','20','all'])) {
+        if ($request->has('show') && in_array($request->show, ['10', '20', 'all'])) {
             $perPage = $request->show === 'all' ? $query->count() : (int)$request->show;
         }
 
@@ -423,7 +423,7 @@ class UserController extends Controller
     public function downloadTemplate(string $role)
     {
         $role = strtolower($role);
-        $allowed = ['parent', 'teacher'];
+        $allowed = ['parent', 'teacher', 'admin'];
         if (!in_array($role, $allowed, true)) {
             return response()->json(['message' => 'Role tidak valid'], 422);
         }
