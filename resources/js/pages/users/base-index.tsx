@@ -7,6 +7,7 @@ import { BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import { Toaster, toast } from 'sonner';
+import * as XLSX from 'xlsx';
 import BaseForm from './base-form';
 
 interface User {
@@ -118,7 +119,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         router.delete(route(`${routePrefix}.destroy`, id), {
             onSuccess: () => {
                 router.reload();
-            }
+            },
         });
     };
 
@@ -130,24 +131,90 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
         if (selectedIds.length === 0) return;
 
         const selectedData = users.data.filter((a) => selectedIds.includes(a.id));
-        const headers = `Name,Username,Role,Phone,Email,Status\n`;
-        const toDash = (v: any) => (v === null || v === undefined || v === '' ? '-' : v);
-        const csv = selectedData
-            .map((a) => [
-                toDash(a.full_name),
-                toDash(a.username),
-                toDash(a.role?.name),
-                toDash(a.phone),
-                toDash(a.email),
-                toDash(a.status)
-            ].join(','))
-            .join('\n');
-        const blob = new Blob([headers, csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${role.value}-users.csv`;
-        link.click();
+
+        const timestamp = Date.now();
+
+        const getExportConfig = (roleValue: string) => {
+            switch (roleValue) {
+                case 'parent':
+                    return {
+                        headers: ['Nama Lengkap', 'Username', 'Pekerjaan', 'Nomor Telepon', 'Email', 'Alamat', 'Role', 'Status'],
+                        baseFilename: 'data-orang-tua',
+                        getRow: (user: any) => ({
+                            'Nama Lengkap': user.full_name || '-',
+                            Username: user.username || '-',
+                            Pekerjaan: user.job || '-',
+                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
+                            Email: user.email || '-',
+                            Alamat: user.address || '-',
+                            Role: user.role?.name || '-',
+                            Status: user.status || '-',
+                        }),
+                    };
+                case 'teacher':
+                    return {
+                        headers: ['Nama Lengkap', 'Username', 'NIP', 'Email', 'Nomor Telepon', 'Alamat', 'Posisi/Jabatan', 'Role', 'Status'],
+                        baseFilename: 'data-guru',
+                        getRow: (user: any) => ({
+                            'Nama Lengkap': user.full_name || '-',
+                            Username: user.username || '-',
+                            NIP: { v: user.nip || '-', t: 's' }, // Force as string
+                            Email: user.email || '-',
+                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
+                            Alamat: user.address || '-',
+                            'Posisi/Jabatan': user.position || '-',
+                            Role: user.role?.name || '-',
+                            Status: user.status || '-',
+                        }),
+                    };
+                case 'admin':
+                    return {
+                        headers: ['Nama Lengkap', 'Username', 'NIP', 'Email', 'Nomor Telepon', 'Alamat', 'Posisi/Jabatan', 'Role', 'Status'],
+                        baseFilename: 'data-admin',
+                        getRow: (user: any) => ({
+                            'Nama Lengkap': user.full_name || '-',
+                            Username: user.username || '-',
+                            NIP: { v: user.nip || '-', t: 's' }, // Force as string
+                            Email: user.email || '-',
+                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
+                            Alamat: user.address || '-',
+                            'Posisi/Jabatan': user.position || '-',
+                            Role: user.role?.name || '-',
+                            Status: user.status || '-',
+                        }),
+                    };
+                default:
+                    return {
+                        headers: ['Nama Lengkap', 'Username', 'Email', 'Nomor Telepon', 'Alamat', 'Role', 'Status'],
+                        baseFilename: 'data-user',
+                        getRow: (user: any) => ({
+                            'Nama Lengkap': user.full_name || '-',
+                            Username: user.username || '-',
+                            Email: user.email || '-',
+                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
+                            Alamat: user.address || '-',
+                            Role: user.role?.name || '-',
+                            Status: user.status || '-',
+                        }),
+                    };
+            }
+            
+        };
+
+        const config = getExportConfig(role.value);
+
+        const filename = `${timestamp}-${config.baseFilename}.xlsx`;
+
+        const worksheetData = selectedData.map((user) => config.getRow(user));
+        const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+
+        const colWidths = config.headers.map(() => ({ width: 20 }));
+        worksheet['!cols'] = colWidths;
+
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
+
+        XLSX.writeFile(workbook, filename);
 
         toast.success(`Berhasil mengekspor ${selectedData.length} data ${translateRoleName(role.name)}`, {
             description: 'File CSV telah didownload otomatis',
@@ -253,28 +320,24 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                     type="text"
                     placeholder="Cari pengguna..."
                     defaultValue={filters.search || ''}
-                    onChange={e => {
+                    onChange={(e) => {
                         setSelectedIds([]);
-                        router.get(route(`${routePrefix}.index`), { ...filters, search: e.target.value, show, status: statusFilter }, { preserveState: true });
+                        router.get(
+                            route(`${routePrefix}.index`),
+                            { ...filters, search: e.target.value, show, status: statusFilter },
+                            { preserveState: true },
+                        );
                     }}
-                    className="w-64 rounded border px-3 py-1 text-sm bg-white"
+                    className="w-64 rounded border bg-white px-3 py-1 text-sm"
                 />
                 {/* Show per page */}
-                <select
-                    value={show}
-                    onChange={handleShowChange}
-                    className="rounded border px-2 py-1 text-sm min-w-[100px] bg-white"
-                >
+                <select value={show} onChange={handleShowChange} className="min-w-[100px] rounded border bg-white px-2 py-1 text-sm">
                     <option value="10">Show 10 data</option>
                     <option value="20">Show 20 data</option>
                     <option value="all">Show All</option>
                 </select>
                 {/* Status Filter */}
-                <select
-                    value={statusFilter}
-                    onChange={handleStatusChange}
-                    className="rounded border px-2 py-1 text-sm min-w-[120px] bg-white"
-                >
+                <select value={statusFilter} onChange={handleStatusChange} className="min-w-[120px] rounded border bg-white px-2 py-1 text-sm">
                     <option value="">Semua Status</option>
                     <option value="active">Aktif</option>
                     <option value="inactive">Nonaktif</option>
@@ -283,30 +346,35 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                 <button
                     disabled={selectedIds.length === 0}
                     onClick={exportSelected}
-                    className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                        }`}
+                    className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
+                        selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                    }`}
                 >
                     Ekspor Data
                 </button>
-                <button
-                    onClick={() => setShowImportModal(true)}
-                    className="inline-flex items-center rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-indigo-700"
-                >
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth="2"
-                            d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 5v14"
-                        />
-                    </svg>
-                    Impor Data
-                </button>
+
+                {role.value !== 'admin' && (
+                    <button
+                        onClick={() => setShowImportModal(true)}
+                        className="inline-flex items-center rounded bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer hover:bg-indigo-700"
+                    >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5-5 5 5M12 5v14"
+                            />
+                        </svg>
+                        Impor Data
+                    </button>
+                )}
+
                 {/* Add Button stays at right */}
                 <div className="flex-1" />
                 <button
                     onClick={() => openForm(null)}
-                    className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700 ml-2"
+                    className="ml-2 rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                 >
                     Tambah {translateRoleName(role.name)}
                 </button>
