@@ -433,7 +433,7 @@ class UserController extends Controller
             'teacher' => 'guru'
         ];
 
-        $indonesianRole = $roleMapping[$role] ?? $role;
+        $indonesianRole = $roleMapping[$role] ?? 'user';
         $filename = "template-import-{$indonesianRole}.xlsx";
         $path = storage_path("app/templates/{$filename}");
 
