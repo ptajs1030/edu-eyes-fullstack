@@ -8,6 +8,7 @@ import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 import StudentFormModal from './form';
+import * as XLSX from 'xlsx';
 
 type Student = {
     id: number;
@@ -190,33 +191,113 @@ export default function StudentIndex() {
     };
 
     const exportSelected = () => {
-        if (selectedIds.length === 0) return;
+        if (selectedIds.length === 0) {
+            toast.error('Pilih data siswa yang akan diexport terlebih dahulu');
+            return;
+        }
 
         const selectedData = students.data.filter((a) => selectedIds.includes(a.id));
-        const headers = `Nama Siswa,Nama Orang Tua/Wali,Kelas,NIS,Tahun Masuk,Jenis Kelamin,Agama,Tanggal Lahir,Alamat,Status\n`;
-        const csv = selectedData
-            .map((a) => {
-                const addressOneLine = a.address ? `"${a.address.replace(/[\r\n\u2028\u2029\u0085]+/g, ' ').replace(/"/g, '""')}"` : '"-"';
-                const formattedDate = a.date_of_birth ? new Date(a.date_of_birth).toISOString().slice(0, 10) : '-';
-                const nis = a.nis ? a.nis : '-';
-                const classroom = a.classroom?.name ? a.classroom?.name : '-';
-                const religion = a.religion ? a.religion : '-';
-                return `${a.full_name},${a.parent?.full_name},${classroom},${nis},${a.entry_year},${a.gender},${religion},${formattedDate},${addressOneLine},${a.status}`;
-            })
-            .join('\n');
-        const blob = new Blob([headers, csv], { type: 'text/csv' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = 'students.csv';
-        link.click();
+        const timestamp = Date.now();
 
-        toast.success(`Berhasil mengekspor ${selectedIds.length} data siswa`, {
-            description: 'File CSV telah didownload otomatis',
+        // Prepare data untuk Excel sesuai urutan header yang diminta
+        const excelData = selectedData.map((student) => {
+            // Format tanggal lahir
+            const formattedDate = student.date_of_birth ? new Date(student.date_of_birth).toISOString().slice(0, 10) : '-';
+
+            // Mapping gender ke bahasa Indonesia
+            const genderMap = {
+                male: 'Laki-laki',
+                female: 'Perempuan',
+            };
+
+            // Mapping status ke bahasa Indonesia
+            const statusMap = {
+                active: 'Aktif',
+                inactive: 'Tidak Aktif',
+                graduated: 'Lulus',
+            };
+
+            return {
+                'Nama Lengkap': student.full_name || '-',
+                'Orang Tua/Wali': student.parent?.full_name || '-',
+                Kelas: student.classroom?.name || '-',
+                NIS: { v: student.nis || '-', t: 's' }, // Force sebagai string
+                'Tahun Masuk': student.entry_year || '-',
+                'Jenis Kelamin': genderMap[student.gender] || student.gender,
+                Agama: student.religion || '-',
+                'Tempat Lahir': student.birth_place || '-',
+                'Tanggal Lahir': formattedDate,
+                Alamat: student.address || '-',
+                Status: statusMap[student.status] || student.status,
+            };
         });
 
-        URL.revokeObjectURL(url);
+        // Create worksheet
+        const worksheet = XLSX.utils.json_to_sheet(excelData);
+
+        // Set column widths untuk tampilan yang lebih baik
+        const colWidths = [
+            { width: 25 }, // Nama Lengkap
+            { width: 25 }, // Orang Tua/Wali
+            { width: 15 }, // Kelas
+            { width: 15 }, // NIS
+            { width: 12 }, // Tahun Masuk
+            { width: 15 }, // Jenis Kelamin
+            { width: 15 }, // Agama
+            { width: 15 }, // Tempat Lahir
+            { width: 15 }, // Tanggal Lahir
+            { width: 30 }, // Alamat
+            { width: 12 }, // Status
+        ];
+        worksheet['!cols'] = colWidths;
+
+        // Create workbook
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Siswa');
+
+        // Filename dengan format epoch-data-siswa
+        const filename = `${timestamp}-data-siswa.xlsx`;
+
+        // Export to file
+        try {
+            XLSX.writeFile(workbook, filename);
+            toast.success(`Berhasil mengekspor ${selectedData.length} data siswa`, {
+                description: `File: ${filename}`,
+            });
+        } catch (error) {
+            console.error('Export error:', error);
+            toast.error('Gagal mengekspor data. Silakan coba lagi.');
+        }
     };
+
+    // const exportSelected = () => {
+    //     if (selectedIds.length === 0) return;
+
+    //     const selectedData = students.data.filter((a) => selectedIds.includes(a.id));
+    //     const headers = `Nama Siswa,Nama Orang Tua/Wali,Kelas,NIS,Tahun Masuk,Jenis Kelamin,Agama,Tanggal Lahir,Alamat,Status\n`;
+    //     const csv = selectedData
+    //         .map((a) => {
+    //             const addressOneLine = a.address ? `"${a.address.replace(/[\r\n\u2028\u2029\u0085]+/g, ' ').replace(/"/g, '""')}"` : '"-"';
+    //             const formattedDate = a.date_of_birth ? new Date(a.date_of_birth).toISOString().slice(0, 10) : '-';
+    //             const nis = a.nis ? a.nis : '-';
+    //             const classroom = a.classroom?.name ? a.classroom?.name : '-';
+    //             const religion = a.religion ? a.religion : '-';
+    //             return `${a.full_name},${a.parent?.full_name},${classroom},${nis},${a.entry_year},${a.gender},${religion},${formattedDate},${addressOneLine},${a.status}`;
+    //         })
+    //         .join('\n');
+    //     const blob = new Blob([headers, csv], { type: 'text/csv' });
+    //     const url = URL.createObjectURL(blob);
+    //     const link = document.createElement('a');
+    //     link.href = url;
+    //     link.download = 'students.csv';
+    //     link.click();
+
+    //     toast.success(`Berhasil mengekspor ${selectedIds.length} data siswa`, {
+    //         description: 'File CSV telah didownload otomatis',
+    //     });
+
+    //     URL.revokeObjectURL(url);
+    // };
 
     const handleSortChange = (column: string) => {
         const sortDirection = filters.direction === 'asc' ? 'desc' : 'asc';
@@ -327,7 +408,7 @@ export default function StudentIndex() {
                         {/* Show Data Filter */}
                         <select
                             value={filters.show || '10'}
-                            onChange={e => {
+                            onChange={(e) => {
                                 setSelectedIds([]); // Deselect all when show data filter changes
                                 router.get(route('students.index'), { ...filters, show: e.target.value }, { preserveState: true });
                             }}
@@ -340,15 +421,17 @@ export default function StudentIndex() {
                         {/* Status Filter */}
                         <select
                             value={filters.status || ''}
-                            onChange={e => {
+                            onChange={(e) => {
                                 setSelectedIds([]); // Unselect all checkboxes when filter changes
                                 router.get(route('students.index'), { ...filters, status: e.target.value }, { preserveState: true });
                             }}
                             className="rounded border px-2 py-1 text-sm"
                         >
                             <option value="">Semua Status</option>
-                            {statuses.map(s => (
-                                <option key={s.value} value={s.value}>{s.label}</option>
+                            {statuses.map((s) => (
+                                <option key={s.value} value={s.value}>
+                                    {s.label}
+                                </option>
                             ))}
                         </select>
                         {/* Classroom Filter Dropdown */}
@@ -390,20 +473,22 @@ export default function StudentIndex() {
                         <button
                             disabled={selectedIds.length === 0 || students.data.length === 0}
                             onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white transition ${selectedIds.length === 0 || students.data.length === 0
-                                ? 'cursor-not-allowed opacity-50'
-                                : 'hover:bg-indigo-700 hover:cursor-pointer'
-                                }`}
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white transition ${
+                                selectedIds.length === 0 || students.data.length === 0
+                                    ? 'cursor-not-allowed opacity-50'
+                                    : 'hover:cursor-pointer hover:bg-indigo-700'
+                            }`}
                         >
                             Ekspor Data
                         </button>
                         <button
                             disabled={selectedIds.length === 0 || students.data.length === 0}
                             onClick={handleBulkPrint}
-                            className={`rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white transition ${selectedIds.length === 0 || students.data.length === 0
-                                ? 'cursor-not-allowed opacity-50'
-                                : 'hover:bg-indigo-700 hover:cursor-pointer'
-                                }`}
+                            className={`rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white transition ${
+                                selectedIds.length === 0 || students.data.length === 0
+                                    ? 'cursor-not-allowed opacity-50'
+                                    : 'hover:cursor-pointer hover:bg-indigo-700'
+                            }`}
                         >
                             Print Kartu
                         </button>
@@ -497,8 +582,9 @@ export default function StudentIndex() {
                                 </button>
                                 <Link
                                     href={route('students.attendance', student.id)}
-                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${student.classroom?.name ? 'bg-sky-500 hover:cursor-pointer hover:bg-sky-600' : 'cursor-not-allowed bg-sky-300'
-                                        }`}
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
+                                        student.classroom?.name ? 'bg-sky-500 hover:cursor-pointer hover:bg-sky-600' : 'cursor-not-allowed bg-sky-300'
+                                    }`}
                                     onClick={(e) => {
                                         if (!student.classroom?.name) {
                                             e.preventDefault();

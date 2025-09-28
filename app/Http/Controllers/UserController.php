@@ -198,7 +198,7 @@ class UserController extends Controller
 
         // Show data (pagination size)
         $perPage = 10;
-        if ($request->has('show') && in_array($request->show, ['10','20','all'])) {
+        if ($request->has('show') && in_array($request->show, ['10', '20', 'all'])) {
             $perPage = $request->show === 'all' ? $query->count() : (int)$request->show;
         }
 
@@ -428,7 +428,13 @@ class UserController extends Controller
             return response()->json(['message' => 'Role tidak valid'], 422);
         }
 
-        $filename = "template-import-{$role}.xlsx";
+        $roleMapping = [
+            'parent' => 'orang-tua',
+            'teacher' => 'guru'
+        ];
+
+        $indonesianRole = $roleMapping[$role] ?? $role;
+        $filename = "template-import-{$indonesianRole}.xlsx";
         $path = storage_path("app/templates/{$filename}");
 
         if (!file_exists($path)) {
