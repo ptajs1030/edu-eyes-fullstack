@@ -123,7 +123,9 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
-            const fileName = res.headers.get('X-File-Name') || `template-import-${role.value}.xlsx`;
+            console.log({ role });
+
+            const fileName = res.headers.get('X-File-Name') || `template-import-user.xlsx`;
             a.href = url;
             a.download = fileName;
             document.body.appendChild(a);
