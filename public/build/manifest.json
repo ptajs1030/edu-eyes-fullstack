@@ -155,6 +155,17 @@
       "resources/js/app.tsx"
     ]
   },
+  "_rich-text-editor-BhzXCweS.js": {
+    "file": "assets/rich-text-editor-BhzXCweS.js",
+    "name": "rich-text-editor",
+    "imports": [
+      "resources/js/app.tsx",
+      "_index-CeayDw-m.js"
+    ],
+    "css": [
+      "assets/rich-text-editor-GgiLjRqO.css"
+    ]
+  },
   "_rich-text-editor-GgiLjRqO.css": {
     "file": "assets/rich-text-editor-GgiLjRqO.css",
     "src": "_rich-text-editor-GgiLjRqO.css"
@@ -1344,9 +1355,6 @@
       "_constants-BwyCeSHr.js",
       "_parseISO-C9VBp7jN.js",
       "_id-PlgGTalb.js"
-    ],
-    "css": [
-      "assets/app-Cz-XELVB.css"
     ]
   },
   "resources/js/pages/students/subjectAttendanceTable.tsx": {
@@ -1363,9 +1371,6 @@
       "_createLucideIcon-iLjx2ksk.js",
       "_parseISO-C9VBp7jN.js",
       "_id-PlgGTalb.js"
-    ],
-    "css": [
-      "assets/app-Cz-XELVB.css"
     ]
   },
   "resources/js/pages/subjects/form.tsx": {
@@ -1535,9 +1540,6 @@
       "_index-CYx-xawi.js",
       "_app-logo-icon-BUFDshL2.js",
       "resources/js/pages/users/base-form.tsx"
-    ],
-    "css": [
-      "assets/app-Cz-XELVB.css"
     ]
   },
   "resources/js/pages/users/base-form.tsx": {
@@ -1606,9 +1608,6 @@
       "_index-CYx-xawi.js",
       "_app-logo-icon-BUFDshL2.js",
       "resources/js/pages/users/base-form.tsx"
-    ],
-    "css": [
-      "assets/app-Cz-XELVB.css"
     ]
   },
   "resources/js/pages/users/teacher/index.tsx": {
@@ -1634,9 +1633,6 @@
       "_index-CYx-xawi.js",
       "_app-logo-icon-BUFDshL2.js",
       "resources/js/pages/users/base-form.tsx"
-    ],
-    "css": [
-      "assets/app-Cz-XELVB.css"
     ]
   },
   "resources/js/pages/welcome.tsx": {
@@ -1646,9 +1642,6 @@
     "isDynamicEntry": true,
     "imports": [
       "resources/js/app.tsx"
-    ],
-    "css": [
-      "assets/app-Cz-XELVB.css"
     ]
   }
 }
