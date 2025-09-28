@@ -124,6 +124,7 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             console.log({ checkRole: res.headers.get('X-Template-Role') });
+            console.log({ checkIndonesiaRole: res.headers.get('X-Template-Indonesia-Role') });
             console.log({ checkFileName: res.headers.get('X-File-Name') });
 
             const fileName = res.headers.get('X-File-Name') || `template-import-${role.value}.xlsx`;

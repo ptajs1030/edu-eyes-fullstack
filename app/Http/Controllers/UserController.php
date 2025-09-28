@@ -443,8 +443,9 @@ class UserController extends Controller
         return response()->download($path, $filename, [
             'Content-Type'              => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'X-Template-Role'           => $role,
+            'X-Template-Indonesia-Role' => $roleMapping[$role],
             'X-File-Name'               => $filename,
-            'Access-Control-Expose-Headers' => 'X-Template-Role, X-File-Name',
+            'Access-Control-Expose-Headers' => 'X-Template-Role, X-Template-Indonesia-Role, X-File-Name',
         ]);
     }
 }
