@@ -10,19 +10,30 @@ interface ImportStudentModalProps {
 }
 
 const expectedStudentHeader = [
-  'nama_lengkap',
-  'nama_orang_tua',
-  'kelas',
-  'nis',
-  'tahun_masuk',
-  'jenis_kelamin',
-  'status',
-  'agama',
-  'tempat_lahir',
-  'tanggal_lahir',
-  'alamat',
+    'Nama Lengkap',
+    'Orang Tua/Wali',
+    'Kelas',
+    'NIS', 
+    'Tahun Masuk',
+    'Jenis Kelamin',
+    'Agama',
+    'Tempat Lahir',
+    'Tanggal Lahir',
+    'Alamat'
 ];
 
+const prettyStudentHeader = [
+    'Nama Lengkap*',
+    'Orang Tua/Wali*',
+    'Kelas',
+    'NIS',
+    'Tahun Masuk*',
+    'Jenis Kelamin*',
+    'Agama',
+    'Tempat Lahir',
+    'Tanggal Lahir',
+    'Alamat'
+];
 
 const normalizeHeader = (s: string) =>
     s.replace(/\*/g, '').trim().toLowerCase().replace(/\s+/g, '_');
@@ -86,13 +97,23 @@ export default function ImportStudentModal({ isOpen, onClose }: ImportStudentMod
                 );
                 const expected = expectedStudentHeader.map(normalizeHeader);
 
-                const match =
-                    headerRow.length === expected.length &&
-                    expected.every((col, idx) => col === headerRow[idx]);
+                // Validasi: header harus mengandung semua field yang diharapkan
+                const missingHeaders = expected.filter(expectedHeader => 
+                    !headerRow.includes(expectedHeader)
+                );
+                
+                const extraHeaders = headerRow.filter(header => 
+                    !expected.includes(header) && header !== ''
+                );
 
-                if (!match) {
-                    setErrorMsg('Header file tidak sesuai template.');
+                if (missingHeaders.length > 0) {
+                    setErrorMsg(`Header tidak lengkap. Field yang kurang: ${missingHeaders.join(', ')}. Gunakan template yang disediakan.`);
                     setFile(null);
+                } else if (extraHeaders.length > 0) {
+                    // Warning untuk header tambahan, tapi tetap lanjut
+                    console.warn('Header tambahan ditemukan:', extraHeaders);
+                    setFile(f);
+                    toast.success('File valid. Header tambahan akan diabaikan.');
                 } else {
                     setFile(f);
                     toast.success('File valid. Siap diimpor.');
@@ -158,7 +179,7 @@ export default function ImportStudentModal({ isOpen, onClose }: ImportStudentMod
     };
 
     return (
-        <FormModal
+         <FormModal
             isOpen={isOpen}
             onClose={handleClose}
             title="Import Data Siswa"
@@ -228,7 +249,7 @@ export default function ImportStudentModal({ isOpen, onClose }: ImportStudentMod
                         Template
                     </button>
                     <div className="text-xs text-gray-500">
-                        Header: {expectedStudentHeader.join(', ')}
+                        Header: {prettyStudentHeader.join(', ')}
                     </div>
                 </div>
             </div>
