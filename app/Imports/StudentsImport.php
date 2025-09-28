@@ -177,6 +177,7 @@ class StudentsImport implements ToCollection, WithHeadingRow
                 $parentName = $validated['parent_name'];
                 $entryYear = $validated['entry_year'];
                 $gender = $validated['gender'];
+                $nis = $this->getOptionalField($row, ['nis', 'NIS']);
 
                 // Cari Parent
                 $parent = $this->findParent($parentName);
@@ -196,13 +197,17 @@ class StudentsImport implements ToCollection, WithHeadingRow
                     }
                 }
 
-                // Cek Duplikat Siswa
-                $existingStudent = Student::where('full_name', $fullName)
-                    ->where('entry_year', $entryYear)
-                    ->first();
-
-                if ($existingStudent) {
-                    throw new \Exception("Baris {$rowNumber}: Siswa '{$fullName}' dengan tahun masuk {$entryYear} sudah ada");
+                // Cek Duplikat Siswa by NIS
+                $trimmedNis = null;
+                if($nis){
+                    $trimmedNis = trim($nis);
+                    if($trimmedNis){
+                        $existingStudent = Student::where('nis', $trimmedNis)->first();
+        
+                        if ($existingStudent) {
+                            throw new \Exception("Baris {$rowNumber}: Siswa dengan NIS '{$trimmedNis}' sudah ada");
+                        }
+                    }
                 }
 
                 // Ambil data optional lainnya
@@ -213,7 +218,7 @@ class StudentsImport implements ToCollection, WithHeadingRow
                     'entry_year'    => $entryYear,
                     'gender'        => $gender,
                     'status'        => 'active',
-                    'nis'           => $this->getOptionalField($row, ['nis', 'NIS']),
+                    'nis'           => $trimmedNis,
                     'religion'      => $this->getOptionalField($row, ['agama', 'Agama']),
                     'birth_place'   => $this->getOptionalField($row, ['tempat_lahir', 'Tempat Lahir']),
                     'date_of_birth' => $this->getDateField($row, ['tanggal_lahir', 'Tanggal Lahir']),
