@@ -103,6 +103,11 @@ class ParentController extends BaseApiController
         ]);
     }
 
+    public function getNextEvent(Request $request){
+        $student = $request->attributes->get('current_student');
+        return $this->success($this->service->getNextEvent($student));
+    }
+
     public function eventAttendanceHistory(Request $request){
         $student = $request->attributes->get('current_student');
         $date = $request->query('date');
