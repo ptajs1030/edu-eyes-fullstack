@@ -178,8 +178,8 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                 selected_students: selectedStudentIds,
             },
             {
-                onSuccess: () => {},
-                onError: () => {},
+                onSuccess: () => { },
+                onError: () => { },
             },
         );
     };
@@ -289,7 +289,7 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
 
                             <div className="md:col-span-2">
                                 <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                                    Deskripsi
+                                    Deskripsi*
                                 </label>
                                 <textarea
                                     id="description"

@@ -88,9 +88,9 @@ class ClassroomScheduleController extends Controller
                 ->map(fn($s) => [
                     'id' => $s->id,
                     'subject_id' => $s->subject_id,
-                    'subject_name' => $s->subject->name,
+                    'subject_name' => $s->subject?->name,
                     'teacher_id' => $s->teacher_id,
-                    'teacher_name' => $s->teacher->full_name,
+                    'teacher_name' => $s->teacher?->full_name,
                     'start_hour' => $this->formatTime($s->start_hour),
                     'end_hour' => $this->formatTime($s->end_hour),
                 ])
@@ -190,7 +190,7 @@ class ClassroomScheduleController extends Controller
     protected function getSubjectScheduleValidationRules(): array
     {
         return [
-            'schedules' => 'required|array',
+            'schedules' => 'array',
             'schedules.*.id' => 'nullable|exists:class_subject_schedules,id',
             'schedules.*.day' => 'required|integer|min:1|max:7',
             'schedules.*.subject_id' => 'required|exists:subjects,id',
