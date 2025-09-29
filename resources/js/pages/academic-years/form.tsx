@@ -9,6 +9,7 @@ interface AcademicYear {
     start_year: number;
     attendance_mode: string;
     note?: string;
+    status?: 'active' | 'complete';
 }
 
 interface Props {
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export default function AcademicYearFormModal({ isOpen, closeModal, academicYear, attendanceModes }: Props) {
+    const isLocked = academicYear?.status === 'complete'; // <— true jika harus di-disable
     const [formData, setFormData] = useState<AcademicYear>({
         start_year: new Date().getFullYear(),
         attendance_mode: '',
@@ -61,6 +63,10 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        if (isLocked) {
+            toast.error('Tahun ajaran sudah complete — tidak bisa diedit.');
+            return;
+        }
 
         if (!academicYear) {
             setShowConfirm(true);
@@ -80,6 +86,7 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                 {
                     onSuccess: () => {
                         closeModal();
+                        toast.success('Tahun ajaran berhasil diperbarui.');
                         router.reload();
                     },
                     onError: (errors) => {
@@ -137,7 +144,8 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                         name="attendance_mode"
                         value={formData.attendance_mode}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                        disabled={isLocked}
+                        className={`mt-1 block w-full rounded-md border p-2 shadow-sm ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                         required
                     >
                         <option value="">-- Select Mode --</option>
@@ -156,7 +164,8 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                         name="note"
                         value={formData.note}
                         onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                        disabled={isLocked}
+                        className={`mt-1 block w-full rounded-md border p-2 shadow-sm ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                     />
                 </div>
                 <div className="flex justify-end">
@@ -169,7 +178,8 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                     </button>
                     <button
                         type="submit"
-                        className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
+                        disabled={isLocked}
+                        className={`rounded-md px-4 py-2 text-sm font-medium text-white shadow-sm ${isLocked ? 'bg-gray-400 cursor-not-allowed' : 'hover:cursor-pointer bg-blue-600 hover:bg-blue-700'}`}
                     >
                         {academicYear ? 'Ubah' : 'Simpan'}
                     </button>
