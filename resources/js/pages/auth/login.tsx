@@ -1,6 +1,6 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
-import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler, useEffect } from 'react';
+import { Eye, EyeOff, LoaderCircle } from 'lucide-react';
+import { FormEventHandler, useEffect, useState } from 'react';
 
 import InputError from '@/components/input-error';
 import TextLink from '@/components/text-link';
@@ -24,7 +24,7 @@ interface LoginProps {
 
 export default function Login({ status, canResetPassword }: LoginProps) {
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
-    
+
     useEffect(() => {
         if (flash?.error) {
             toast.error(flash.error);
@@ -37,10 +37,16 @@ export default function Login({ status, canResetPassword }: LoginProps) {
         remember: false,
     });
 
+    // 👇 state untuk toggle show/hide
+    const [showPassword, setShowPassword] = useState(false);
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
         post(route('login'), {
-            onFinish: () => reset('password'),
+            onFinish: () => {
+                reset('password');
+                setShowPassword(false); // kembalikan ke hidden setelah submit
+            }
         });
     };
 
@@ -72,20 +78,36 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                             <Label htmlFor="password">Kata Sandi</Label>
                             {/* {canResetPassword && (
                                 <TextLink href={route('password.request')} className="ml-auto text-sm" tabIndex={5}>
-                                    Forgot password?
+                                Lupa kata sandi?
                                 </TextLink>
                             )} */}
                         </div>
-                        <Input
-                            id="password"
-                            type="password"
-                            required
-                            tabIndex={2}
-                            autoComplete="current-password"
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            placeholder="Kata Sandi"
-                        />
+
+                        {/* 🔒 Input password + tombol eye */}
+                        <div className="relative">
+                            <Input
+                                id="password"
+                                type={showPassword ? 'text' : 'password'}
+                                required
+                                tabIndex={2}
+                                autoComplete="current-password"
+                                value={data.password}
+                                onChange={(e) => setData('password', e.target.value)}
+                                placeholder="Kata Sandi"
+                                className="pr-10" // beri ruang untuk ikon di kanan
+                            />
+
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword((v) => !v)}
+                                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-500 hover:text-gray-700"
+                                aria-label={showPassword ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'}
+                                aria-pressed={showPassword}
+                            >
+                                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </button>
+                        </div>
+
                         <InputError message={errors.password} />
                     </div>
 
