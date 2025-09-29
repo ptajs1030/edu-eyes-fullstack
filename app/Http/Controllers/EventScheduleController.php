@@ -106,7 +106,7 @@ class EventScheduleController extends Controller
             'event_pics' => $event->eventPics->map(function ($pic) {
                 return [
                     'user' => [
-                        'full_name' => $pic->user->full_name
+                        'full_name' => $pic->user?->full_name ?? null, // safe fallback
                     ]
                 ];
             }),
@@ -172,8 +172,7 @@ class EventScheduleController extends Controller
                 $attendanceData
             );
 
-            return redirect()->back()
-                ->with('success', 'Kehadiran berhasil diperbarui');
+            return redirect()->back();
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->validator)

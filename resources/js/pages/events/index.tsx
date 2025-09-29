@@ -83,7 +83,7 @@ export default function EventIndex() {
         const headers = `Name,PIC,Date,Time\n`;
         const csv = selectedData
             .map((a) => {
-                const picNames = a.event_pics.map((pic) => pic.user.full_name).join(', ');
+                const picNames = a.event_pics.map((pic) => pic.user?.full_name).join(', ');
                 const dateRange = `${a.start_date} - ${a.end_date}`;
                 const timeRange = `${a.start_hour} - ${a.end_hour}`;
                 return `${a.name},"${picNames}",${dateRange},${timeRange}`;
@@ -173,7 +173,12 @@ export default function EventIndex() {
                                 <input type="checkbox" checked={selectedIds.includes(event.id)} onChange={() => toggleSelect(event.id)} />
                             </td>
                             <td className="p-3 text-sm">{event.name}</td>
-                            <td className="p-3 text-sm">{event.event_pics.map((pic) => pic.user.full_name).join(', ')}</td>
+                            <td className="p-3 text-sm">
+                                {event.event_pics
+                                    .map((pic) => pic.user?.full_name)
+                                    .filter(Boolean)
+                                    .join(', ') || '-'}
+                            </td>
                             <td className="p-3 text-sm">
                                 {format(parseISO(event.start_date), 'dd MMM yyyy', { locale: id })} -{' '}
                                 {format(parseISO(event.end_date), 'dd MMM yyyy', { locale: id })}
@@ -212,11 +217,10 @@ export default function EventIndex() {
                                 {/* Delete Button */}
                                 <button
                                     onClick={() => isEventEditable(event) && setEventToDelete(event)}
-                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
-                                        isEventEditable(event)
-                                            ? 'bg-red-500 hover:cursor-pointer hover:bg-red-600'
-                                            : 'cursor-not-allowed bg-red-300 opacity-60'
-                                    }`}
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${isEventEditable(event)
+                                        ? 'bg-red-500 hover:cursor-pointer hover:bg-red-600'
+                                        : 'cursor-not-allowed bg-red-300 opacity-60'
+                                        }`}
                                     disabled={!isEventEditable(event)}
                                     title={!isEventEditable(event) ? 'Event tidak dapat dihapus' : ''}
                                 >

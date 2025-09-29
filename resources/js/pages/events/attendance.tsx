@@ -194,6 +194,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
         router.patch(route('events.attendance.update', event.id), formData, {
             preserveScroll: true,
             onSuccess: () => {
+                toast.success('Kehadiran berhasil diperbarui');
                 setIsEditModalOpen(false);
                 setSelectedAttendance(null);
             },
