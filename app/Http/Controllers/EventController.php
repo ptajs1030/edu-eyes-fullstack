@@ -161,15 +161,19 @@ class EventController extends Controller
                 'end_date' => $event->end_date,
                 'start_hour' => $this->formatTimeForDisplay($event->start_hour),
                 'end_hour' => $this->formatTimeForDisplay($event->end_hour),
-                'pics' => $event->eventPics->map(function ($pic) {
-                    return [
-                        'id' => $pic->id,
-                        'user' => [
-                            'id' => $pic->user->id,
-                            'full_name' => $pic->user->full_name
-                        ]
-                    ];
-                })
+                'pics' => $event->eventPics
+                    ->filter(fn ($pic) => $pic->user) // hanya ambil yang ada user
+                    ->map(function ($pic) {
+                        return [
+                            'id' => $pic->id,
+                            'user' => [
+                                'id' => $pic->user->id,
+                                'full_name' => $pic->user->full_name
+                            ]
+                        ];
+                    })
+                    ->values()
+                    ->toArray(),
             ],
             'teachers' => $teachers,
             'classrooms' => $classrooms,
