@@ -5,6 +5,8 @@ namespace App\Services;
 use App\DTOs\ChangePasswordData;
 use App\Exceptions\SilentHttpException;
 use App\Models\AcademicYear;
+use App\Models\Event;
+use Carbon\Carbon;
 
 class TeacherService
 {
@@ -31,6 +33,24 @@ class TeacherService
 
         return [
             'attendance_mode'=>$academicYear->attendance_mode
+        ];
+    }
+
+        public function getNextEvent()
+    {
+        $today = Carbon::now()->format('Y-m-d');
+
+        $nextEvent = Event::whereDate('start_date', '>=', $today)
+            ->orderBy('start_date', 'asc')
+            ->first();
+
+        $prevEvent = Event::whereDate('start_date', '<', $today)
+            ->orderBy('start_date', 'desc')
+            ->first();
+
+        return [
+            'next_event' => $nextEvent ,
+            'previous_event' => $prevEvent 
         ];
     }
 }
