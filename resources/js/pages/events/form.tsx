@@ -43,11 +43,11 @@ interface Props {
 
 const breadcrumbs = (isEdit: boolean): BreadcrumbItem[] => [
     {
-        title: 'Events',
+        title: 'Kegiatan',
         href: '/events',
     },
     {
-        title: isEdit ? 'Edit Event' : 'Buat Event Baru',
+        title: isEdit ? 'Edit Kegiatan' : 'Buat Kegiatan Baru',
     },
 ];
 
@@ -189,18 +189,18 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
 
     return (
         <AppLayout breadcrumbs={breadcrumbs(!!event?.id)}>
-            <Head title={event?.id ? 'Edit Event' : 'Buat Event Baru'} />
+            <Head title={event?.id ? 'Edit Kegiatan' : 'Buat Kegiatan Baru'} />
             <Toaster position="top-right" richColors />
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
-                <h1 className="text-2xl font-bold">{event?.id ? 'Edit Event' : 'Buat Event Baru'}</h1>
+                <h1 className="text-2xl font-bold">{event?.id ? 'Edit Kegiatan' : 'Buat Kegiatan Baru'}</h1>
 
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
                     <div className="rounded-lg border p-4">
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div>
                                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                    Nama Event*
+                                    Nama Kegiatan*
                                 </label>
                                 <input
                                     id="name"

@@ -228,9 +228,8 @@ export default function PaymentIndex() {
                                 <button
                                     onClick={() => setPaymentToNotify(payment)}
                                     disabled={isPaymentExpired(payment)}
-                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
-                                        isPaymentExpired(payment) ? 'cursor-not-allowed bg-sky-300' : 'bg-sky-500 hover:cursor-pointer'
-                                    }`}
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${isPaymentExpired(payment) ? 'cursor-not-allowed bg-sky-300' : 'bg-sky-500 hover:cursor-pointer'
+                                        }`}
                                     title={isPaymentExpired(payment) ? 'Tagihan sudah melewati deadline' : 'Kirim notifikasi'}
                                 >
                                     Kirim Notif
@@ -246,7 +245,7 @@ export default function PaymentIndex() {
                             </td>
                         </tr>
                     )}
-                    emptyMessage="Tidak ada event yang ditemukan"
+                    emptyMessage="Tidak ada tagihan yang ditemukan"
                 />
 
                 <Pagination links={payments.links} />
@@ -255,7 +254,7 @@ export default function PaymentIndex() {
                     isOpen={!!paymentToDelete}
                     onClose={() => setPaymentToDelete(null)}
                     title="Konfirmasi Hapus"
-                    message={`Apakah Anda yakin ingin menghapus event "${paymentToDelete?.title}"?`}
+                    message={`Apakah Anda yakin ingin menghapus tagihan "${paymentToDelete?.title}"?`}
                     buttons={[
                         {
                             label: 'Batal',

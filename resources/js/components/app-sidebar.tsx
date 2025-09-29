@@ -60,7 +60,7 @@ const mainNavItems: NavItem[] = [
         icon: BookText,
     },
     {
-        title: 'Kegiatan Kustom',
+        title: 'Kegiatan',
         href: '/events',
         icon: LandPlot,
     },
