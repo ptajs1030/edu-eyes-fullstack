@@ -64,6 +64,8 @@ Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(functio
         Route::get('/classrooms/{id?}', 'getClassrooms');
         Route::get('/subjects/{id?}', 'getSubjects');
         Route::get('/event/{id?}', 'getEvent');
+        Route::get('/next-event', 'getNextEvent');
+        Route::get('/event-schedule', 'getEventSchedule');
         Route::get('/attendance-mode', 'getAttendanceMode');
     });
 
@@ -105,6 +107,7 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
         Route::get('/subject-schedule', 'getSubjectSchedule');
         Route::get('/event-date/{date}', 'getEventDate');
         Route::get('/event-schedule', 'getEventSchedule');
+        Route::get('/next-event', 'getNextEvent');
         Route::get('/get-academic-year', 'getAcademicYear');
         Route::get('/payment', 'getPayment');
         Route::get('/unpaid-payment', 'getUnpaidPayment');
