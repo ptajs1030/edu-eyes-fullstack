@@ -293,18 +293,17 @@ class ParentService
             throw new SilentHttpException(404, 'Kegiatan tidak ditemukan');
         }
         
-      $schedulesWithRelations = [];
-        foreach ($schedules as $schedule) {
-            $schedulesWithRelations[] = [
+        $schedulesWithRelations = $schedules->map(function ($schedule) {
+            return [
                 'id' => $schedule->event->id,
                 'name' => $schedule->event->name,
                 'description' => $schedule->event->description,
                 'start_date' => $schedule->event->start_date,
                 'end_date' => $schedule->event->end_date,
-                'start_time' => $schedule->event->Start_hour,
+                'start_time' => $schedule->event->start_hour,
                 'end_time' => $schedule->event->end_hour,
             ];
-        }
+        })->toArray();
         
         return  [
             'number_of_schedules' => $schedules->total(),
@@ -314,6 +313,31 @@ class ParentService
             'attendances' => $schedulesWithRelations,
         ];
         
+    }
+
+
+    public function getNextEvent($student)
+    {
+        $today = Carbon::now()->format('Y-m-d');
+
+        $nextEvent = Event::whereHas('participants', function($q) use ($student) {
+                $q->where('student_id', $student->id);
+            })
+            ->whereDate('start_date', '>=', $today)
+            ->orderBy('start_date', 'asc')
+            ->first();
+
+        $prevEvent = Event::whereHas('participants', function($q) use ($student) {
+                $q->where('student_id', $student->id);
+            })
+            ->whereDate('start_date', '<', $today)
+            ->orderBy('start_date', 'desc')
+            ->first();
+
+        return [
+            'next_event' => $nextEvent ,
+            'previous_event' => $prevEvent 
+        ];
     }
 
     public function eventAttendanceHistory ($date, $student){
