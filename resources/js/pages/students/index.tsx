@@ -219,12 +219,12 @@ export default function StudentIndex() {
 
             return {
                 'Nama Lengkap': student.full_name || '-',
+                NIS: { v: student.nis || '-', t: 's' }, // Force sebagai string
                 'Orang Tua/Wali': student.parent?.full_name || '-',
                 Kelas: student.classroom?.name || '-',
-                NIS: { v: student.nis || '-', t: 's' }, // Force sebagai string
-                'Tahun Masuk': student.entry_year || '-',
                 'Jenis Kelamin': genderMap[student.gender] || student.gender,
                 Agama: student.religion || '-',
+                'Tahun Masuk': student.entry_year || '-',
                 'Tempat Lahir': student.birth_place || '-',
                 'Tanggal Lahir': formattedDate,
                 Alamat: student.address || '-',
@@ -473,22 +473,20 @@ export default function StudentIndex() {
                         <button
                             disabled={selectedIds.length === 0 || students.data.length === 0}
                             onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white transition ${
-                                selectedIds.length === 0 || students.data.length === 0
-                                    ? 'cursor-not-allowed opacity-50'
-                                    : 'hover:cursor-pointer hover:bg-indigo-700'
-                            }`}
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white transition ${selectedIds.length === 0 || students.data.length === 0
+                                ? 'cursor-not-allowed opacity-50'
+                                : 'hover:cursor-pointer hover:bg-indigo-700'
+                                }`}
                         >
                             Ekspor Data
                         </button>
                         <button
                             disabled={selectedIds.length === 0 || students.data.length === 0}
                             onClick={handleBulkPrint}
-                            className={`rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white transition ${
-                                selectedIds.length === 0 || students.data.length === 0
-                                    ? 'cursor-not-allowed opacity-50'
-                                    : 'hover:cursor-pointer hover:bg-indigo-700'
-                            }`}
+                            className={`rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white transition ${selectedIds.length === 0 || students.data.length === 0
+                                ? 'cursor-not-allowed opacity-50'
+                                : 'hover:cursor-pointer hover:bg-indigo-700'
+                                }`}
                         >
                             Print Kartu
                         </button>
@@ -582,9 +580,8 @@ export default function StudentIndex() {
                                 </button>
                                 <Link
                                     href={route('students.attendance', student.id)}
-                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
-                                        student.classroom?.name ? 'bg-sky-500 hover:cursor-pointer hover:bg-sky-600' : 'cursor-not-allowed bg-sky-300'
-                                    }`}
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${student.classroom?.name ? 'bg-sky-500 hover:cursor-pointer hover:bg-sky-600' : 'cursor-not-allowed bg-sky-300'
+                                        }`}
                                     onClick={(e) => {
                                         if (!student.classroom?.name) {
                                             e.preventDefault();

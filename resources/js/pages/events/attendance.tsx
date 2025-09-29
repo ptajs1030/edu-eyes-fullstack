@@ -117,7 +117,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                     escape(getStatusLabel(a.status)),
                     escape(a.clock_in_hour || '-'),
                     escape(a.clock_out_hour || '-'),
-                    escape(a.minutes_of_late !== null ? a.minutes_of_late : '-'),
+                    escape(a.minutes_of_late !== null ? `${a.minutes_of_late} Menit` : '-'),
                     escape(a.note || '-')
                 ].join(','));
             });
@@ -132,6 +132,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+        toast.success('Data berhasil diekspor ke CSV!');
     };
     // Handle select all
     const handleSelectAll = (checked: boolean) => {
@@ -420,7 +421,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.clock_in_hour || '-'}</td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.clock_out_hour || '-'}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-500">{attendance.minutes_of_late !== null ? attendance.minutes_of_late : '-'}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">{attendance.minutes_of_late !== null ? `${attendance.minutes_of_late} Menit` : '-'}</td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.note || '-'}</td>
                                         {canEditAttendance && (
                                             <td className="px-4 py-3 text-sm">

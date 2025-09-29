@@ -134,11 +134,16 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
 
         const timestamp = Date.now();
 
+        const statusMap = {
+            active: 'Aktif',
+            inactive: 'Tidak Aktif'
+        };
+
         const getExportConfig = (roleValue: string) => {
             switch (roleValue) {
                 case 'parent':
                     return {
-                        headers: ['Nama Lengkap', 'Username', 'Pekerjaan', 'Nomor Telepon', 'Email', 'Alamat', 'Role', 'Status'],
+                        headers: ['Nama Lengkap', 'Username', 'Pekerjaan', 'Nomor Telepon', 'Email', 'Alamat', 'Status'],
                         baseFilename: 'data-orang-tua',
                         getRow: (user: any) => ({
                             'Nama Lengkap': user.full_name || '-',
@@ -147,58 +152,55 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                             'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
                             Email: user.email || '-',
                             Alamat: user.address || '-',
-                            Role: user.role?.name || '-',
-                            Status: user.status || '-',
+                            Status: statusMap[user.status] || (user.status || '-'),
                         }),
                     };
                 case 'teacher':
                     return {
-                        headers: ['Nama Lengkap', 'Username', 'NIP', 'Email', 'Nomor Telepon', 'Alamat', 'Posisi/Jabatan', 'Role', 'Status'],
+                        headers: ['Nama Lengkap', 'Username', 'NIP', 'Posisi/Jabatan', 'Nomor Telepon', 'Email', 'Alamat', 'Status'],
                         baseFilename: 'data-guru',
                         getRow: (user: any) => ({
                             'Nama Lengkap': user.full_name || '-',
                             Username: user.username || '-',
                             NIP: { v: user.nip || '-', t: 's' }, // Force as string
-                            Email: user.email || '-',
-                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
-                            Alamat: user.address || '-',
                             'Posisi/Jabatan': user.position || '-',
-                            Role: user.role?.name || '-',
-                            Status: user.status || '-',
+                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
+                            Email: user.email || '-',
+                            Alamat: user.address || '-',
+                            Status: statusMap[user.status] || (user.status || '-'),
                         }),
                     };
                 case 'admin':
                     return {
-                        headers: ['Nama Lengkap', 'Username', 'NIP', 'Email', 'Nomor Telepon', 'Alamat', 'Posisi/Jabatan', 'Role', 'Status'],
+                        headers: ['Nama Lengkap', 'Username', 'NIP', 'Posisi/Jabatan', 'Nomor Telepon', 'Email', 'Alamat', 'Status'],
                         baseFilename: 'data-admin',
                         getRow: (user: any) => ({
                             'Nama Lengkap': user.full_name || '-',
                             Username: user.username || '-',
                             NIP: { v: user.nip || '-', t: 's' }, // Force as string
-                            Email: user.email || '-',
-                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
-                            Alamat: user.address || '-',
                             'Posisi/Jabatan': user.position || '-',
-                            Role: user.role?.name || '-',
-                            Status: user.status || '-',
+                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
+                            Email: user.email || '-',
+                            Alamat: user.address || '-',
+                            Status: statusMap[user.status] || (user.status || '-'),
                         }),
                     };
                 default:
                     return {
-                        headers: ['Nama Lengkap', 'Username', 'Email', 'Nomor Telepon', 'Alamat', 'Role', 'Status'],
+                        headers: ['Nama Lengkap', 'Username', 'Nomor Telepon', 'Email', 'Alamat', 'Role', 'Status'],
                         baseFilename: 'data-user',
                         getRow: (user: any) => ({
                             'Nama Lengkap': user.full_name || '-',
                             Username: user.username || '-',
-                            Email: user.email || '-',
                             'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
+                            Email: user.email || '-',
                             Alamat: user.address || '-',
                             Role: user.role?.name || '-',
-                            Status: user.status || '-',
+                            Status: statusMap[user.status] || (user.status || '-'),
                         }),
                     };
             }
-            
+
         };
 
         const config = getExportConfig(role.value);
@@ -346,9 +348,8 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                 <button
                     disabled={selectedIds.length === 0}
                     onClick={exportSelected}
-                    className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                        selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                    }`}
+                    className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                        }`}
                 >
                     Ekspor Data
                 </button>

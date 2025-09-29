@@ -212,6 +212,7 @@ export default function ExamScoring({ exam, academicYears }: Props) {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+        toast.success('Data berhasil diekspor ke CSV!');
     };
 
     const getScoreColor = (score: number | null) => {
