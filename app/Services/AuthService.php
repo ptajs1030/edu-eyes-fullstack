@@ -82,7 +82,7 @@ class AuthService
     }
 
     public function helpCenter(){
-        $admin = Setting::where('key', 'school_admin_phone')->first();
+        $admin = Setting::where('key', 'admin_phone')->first();
         if (!$admin) {
             throw new SilentHttpException(404, 'Admin contact not found');
         }

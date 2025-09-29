@@ -383,23 +383,21 @@ return [
     }
 
     public function getClassroomByTeacher($search){
-        $query= ClassSubjectSchedule::where('teacher_id', auth()->user()->id)->where('day', Carbon::now()->dayOfWeek())->with('classroom');
+        $classrooms = ClassSubjectSchedule::query()
+    ->where('teacher_id', auth()->user()->id)
+    ->where('day', Carbon::now()->dayOfWeek())
+    ->leftJoin('classrooms', 'class_subject_schedules.class_id', '=', 'classrooms.id')
+    ->select('classrooms.id', 'classrooms.name')
+    ->when($search, function($q) use ($search) {
+        $q->where('classrooms.name', 'like', "%$search%");
+    })
+    ->get();
 
-        if ($search) {
-            $query->where('name', 'like', "%$search%");
-        }
-        $classrooms = $query->get();
-        if ($classrooms->isEmpty()) {
-            throw new SilentHttpException(404, 'Kelas tidak ditemukan');
-        }
-        $classroomsWithRelations = [];
-        foreach ($classrooms as $classroom) {
-            $classroomsWithRelations[] = [
-                'id' => $classroom->id,
-                'classroom' => $classroom->classroom->name,
-            ];
-        }
-        return $classroomsWithRelations;
+if ($classrooms->isEmpty()) {
+    throw new SilentHttpException(404, 'Kelas tidak ditemukan');
+}
+
+return $classrooms->toArray();
 
     }
 

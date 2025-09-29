@@ -68,6 +68,10 @@ class TeacherController extends BaseApiController
         );
     }
 
+    public function getNextEvent(){
+        return $this->success($this->service->getNextEvent());
+    }
+
     public function getAttendanceMode()
     {
         return $this->success($this->service->getAttendanceMode());
