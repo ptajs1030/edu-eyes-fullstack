@@ -446,6 +446,9 @@ class UserController extends Controller
             'X-Template-Indonesia-Role' => $roleMapping[$role],
             'X-File-Name'               => $filename,
             'Access-Control-Expose-Headers' => 'X-Template-Role, X-Template-Indonesia-Role, X-File-Name',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma'        => 'no-cache',
+            'Expires'       => '0',
         ]);
     }
 }

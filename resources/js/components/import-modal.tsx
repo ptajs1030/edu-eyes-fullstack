@@ -114,6 +114,8 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
         try {
             const res = await fetch(route('users.template', role.value), {
                 method: 'GET',
+                cache: 'no-store',
+                credentials: 'include'
             });
             if (!res.ok) {
                 const msg = (await res.json().catch(() => null))?.message || 'Gagal mengunduh template';
