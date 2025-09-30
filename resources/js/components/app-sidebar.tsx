@@ -1,7 +1,7 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BadgeInfo, BookText, GraduationCap, LayoutGrid, School, Settings2, TimerReset, TrendingUpDown, UserPen, UserSearch, PencilRuler, LandPlot, CalendarOff, CreditCard, BookOpen } from 'lucide-react';
@@ -103,31 +103,8 @@ const mainNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [];
 
-import { useState, useEffect } from 'react';
-
 export function AppSidebar() {
-    // Assume Sidebar provides a class or attribute when collapsed, or you can use a state/prop if available
-    // Here, we use a workaround with a CSS class on body or sidebar element
-    // If your Sidebar component provides a collapsed state/prop/context, use that instead
-    const [isCollapsed, setIsCollapsed] = useState(false);
-
-    useEffect(() => {
-        // Example: check for a class on body or sidebar element
-        // Replace this logic with your actual sidebar collapse detection
-        const observer = new MutationObserver(() => {
-            const sidebar = document.querySelector('.sidebar');
-            if (sidebar && sidebar.classList.contains('collapsed')) {
-                setIsCollapsed(true);
-            } else {
-                setIsCollapsed(false);
-            }
-        });
-        const sidebar = document.querySelector('.sidebar');
-        if (sidebar) {
-            observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
-        }
-        return () => observer.disconnect();
-    }, []);
+    const { state } = useSidebar();
 
     return (
         <Sidebar collapsible="icon" variant="inset">
@@ -136,7 +113,7 @@ export function AppSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
                             <Link href="/dashboard" prefetch>
-                                {!isCollapsed && <AppLogo />}
+                                {state === 'collapsed' ? null : <AppLogo />}
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
