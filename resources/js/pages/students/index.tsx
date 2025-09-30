@@ -256,7 +256,7 @@ export default function StudentIndex() {
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Siswa');
 
         // Filename dengan format epoch-data-siswa
-        const filename = `${timestamp}-data-siswa.xlsx`;
+        const filename = `data-siswa.xlsx`;
 
         // Export to file
         try {
