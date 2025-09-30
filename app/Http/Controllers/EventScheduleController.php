@@ -27,8 +27,12 @@ class EventScheduleController extends Controller
 
         // Ambil limit dari request, default 10, jika 'all' maka ambil semua
         $limit = $request->get('limit', 10);
-        $attendancesQuery  = EventAttendance::where('event_id', $event->id)
-            ->with(['student.classroom']);
+
+        $attendancesQuery  = EventAttendance::where('event_attendances.event_id', $event->id)
+            ->with(['student.classroom'])
+            ->join('students', 'event_attendances.student_id', '=', 'students.id')
+            ->leftJoin('classrooms', 'students.class_id', '=', 'classrooms.id')
+            ->select('event_attendances.*');
 
         if ($request->has('dates') && !empty($request->dates)) {
             $dates = $request->dates;
@@ -38,8 +42,7 @@ class EventScheduleController extends Controller
             $attendancesQuery->whereIn('submit_date', $dates);
         }
 
-        $attendancesQuery->orderBy('submit_date')
-            ->orderBy('student_id');
+        $attendancesQuery->orderBy('classrooms.name', 'asc');
 
         if ($limit === 'all') {
             $attendances = $attendancesQuery->get();
