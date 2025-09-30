@@ -113,7 +113,7 @@ export function AppSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
                             <Link href="/dashboard" prefetch>
-                                {state === 'collapsed' ? null : <AppLogo />}
+                                <AppLogo small={state === 'collapsed'} />
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
