@@ -134,6 +134,10 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
     }, [isOpen, role.id, role.value]);
 
     const handleChange = (field: keyof User, value: any) => {
+        // Remove all whitespace for password fields
+        if (field === 'password' || field === 'password_confirmation') {
+            value = value.replace(/\s+/g, '');
+        }
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
