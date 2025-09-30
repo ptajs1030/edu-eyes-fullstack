@@ -242,6 +242,7 @@ class UserController extends Controller
                 'username.unique' => 'Username sudah digunakan',
                 'phone.unique' => 'Nomor telepon sudah digunakan',
                 'email.unique' => 'Email sudah digunakan',
+                'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
             ]);
 
             $userData = $this->prepareUserData($validated, $role);
@@ -295,6 +296,7 @@ class UserController extends Controller
                 'username.unique' => 'Username sudah digunakan',
                 'phone.unique' => 'Nomor telepon sudah digunakan',
                 'email.unique' => 'Email sudah digunakan',
+                'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
             ]);
 
             $userData = $this->prepareUserData($validated, $role);

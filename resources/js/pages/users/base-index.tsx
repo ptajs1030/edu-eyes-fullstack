@@ -293,9 +293,9 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
     const getStatusLabel = (status: string): string => {
         switch (status) {
             case 'active':
-                return 'Active';
+                return 'Aktif';
             case 'inactive':
-                return 'Inactive';
+                return 'Tidak Aktif';
             default:
                 return status;
         }

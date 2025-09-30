@@ -376,15 +376,26 @@ export default function StudentIndex() {
     const getStatusLabel = (status: string): string => {
         switch (status) {
             case 'active':
-                return 'Active';
+                return 'Aktif';
             case 'inactive':
-                return 'Inactive';
+                return 'Tidak Aktif';
             case 'graduated':
-                return 'Graduated';
+                return 'Lulus';
             default:
                 return status;
         }
     };
+
+    const getGenderLabel = (gender: string): string => {
+        switch (gender) {
+            case 'male':
+                return 'Laki-Laki';
+            case 'female':
+                return 'Perempuan';
+            default:
+                return gender;
+        }
+    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -549,7 +560,7 @@ export default function StudentIndex() {
                             <td className="p-3 text-sm">{student.classroom?.name || '-'}</td>
                             <td className="p-3 text-sm">{student.nis || '-'}</td>
                             <td className="p-3 text-sm">{student.entry_year}</td>
-                            <td className="p-3 text-sm">{student.gender}</td>
+                            <td className="p-3 text-sm">{getGenderLabel(student.gender)}</td>
                             <td className="p-3 text-sm">{student.religion || '-'}</td>
                             <td className="p-3 text-sm">
                                 {(() => {

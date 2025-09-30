@@ -18,7 +18,7 @@ const sidebarNavItems: NavItem[] = [
         icon: null,
     },
     {
-        title: 'School',
+        title: 'Sekolah',
         href: '/settings/school',
         icon: null,
     }
