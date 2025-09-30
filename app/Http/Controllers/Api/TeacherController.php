@@ -45,7 +45,7 @@ class TeacherController extends BaseApiController
             return $this->resource(ClassroomResource::make(Classroom::findOrFail($id)));
         }
         return $this->resource(
-            ClassroomResource::collection(Classroom::get())
+            ClassroomResource::collection(Classroom::get()->sortBy('name'))
         );
     }
 

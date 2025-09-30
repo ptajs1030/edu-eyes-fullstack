@@ -640,6 +640,9 @@ return $classrooms->toArray();
             ->where('event_id', $data->getEvent())
             ->where('submit_date', Carbon::now()->format('Y-m-d'))->with('event')
             ->first();
+        if (!$attendance) {
+            throw new SilentHttpException(404, 'Absensi tidak ditemukan');
+        }
         $late_tolerance = (int)Setting::where('key', 'late_tolerance')->value        ('value');
         $start_hour=Carbon::parse($attendance->event->start_hour);
         $deadline = Carbon::parse($attendance->event->start_hour)->addMinutes($late_tolerance);
