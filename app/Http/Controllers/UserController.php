@@ -243,6 +243,7 @@ class UserController extends Controller
                 'phone.unique' => 'Nomor telepon sudah digunakan',
                 'email.unique' => 'Email sudah digunakan',
                 'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+                'password.min' => 'Kata sandi minmal 8 karakter',
             ]);
 
             $userData = $this->prepareUserData($validated, $role);
@@ -297,6 +298,7 @@ class UserController extends Controller
                 'phone.unique' => 'Nomor telepon sudah digunakan',
                 'email.unique' => 'Email sudah digunakan',
                 'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+                'password.min' => 'Kata sandi minmal 8 karakter',
             ]);
 
             $userData = $this->prepareUserData($validated, $role);
