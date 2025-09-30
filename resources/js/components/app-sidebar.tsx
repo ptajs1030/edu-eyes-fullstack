@@ -103,7 +103,32 @@ const mainNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [];
 
+import { useState, useEffect } from 'react';
+
 export function AppSidebar() {
+    // Assume Sidebar provides a class or attribute when collapsed, or you can use a state/prop if available
+    // Here, we use a workaround with a CSS class on body or sidebar element
+    // If your Sidebar component provides a collapsed state/prop/context, use that instead
+    const [isCollapsed, setIsCollapsed] = useState(false);
+
+    useEffect(() => {
+        // Example: check for a class on body or sidebar element
+        // Replace this logic with your actual sidebar collapse detection
+        const observer = new MutationObserver(() => {
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar && sidebar.classList.contains('collapsed')) {
+                setIsCollapsed(true);
+            } else {
+                setIsCollapsed(false);
+            }
+        });
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) {
+            observer.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+        }
+        return () => observer.disconnect();
+    }, []);
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -111,7 +136,7 @@ export function AppSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
                             <Link href="/dashboard" prefetch>
-                                <AppLogo />
+                                {!isCollapsed && <AppLogo />}
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
