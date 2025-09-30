@@ -374,7 +374,7 @@ export default function StudentIndex() {
     };
 
     const getStatusLabel = (status: string): string => {
-        switch (status) {
+        switch (status.toLowerCase()) {
             case 'active':
                 return 'Aktif';
             case 'inactive':
@@ -441,7 +441,7 @@ export default function StudentIndex() {
                             <option value="">Semua Status</option>
                             {statuses.map((s) => (
                                 <option key={s.value} value={s.value}>
-                                    {s.label}
+                                    {getStatusLabel(s.label)}
                                 </option>
                             ))}
                         </select>
@@ -575,7 +575,7 @@ export default function StudentIndex() {
                             <td className="p-3 text-sm">
                                 {student.address ? (student.address.length > 70 ? student.address.substring(0, 70) + '...' : student.address) : '-'}
                             </td>
-                            <td className="p-3 text-sm">
+                            <td className="p-3 text-sm min-w-[120px] w-[140px]">
                                 <span
                                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(student.status)}`}
                                 >

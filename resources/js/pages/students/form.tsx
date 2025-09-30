@@ -203,10 +203,23 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                 router.reload();
             },
             onError: (errors) => {
-                const errorMessage = Object.values(errors).join('\n');
-                toast.error(`Failed: ${errorMessage}`);
+                const errorMessage = Object.values(errors).join(', ');
+                toast.error(`Validasi Gagal: ${errorMessage}`);
             },
         });
+    };
+
+    const getStatusLabel = (status: string): string => {
+        switch (status.toLowerCase()) {
+            case 'active':
+                return 'Aktif';
+            case 'inactive':
+                return 'Tidak Aktif';
+            case 'graduated':
+                return 'Lulus';
+            default:
+                return status;
+        }
     };
 
     return (
@@ -398,12 +411,12 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                         >
                             {statuses.map((status) => (
                                 <option key={status.value} value={status.value}>
-                                    {status.label}
+                                    {getStatusLabel(status.label)}
                                 </option>
                             ))}
                         </select>
                     ) : (
-                        <input type="text" value="active" disabled className="w-full rounded border bg-gray-100 px-3 py-2" />
+                        <input type="text" value="Aktif" disabled className="w-full rounded border bg-gray-100 px-3 py-2" />
                     )}
                 </div>
             </div>

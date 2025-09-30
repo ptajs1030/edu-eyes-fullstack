@@ -73,7 +73,7 @@ export default function CustomDayOffFormModal({ isOpen, onClose, dayOff }: Props
                 // Tangkap error validasi dari Inertia
                 if (typeof errors === 'object') {
                     setErrors(errors);
-                    const errorMessages = Object.values(errors).join('\n');
+                    const errorMessages = Object.values(errors).join(', ');
                     toast.error(`Validasi gagal:\n${errorMessages}`);
                 } else {
                     toast.error('Terjadi kesalahan tidak diketahui');

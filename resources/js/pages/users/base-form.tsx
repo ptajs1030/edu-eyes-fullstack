@@ -203,13 +203,25 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 router.reload();
             },
             onError: (errors) => {
-                const errorMessage = Object.values(errors).join('\n');
-                toast.error(`Failed: ${errorMessage}`);
+                const errorMessage = Object.values(errors).join(', ');
+                toast.error(`Validasi gagal: ${errorMessage}`);
             },
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         });
+    };
+
+    const mappingStatus = (label: string): string => {
+        // lowered label
+        switch (label.toLowerCase()) {
+            case 'active':
+                return 'Aktif';
+            case 'inactive':
+                return 'Tidak Aktif';
+            default:
+                return label;
+        }
     };
 
     return (
@@ -412,7 +424,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 >
                     {statuses.map((status) => (
                         <option key={status.value} value={status.value}>
-                            {status.label}
+                            {mappingStatus(status.label)}
                         </option>
                     ))}
                 </select>

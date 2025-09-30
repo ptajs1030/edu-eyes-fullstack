@@ -342,7 +342,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                 <select value={statusFilter} onChange={handleStatusChange} className="min-w-[120px] rounded border bg-white px-2 py-1 text-sm">
                     <option value="">Semua Status</option>
                     <option value="active">Aktif</option>
-                    <option value="inactive">Nonaktif</option>
+                    <option value="inactive">Tidak Aktif</option>
                 </select>
                 {/* Export & Import Buttons - moved to left after status filter */}
                 <button
@@ -417,7 +417,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                             {role.value === 'parent' && <td className="p-3 text-sm">{user.job || '-'}</td>}
                             <td className="p-3 text-sm">{user.phone || '-'}</td>
                             <td className="p-3 text-sm">{user.email || '-'}</td>
-                            <td className="p-3 text-sm">
+                            <td className="p-3 text-sm min-w-[120px] w-[140px]">
                                 <span
                                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(user.status)}`}
                                 >

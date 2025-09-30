@@ -168,6 +168,21 @@ class StudentController extends Controller
                 'address' => 'required|string',
                 'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
                 'remove_profile_picture' => 'nullable|boolean',
+            ], [
+                'full_name.max' => 'Nama lengkap tidak boleh lebih dari 70 karakter',
+                'nis.digits_between' => 'NIS harus terdiri dari 4 hingga 20 digit',
+                'nis.unique' => 'NIS sudah digunakan',
+                'entry_year.min' => 'Tahun masuk tidak boleh kurang dari 1900',
+                'entry_year.max' => 'Tahun masuk tidak boleh lebih dari ' . (date('Y') + 1),
+                'gender.in' => 'Jenis kelamin tidak valid',
+                'status.in' => 'Status tidak valid',
+                'religion.max' => 'Agama tidak boleh lebih dari 70 karakter',
+                'birth_place.max' => 'Tempat lahir tidak boleh lebih dari 70 karakter',
+                'date_of_birth.date' => 'Tanggal lahir tidak valid',
+                'address.required' => 'Alamat harus diisi',
+                'profile_picture.image' => 'Foto profil harus berupa gambar',
+                'profile_picture.mimes' => 'Foto profil harus berformat jpeg, png, atau jpg',
+                'profile_picture.max' => 'Foto profil tidak boleh lebih dari 2MB',
             ]);
 
             // Handle profile picture
@@ -209,6 +224,21 @@ class StudentController extends Controller
                 'address' => 'required|string',
                 'profile_picture' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
                 'remove_profile_picture' => 'nullable|boolean',
+            ], [
+                'full_name.max' => 'Nama lengkap tidak boleh lebih dari 70 karakter',
+                'nis.digits_between' => 'NIS harus terdiri dari 4 hingga 20 digit',
+                'nis.unique' => 'NIS sudah digunakan',
+                'entry_year.min' => 'Tahun masuk tidak boleh kurang dari 1900',
+                'entry_year.max' => 'Tahun masuk tidak boleh lebih dari ' . (date('Y') + 1),
+                'gender.in' => 'Jenis kelamin tidak valid',
+                'status.in' => 'Status tidak valid',
+                'religion.max' => 'Agama tidak boleh lebih dari 70 karakter',
+                'birth_place.max' => 'Tempat lahir tidak boleh lebih dari 70 karakter',
+                'date_of_birth.date' => 'Tanggal lahir tidak valid',
+                'address.required' => 'Alamat harus diisi',
+                'profile_picture.image' => 'Foto profil harus berupa gambar',
+                'profile_picture.mimes' => 'Foto profil harus berformat jpeg, png, atau jpg',
+                'profile_picture.max' => 'Foto profil tidak boleh lebih dari 2MB',
             ]);
 
             // Handle profile picture
