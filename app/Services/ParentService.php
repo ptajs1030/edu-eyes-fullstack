@@ -55,7 +55,7 @@ class ParentService
         $today = Carbon::now()->format('Y-m-d');
         $dayOff=CustomDayOff::where('date', Carbon::parse($today)->format('Y-m-d'))->first();
         if ($dayOff) {
-            throw new SilentHttpException(400, 'Hari ini adalah hari libur');
+            throw new SilentHttpException(400, 'Hari ini adalah hari libur'. $dayOff->description);
         }
         $attendance = ShiftingAttendance::where('student_id', $student->id)
         ->where('submit_date', Carbon::now('Asia/Jakarta')->format('Y-m-d'))
@@ -363,8 +363,8 @@ class ParentService
                 'event' => optional($attendance->event)->name,
                 'academic_year' => optional($attendance->academicYear)->title,
                 'submit_date' => $attendance->submit_date,
-                'clockInHour'=> $attendance->clock_in_hour,
-                'clockOutHour'=> $attendance->clock_out_hour,
+                'clock_in_hour'=> $attendance->clock_in_hour,
+                'clock_out_hour'=> $attendance->clock_out_hour,
                 'status' => $attendance->status,
                 'note' => $attendance->note,
             ];
@@ -403,17 +403,21 @@ class ParentService
         if ($year) {
             $year = (int)$year; 
             $query->whereHas('payment', function($q) use ($year) {
-                $q->whereYear('due_date', $year);
+                $q->whereYear('due_date', $year);    
             });
         }
-        $payment = $query->with('payment')->paginate(10);
-        if ($payment->isEmpty()) {
+        $payments = $query
+                    ->with('payment')
+                    ->join('payments', 'payments.id', '=', 'payment_assignments.payment_id')
+                    ->orderBy('payments.updated_at', 'desc')
+                    ->select('payment_assignments.*') // pastikan hanya ambil kolom utama
+                    ->paginate(10);
+        if ($payments->isEmpty()) {
             return throw new SilentHttpException(404, 'Pembayaran tidak ditemukan');
         }
         
-        $paymentWithRelations = [];
-        foreach ($payment as $item) {
-            $paymentWithRelations[] = [
+        $paymentWithRelations=$payments->map(function ($item) {
+           return[
                 'id' => $item->payment->id,
                 'academic_year' => optional($item->payment->academicYear)->title,
                 'title' => $item->payment->title,
@@ -421,12 +425,12 @@ class ParentService
                 'nominal' => $item->payment->nominal,
                 'due_date' => $item->payment->due_date,
                 'payment_date' => $item->payment_date,
-            ];
-        }
+           ]; 
+        });
         return [
-            'current_page' => $payment->currentPage(),
-            'last_page' => $payment->lastPage(),
-            'per_page' => $payment->perPage(),
+            'current_page' => $payments->currentPage(),
+            'last_page' => $payments->lastPage(),
+            'per_page' => $payments->perPage(),
             'payments' => $paymentWithRelations
         ];
     }
