@@ -205,7 +205,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
 
         const config = getExportConfig(role.value);
 
-        const filename = `${timestamp}-${config.baseFilename}.xlsx`;
+        const filename = `${config.baseFilename}.xlsx`;
 
         const worksheetData = selectedData.map((user) => config.getRow(user));
         const worksheet = XLSX.utils.json_to_sheet(worksheetData);
