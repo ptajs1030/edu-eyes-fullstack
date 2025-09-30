@@ -55,7 +55,7 @@ interface Props {
 
 const breadcrumbs = (eventName: string): BreadcrumbItem[] => [
     {
-        title: 'Events',
+        title: 'Kegiatan',
         href: '/events',
     },
     {
