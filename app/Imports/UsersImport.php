@@ -76,8 +76,10 @@ class UsersImport extends DefaultValueBinder implements
         return [
             'nama_lengkap.required' => 'Nama lengkap wajib diisi',
             'username.required'     => 'Username wajib diisi',
+            'username.unique'       => 'Username sudah digunakan',
             'password.required'     => 'Password wajib diisi',
             'email.email'           => 'Format email tidak valid',
+            'email.unique'          => 'Email sudah digunakan',
             'nomor_telepon.regex'   => 'Nomor telepon harus 7-15 digit',
             'nip.regex'             => 'NIP harus angka (18 digit)',
         ];
@@ -117,5 +119,15 @@ class UsersImport extends DefaultValueBinder implements
     public function getInsertedCount(): int
     {
         return $this->inserted;
+    }
+
+    public function prepareForValidation($data, $index)
+    {
+        if (isset($data['nip'])) {
+            // Remove ALL spaces before validating
+            $data['nip'] = preg_replace('/\s+/', '', $data['nip']);
+        }
+
+        return $data;
     }
 }

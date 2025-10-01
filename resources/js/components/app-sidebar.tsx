@@ -1,7 +1,7 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BadgeInfo, BookText, GraduationCap, LayoutGrid, School, Settings2, TimerReset, TrendingUpDown, UserPen, UserSearch, PencilRuler, LandPlot, CalendarOff, CreditCard, BookOpen } from 'lucide-react';
@@ -60,7 +60,7 @@ const mainNavItems: NavItem[] = [
         icon: BookText,
     },
     {
-        title: 'Kegiatan Kustom',
+        title: 'Kegiatan',
         href: '/events',
         icon: LandPlot,
     },
@@ -104,6 +104,8 @@ const mainNavItems: NavItem[] = [
 const footerNavItems: NavItem[] = [];
 
 export function AppSidebar() {
+    const { state } = useSidebar();
+
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -111,7 +113,7 @@ export function AppSidebar() {
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild>
                             <Link href="/dashboard" prefetch>
-                                <AppLogo />
+                                <AppLogo small={state === 'collapsed'} />
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>

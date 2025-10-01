@@ -4,28 +4,35 @@
     <meta charset="UTF-8">
     <title>Kartu Siswa</title>
     <style>
-        body {
-            font-family: Arial, Helvetica, sans-serif;
-            margin: 0;
-            padding: 0;
-        }
-        .page {
-            width: 100%;
-            height: 100vh; /* penuh satu halaman PDF */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            page-break-after: always;
-        }
-        .card {
-            width: 53.98mm;
-            height: 85.6mm;
-            background-color: #fff;
-            border: 1px solid #d1d5db;
-            border-radius: 0.5rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            overflow: hidden;
-        }
+       @page {
+    margin: 0; /* biar benar-benar full page */
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.page {
+    width: 100%;
+    height: 100vh; /* penuh satu halaman PDF */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    page-break-after: always;
+}
+
+.card {
+    width: 53.98mm;
+    height: 85.6mm;
+    background-color: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+    margin: auto; /* tambahan supaya benar-benar center */
+}
         .header {
             background-color: #2b7fff;
             color: #fff;
@@ -75,8 +82,8 @@
             font-size: 12px;
         }
         .details {
-            margin-top:-5mm
             padding: 2mm;
+            margin-left: 2mm;
             font-size: 9px;
         }
         .details p {

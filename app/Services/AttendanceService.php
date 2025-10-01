@@ -383,23 +383,21 @@ return [
     }
 
     public function getClassroomByTeacher($search){
-        $query= ClassSubjectSchedule::where('teacher_id', auth()->user()->id)->where('day', Carbon::now()->dayOfWeek())->with('classroom');
+        $classrooms = ClassSubjectSchedule::query()
+    ->where('teacher_id', auth()->user()->id)
+    ->where('day', Carbon::now()->dayOfWeek())
+    ->leftJoin('classrooms', 'class_subject_schedules.class_id', '=', 'classrooms.id')
+    ->select('classrooms.id', 'classrooms.name')
+    ->when($search, function($q) use ($search) {
+        $q->where('classrooms.name', 'like', "%$search%");
+    })
+    ->get();
 
-        if ($search) {
-            $query->where('name', 'like', "%$search%");
-        }
-        $classrooms = $query->get();
-        if ($classrooms->isEmpty()) {
-            throw new SilentHttpException(404, 'Kelas tidak ditemukan');
-        }
-        $classroomsWithRelations = [];
-        foreach ($classrooms as $classroom) {
-            $classroomsWithRelations[] = [
-                'id' => $classroom->id,
-                'classroom' => $classroom->classroom->name,
-            ];
-        }
-        return $classroomsWithRelations;
+if ($classrooms->isEmpty()) {
+    throw new SilentHttpException(404, 'Kelas tidak ditemukan');
+}
+
+return $classrooms->toArray();
 
     }
 
@@ -603,7 +601,7 @@ return [
             $query->whereYear('start_date', $parsedDate->year)
               ->whereMonth('start_date', $parsedDate->month);
         }
-        $events = $query->paginate(10);
+        $events = $query->orderBy('end_date', 'desc')->orderBy('start_date', 'desc')->paginate(10);
         if ($events->isEmpty()) {
             throw new SilentHttpException(404, 'Kegiatan tidak ditemukan');
         }
@@ -642,6 +640,9 @@ return [
             ->where('event_id', $data->getEvent())
             ->where('submit_date', Carbon::now()->format('Y-m-d'))->with('event')
             ->first();
+        if (!$attendance) {
+            throw new SilentHttpException(404, 'Absensi tidak ditemukan');
+        }
         $late_tolerance = (int)Setting::where('key', 'late_tolerance')->value        ('value');
         $start_hour=Carbon::parse($attendance->event->start_hour);
         $deadline = Carbon::parse($attendance->event->start_hour)->addMinutes($late_tolerance);
@@ -790,9 +791,25 @@ return [
             throw new SilentHttpException(404, "Data Kosong");
         }
         
-        $attendancesWithRelations=[];
-        foreach ($attendances as $attendance) {
-            $attendancesWithRelations[]=[
+        // $attendancesWithRelations=[];
+        // foreach ($attendances as $attendance) {
+        //     $attendancesWithRelations[]=[
+        //         'id' => $attendance->id,
+        //         'student' => optional($attendance->student)->full_name,
+        //         'classroom' => optional($attendance->student->classroom)->name,
+        //         'academic_year'=> optional($attendance->student->classroom->academicYear)->title,
+        //         'event_name' => optional($attendance->event)->name,  
+        //         'submit_date'=> $attendance->submit_date,
+        //         'clock_in_hour'=>$attendance->clock_in_hour,
+        //         'clock_out_hour'=>$attendance->clock_out_hour,
+        //         'status'=>$attendance->status,
+        //         'minutes_of_late'=>$attendance->minutes_of_late,
+        //         'note'=>$attendance->note
+        //     ];
+        // }
+
+        $attendancesWithRelations = $attendances->map(function ($attendance) {
+            return [
                 'id' => $attendance->id,
                 'student' => optional($attendance->student)->full_name,
                 'classroom' => optional($attendance->student->classroom)->name,
@@ -805,9 +822,9 @@ return [
                 'minutes_of_late'=>$attendance->minutes_of_late,
                 'note'=>$attendance->note
             ];
-        }
+        });
         return [
-            'number_of_attendances' => $attendances->total(),
+            'number_of_attendances' => $attendances->whereIn('status', ['present', 'late', 'present_in_tolerance'])->count() ,
             'current_page' => $attendances->currentPage(),
             'last_page' => $attendances->lastPage(),
             'per_page' => $attendances->perPage(),

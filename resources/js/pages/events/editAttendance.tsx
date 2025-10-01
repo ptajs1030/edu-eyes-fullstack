@@ -107,7 +107,8 @@ export default function EditAttendanceModal({ attendance, onClose, onSubmit }: P
                             type="time"
                             value={formData.clock_in_hour}
                             onChange={(e) => setFormData({ ...formData, clock_in_hour: e.target.value })}
-                            className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 p-2 shadow-sm"
+                            disabled
                         />
                     </div>
                     <div>
@@ -116,7 +117,8 @@ export default function EditAttendanceModal({ attendance, onClose, onSubmit }: P
                             type="time"
                             value={formData.clock_out_hour}
                             onChange={(e) => setFormData({ ...formData, clock_out_hour: e.target.value })}
-                            className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                            className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 p-2 shadow-sm"
+                            disabled
                         />
                     </div>
                 </div>

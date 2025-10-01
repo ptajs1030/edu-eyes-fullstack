@@ -219,12 +219,12 @@ export default function StudentIndex() {
 
             return {
                 'Nama Lengkap': student.full_name || '-',
+                NIS: { v: student.nis || '-', t: 's' }, // Force sebagai string
                 'Orang Tua/Wali': student.parent?.full_name || '-',
                 Kelas: student.classroom?.name || '-',
-                NIS: { v: student.nis || '-', t: 's' }, // Force sebagai string
-                'Tahun Masuk': student.entry_year || '-',
                 'Jenis Kelamin': genderMap[student.gender] || student.gender,
                 Agama: student.religion || '-',
+                'Tahun Masuk': student.entry_year || '-',
                 'Tempat Lahir': student.birth_place || '-',
                 'Tanggal Lahir': formattedDate,
                 Alamat: student.address || '-',
@@ -256,7 +256,7 @@ export default function StudentIndex() {
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Data Siswa');
 
         // Filename dengan format epoch-data-siswa
-        const filename = `${timestamp}-data-siswa.xlsx`;
+        const filename = `data-siswa.xlsx`;
 
         // Export to file
         try {
@@ -374,17 +374,28 @@ export default function StudentIndex() {
     };
 
     const getStatusLabel = (status: string): string => {
-        switch (status) {
+        switch (status.toLowerCase()) {
             case 'active':
-                return 'Active';
+                return 'Aktif';
             case 'inactive':
-                return 'Inactive';
+                return 'Tidak Aktif';
             case 'graduated':
-                return 'Graduated';
+                return 'Lulus';
             default:
                 return status;
         }
     };
+
+    const getGenderLabel = (gender: string): string => {
+        switch (gender) {
+            case 'male':
+                return 'Laki-Laki';
+            case 'female':
+                return 'Perempuan';
+            default:
+                return gender;
+        }
+    }
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -430,7 +441,7 @@ export default function StudentIndex() {
                             <option value="">Semua Status</option>
                             {statuses.map((s) => (
                                 <option key={s.value} value={s.value}>
-                                    {s.label}
+                                    {getStatusLabel(s.label)}
                                 </option>
                             ))}
                         </select>
@@ -473,22 +484,20 @@ export default function StudentIndex() {
                         <button
                             disabled={selectedIds.length === 0 || students.data.length === 0}
                             onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white transition ${
-                                selectedIds.length === 0 || students.data.length === 0
-                                    ? 'cursor-not-allowed opacity-50'
-                                    : 'hover:cursor-pointer hover:bg-indigo-700'
-                            }`}
+                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white transition ${selectedIds.length === 0 || students.data.length === 0
+                                ? 'cursor-not-allowed opacity-50'
+                                : 'hover:cursor-pointer hover:bg-indigo-700'
+                                }`}
                         >
                             Ekspor Data
                         </button>
                         <button
                             disabled={selectedIds.length === 0 || students.data.length === 0}
                             onClick={handleBulkPrint}
-                            className={`rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white transition ${
-                                selectedIds.length === 0 || students.data.length === 0
-                                    ? 'cursor-not-allowed opacity-50'
-                                    : 'hover:cursor-pointer hover:bg-indigo-700'
-                            }`}
+                            className={`rounded bg-indigo-700 px-3 py-1 text-sm font-medium text-white transition ${selectedIds.length === 0 || students.data.length === 0
+                                ? 'cursor-not-allowed opacity-50'
+                                : 'hover:cursor-pointer hover:bg-indigo-700'
+                                }`}
                         >
                             Print Kartu
                         </button>
@@ -551,7 +560,7 @@ export default function StudentIndex() {
                             <td className="p-3 text-sm">{student.classroom?.name || '-'}</td>
                             <td className="p-3 text-sm">{student.nis || '-'}</td>
                             <td className="p-3 text-sm">{student.entry_year}</td>
-                            <td className="p-3 text-sm">{student.gender}</td>
+                            <td className="p-3 text-sm">{getGenderLabel(student.gender)}</td>
                             <td className="p-3 text-sm">{student.religion || '-'}</td>
                             <td className="p-3 text-sm">
                                 {(() => {
@@ -566,7 +575,7 @@ export default function StudentIndex() {
                             <td className="p-3 text-sm">
                                 {student.address ? (student.address.length > 70 ? student.address.substring(0, 70) + '...' : student.address) : '-'}
                             </td>
-                            <td className="p-3 text-sm">
+                            <td className="p-3 text-sm min-w-[120px] w-[140px]">
                                 <span
                                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(student.status)}`}
                                 >
@@ -582,9 +591,8 @@ export default function StudentIndex() {
                                 </button>
                                 <Link
                                     href={route('students.attendance', student.id)}
-                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
-                                        student.classroom?.name ? 'bg-sky-500 hover:cursor-pointer hover:bg-sky-600' : 'cursor-not-allowed bg-sky-300'
-                                    }`}
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${student.classroom?.name ? 'bg-sky-500 hover:cursor-pointer hover:bg-sky-600' : 'cursor-not-allowed bg-sky-300'
+                                        }`}
                                     onClick={(e) => {
                                         if (!student.classroom?.name) {
                                             e.preventDefault();

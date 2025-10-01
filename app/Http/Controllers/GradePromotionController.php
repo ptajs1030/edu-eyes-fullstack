@@ -215,7 +215,7 @@ class GradePromotionController extends Controller
                     );
                 });
 
-                return redirect()->back()->with('success', 'Status kelas kosong berhasil diperbarui');
+                return redirect()->route('grade-promotions.index')->with('success', 'Status kelas kosong berhasil diperbarui');
             }
 
             $validated = $request->validate([
@@ -244,10 +244,10 @@ class GradePromotionController extends Controller
                 );
             });
 
-            return redirect()->back()->with('success', 'Target kelas siswa berhasil diperbarui');
+            return redirect()->route('grade-promotions.index')->with('success', 'Target kelas siswa berhasil diperbarui');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()
+            return redirect()->route('grade-promotions.index')
                 ->with('error', 'Gagal menyimpan perubahan: ' . $e->getMessage());
         }
     }

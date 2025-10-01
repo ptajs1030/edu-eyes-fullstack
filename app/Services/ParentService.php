@@ -55,7 +55,7 @@ class ParentService
         $today = Carbon::now()->format('Y-m-d');
         $dayOff=CustomDayOff::where('date', Carbon::parse($today)->format('Y-m-d'))->first();
         if ($dayOff) {
-            throw new SilentHttpException(400, 'Hari ini adalah hari libur');
+            throw new SilentHttpException(400, 'Hari ini adalah hari libur'. $dayOff->description);
         }
         $attendance = ShiftingAttendance::where('student_id', $student->id)
         ->where('submit_date', Carbon::now('Asia/Jakarta')->format('Y-m-d'))
@@ -293,18 +293,17 @@ class ParentService
             throw new SilentHttpException(404, 'Kegiatan tidak ditemukan');
         }
         
-      $schedulesWithRelations = [];
-        foreach ($schedules as $schedule) {
-            $schedulesWithRelations[] = [
+        $schedulesWithRelations = $schedules->map(function ($schedule) {
+            return [
                 'id' => $schedule->event->id,
                 'name' => $schedule->event->name,
                 'description' => $schedule->event->description,
                 'start_date' => $schedule->event->start_date,
                 'end_date' => $schedule->event->end_date,
-                'start_time' => $schedule->event->Start_hour,
+                'start_time' => $schedule->event->start_hour,
                 'end_time' => $schedule->event->end_hour,
             ];
-        }
+        })->toArray();
         
         return  [
             'number_of_schedules' => $schedules->total(),
@@ -314,6 +313,31 @@ class ParentService
             'attendances' => $schedulesWithRelations,
         ];
         
+    }
+
+
+    public function getNextEvent($student)
+    {
+        $today = Carbon::now()->format('Y-m-d');
+
+        $nextEvent = Event::whereHas('participants', function($q) use ($student) {
+                $q->where('student_id', $student->id);
+            })
+            ->whereDate('start_date', '>=', $today)
+            ->orderBy('start_date', 'asc')
+            ->first();
+
+        $prevEvent = Event::whereHas('participants', function($q) use ($student) {
+                $q->where('student_id', $student->id);
+            })
+            ->whereDate('start_date', '<', $today)
+            ->orderBy('start_date', 'desc')
+            ->first();
+
+        return [
+            'next_event' => $nextEvent ,
+            'previous_event' => $prevEvent 
+        ];
     }
 
     public function eventAttendanceHistory ($date, $student){
@@ -339,6 +363,8 @@ class ParentService
                 'event' => optional($attendance->event)->name,
                 'academic_year' => optional($attendance->academicYear)->title,
                 'submit_date' => $attendance->submit_date,
+                'clock_in_hour'=> $attendance->clock_in_hour,
+                'clock_out_hour'=> $attendance->clock_out_hour,
                 'status' => $attendance->status,
                 'note' => $attendance->note,
             ];
@@ -377,17 +403,21 @@ class ParentService
         if ($year) {
             $year = (int)$year; 
             $query->whereHas('payment', function($q) use ($year) {
-                $q->whereYear('due_date', $year);
+                $q->whereYear('due_date', $year);    
             });
         }
-        $payment = $query->with('payment')->paginate(10);
-        if ($payment->isEmpty()) {
+        $payments = $query
+                    ->with('payment')
+                    ->join('payments', 'payments.id', '=', 'payment_assignments.payment_id')
+                    ->orderBy('payments.updated_at', 'desc')
+                    ->select('payment_assignments.*') // pastikan hanya ambil kolom utama
+                    ->paginate(10);
+        if ($payments->isEmpty()) {
             return throw new SilentHttpException(404, 'Pembayaran tidak ditemukan');
         }
         
-        $paymentWithRelations = [];
-        foreach ($payment as $item) {
-            $paymentWithRelations[] = [
+        $paymentWithRelations=$payments->map(function ($item) {
+           return[
                 'id' => $item->payment->id,
                 'academic_year' => optional($item->payment->academicYear)->title,
                 'title' => $item->payment->title,
@@ -395,12 +425,12 @@ class ParentService
                 'nominal' => $item->payment->nominal,
                 'due_date' => $item->payment->due_date,
                 'payment_date' => $item->payment_date,
-            ];
-        }
+           ]; 
+        });
         return [
-            'current_page' => $payment->currentPage(),
-            'last_page' => $payment->lastPage(),
-            'per_page' => $payment->perPage(),
+            'current_page' => $payments->currentPage(),
+            'last_page' => $payments->lastPage(),
+            'per_page' => $payments->perPage(),
             'payments' => $paymentWithRelations
         ];
     }

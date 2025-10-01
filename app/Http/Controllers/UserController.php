@@ -242,6 +242,8 @@ class UserController extends Controller
                 'username.unique' => 'Username sudah digunakan',
                 'phone.unique' => 'Nomor telepon sudah digunakan',
                 'email.unique' => 'Email sudah digunakan',
+                'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+                'password.min' => 'Kata sandi minmal 8 karakter',
             ]);
 
             $userData = $this->prepareUserData($validated, $role);
@@ -295,6 +297,8 @@ class UserController extends Controller
                 'username.unique' => 'Username sudah digunakan',
                 'phone.unique' => 'Nomor telepon sudah digunakan',
                 'email.unique' => 'Email sudah digunakan',
+                'password.confirmed' => 'Konfirmasi kata sandi tidak cocok.',
+                'password.min' => 'Kata sandi minmal 8 karakter',
             ]);
 
             $userData = $this->prepareUserData($validated, $role);
@@ -432,7 +436,6 @@ class UserController extends Controller
             'parent' => 'orang-tua',
             'teacher' => 'guru'
         ];
-
         $indonesianRole = $roleMapping[$role] ?? $role;
         $filename = "template-import-{$indonesianRole}.xlsx";
         $path = storage_path("app/templates/{$filename}");
@@ -444,8 +447,12 @@ class UserController extends Controller
         return response()->download($path, $filename, [
             'Content-Type'              => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'X-Template-Role'           => $role,
+            'X-Template-Indonesia-Role' => $roleMapping[$role],
             'X-File-Name'               => $filename,
-            'Access-Control-Expose-Headers' => 'X-Template-Role, X-File-Name',
+            'Access-Control-Expose-Headers' => 'X-Template-Role, X-Template-Indonesia-Role, X-File-Name',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
+            'Pragma'        => 'no-cache',
+            'Expires'       => '0',
         ]);
     }
 }

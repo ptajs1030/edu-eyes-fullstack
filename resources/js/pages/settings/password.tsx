@@ -64,7 +64,7 @@ export default function Password() {
                                 id="current_password"
                                 ref={currentPasswordInput}
                                 value={data.current_password}
-                                onChange={(e) => setData('current_password', e.target.value)}
+                                onChange={(e) => setData('current_password', e.target.value.replace(/\s+/g, ''))}
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="current-password"
@@ -81,7 +81,7 @@ export default function Password() {
                                 id="password"
                                 ref={passwordInput}
                                 value={data.password}
-                                onChange={(e) => setData('password', e.target.value)}
+                                onChange={(e) => setData('password', e.target.value.replace(/\s+/g, ''))}
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"
@@ -97,7 +97,7 @@ export default function Password() {
                             <Input
                                 id="password_confirmation"
                                 value={data.password_confirmation}
-                                onChange={(e) => setData('password_confirmation', e.target.value)}
+                                onChange={(e) => setData('password_confirmation', e.target.value.replace(/\s+/g, ''))}
                                 type="password"
                                 className="mt-1 block w-full"
                                 autoComplete="new-password"

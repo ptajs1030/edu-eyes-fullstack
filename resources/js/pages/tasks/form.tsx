@@ -128,7 +128,11 @@ export default function CreateTask({ academicYears, selectedStudents, classrooms
 
     const handleSelectAllStudents = (checked: boolean) => {
         if (checked) {
-            setSelectedStudentIds(students.map((student) => student.id));
+     
+            setSelectedStudentIds((prev) => {
+                const newIds = students.map((student) => student.id);
+                return Array.from(new Set([...prev, ...newIds])); 
+            });
         } else {
             const studentIdsToRemove = students.map((student) => student.id);
             setSelectedStudentIds((prev) => prev.filter((id) => !studentIdsToRemove.includes(id)));

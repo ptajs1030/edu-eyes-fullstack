@@ -43,15 +43,19 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function PaymentIndex() {
-    const { payments, filters } = usePage<{
-        payments: PaginatedResponse<Payment, Link>;
-        filters: { search?: string; sort?: string; direction?: string };
-    }>().props;
+
 
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [paymentToDelete, setPaymentToDelete] = useState<Payment | null>(null);
     const [paymentToNotify, setPaymentToNotify] = useState<Payment | null>(null);
+    const { payments, filters, academicYears } = usePage<{
+        payments: PaginatedResponse<Payment, Link>;
+        filters: { search?: string; sort?: string; direction?: string };
+        academicYears: { id: number; title: string }[];
+    }>().props;
+
+    const academicYearOptions = Array.isArray(academicYears) ? academicYears : [];
 
     useEffect(() => {
         if (flash?.success) {
@@ -70,6 +74,16 @@ export default function PaymentIndex() {
                 router.reload();
             },
         });
+    };
+    const handleAcademicYearChange = (academicYearId: string) => {
+        router.get(
+            route('payments.index'),
+            {
+                ...filters,
+                academic_year: academicYearId || null,
+            },
+            { preserveState: true },
+        );
     };
 
     const toggleSelect = (id: number) => {
@@ -143,6 +157,22 @@ export default function PaymentIndex() {
                             onChange={(e) => router.get(route('payments.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1 text-sm"
                         />
+                        <div className="relative">
+                            <div className="rounded bg-gray-200 px-3 py-1 text-sm font-medium text-gray-700">
+                                <select
+                                    value={filters.academic_year || ''}
+                                    onChange={(e) => handleAcademicYearChange(e.target.value)}
+                                    className="cursor-pointer bg-transparent outline-none"
+                                >
+                                    <option value="">Tahun Ajaran</option>
+                                    {academicYearOptions.map((year) => (
+                                        <option key={year.id} value={year.id}>
+                                            {year.title}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
                         {/* <button
                             disabled={selectedIds.length === 0}
                             onClick={exportSelected}
@@ -198,9 +228,8 @@ export default function PaymentIndex() {
                                 <button
                                     onClick={() => setPaymentToNotify(payment)}
                                     disabled={isPaymentExpired(payment)}
-                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
-                                        isPaymentExpired(payment) ? 'cursor-not-allowed bg-sky-300' : 'bg-sky-500 hover:cursor-pointer'
-                                    }`}
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${isPaymentExpired(payment) ? 'cursor-not-allowed bg-sky-300' : 'bg-sky-500 hover:cursor-pointer'
+                                        }`}
                                     title={isPaymentExpired(payment) ? 'Tagihan sudah melewati deadline' : 'Kirim notifikasi'}
                                 >
                                     Kirim Notif
@@ -216,7 +245,7 @@ export default function PaymentIndex() {
                             </td>
                         </tr>
                     )}
-                    emptyMessage="Tidak ada event yang ditemukan"
+                    emptyMessage="Tidak ada tagihan yang ditemukan"
                 />
 
                 <Pagination links={payments.links} />
@@ -225,7 +254,7 @@ export default function PaymentIndex() {
                     isOpen={!!paymentToDelete}
                     onClose={() => setPaymentToDelete(null)}
                     title="Konfirmasi Hapus"
-                    message={`Apakah Anda yakin ingin menghapus event "${paymentToDelete?.title}"?`}
+                    message={`Apakah Anda yakin ingin menghapus tagihan "${paymentToDelete?.title}"?`}
                     buttons={[
                         {
                             label: 'Batal',

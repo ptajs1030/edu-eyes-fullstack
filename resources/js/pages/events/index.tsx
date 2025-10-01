@@ -38,7 +38,7 @@ interface Link {
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'Events',
+        title: 'Kegiatan',
         href: '/events',
     },
 ];
@@ -83,7 +83,7 @@ export default function EventIndex() {
         const headers = `Name,PIC,Date,Time\n`;
         const csv = selectedData
             .map((a) => {
-                const picNames = a.event_pics.map((pic) => pic.user.full_name).join(', ');
+                const picNames = a.event_pics.map((pic) => pic.user?.full_name).join(', ');
                 const dateRange = `${a.start_date} - ${a.end_date}`;
                 const timeRange = `${a.start_hour} - ${a.end_hour}`;
                 return `${a.name},"${picNames}",${dateRange},${timeRange}`;
@@ -119,7 +119,7 @@ export default function EventIndex() {
     };
 
     const tableHeaders = [
-        { key: 'name', label: 'Nama Event', sortable: true },
+        { key: 'name', label: 'Nama Kegiatan', sortable: true },
         { key: 'event_pics.user.full_name', label: 'PIC', sortable: false },
         { key: 'start_date', label: 'Tanggal', sortable: true },
         { key: 'start_hour', label: 'Waktu', sortable: true },
@@ -137,7 +137,7 @@ export default function EventIndex() {
                     <div className="flex items-center gap-2">
                         <input
                             type="text"
-                            placeholder="Cari event..."
+                            placeholder="Cari kegiatan..."
                             defaultValue={filters.search || ''}
                             onChange={(e) => router.get(route('events.index'), { search: e.target.value }, { preserveState: true })}
                             className="w-64 rounded border px-3 py-1 text-sm"
@@ -156,7 +156,7 @@ export default function EventIndex() {
                         href={route('events.create')}
                         className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
                     >
-                        Buat Event
+                        Buat Kegiatan
                     </Link>
                 </div>
 
@@ -173,7 +173,12 @@ export default function EventIndex() {
                                 <input type="checkbox" checked={selectedIds.includes(event.id)} onChange={() => toggleSelect(event.id)} />
                             </td>
                             <td className="p-3 text-sm">{event.name}</td>
-                            <td className="p-3 text-sm">{event.event_pics.map((pic) => pic.user.full_name).join(', ')}</td>
+                            <td className="p-3 text-sm">
+                                {event.event_pics
+                                    .map((pic) => pic.user?.full_name)
+                                    .filter(Boolean)
+                                    .join(', ') || '-'}
+                            </td>
                             <td className="p-3 text-sm">
                                 {format(parseISO(event.start_date), 'dd MMM yyyy', { locale: id })} -{' '}
                                 {format(parseISO(event.end_date), 'dd MMM yyyy', { locale: id })}
@@ -212,11 +217,10 @@ export default function EventIndex() {
                                 {/* Delete Button */}
                                 <button
                                     onClick={() => isEventEditable(event) && setEventToDelete(event)}
-                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
-                                        isEventEditable(event)
-                                            ? 'bg-red-500 hover:cursor-pointer hover:bg-red-600'
-                                            : 'cursor-not-allowed bg-red-300 opacity-60'
-                                    }`}
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${isEventEditable(event)
+                                        ? 'bg-red-500 hover:cursor-pointer hover:bg-red-600'
+                                        : 'cursor-not-allowed bg-red-300 opacity-60'
+                                        }`}
                                     disabled={!isEventEditable(event)}
                                     title={!isEventEditable(event) ? 'Event tidak dapat dihapus' : ''}
                                 >
@@ -234,7 +238,7 @@ export default function EventIndex() {
                     isOpen={!!eventToDelete}
                     onClose={() => setEventToDelete(null)}
                     title="Konfirmasi Hapus"
-                    message={`Apakah Anda yakin ingin menghapus event "${eventToDelete?.name}"?`}
+                    message={`Apakah Anda yakin ingin menghapus kegiatan "${eventToDelete?.name}"?`}
                     buttons={[
                         {
                             label: 'Batal',

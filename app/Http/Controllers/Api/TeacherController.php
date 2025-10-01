@@ -18,11 +18,7 @@ use Illuminate\Http\Request;
 
 class TeacherController extends BaseApiController
 {
-    public function __construct(protected TeacherService $service)
-    {
-       
-    }
-
+    
     public function profile(){
         return $this->resource(UserResource::make(auth()->user()));
     }
@@ -45,7 +41,7 @@ class TeacherController extends BaseApiController
             return $this->resource(ClassroomResource::make(Classroom::findOrFail($id)));
         }
         return $this->resource(
-            ClassroomResource::collection(Classroom::get())
+            ClassroomResource::collection(Classroom::get()->sortBy('name'))
         );
     }
 
@@ -64,8 +60,12 @@ class TeacherController extends BaseApiController
             return $this->resource(EventResource::make(Event::findOrFail($id)));
         }
         return $this->resource(
-            EventResource::collection(Event::get()->sortByDesc('start_date')->sortByDesc('end_date'))
+            EventResource::collection(Event::get()->sortByDesc('end_date')->sortByDesc('start_date'))
         );
+    }
+
+    public function getNextEvent(){
+        return $this->success($this->service->getNextEvent());
     }
 
     public function getAttendanceMode()

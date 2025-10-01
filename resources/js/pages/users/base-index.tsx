@@ -134,11 +134,16 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
 
         const timestamp = Date.now();
 
+        const statusMap = {
+            active: 'Aktif',
+            inactive: 'Tidak Aktif'
+        };
+
         const getExportConfig = (roleValue: string) => {
             switch (roleValue) {
                 case 'parent':
                     return {
-                        headers: ['Nama Lengkap', 'Username', 'Pekerjaan', 'Nomor Telepon', 'Email', 'Alamat', 'Role', 'Status'],
+                        headers: ['Nama Lengkap', 'Username', 'Pekerjaan', 'Nomor Telepon', 'Email', 'Alamat', 'Status'],
                         baseFilename: 'data-orang-tua',
                         getRow: (user: any) => ({
                             'Nama Lengkap': user.full_name || '-',
@@ -147,63 +152,60 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                             'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
                             Email: user.email || '-',
                             Alamat: user.address || '-',
-                            Role: user.role?.name || '-',
-                            Status: user.status || '-',
+                            Status: statusMap[user.status] || (user.status || '-'),
                         }),
                     };
                 case 'teacher':
                     return {
-                        headers: ['Nama Lengkap', 'Username', 'NIP', 'Email', 'Nomor Telepon', 'Alamat', 'Posisi/Jabatan', 'Role', 'Status'],
+                        headers: ['Nama Lengkap', 'Username', 'NIP', 'Posisi/Jabatan', 'Nomor Telepon', 'Email', 'Alamat', 'Status'],
                         baseFilename: 'data-guru',
                         getRow: (user: any) => ({
                             'Nama Lengkap': user.full_name || '-',
                             Username: user.username || '-',
                             NIP: { v: user.nip || '-', t: 's' }, // Force as string
-                            Email: user.email || '-',
-                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
-                            Alamat: user.address || '-',
                             'Posisi/Jabatan': user.position || '-',
-                            Role: user.role?.name || '-',
-                            Status: user.status || '-',
+                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
+                            Email: user.email || '-',
+                            Alamat: user.address || '-',
+                            Status: statusMap[user.status] || (user.status || '-'),
                         }),
                     };
                 case 'admin':
                     return {
-                        headers: ['Nama Lengkap', 'Username', 'NIP', 'Email', 'Nomor Telepon', 'Alamat', 'Posisi/Jabatan', 'Role', 'Status'],
+                        headers: ['Nama Lengkap', 'Username', 'NIP', 'Posisi/Jabatan', 'Nomor Telepon', 'Email', 'Alamat', 'Status'],
                         baseFilename: 'data-admin',
                         getRow: (user: any) => ({
                             'Nama Lengkap': user.full_name || '-',
                             Username: user.username || '-',
                             NIP: { v: user.nip || '-', t: 's' }, // Force as string
-                            Email: user.email || '-',
-                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
-                            Alamat: user.address || '-',
                             'Posisi/Jabatan': user.position || '-',
-                            Role: user.role?.name || '-',
-                            Status: user.status || '-',
+                            'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
+                            Email: user.email || '-',
+                            Alamat: user.address || '-',
+                            Status: statusMap[user.status] || (user.status || '-'),
                         }),
                     };
                 default:
                     return {
-                        headers: ['Nama Lengkap', 'Username', 'Email', 'Nomor Telepon', 'Alamat', 'Role', 'Status'],
+                        headers: ['Nama Lengkap', 'Username', 'Nomor Telepon', 'Email', 'Alamat', 'Role', 'Status'],
                         baseFilename: 'data-user',
                         getRow: (user: any) => ({
                             'Nama Lengkap': user.full_name || '-',
                             Username: user.username || '-',
-                            Email: user.email || '-',
                             'Nomor Telepon': { v: user.phone || '-', t: 's' }, // Force as string
+                            Email: user.email || '-',
                             Alamat: user.address || '-',
                             Role: user.role?.name || '-',
-                            Status: user.status || '-',
+                            Status: statusMap[user.status] || (user.status || '-'),
                         }),
                     };
             }
-            
+
         };
 
         const config = getExportConfig(role.value);
 
-        const filename = `${timestamp}-${config.baseFilename}.xlsx`;
+        const filename = `${config.baseFilename}.xlsx`;
 
         const worksheetData = selectedData.map((user) => config.getRow(user));
         const worksheet = XLSX.utils.json_to_sheet(worksheetData);
@@ -291,9 +293,9 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
     const getStatusLabel = (status: string): string => {
         switch (status) {
             case 'active':
-                return 'Active';
+                return 'Aktif';
             case 'inactive':
-                return 'Inactive';
+                return 'Tidak Aktif';
             default:
                 return status;
         }
@@ -340,15 +342,14 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                 <select value={statusFilter} onChange={handleStatusChange} className="min-w-[120px] rounded border bg-white px-2 py-1 text-sm">
                     <option value="">Semua Status</option>
                     <option value="active">Aktif</option>
-                    <option value="inactive">Nonaktif</option>
+                    <option value="inactive">Tidak Aktif</option>
                 </select>
                 {/* Export & Import Buttons - moved to left after status filter */}
                 <button
                     disabled={selectedIds.length === 0}
                     onClick={exportSelected}
-                    className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                        selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                    }`}
+                    className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                        }`}
                 >
                     Ekspor Data
                 </button>
@@ -416,7 +417,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                             {role.value === 'parent' && <td className="p-3 text-sm">{user.job || '-'}</td>}
                             <td className="p-3 text-sm">{user.phone || '-'}</td>
                             <td className="p-3 text-sm">{user.email || '-'}</td>
-                            <td className="p-3 text-sm">
+                            <td className="p-3 text-sm min-w-[120px] w-[140px]">
                                 <span
                                     className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusBadgeClass(user.status)}`}
                                 >

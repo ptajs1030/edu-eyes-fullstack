@@ -82,6 +82,24 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             />
                             <InputError className="mt-2" message={errors.profile_picture} />
                         </div>
+                        {/* Email Admin */}
+                        <div className="grid gap-2">
+                            <Label htmlFor="email">Email address</Label>
+
+                            <Input
+                                id="email"
+                                type="email"
+                                className="mt-1 block w-full bg-gray-200"
+                                value={data.email}
+                                onChange={(e) => setData('email', e.target.value)}
+                                required
+                                autoComplete="email"
+                                placeholder="Email address"
+                                disabled
+                            />
+
+                            <InputError className="mt-2" message={errors.email} />
+                        </div>
                         {/* Nama Admin */}
                         <div className="grid gap-2">
                             <Label htmlFor="full_name">Nama Admin</Label>
@@ -167,23 +185,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 placeholder="Nomor Telepon"
                             />
                             <InputError className="mt-2" message={errors.phone} />
-                        </div>
-
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email address</Label>
-
-                            <Input
-                                id="email"
-                                type="email"
-                                className="mt-1 block w-full"
-                                value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
-                                required
-                                autoComplete="email"
-                                placeholder="Email address"
-                            />
-
-                            <InputError className="mt-2" message={errors.email} />
                         </div>
 
                         {mustVerifyEmail && auth.user.email_verified_at === null && (

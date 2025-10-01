@@ -44,7 +44,9 @@ class AcademicYearController extends Controller
                     Rule::unique(AcademicYear::class),
                 ],
                 'attendance_mode' => 'required|in:' . implode(',', AttendanceMode::getValues()),
-                'note' => 'nullable|string',
+                'note' => 'nullable|string|max:255',
+            ], [
+                'note.max' => 'Catatan maksimal 255 Karakter'
             ]);
 
             AcademicYear::create([
@@ -82,7 +84,9 @@ class AcademicYearController extends Controller
                     Rule::unique(AcademicYear::class)->ignore($academicYear->id),
                 ],
                 'attendance_mode' => 'required|in:' . implode(',', AttendanceMode::getValues()),
-                'note' => 'nullable|string',
+                'note' => 'nullable|string|max:255',
+            ], [
+                'note.max' => 'Catatan maksimal 255 Karakter'
             ]);
 
             $academicYear->update([

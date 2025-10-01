@@ -134,6 +134,10 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
     }, [isOpen, role.id, role.value]);
 
     const handleChange = (field: keyof User, value: any) => {
+        // Remove all whitespace for password fields
+        if (field === 'password' || field === 'password_confirmation') {
+            value = value.replace(/\s+/g, '');
+        }
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
@@ -203,13 +207,25 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 router.reload();
             },
             onError: (errors) => {
-                const errorMessage = Object.values(errors).join('\n');
-                toast.error(`Failed: ${errorMessage}`);
+                const errorMessage = Object.values(errors).join(', ');
+                toast.error(`Validasi gagal: ${errorMessage}`);
             },
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
         });
+    };
+
+    const mappingStatus = (label: string): string => {
+        // lowered label
+        switch (label.toLowerCase()) {
+            case 'active':
+                return 'Aktif';
+            case 'inactive':
+                return 'Tidak Aktif';
+            default:
+                return label;
+        }
     };
 
     return (
@@ -412,7 +428,7 @@ export default function BaseForm({ isOpen, onClose, user, statuses, role, routeP
                 >
                     {statuses.map((status) => (
                         <option key={status.value} value={status.value}>
-                            {status.label}
+                            {mappingStatus(status.label)}
                         </option>
                     ))}
                 </select>

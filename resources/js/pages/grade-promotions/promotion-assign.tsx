@@ -56,13 +56,19 @@ export default function PromotionAssign({
     const [bulkAction, setBulkAction] = useState('');
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
+    // useEffect(() => {
+    //     if (flash?.success) {
+    //         toast.success(flash.success);
+    //     } else if (flash?.error) {
+    //         toast.error(flash.error);
+    //     }
+    // }, [flash]);
+
     useEffect(() => {
-        if (flash?.success) {
-            toast.success(flash.success);
-        } else if (flash?.error) {
+        if (flash?.error) {
             toast.error(flash.error);
         }
-    }, [flash]);
+    }, [flash?.error]);
 
     const toggleStudentSelection = (id: number) => {
         setSelectedStudents((prev) => (prev.includes(id) ? prev.filter((studentId) => studentId !== id) : [...prev, id]));
@@ -89,8 +95,8 @@ export default function PromotionAssign({
                     return bulkAction === 'graduate'
                         ? { ...student, target_class_id: null, is_graduate: true }
                         : bulkAction === 'null'
-                          ? { ...student, target_class_id: null, is_graduate: false }
-                          : { ...student, target_class_id: parseInt(bulkAction), is_graduate: false };
+                            ? { ...student, target_class_id: null, is_graduate: false }
+                            : { ...student, target_class_id: parseInt(bulkAction), is_graduate: false };
                 }
                 return student;
             }),
@@ -100,10 +106,23 @@ export default function PromotionAssign({
         setSelectedStudents([]);
     };
 
+    // const handleSubmit = () => {
+    //     router.post(
+    //         route('grade-promotions.update', currentClass.id),
+    //         { students },
+    //         {
+    //             onSuccess: () => {
+    //                 // Force full reload so flash message is picked up
+    //                 router.visit(route('grade-promotions.index'), { replace: true, preserveState: false });
+    //             },
+    //         }
+    //     );
+    // };
+
     const handleSubmit = () => {
-        router.post(route('grade-promotions.update', currentClass.id), {
-            students,
-        });
+        // izinkan index menampilkan banner setelah redirect
+        sessionStorage.removeItem('gp:index:suppressBannerOnce');
+        router.post(route('grade-promotions.update', currentClass.id), { students });
     };
 
     const getClassOptions = () => {
@@ -320,6 +339,7 @@ export default function PromotionAssign({
                     </button>
                     <Link
                         href={route('grade-promotions.index')}
+                        onClick={() => sessionStorage.setItem('gp:index:suppressBannerOnce', '1')}
                         className="rounded-md bg-gray-200 px-4 py-2 text-sm font-medium text-gray-800 hover:bg-gray-300"
                     >
                         Kembali

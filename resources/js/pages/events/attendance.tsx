@@ -2,7 +2,7 @@ import Pagination from '@/components/ui/pagination';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { toast, Toaster } from 'sonner';
 import EditAttendanceModal from './editAttendance';
 
@@ -55,7 +55,7 @@ interface Props {
 
 const breadcrumbs = (eventName: string): BreadcrumbItem[] => [
     {
-        title: 'Events',
+        title: 'Kegiatan',
         href: '/events',
     },
     {
@@ -71,6 +71,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isFilterOpen, setIsFilterOpen] = useState(false);
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
+    const dropdownRef = useRef<HTMLDivElement>(null);
     // Limit langsung dari props
     const limit = typeof filters?.limit !== 'undefined' ? filters.limit : 10;
     // Reset selectedIds saat filter tanggal atau limit berubah
@@ -117,7 +118,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                     escape(getStatusLabel(a.status)),
                     escape(a.clock_in_hour || '-'),
                     escape(a.clock_out_hour || '-'),
-                    escape(a.minutes_of_late !== null ? a.minutes_of_late : '-'),
+                    escape(a.minutes_of_late !== null ? `${a.minutes_of_late} Menit` : '-'),
                     escape(a.note || '-')
                 ].join(','));
             });
@@ -132,6 +133,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(url);
+        toast.success('Data berhasil diekspor ke CSV!');
     };
     // Handle select all
     const handleSelectAll = (checked: boolean) => {
@@ -194,6 +196,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
         router.patch(route('events.attendance.update', event.id), formData, {
             preserveScroll: true,
             onSuccess: () => {
+                toast.success('Kehadiran berhasil diperbarui');
                 setIsEditModalOpen(false);
                 setSelectedAttendance(null);
             },
@@ -216,6 +219,8 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
     };
 
     const getStatusLabel = (status: string) => {
+        console.log({ status });
+
         switch (status) {
             case 'present':
                 return 'Hadir';
@@ -229,6 +234,19 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                 return 'Belum Diisi';
         }
     };
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsFilterOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs(event.name)}>
@@ -290,7 +308,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                             >
                                 Ekspor CSV
                             </button>
-                            <div className="relative">
+                            <div className="relative" ref={dropdownRef}>
                                 <button
                                     onClick={() => setIsFilterOpen(!isFilterOpen)}
                                     className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
@@ -419,7 +437,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.clock_in_hour || '-'}</td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.clock_out_hour || '-'}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-500">{attendance.minutes_of_late !== null ? attendance.minutes_of_late : '-'}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">{attendance.minutes_of_late !== null ? `${attendance.minutes_of_late} Menit` : '-'}</td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.note || '-'}</td>
                                         {canEditAttendance && (
                                             <td className="px-4 py-3 text-sm">

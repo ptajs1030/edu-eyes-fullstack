@@ -114,6 +114,8 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
         try {
             const res = await fetch(route('users.template', role.value), {
                 method: 'GET',
+                cache: 'no-store',
+                credentials: 'include'
             });
             if (!res.ok) {
                 const msg = (await res.json().catch(() => null))?.message || 'Gagal mengunduh template';
@@ -123,6 +125,7 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
             const blob = await res.blob();
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
+
             const fileName = res.headers.get('X-File-Name') || `template-import-${role.value}.xlsx`;
             a.href = url;
             a.download = fileName;
