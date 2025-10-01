@@ -222,6 +222,17 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
         }
     };
 
+    const getGenderLabel = (key: string): string => {
+        switch (key.toLowerCase()) {
+            case 'male':
+                return 'Laki-Laki';
+            case 'female':
+                return 'Perempuan';
+            default:
+                return key;
+        }
+    };
+
     return (
         <FormModal isOpen={isOpen} onClose={onClose} title={student ? 'Edit Siswa' : 'Tambah Siswa Baru'} onSubmit={handleSubmit}>
             {/* Profile Picture Section */}
@@ -347,7 +358,7 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                         <option value="">--Pilih Jenis Kelamin--</option>
                         {sexes.map((sex) => (
                             <option key={sex.value} value={sex.value}>
-                                {sex.label}
+                                {getGenderLabel(sex.label)}
                             </option>
                         ))}
                     </select>
