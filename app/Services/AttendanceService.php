@@ -601,7 +601,7 @@ return $classrooms->toArray();
             $query->whereYear('start_date', $parsedDate->year)
               ->whereMonth('start_date', $parsedDate->month);
         }
-        $events = $query->paginate(10);
+        $events = $query->orderBy('end_date', 'desc')->orderBy('start_date', 'desc')->paginate(10);
         if ($events->isEmpty()) {
             throw new SilentHttpException(404, 'Kegiatan tidak ditemukan');
         }
