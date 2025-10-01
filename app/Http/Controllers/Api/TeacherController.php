@@ -18,7 +18,9 @@ use Illuminate\Http\Request;
 
 class TeacherController extends BaseApiController
 {
-    
+ 
+    public function __construct(protected TeacherService $service){}
+
     public function profile(){
         return $this->resource(UserResource::make(auth()->user()));
     }
