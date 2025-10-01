@@ -31,6 +31,7 @@ interface Props {
 }
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Kenaikan Kelas', href: '' }];
+type Banner = { type: 'success' | 'error'; message: string } | null;
 
 export default function GradePromotionIndex({
     classGroups,
@@ -46,15 +47,65 @@ export default function GradePromotionIndex({
     const [showResetModal, setShowResetModal] = useState(false);
     const [showPopulateModal, setShowPopulateModal] = useState(false);
     const [isPopulating, setIsPopulating] = useState(false);
+    const [banner, setBanner] = useState<Banner>(null);
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
 
     useEffect(() => {
-        if (flash?.success) {
-            toast.success(flash.success);
+        const onPageShow = (e: PageTransitionEvent) => {
+            const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+            const isBF = (e as any)?.persisted || nav?.type === 'back_forward';
+            if (isBF) {
+                // hide banner & dismiss toasts yang mungkin tertinggal
+                setBanner(null);
+                toast.dismiss?.();
+            }
+        };
+        const onPageHide = () => {
+            setBanner(null);
+            toast.dismiss?.();
+        };
+        window.addEventListener('pageshow', onPageShow as any);
+        window.addEventListener('pagehide', onPageHide);
+        return () => {
+            window.removeEventListener('pageshow', onPageShow as any);
+            window.removeEventListener('pagehide', onPageHide);
+        };
+    }, []);
+
+    // useEffect(() => {
+    //     const key = 'gp:index:flashShown';
+    //     const msg = flash?.success ?? flash?.error ?? '';
+
+    //     if (!msg) return;
+
+    //     // Hanya tampilkan jika pesan berbeda dari yang sudah pernah ditampilkan pada visit ini
+    //     const already = sessionStorage.getItem(key) === msg;
+    //     if (!already) {
+    //         if (flash?.success) toast.success(flash.success);
+    //         if (flash?.error) toast.error(flash.error);
+    //         sessionStorage.setItem(key, msg);
+    //     }
+    // }, [flash]);
+
+    useEffect(() => {
+        const markPop = () => sessionStorage.setItem('gp:index:suppressBannerOnce', '1');
+        window.addEventListener('popstate', markPop);
+        return () => window.removeEventListener('popstate', markPop);
+    }, []);
+
+    useEffect(() => {
+        // Jika barusan back/forward, jangan render banner satu kali
+        if (sessionStorage.getItem('gp:index:suppressBannerOnce') === '1') {
+            setBanner(null);
+            sessionStorage.removeItem('gp:index:suppressBannerOnce'); // habiskan sekali pakai
+            return;
         }
 
-        if (flash?.error) {
-            toast.error(flash.error);
+        const msg = flash?.success || flash?.error;
+        if (msg) {
+            setBanner({ type: flash?.success ? 'success' : 'error', message: msg });
+        } else {
+            setBanner(null);
         }
     }, [flash]);
 
@@ -135,6 +186,55 @@ export default function GradePromotionIndex({
         );
     };
 
+    const FlashBanner = () =>
+        banner ? (
+            <div
+                role="alert"
+                className={`relative mb-4 flex items-start gap-3 rounded-lg border shadow-sm p-3 sm:p-4 ${banner.type === 'success'
+                    ? 'border-green-200 bg-green-50 text-green-800'
+                    : 'border-red-200 bg-red-50 text-red-800'
+                    }`}
+            >
+                <div className="shrink-0">
+                    {banner.type === 'success' ? (
+                        <svg className="h-5 w-5 sm:h-6 sm:w-6" viewBox="0 0 20 20" fill="currentColor">
+                            <path
+                                fillRule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-10.707a1 1 0 00-1.414-1.414L9 8.586 7.707 7.293A1 1 0 006.293 8.707l2 2a1 1 0 001.414 0l4-4z"
+                                clipRule="evenodd"
+                            />
+                        </svg>
+                    ) : (
+                        <svg className="h-5 w-5 sm:h-6 sm:w-6" viewBox="0 0 20 20" fill="currentColor">
+                            <path
+                                fillRule="evenodd"
+                                d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-6a1 1 0 00-1 1v2a1 1 0 002 0V8a1 1 0 00-1-1z"
+                                clipRule="evenodd"
+                            />
+                        </svg>
+                    )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                    <p className="font-medium">{banner.message}</p>
+                </div>
+
+                <button
+                    onClick={() => setBanner(null)}
+                    aria-label="Tutup notifikasi"
+                    className="ml-2 rounded-md p-1.5 text-current/70 hover:bg-black/5 hover:text-current focus:outline-none focus:ring-2 focus:ring-black/10"
+                >
+                    <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path
+                            fillRule="evenodd"
+                            d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                            clipRule="evenodd"
+                        />
+                    </svg>
+                </button>
+            </div>
+        ) : null;
+
     if (!hasActiveAcademicYear) {
         return (
             <AppLayout breadcrumbs={breadcrumbs}>
@@ -172,6 +272,9 @@ export default function GradePromotionIndex({
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Kenaikan Kelas" />
             <Toaster position="top-right" richColors />
+            <div className="px-6 pt-4">
+                <FlashBanner />
+            </div>
 
             {!hasActiveAcademicYear}
             {!hasData ? (
@@ -194,9 +297,8 @@ export default function GradePromotionIndex({
                     <button
                         onClick={handlePopulate}
                         disabled={isPopulating}
-                        className={`rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-600 ${
-                            isPopulating ? 'cursor-not-allowed opacity-70' : ''
-                        }`}
+                        className={`rounded-md bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:cursor-pointer hover:bg-blue-600 ${isPopulating ? 'cursor-not-allowed opacity-70' : ''
+                            }`}
                     >
                         {isPopulating ? 'Memproses...' : 'Inisialisasi Data'}
                     </button>
@@ -229,9 +331,8 @@ export default function GradePromotionIndex({
                                 <td className="p-4 text-sm">{group.classroom.name}</td>
                                 <td className="p-4 text-sm">
                                     <span
-                                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                                            group.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                                        }`}
+                                        className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${group.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                                            }`}
                                     >
                                         {group.status === 'completed' ? 'Selesai' : 'Draf'}
                                     </span>
@@ -240,6 +341,7 @@ export default function GradePromotionIndex({
                                 <td className="p-4 text-sm">
                                     <Link
                                         href={route('grade-promotions.show', group.class_id)}
+                                        onClick={() => sessionStorage.setItem('gp:index:suppressBannerOnce', '1')}
                                         className="inline-flex items-center rounded-md bg-blue-600 px-3 py-1 text-sm font-medium text-white hover:bg-blue-700"
                                     >
                                         Atur Siswa
@@ -281,9 +383,8 @@ export default function GradePromotionIndex({
                                 <button
                                     onClick={handleFinalize}
                                     disabled={!allCompleted}
-                                    className={`rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 ${
-                                        !allCompleted ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
-                                    }`}
+                                    className={`rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 ${!allCompleted ? 'cursor-not-allowed opacity-50' : 'hover:cursor-pointer'
+                                        }`}
                                 >
                                     Finalisasi
                                 </button>
