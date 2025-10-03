@@ -17,7 +17,7 @@ const expectedHeaderByRole = (roleValue: string): string[] => {
             return ['nama_lengkap', 'username', 'pekerjaan', 'nomor_telepon', 'email', 'alamat', 'password'];
             break;
         case 'teacher':
-            return ['nama_lengkap', 'username', 'nip', 'email', 'nomor_telepon', 'alamat', 'password', 'posisi'];
+            return ['nama_lengkap', 'username', 'nip', 'posisi', 'nomor_telepon', 'email', 'alamat', 'password'];
             break;
         default:
             return [];
@@ -31,7 +31,7 @@ const prettyHeaderByRole = (roleValue: string): string[] => {
             return ['Nama Lengkap', 'Username', 'Pekerjaan', 'Nomor Telepon', 'Email', 'Alamat', 'Password'];
             break;
         case 'teacher':
-            return ['Nama Lengkap', 'Username', 'NIP', 'Email', 'Nomor Telepon', 'Alamat', 'Password', 'Posisi'];
+            return ['Nama Lengkap', 'Username', 'NIP', 'Posisi/Jabatan', 'Nomor Telepon', 'Email', 'Alamat', 'Password'];
             break;
         default:
             return [];
@@ -110,6 +110,17 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
         reader.readAsArrayBuffer(f);
     };
 
+    const mappingRole = (roleName: string) => {
+        switch (roleName.toLowerCase()) {
+            case 'teacher':
+                return 'Guru';
+            case 'parent':
+                return 'Orang Tua';
+            default:
+                return roleName;
+        }
+    }
+
     const handleDownloadTemplate = async () => {
         try {
             const res = await fetch(route('users.template', role.value), {
@@ -133,7 +144,7 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
             a.click();
             a.remove();
             window.URL.revokeObjectURL(url);
-            toast.success(`Template ${role.name} berhasil diunduh`);
+            toast.success(`Template import ${mappingRole(role.name).toLowerCase()} berhasil diunduh`);
         } catch (e: any) {
             toast.error('Terjadi kesalahan saat mengunduh template');
         }
@@ -171,7 +182,7 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
         <FormModal
             isOpen={isOpen}
             onClose={handleClose}
-            title={`Import Data ${role.name}`}
+            title={`Import Data ${mappingRole(role.name)}`}
             onSubmit={(e) => {
                 e.preventDefault();
                 handleImport();
@@ -207,7 +218,7 @@ export default function ImportModal({ isOpen, onClose, role, routePrefix }: Impo
                 </div>
 
                 {/* Template Download Section */}
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between ml-1">
                     <button
                         type="button"
                         onClick={handleDownloadTemplate}

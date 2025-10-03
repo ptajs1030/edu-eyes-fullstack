@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\Api\ForgotPasswordController;
+use App\Http\Controllers\Auth\NewPasswordController;
+use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
@@ -27,6 +30,21 @@ use App\Models\Student;
 Route::get('/', function () {
     return redirect('/login');
 })->name('home');
+Route::get('/forgot-password', [PasswordResetLinkController::class, 'create'])
+    ->middleware('guest')
+    ->name('password.request');
+
+Route::post('/forgot-password', [PasswordResetLinkController::class, 'store'])
+    ->middleware('guest')
+    ->name('password.email');
+
+Route::get('/reset-password/{token}', [NewPasswordController::class, 'create'])
+    ->middleware('guest')
+    ->name('password.reset');
+
+Route::post('/reset-password', [NewPasswordController::class, 'store'])
+    ->middleware('guest')
+    ->name('password.update');
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/parents/search', [UserController::class, 'searchParents'])->name('parents.search');
     Route::get('/teachers/search', [UserController::class, 'searchTeachers'])->name('teachers.search');
