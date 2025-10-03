@@ -261,20 +261,22 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                 <div className="mb-6">
                     <div className="mb-4 flex items-center justify-between">
                         <h3 className="text-lg font-medium text-gray-900">Student Assignments</h3>
-                        {hasUnsavedChanges && (
+                        <div className="flex gap-2">
                             <button
-                                onClick={handleSaveAllScores}
-                                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                                onClick={handleExportScores}
+                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                             >
-                                Simpan Semua Nilai
+                                Export Nilai
                             </button>
-                        )}
-                        <button
-                            onClick={handleExportScores}
-                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                        >
-                            Export Nilai
-                        </button>
+                            {hasUnsavedChanges && (
+                                <button
+                                    onClick={handleSaveAllScores}
+                                    className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                                >
+                                    Simpan Semua Nilai
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     <div className="overflow-hidden rounded-lg border border-gray-200">
