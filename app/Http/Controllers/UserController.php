@@ -237,7 +237,6 @@ class UserController extends Controller
             $roleModel = Role::where('name', $role->value)->firstOrFail();
 
             $validationRules = $this->getValidationRules($role, null);
-
             $validated = $request->validate($validationRules, [
                 'username.unique' => 'Username sudah digunakan',
                 'phone.unique' => 'Nomor telepon sudah digunakan',

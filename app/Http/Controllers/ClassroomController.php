@@ -18,7 +18,14 @@ class ClassroomController extends Controller
     {
         $classrooms = Classroom::with('mainTeacher')
             ->when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%"))
-            ->orderBy($request->sort ?? 'level', $request->direction ?? 'asc')
+            ->when($request->sort, function ($q) use ($request) {
+                // if sort param exists → use it
+                $q->orderBy($request->sort, $request->direction ?? 'asc');
+            }, function ($q) use ($request) {
+                // if sort param does NOT exist → fallback to level + name
+                $q->orderBy('level', $request->direction ?? 'asc')
+                ->orderBy('name', $request->direction ?? 'asc');
+            })
             ->paginate(10)
             ->withQueryString();
 
