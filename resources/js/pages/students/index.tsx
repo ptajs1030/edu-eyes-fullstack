@@ -325,8 +325,10 @@ export default function StudentIndex() {
         try {
             const response = await fetch('/bulk-kartu-siswa', {
                 method: 'POST',
+                credentials: 'same-origin', // penting agar cookie & CSRF ikut
                 headers: {
                     'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
                     'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
                 },
                 body: JSON.stringify({ student_ids: selectedIds }),
@@ -336,11 +338,16 @@ export default function StudentIndex() {
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
+
             const link = document.createElement('a');
             link.href = url;
-            link.download = 'kumpulan-kartu-siswa.pdf';
+            link.download = 'kumpulan-kartu-siswa.pdf'; // nama file default
+            document.body.appendChild(link);
             link.click();
-        } catch {
+            link.remove();
+
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
             toast.error('Gagal download kartu siswa.');
         }
     };

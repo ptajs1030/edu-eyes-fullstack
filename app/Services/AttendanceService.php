@@ -139,10 +139,6 @@ class AttendanceService
             throw new SilentHttpException(404, 'PIC tidak ditemukan');
         }
         
-        if($academic_year!='per-shift'){
-            throw new SilentHttpException(400, 'Absensi tidak aktif');
-        }
-
         $late_tolerance = (int) Setting::where('key', 'late_tolerance')->value('value');
         $start_hour = Carbon::parse($attendance->shifting_start_hour);
         $deadline = $start_hour->copy()->addMinutes($late_tolerance);
@@ -483,9 +479,7 @@ return $classrooms->toArray();
         if($schedule->teacher_id != auth()->user()->id){
             throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengabsen mata pelajaran ini');
         }
-        if ($academic_year != 'per-subject') {
-            throw new SilentHttpException(400, 'Absensi tidak aktif');
-        }
+        
         $presentIds = $data->getStudentIdList();
         $today = Carbon::now()->format('Y-m-d');
         $results = []; 
