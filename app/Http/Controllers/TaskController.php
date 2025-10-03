@@ -343,7 +343,7 @@ class TaskController extends Controller
             $assignment->update(['score' => $validated['score']]);
 
 
-            return redirect()->back()->with('success', 'Nilai berhasil disimpan');
+            return redirect()->back();
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->errors())
