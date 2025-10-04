@@ -40,6 +40,7 @@ class ClassroomScheduleController extends Controller
             'academicYear' => $academicYear,
             'subjectSchedulesByDay' => $this->getSubjectScheduleData($classroom),
             'subjects' => $this->getActiveSubjects(),
+            'refreshed_schedules' => session('refreshed_schedules'),
         ]);
     }
 
@@ -138,6 +139,7 @@ class ClassroomScheduleController extends Controller
     protected function assertNoInternalConflicts(array $schedules): void
     {
         $byDay = collect($schedules)->groupBy('day');
+
         foreach ($byDay as $day => $items) {
             // Cek overlap antar slot di hari yang sama (tanpa peduli subject)
             $sorted = collect($items)->sortBy('start_hour')->values();
@@ -145,7 +147,7 @@ class ClassroomScheduleController extends Controller
                 $prev = $sorted[$i - 1];
                 $curr = $sorted[$i];
                 if ($curr['start_hour'] < $prev['end_hour']) {
-                    throw new Exception("Payload overlaps on day {$day} between {$prev['start_hour']}-{$prev['end_hour']} and {$curr['start_hour']}-{$curr['end_hour']}");
+                    throw new Exception("Terjadi overlap jadwal pada hari {$this->getDayName($day)} antara {$prev['start_hour']}-{$prev['end_hour']} dan {$curr['start_hour']}-{$curr['end_hour']}");
                 }
             }
 
@@ -153,16 +155,26 @@ class ClassroomScheduleController extends Controller
             $byTeacher = collect($items)->groupBy('teacher_id');
             foreach ($byTeacher as $teacherId => $rows) {
                 if (!$teacherId) continue;
+
+                $teacher = User::find($teacherId);
+                $teacherName = $teacher ? $teacher->full_name : "Guru ID {$teacherId}";
+
                 $sortedT = $rows->sortBy('start_hour')->values();
                 for ($i = 1; $i < $sortedT->count(); $i++) {
                     $prev = $sortedT[$i - 1];
                     $curr = $sortedT[$i];
                     if ($curr['start_hour'] < $prev['end_hour']) {
-                        throw new Exception("Teacher {$teacherId} has overlapping schedules in payload on day {$day}");
+                        throw new Exception("{$teacherName} memiliki jadwal yang bertumpuk pada hari {$this->getDayName($day)}: {$prev['start_hour']}-{$prev['end_hour']} dan {$curr['start_hour']}-{$curr['end_hour']}");
                     }
                 }
             }
         }
+    }
+
+    private function getDayName(int $day): string
+    {
+        $dayNames = ['Senin', 'Selasa', 'Rabu', 'Kamis', "Jum'at", 'Sabtu', 'Minggu'];
+        return $dayNames[$day - 1] ?? "Hari {$day}";
     }
 
     public function saveSubjectSchedule(Request $request, Classroom $classroom)
@@ -177,7 +189,9 @@ class ClassroomScheduleController extends Controller
                 $this->processSubjectSchedules($classroom, $validated['schedules']);
             });
 
-            return redirect()->back()->with('success', 'Jadwal mata pelajaran berhasil diperbarui');
+            return redirect()->back()
+                ->with('success', 'Jadwal mata pelajaran berhasil diperbarui')
+                ->with('refreshed_schedules', $this->getSubjectScheduleData($classroom));
         } catch (ValidationException $e) {
             return $this->handleValidationError($e);
         } catch (Exception $e) {
@@ -225,8 +239,11 @@ class ClassroomScheduleController extends Controller
             $overlappingQuery->whereNotIn('id', $excludeIds);
         }
 
-        if ($overlappingQuery->exists()) {
-            throw new Exception("Teacher has another schedule at the same time on day {$scheduleData['day']}");
+        $overlapping = $overlappingQuery->first();
+        if ($overlapping) {
+            $teacher = User::find($scheduleData['teacher_id']);
+            $teacherName = $teacher ? $teacher->full_name : "Guru ID {$scheduleData['teacher_id']}";
+            throw new Exception("{$teacherName} sudah memiliki jadwal pada hari {$this->getDayName($scheduleData['day'])} di waktu yang sama: {$overlapping->start_hour} - {$overlapping->end_hour}");
         }
     }
 
@@ -271,9 +288,9 @@ class ClassroomScheduleController extends Controller
             $overlappingQuery->whereNotIn('id', $excludeIds);
         }
 
-        if ($overlappingQuery->exists()) {
-            $overlaps = $overlappingQuery->get()->map(fn($o) => "ID {$o->id}: {$o->start_hour} - {$o->end_hour}")->implode(', ');
-            throw new Exception("Schedule overlaps with existing schedules on day {$scheduleData['day']}. Overlapping schedules: {$overlaps}");
+        $overlapping = $overlappingQuery->first();
+        if ($overlapping) {
+            throw new Exception("Jadwal bertabrakan dengan jadwal yang sudah ada pada hari {$this->getDayName($scheduleData['day'])}: {$overlapping->start_hour} - {$overlapping->end_hour}");
         }
     }
 
