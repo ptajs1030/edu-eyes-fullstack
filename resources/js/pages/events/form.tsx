@@ -178,8 +178,8 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                 selected_students: selectedStudentIds,
             },
             {
-                onSuccess: () => { },
-                onError: () => { },
+                onSuccess: () => {},
+                onError: () => {},
             },
         );
     };
@@ -200,7 +200,7 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                             <div>
                                 <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                    Nama Kegiatan*
+                                    Nama Kegiatan <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     id="name"
@@ -215,7 +215,7 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
                             </div>
                             <div className="">
                                 <label htmlFor="pics" className="block text-sm font-medium text-gray-700">
-                                    PIC (Penanggung Jawab)*
+                                    PIC (Penanggung Jawab) <span className="text-red-500">*</span>
                                 </label>
                                 <MultiSearchableSelectInline
                                     value={selectedPics}
@@ -230,7 +230,7 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
 
                             <div>
                                 <label htmlFor="start_hour" className="block text-sm font-medium text-gray-700">
-                                    Jam Mulai*
+                                    Jam Mulai <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="time"
@@ -244,7 +244,7 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
 
                             <div>
                                 <label htmlFor="end_hour" className="block text-sm font-medium text-gray-700">
-                                    Jam Selesai*
+                                    Jam Selesai <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     type="time"
@@ -259,7 +259,7 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
 
                             <div>
                                 <label htmlFor="start_date" className="block text-sm font-medium text-gray-700">
-                                    Tanggal Mulai*
+                                    Tanggal Mulai <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     id="start_date"
@@ -274,7 +274,7 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
 
                             <div>
                                 <label htmlFor="end_date" className="block text-sm font-medium text-gray-700">
-                                    Tanggal Selesai*
+                                    Tanggal Selesai <span className="text-red-500">*</span>
                                 </label>
                                 <input
                                     id="end_date"
@@ -289,7 +289,7 @@ export default function EventForm({ teachers, classrooms, event, selectedStudent
 
                             <div className="md:col-span-2">
                                 <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                                    Deskripsi*
+                                    Deskripsi cuy <span className="text-red-500">*</span>
                                 </label>
                                 <textarea
                                     id="description"
