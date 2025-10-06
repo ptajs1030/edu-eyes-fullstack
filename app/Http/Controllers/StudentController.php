@@ -130,12 +130,13 @@ class StudentController extends Controller
                     $query->orderBy('students.' . $request->sort, $direction);
             }
         } else {
-            $query->orderBy('students.full_name', 'asc');
+            $query->orderBy('classrooms.name', 'asc')
+                ->orderBy('students.full_name', 'asc');
         }
 
         // Show data (pagination size)
         $perPage = 10;
-        if ($request->has('show') && in_array($request->show, ['5','10','20','all'])) {
+        if ($request->has('show') && in_array($request->show, ['5', '10', '20', 'all'])) {
             $perPage = $request->show === 'all' ? $query->count() : (int)$request->show;
         }
 
@@ -320,7 +321,8 @@ class StudentController extends Controller
         return response()->json($students);
     }
 
-    public function import(Request $request){
+    public function import(Request $request)
+    {
         $request->validate([
             'file' => 'required|mimes:xlsx,xls,csv|max:2048'
         ]);
@@ -336,18 +338,17 @@ class StudentController extends Controller
         }
     }
 
-    public function downloadTemplate(){
+    public function downloadTemplate()
+    {
         $filename = "template-import-siswa.xlsx";
         $path = storage_path("app/templates/{$filename}");
-        
+
         if (!file_exists($path)) {
             return response()->json(['message' => 'Template tidak ditemukan'], 404);
-            
         }
 
         return response()->file($path, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         ]);
-    }   
-
+    }
 }
