@@ -107,7 +107,7 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
         <FormModal isOpen={isOpen} onClose={onClose} title={classroom ? 'Edit Kelas' : 'Tambahkan Kelas Baru'} onSubmit={handleSubmit}>
             <div className="mb-3">
                 <label htmlFor="level" className="block text-sm font-medium text-gray-700">
-                    Level
+                    Tingkat
                 </label>
                 <input
                     id="level"

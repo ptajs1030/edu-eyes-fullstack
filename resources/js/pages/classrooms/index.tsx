@@ -164,7 +164,7 @@ export default function ClassroomIndex() {
                             </td>
                             <td className="p-3 text-sm">Tingkat {classroom.level}</td>
                             <td className="p-3 text-sm">{classroom.name}</td>
-                            <td className="p-3 text-sm">{classroom.main_teacher ? classroom.main_teacher.full_name : '-- Not assigned --'}</td>
+                            <td className="p-3 text-sm">{classroom.main_teacher ? classroom.main_teacher.full_name : '-- Belum ditugaskan --'}</td>
                             <td className="flex gap-2 p-3">
                                 <button
                                     onClick={() => openForm(classroom)}
