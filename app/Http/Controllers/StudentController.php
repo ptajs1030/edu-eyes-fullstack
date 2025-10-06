@@ -142,9 +142,13 @@ class StudentController extends Controller
 
         $students = $query->paginate($perPage)->withQueryString();
 
+        $classrooms = Classroom::orderBy('level', 'asc')
+            ->orderBy('name', 'asc')
+            ->get();
+
         return Inertia::render('students/index', [
             'students' => $students,
-            'classrooms' => Classroom::orderBy('level', 'asc')->get(),
+            'classrooms' => $classrooms,
             'sexes' => $sexes,
             'statuses' => $statuses,
             'religions' => $religions,
