@@ -80,7 +80,7 @@ export default function ClassroomHistory({ classroom, academicYears, selectedAca
                             <p className="font-semibold">{classroom.name}</p>
                         </div>
                         <div>
-                            <p className="mb-1 text-sm font-medium text-gray-500">Level</p>
+                            <p className="mb-1 text-sm font-medium text-gray-500">Tingkat</p>
                             <p className="font-semibold">{classroom.level}</p>
                         </div>
                         <div>

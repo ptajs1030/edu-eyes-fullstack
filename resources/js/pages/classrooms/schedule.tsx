@@ -459,12 +459,10 @@ export default function ClassroomSchedule({
                                 key={tab}
                                 disabled={(tab === 'By Shifting' && !isShiftMode) || (tab === 'By Subject' && !isSubjectMode)}
                                 className={({ selected }) =>
-                                    `flex-1 rounded-lg py-3 text-center text-sm font-medium transition-all hover:cursor-pointer ${
-                                        selected ? 'bg-white text-blue-700 shadow' : 'text-gray-600 hover:bg-blue-200'
-                                    } ${
-                                        (tab === 'By Shifting' && !isShiftMode) || (tab === 'By Subject' && !isSubjectMode)
-                                            ? 'cursor-not-allowed opacity-50'
-                                            : ''
+                                    `flex-1 rounded-lg py-3 text-center text-sm font-medium transition-all hover:cursor-pointer ${selected ? 'bg-white text-blue-700 shadow' : 'text-gray-600 hover:bg-blue-200'
+                                    } ${(tab === 'By Shifting' && !isShiftMode) || (tab === 'By Subject' && !isSubjectMode)
+                                        ? 'cursor-not-allowed opacity-50'
+                                        : ''
                                     }`
                                 }
                             >
@@ -544,13 +542,13 @@ export default function ClassroomSchedule({
                                                                         onChange={(e) =>
                                                                             handleUpdateSubjectSchedule(day, index, 'start_hour', e.target.value)
                                                                         }
-                                                                        className={`mt-1 w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm ${
-                                                                            schedule.editable
-                                                                                ? 'cursor-text bg-white'
-                                                                                : 'cursor-not-allowed bg-gray-100'
-                                                                        }`}
+                                                                        className={`mt-1 w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm ${schedule.editable
+                                                                            ? 'cursor-text bg-white'
+                                                                            : 'cursor-not-allowed bg-gray-100'
+                                                                            }`}
                                                                         disabled={!schedule.editable}
                                                                         readOnly={!schedule.editable}
+                                                                        required={true}
                                                                     />
                                                                 </div>
 
@@ -564,13 +562,13 @@ export default function ClassroomSchedule({
                                                                         onChange={(e) =>
                                                                             handleUpdateSubjectSchedule(day, index, 'end_hour', e.target.value)
                                                                         }
-                                                                        className={`mt-1 w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm ${
-                                                                            schedule.editable
-                                                                                ? 'cursor-text bg-white'
-                                                                                : 'cursor-not-allowed bg-gray-100'
-                                                                        }`}
+                                                                        className={`mt-1 w-full rounded-md border border-gray-300 p-2 text-sm shadow-sm ${schedule.editable
+                                                                            ? 'cursor-text bg-white'
+                                                                            : 'cursor-not-allowed bg-gray-100'
+                                                                            }`}
                                                                         disabled={!schedule.editable}
                                                                         readOnly={!schedule.editable}
+                                                                        required={true}
                                                                     />
                                                                 </div>
 
@@ -588,14 +586,15 @@ export default function ClassroomSchedule({
                                                                         initialOption={
                                                                             schedule.subject_id
                                                                                 ? {
-                                                                                      id: schedule.subject_id,
-                                                                                      full_name:
-                                                                                          subjects.find((s) => s.id === schedule.subject_id)?.name ||
-                                                                                          '',
-                                                                                  }
+                                                                                    id: schedule.subject_id,
+                                                                                    full_name:
+                                                                                        subjects.find((s) => s.id === schedule.subject_id)?.name ||
+                                                                                        '',
+                                                                                }
                                                                                 : undefined
                                                                         }
                                                                         showInitialOptions={true}
+                                                                        required={true}
                                                                         disabled={!schedule.editable}
                                                                     />
                                                                 </div>
@@ -612,14 +611,15 @@ export default function ClassroomSchedule({
                                                                         initialOption={
                                                                             schedule.teacher_id
                                                                                 ? {
-                                                                                      id: schedule.teacher_id,
-                                                                                      full_name:
-                                                                                          teachers.find((t) => t.id === schedule.teacher_id)
-                                                                                              ?.full_name || '',
-                                                                                  }
+                                                                                    id: schedule.teacher_id,
+                                                                                    full_name:
+                                                                                        teachers.find((t) => t.id === schedule.teacher_id)
+                                                                                            ?.full_name || '',
+                                                                                }
                                                                                 : undefined
                                                                         }
                                                                         showInitialOptions={true}
+                                                                        required={true}
                                                                         disabled={!schedule.editable}
                                                                     />
                                                                 </div>

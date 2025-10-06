@@ -87,16 +87,16 @@ export default function ClassroomDetail({ classroom, academicYear, filters }: Pr
                             <p className="font-semibold">{classroom.name}</p>
                         </div>
                         <div>
-                            <p className="mb-1 text-sm text-gray-500">Main Teacher</p>
-                            <p className="font-semibold">{classroom.main_teacher?.full_name || 'Not assigned'}</p>
+                            <p className="mb-1 text-sm text-gray-500">Wali Kelas</p>
+                            <p className="font-semibold">{classroom.main_teacher?.full_name || 'Belum ditugaskan'}</p>
                         </div>
                         <div>
-                            <p className="mb-1 text-sm text-gray-500">Number of Students</p>
-                            <p className="font-semibold">{classroom.students_count} students</p>
+                            <p className="mb-1 text-sm text-gray-500">Jumlah Siswa</p>
+                            <p className="font-semibold">{classroom.students_count} siswa</p>
                         </div>
                         <div>
                             <p className="mb-1 text-sm text-gray-500">Tahun Akademik</p>
-                            <p className="font-semibold">{academicYear?.title || 'Not set'}</p>
+                            <p className="font-semibold">{academicYear?.title || 'Belum ditentukan'}</p>
                         </div>
                     </div>
                 </div>

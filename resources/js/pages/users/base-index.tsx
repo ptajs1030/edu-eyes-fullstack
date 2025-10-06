@@ -497,7 +497,7 @@ export default function BaseIndex({ users, statuses, filters, breadcrumbs, title
                     isOpen={isResetErrorOpen}
                     onClose={() => setIsResetErrorOpen(false)}
                     title="Reset Password Error"
-                    message={<span>Phone is not set for this user</span>}
+                    message={<span>Nomor telepon belum ditentukan untuk pengguna ini</span>}
                     buttons={[
                         {
                             label: 'OK',
