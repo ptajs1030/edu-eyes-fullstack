@@ -71,6 +71,10 @@
 */
 @layer base {
 
+    ::-webkit-backdrop {
+        border-color: var(--color-gray-200, currentColor);
+    }
+
     *,
     ::after,
     ::before,
@@ -159,4 +163,121 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+
+/* Rich Text Content Styles */
+.rich-text-content {
+    line-height: 1.6;
+}
+
+.rich-text-content h1,
+.rich-text-content h2,
+.rich-text-content h3,
+.rich-text-content h4,
+.rich-text-content h5,
+.rich-text-content h6 {
+    margin-top: 1.5em;
+    margin-bottom: 0.5em;
+    font-weight: 600;
+}
+
+.rich-text-content h1 {
+    font-size: 1.5em;
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: 0.5em;
+}
+
+.rich-text-content h2 {
+    font-size: 1.3em;
+}
+
+.rich-text-content h3 {
+    font-size: 1.1em;
+}
+
+.rich-text-content p {
+    margin-bottom: 1em;
+}
+
+.rich-text-content ul,
+.rich-text-content ol {
+    margin-bottom: 1em;
+    padding-left: 1.5em;
+}
+
+.rich-text-content ul {
+    list-style-type: disc;
+}
+
+.rich-text-content ol {
+    list-style-type: decimal;
+}
+
+.rich-text-content li {
+    margin-bottom: 0.5em;
+}
+
+.rich-text-content blockquote {
+    border-left: 3px solid var(--color-border);
+    padding-left: 1em;
+    margin: 1.5em 0;
+    font-style: italic;
+    color: var(--color-muted-foreground);
+}
+
+.rich-text-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+    border: 1px solid var(--color-border);
+}
+
+.rich-text-content table th,
+.rich-text-content table td {
+    border: 1px solid var(--color-border);
+    padding: 0.75em;
+    text-align: left;
+}
+
+.rich-text-content table th {
+    background-color: var(--color-muted);
+    font-weight: 600;
+}
+
+.rich-text-content strong {
+    font-weight: 600;
+}
+
+.rich-text-content em {
+    font-style: italic;
+}
+
+.rich-text-content a {
+    color: var(--color-primary);
+    text-decoration: underline;
+}
+
+.rich-text-content a:hover {
+    opacity: 0.8;
+}
+
+.rich-text-content code {
+    background-color: var(--color-muted);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+.rich-text-content pre {
+    background-color: var(--color-muted);
+    padding: 1em;
+    border-radius: 5px;
+    overflow-x: auto;
+    margin: 1.5em 0;
+}
+
+.rich-text-content pre code {
+    background: none;
+    padding: 0;
 }

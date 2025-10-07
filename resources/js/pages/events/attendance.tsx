@@ -2,7 +2,7 @@ import Pagination from '@/components/ui/pagination';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useMemo, useState, useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { toast, Toaster } from 'sonner';
 import EditAttendanceModal from './editAttendance';
 
@@ -79,6 +79,10 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
         setSelectedIds([]);
     }, [selectedDates, limit]);
 
+    const renderHTMLContent = (html: string) => {
+        return { __html: html };
+    };
+
     // Hapus sync state limit, gunakan filters.limit langsung
     // Export CSV
     const handleExportCSV = () => {
@@ -86,7 +90,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
         const selectedData = attendances.data.filter((a) => selectedIds.includes(a.id!));
         // Group data by tanggal
         const grouped: { [key: string]: Attendance[] } = {};
-        selectedData.forEach(a => {
+        selectedData.forEach((a) => {
             if (!grouped[a.submit_date]) grouped[a.submit_date] = [];
             grouped[a.submit_date].push(a);
         });
@@ -101,26 +105,28 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
             }
             return s;
         };
-        let csvRows: string[] = [];
+        const csvRows: string[] = [];
         // Baris header di paling atas
         csvRows.push(headers.map(escape).join(','));
         // Data per tanggal
-        sortedDates.forEach(date => {
+        sortedDates.forEach((date) => {
             const attendancesForDate = grouped[date];
             attendancesForDate.forEach((a, idx) => {
                 // Format tanggal tanpa jam
                 const formattedDate = new Date(a.submit_date).toLocaleDateString('id-ID');
-                csvRows.push([
-                    idx === 0 ? escape(formattedDate) : '',
-                    escape(a.student.full_name),
-                    escape(a.student.nis || '-'),
-                    escape(a.student.classroom?.name || '-'),
-                    escape(getStatusLabel(a.status)),
-                    escape(a.clock_in_hour || '-'),
-                    escape(a.clock_out_hour || '-'),
-                    escape(a.minutes_of_late !== null ? `${a.minutes_of_late} Menit` : '-'),
-                    escape(a.note || '-')
-                ].join(','));
+                csvRows.push(
+                    [
+                        idx === 0 ? escape(formattedDate) : '',
+                        escape(a.student.full_name),
+                        escape(a.student.nis || '-'),
+                        escape(a.student.classroom?.name || '-'),
+                        escape(getStatusLabel(a.status)),
+                        escape(a.clock_in_hour || '-'),
+                        escape(a.clock_out_hour || '-'),
+                        escape(a.minutes_of_late !== null ? `${a.minutes_of_late} Menit` : '-'),
+                        escape(a.note || '-'),
+                    ].join(','),
+                );
             });
         });
         const csvContent = csvRows.join('\r\n');
@@ -145,7 +151,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
     };
     // Handle select row
     const handleSelectRow = (id: number) => {
-        setSelectedIds((prev) => prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]);
+        setSelectedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
     };
 
     // Handle flash messages
@@ -255,39 +261,69 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
 
             <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
                 {/* Event Info */}
-                <div className="rounded-lg border p-4">
-                    <h1 className="mb-4 text-2xl font-bold">{event.name}</h1>
-                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-                        <div>
-                            <p className="font-semibold">Tanggal</p>
-                            <p className="mt-1">
-                                {new Date(event.start_date).toLocaleDateString('id-ID')} - {new Date(event.end_date).toLocaleDateString('id-ID')}
-                            </p>
+                <div className="rounded-lg border p-6">
+                    <h1 className="mb-6 text-2xl font-bold text-gray-900">{event.name}</h1>
+
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <div className="space-y-4">
+                            <div>
+                                <h3 className="mb-3 text-sm font-semibold tracking-wide text-gray-700 uppercase">Informasi Waktu</h3>
+                                <div className="space-y-3">
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-600">Tanggal</p>
+                                        <p className="text-gray-900">
+                                            {new Date(event.start_date).toLocaleDateString('id-ID')}
+                                            {event.start_date !== event.end_date && <> - {new Date(event.end_date).toLocaleDateString('id-ID')}</>}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-gray-600">Jam</p>
+                                        <p className="text-gray-900">
+                                            {event.start_hour} - {event.end_hour}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h3 className="mb-3 text-sm font-semibold tracking-wide text-gray-700 uppercase">Penanggung Jawab</h3>
+                                <div className="space-y-2">
+                                    {event.event_pics.length > 0 ? (
+                                        event.event_pics.map((pic, index) => (
+                                            <p key={index} className="text-gray-900">
+                                                {pic.user.full_name}
+                                            </p>
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-500">-</p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
+
                         <div>
-                            <p className="font-semibold">Waktu</p>
-                            <p className="mt-1">
-                                {event.start_hour} - {event.end_hour}
-                            </p>
-                        </div>
-                        <div>
-                            <p className="font-semibold">PIC</p>
-                            <p className="mt-1">{event.event_pics.map((pic) => pic.user.full_name).join(', ') || '-'}</p>
-                        </div>
-                        <div>
-                            <p className="font-semibold">Deskripsi</p>
-                            <p className="mt-1">{event.description || '-'}</p>
+                            <h3 className="mb-3 text-sm font-semibold tracking-wide text-gray-700 uppercase">Deskripsi</h3>
+                            <div className="text-gray-700">
+                                {event.description ? (
+                                    <div
+                                        className="rich-text-content text-sm leading-relaxed"
+                                        dangerouslySetInnerHTML={renderHTMLContent(event.description)}
+                                    />
+                                ) : (
+                                    <p className="text-gray-500 italic">Tidak ada deskripsi</p>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <div className="rounded-lg border p-4">
-                    <div className="mb-4 flex flex-wrap items-center gap-3 justify-between">
+                    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                         <h2 className="text-xl font-bold">Daftar Kehadiran</h2>
                         <div className="flex flex-wrap items-center gap-3">
                             <select
                                 value={limit}
-                                onChange={e => {
+                                onChange={(e) => {
                                     const val = e.target.value;
                                     let newLimit = val === 'all' ? 'all' : Number(val);
                                     // Kirim ke backend, reset ke page 1
@@ -295,7 +331,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                                     if (selectedDates.length > 0) params.dates = selectedDates;
                                     router.get(route('events.attendance', event.id), params, { preserveState: true });
                                 }}
-                                className="rounded-lg border border-gray-300 px-3 py-1 text-sm text-gray-700 bg-white"
+                                className="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700"
                             >
                                 <option value={10}>Show 10 data</option>
                                 <option value={20}>Show 20 data</option>
@@ -304,7 +340,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                             <button
                                 onClick={handleExportCSV}
                                 disabled={selectedIds.length === 0}
-                                className={`rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 ${selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 ${selectedIds.length === 0 ? 'cursor-not-allowed opacity-50' : ''}`}
                             >
                                 Ekspor CSV
                             </button>
@@ -401,7 +437,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                                         <input
                                             type="checkbox"
                                             checked={selectedIds.length === attendances.data.length && attendances.data.length > 0}
-                                            onChange={e => handleSelectAll(e.target.checked)}
+                                            onChange={(e) => handleSelectAll(e.target.checked)}
                                             className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                         />
                                     </th>
@@ -418,7 +454,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200 bg-white">
-                                {attendances.data.map(attendance => (
+                                {attendances.data.map((attendance) => (
                                     <tr key={`${attendance.submit_date}-${attendance.student.id}`}>
                                         <td className="px-4 py-3 text-center">
                                             <input
@@ -428,16 +464,24 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                                                 className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                                             />
                                         </td>
-                                        <td className="px-4 py-3 text-sm text-gray-500">{new Date(attendance.submit_date).toLocaleDateString('id-ID')}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">
+                                            {new Date(attendance.submit_date).toLocaleDateString('id-ID')}
+                                        </td>
                                         <td className="px-4 py-3 text-sm font-medium text-gray-900">{attendance.student.full_name}</td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.student.nis || '-'}</td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.student.classroom?.name || '-'}</td>
                                         <td className="px-4 py-3 text-sm">
-                                            <span className={`inline-block rounded px-2 py-1 text-xs font-semibold ${getStatusColor(attendance.status)}`}>{getStatusLabel(attendance.status)}</span>
+                                            <span
+                                                className={`inline-block rounded px-2 py-1 text-xs font-semibold ${getStatusColor(attendance.status)}`}
+                                            >
+                                                {getStatusLabel(attendance.status)}
+                                            </span>
                                         </td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.clock_in_hour || '-'}</td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.clock_out_hour || '-'}</td>
-                                        <td className="px-4 py-3 text-sm text-gray-500">{attendance.minutes_of_late !== null ? `${attendance.minutes_of_late} Menit` : '-'}</td>
+                                        <td className="px-4 py-3 text-sm text-gray-500">
+                                            {attendance.minutes_of_late !== null ? `${attendance.minutes_of_late} Menit` : '-'}
+                                        </td>
                                         <td className="px-4 py-3 text-sm text-gray-500">{attendance.note || '-'}</td>
                                         {canEditAttendance && (
                                             <td className="px-4 py-3 text-sm">
@@ -467,17 +511,13 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                             <div className="flex justify-center gap-2">
                                 <button
                                     disabled
-                                    className="rounded px-3 py-1 text-sm bg-gray-100 text-black"
+                                    className="rounded bg-gray-100 px-3 py-1 text-sm text-black"
                                     dangerouslySetInnerHTML={{ __html: '&laquo;' }}
                                 />
-                                <button
-                                    className="rounded px-3 py-1 text-sm bg-blue-500 text-white font-bold"
-                                >
-                                    1
-                                </button>
+                                <button className="rounded bg-blue-500 px-3 py-1 text-sm font-bold text-white">1</button>
                                 <button
                                     disabled
-                                    className="rounded px-3 py-1 text-sm bg-gray-100 text-black"
+                                    className="rounded bg-gray-100 px-3 py-1 text-sm text-black"
                                     dangerouslySetInnerHTML={{ __html: '&raquo;' }}
                                 />
                             </div>
