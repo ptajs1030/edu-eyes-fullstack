@@ -22,7 +22,7 @@ class SettingSeeder extends Seeder
             ['key' => 'school_logo', 'title' => 'Logo Sekolah', 'value' => 'https://png.pngtree.com/png-vector/20230725/ourmid/pngtree-school-logo-design-template-vector-png-image_8668651.png', 'type' => 'text'],
             ['key' => 'payment_reminder_days', 'title' => 'Pengingat Tagihan (hari sebelum jatuh tempo)', 'value' => '1', 'type' => 'number'],
             ['key' => 'task_reminder_days', 'title' => 'Pengingat Tugas (hari sebelum deadline)', 'value' => '1', 'type' => 'number'],
-            ['key'=>'admin_phone','title'=>'Nomor Telepon Admin','value'=>'081234567890','type'=>'text'],
+            ['key'=>'admin_phone','title'=>'Nomor Telepon Admin','value'=>'081234567890','type'=>'number'],
         ];
 
         // Delete settings with keys not present in $data
