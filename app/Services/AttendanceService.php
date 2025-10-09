@@ -58,6 +58,7 @@ class AttendanceService
     }
     public function shiftingAttendanceHistory($date, $class_id, $type = 'in', $search)
     {
+        $today = Carbon::now()->format('Y-m-d');
         $dayOff=CustomDayOff::where('date', Carbon::now()->format('Y-m-d'))->where('date', Carbon::parse($date)->format('Y-m-d'))->first();
         if ($dayOff) {
             throw new SilentHttpException(400, 'Hari ini adalah hari libur');
@@ -85,15 +86,22 @@ class AttendanceService
                 $q->where('full_name', 'like', "%$search%");
             });
         }
-        $attendances = $query->latest('submit_date')->with('classroom', 'student')->paginate(10);
+        $attendances = $query
+                    ->with(['classroom', 'student'])
+                    ->leftJoin('classrooms', 'shifting_attendances.class_id', '=', 'classrooms.id')
+                    ->leftJoin('students', 'shifting_attendances.student_id', '=', 'students.id')
+                    ->select('shifting_attendances.*')
+                    ->orderByRaw('classrooms.id IS NOT NULL') // siswa tanpa kelas paling atas
+                    ->orderBy('classrooms.name', 'asc')
+                    ->orderBy('students.full_name', 'asc')
+                    ->paginate(10);
         
         if ($attendances->isEmpty()) {
             throw new SilentHttpException(404, "Data Kosong");
         }
         
-        $attendancesWithClassroom = [];
-        foreach ($attendances->items() as $attendance) {
-            $attendancesWithClassroom[] = [
+        $attendancesWithClassroom=$attendances->map(function($attendance){
+            return[
                 'id' => $attendance->id,
                 'student_name' => optional($attendance->student)->full_name,
                 'classroom' => optional($attendance->classroom)->name,
@@ -108,9 +116,11 @@ class AttendanceService
                 'created_at' => $attendance->created_at,
                 'updated_at' => $attendance->updated_at,
             ];
-        }
+        });
         return [
-            'number_of_attendances' => $query->whereIn('status', ['present', 'late', 'present_in_tolerance'])->where('submit_date', Carbon::now()->format('Y-m-d'))->count() ,
+            'number_of_attendances' => ShiftingAttendance::whereIn('status', ['present', 'late', 'present_in_tolerance'])
+            ->where('submit_date', $today)
+            ->count(),
             'current_page' => $attendances->currentPage(),
             'last_page' => $attendances->lastPage(),
             'per_page' => $attendances->perPage(),
@@ -126,11 +136,11 @@ class AttendanceService
             throw new SilentHttpException(404, 'Murid tidak ditemukan');
         }
         $parent=$student->parent;
-        $day=ClassShiftingSchedule::where('class_id', $student->class_id)->where('day', Carbon::now()->dayOfWeek())->first();
+        $day=ClassShiftingSchedule::where('class_id', $student->class_id)->where('day', Carbon::now('Asia/Jakarta')->dayOfWeek())->first();
         if(!$day){
             throw new SilentHttpException(404, 'Jadwal kelas tidak ditemukan untuk hari ini.');
         }
-        $attendance=ShiftingAttendance::where('student_id', $student->id)->where('submit_date', Carbon::now()->format('Y-m-d'))->where('class_id', $day->class_id)->first();
+        $attendance=ShiftingAttendance::where('student_id', $student->id)->where('submit_date', Carbon::now('Asia/Jakarta')->format('Y-m-d'))->where('class_id', $day->class_id)->first();
         if (!$attendance) {
             throw new SilentHttpException(404, 'Absensi tidak ditemukan');
         }
@@ -262,15 +272,12 @@ class AttendanceService
     }
  
     public function editShiftingAttendance(EditShiftingAttendanceData $data, $attendance_id){
-        $attendance=ShiftingAttendance::where('id', $attendance_id)->where('submit_date', Carbon::now()->format('Y-m-d'))->first();
+        $attendance=ShiftingAttendance::where('id', $attendance_id)->where('submit_date', Carbon::now('Asia/Jakarta')->format('Y-m-d'))->first();
         if (!$attendance) {
             throw new SilentHttpException(404, 'Absensi tidak ditemukan');
         }
-        $submit_date=Carbon::parse($attendance->submit_date)->format('Y-m-d');
-        if($submit_date != Carbon::now()->format('Y-m-d')){
-            throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini, karena tanggal absensi sudah terlewat. Silahkan hubungi admin untuk mengedit absensi');
-        }
-        $classSchedule=ClassShiftingSchedule::where('day', Carbon::now()->dayOfWeek())->first();
+        
+        $classSchedule=ClassShiftingSchedule::where('day', Carbon::now('Asia/Jakarta')->dayOfWeek())->first();
         if (!$classSchedule) {
             throw new SilentHttpException(404, 'Jadwal kelas tidak ditemukan');
         }
@@ -380,20 +387,24 @@ return [
 
     public function getClassroomByTeacher($search){
         $classrooms = ClassSubjectSchedule::query()
-    ->where('teacher_id', auth()->user()->id)
-    ->where('day', Carbon::now()->dayOfWeek())
-    ->leftJoin('classrooms', 'class_subject_schedules.class_id', '=', 'classrooms.id')
-    ->select('classrooms.id', 'classrooms.name')
-    ->when($search, function($q) use ($search) {
-        $q->where('classrooms.name', 'like', "%$search%");
-    })
-    ->get();
-
-if ($classrooms->isEmpty()) {
-    throw new SilentHttpException(404, 'Kelas tidak ditemukan');
-}
-
-return $classrooms->toArray();
+        ->where('teacher_id', auth()->user()->id)
+        ->with('classroom')
+        ->whereHas('classroom', function($q) use ($search) {
+            if ($search) {
+                $q->where('name', 'like', "%$search%");
+            }
+        });
+        $classrooms = $classrooms->get();
+        if ($classrooms->isEmpty()) {
+            throw new SilentHttpException(404, 'Kelas tidak ditemukan');
+        }
+        $classroomNames = $classrooms->map(function($item) {
+            return[
+                'id' => $item->classroom->id,
+                'classroom' => $item->classroom->name,
+            ];
+        })->unique()->values();
+        return $classroomNames;
 
     }
 
