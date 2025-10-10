@@ -293,6 +293,7 @@ class TaskController extends Controller
                     'id' => $assignment->id,
                     'student_name' => $assignment->student?->full_name ?? '-',
                     'class_id' => $assignment->class_id,
+                    'nis' => $assignment->student?->nis ?? '-',
                     'class_name' => $assignment->class_name,
                     'score' => $assignment->score,
                 ];
