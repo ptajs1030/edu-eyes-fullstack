@@ -246,7 +246,7 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
                     {/* Tipe */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Tipe (optional)
+                            Tipe (opsional)
                         </label>
                         <input
                             type="text"
