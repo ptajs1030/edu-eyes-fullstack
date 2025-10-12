@@ -201,7 +201,7 @@ export default function ExamCreate({ subjects, academicYears, classrooms }: Prop
                             disabled
                             className="w-full rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-gray-600"
                         />
-                        <p className="mt-1 text-xs text-gray-500">Auto fill disabled, taken from active academic_year</p>
+                        <p className="mt-1 text-xs text-gray-500">Auto fill dinonaktifkan, diambil dari tahun akademik aktif</p>
                     </div>
 
                     {/* Mata Pelajaran */}
