@@ -242,9 +242,9 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                             <div className="mt-1 rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-sm text-gray-600">
                                 {task.due_date
                                     ? (() => {
-                                          const date = new Date(task.due_date.replace(/-/g, '/'));
-                                          return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('id-ID');
-                                      })()
+                                        const date = new Date(task.due_date.replace(/-/g, '/'));
+                                        return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('id-ID');
+                                    })()
                                     : '-'}
                             </div>
                         </div>
@@ -288,7 +288,7 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Kelas</th>
                                     <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">NILAI</th>
                                     <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">Status</th>
-                                    <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">Action</th>
+                                    <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -315,9 +315,8 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                                         </td>
                                         <td className="px-4 py-3 text-center">
                                             <span
-                                                className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                                                    assignment.score === null ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'
-                                                }`}
+                                                className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${assignment.score === null ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'
+                                                    }`}
                                             >
                                                 {getScoreStatus(assignment.score)}
                                             </span>

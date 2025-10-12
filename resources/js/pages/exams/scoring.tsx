@@ -328,7 +328,7 @@ export default function ExamScoring({ exam, academicYears }: Props) {
                                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Kelas</th>
                                     <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">NILAI</th>
                                     <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">Status</th>
-                                    <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">Action</th>
+                                    <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
