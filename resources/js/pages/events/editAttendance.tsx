@@ -95,7 +95,7 @@ export default function EditAttendanceModal({ attendance, onClose, onSubmit }: P
                         <option value="present">Hadir</option>
                         <option value="present_in_tolerance">Hadir (Toleransi)</option>
                         <option value="late">Terlambat</option>
-                        <option value="alpha">Tidak Masuk</option>
+                        <option value="alpha">Tidak Hadir</option>
                     </select>
                 </div>
 
