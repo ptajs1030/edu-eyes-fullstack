@@ -319,38 +319,38 @@ export default function StudentIndex() {
         );
     };
 
-    const handleBulkPrint = async () => {
-        if (selectedIds.length === 0) return;
+   const handleBulkPrint = async () => {
+       if (selectedIds.length === 0) {
+           toast.error('Pilih minimal satu siswa.');
+           return;
+       }
 
-        try {
-            const response = await fetch('/bulk-kartu-siswa', {
-                method: 'POST',
-                credentials: 'same-origin', // penting agar cookie & CSRF ikut
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': (document.querySelector('meta[name="csrf-token"]') as HTMLMetaElement)?.content || '',
-                },
-                body: JSON.stringify({ student_ids: selectedIds }),
-            });
+       try {
+           const response = await fetch('/bulk-kartu-siswa', {
+               method: 'POST',
+               headers: {
+                   'Content-Type': 'application/json',
+                   'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+               },
+               body: JSON.stringify({ student_ids: selectedIds }),
+           });
 
-            if (!response.ok) throw new Error('Gagal download file PDF');
+           if (!response.ok) throw new Error('Gagal generate PDF');
 
-            const blob = await response.blob();
-            const url = window.URL.createObjectURL(blob);
+           const blob: Blob = await response.blob();
 
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = 'kumpulan-kartu-siswa.pdf'; // nama file default
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+           const url = window.URL.createObjectURL(blob);
+           const a = document.createElement('a');
+           a.href = url;
+           a.download = 'kartu-siswa-bulk.pdf';
+           a.click();
+           window.URL.revokeObjectURL(url);
+       } catch (err) {
+           toast.error('Gagal generate kartu siswa.');
+           console.error(err);
+       }
+   };
 
-            window.URL.revokeObjectURL(url);
-        } catch (error) {
-            toast.error('Gagal download kartu siswa.');
-        }
-    };
 
     const tableHeaders = [
         { key: 'profile_picture', label: 'Foto', sortable: false },
