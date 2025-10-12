@@ -43,7 +43,7 @@ class TeacherController extends BaseApiController
             return $this->resource(ClassroomResource::make(Classroom::findOrFail($id)));
         }
         return $this->resource(
-            ClassroomResource::collection(Classroom::get()->sortBy('name'))
+            ClassroomResource::collection(Classroom::get()->sortBy('name')->values())
         );
     }
 
@@ -62,7 +62,7 @@ class TeacherController extends BaseApiController
             return $this->resource(EventResource::make(Event::findOrFail($id)));
         }
         return $this->resource(
-            EventResource::collection(Event::get()->sortByDesc('end_date')->sortByDesc('start_date'))
+            EventResource::collection(Event::get()->sortByDesc('end_date')->sortByDesc('start_date')->values())
         );
     }
 

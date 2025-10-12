@@ -416,7 +416,7 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
                             disabled={processing}
                             className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
                         >
-                            {processing ? 'Memperbarui...' : 'Ubah'}
+                            {processing ? 'Memperbarui...' : 'Simpan'}
                         </button>
                     </div>
                 </form>
