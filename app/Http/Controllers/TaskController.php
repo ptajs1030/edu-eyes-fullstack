@@ -41,6 +41,12 @@ class TaskController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        // Strip HTML tags from description for each task
+        $tasks->getCollection()->transform(function ($task) {
+            $task->description = strip_tags($task->description);
+            return $task;
+        });
+
         return Inertia::render('tasks/index', [
             'tasks' => $tasks,
             'filters' => $request->only(['search', 'sort', 'direction']),

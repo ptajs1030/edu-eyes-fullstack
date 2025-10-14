@@ -2,6 +2,7 @@
 import ConfirmationModal from '@/components/confirmation-modal';
 import StudentAssignmentModal from '@/components/student-assignment-modal';
 import AppLayout from '@/layouts/app-layout';
+import RichTextEditor from '@/components/rich-text-editor';
 import { BreadcrumbItem } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import React, { useEffect, useState } from 'react';
@@ -262,11 +263,9 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
                     {/* Description */}
                     <div>
                         <label className="mb-2 block text-sm font-medium text-gray-700">Deskripsi</label>
-                        <input
-                            type="text"
+                        <RichTextEditor
                             value={data.description}
-                            onChange={(e) => setData('description', e.target.value)}
-                            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                            onChange={(value) => setData('description', value)}
                             placeholder="Deskripsi tugas..."
                         />
                     </div>

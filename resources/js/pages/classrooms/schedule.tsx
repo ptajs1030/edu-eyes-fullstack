@@ -496,7 +496,7 @@ export default function ClassroomSchedule({
 
                                         {daySchedule.shifting_id && (
                                             <div>
-                                                <label className="mb-1 block text-sm font-medium text-gray-700">Teacher responsible:</label>
+                                                <label className="mb-1 block text-sm font-medium text-gray-700">Penanggung jawab:</label>
                                                 <MultiSearchableSelect
                                                     value={daySchedule.teachers}
                                                     onChange={(value) => handleTeachersChange(index, value)}
