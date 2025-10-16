@@ -51,8 +51,9 @@ Route::prefix('auth')->controller(AuthController::class)->group(function (){
 
 });
 
-Route::controller(ForgotPasswordController::class)->group(function () {
-    Route::post('auth/forgot-password', 'sendLink');
+Route::prefix('auth')->group(function () {
+    Route::post('/forgot-password', [ForgotPasswordController::class, 'sendLink'])
+        ->name('api.password.email');
 });
 
 Route::middleware(['auth:sanctum', 'teacher'])->prefix('teacher')->group(function (){
