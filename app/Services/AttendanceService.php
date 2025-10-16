@@ -78,8 +78,7 @@ class AttendanceService
             );
         }
         if ($type=='out') {
-            $query->whereNotNull('clock_in_hour')
-                  ->whereNotNull('clock_out_hour');
+            $query->whereNotNull('clock_out_hour');
         }
         if ($search) {
             $query->whereHas('student', function($q) use ($search){
@@ -272,22 +271,30 @@ class AttendanceService
     }
  
     public function editShiftingAttendance(EditShiftingAttendanceData $data, $attendance_id){
-        $attendance=ShiftingAttendance::where('id', $attendance_id)->where('submit_date', Carbon::now('Asia/Jakarta')->format('Y-m-d'))->first();
+        $attendance = ShiftingAttendance::where('id', $attendance_id)
+            ->where('submit_date', Carbon::now('Asia/Jakarta')->toDateString())
+            ->first();
+
         if (!$attendance) {
             throw new SilentHttpException(404, 'Absensi tidak ditemukan');
         }
-        
-        $classSchedule=ClassShiftingSchedule::where('day', Carbon::now('Asia/Jakarta')->dayOfWeek())->first();
+
+        $today = Carbon::now('Asia/Jakarta');
+        $classSchedule = ClassShiftingSchedule::where('day', $today->dayOfWeek)->first();
         if (!$classSchedule) {
             throw new SilentHttpException(404, 'Jadwal kelas tidak ditemukan');
         }
-        $pic = ClassShiftingSchedulePic::where('class_shifting_schedule_id', $classSchedule->id)->first('teacher_id');
-        if (!$pic) {
-            throw new SilentHttpException(404, 'PIC tidak ditemukan');
+
+        $pic = ClassShiftingSchedulePic::where('class_shifting_schedule_id', $classSchedule->id)
+            ->first(['teacher_id']);
+        if (!$pic || !$pic->teacher_id) {
+            throw new SilentHttpException(404, 'PIC tidak ditemukan atau belum diatur');
         }
-        if ($pic->teacher_id != auth()->user()->id) {
+
+        if ((int) $pic->teacher_id !== (int) auth()->id()) {
             throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
         }
+
         $attendance->update([
             'status' => $data->getStatus(),
         ]);
@@ -296,6 +303,7 @@ class AttendanceService
             'message' => 'Absensi berhasil diupdate',
             'attendance' => $attendance,
         ];
+
     }
 
     public function subjectAttendanceHistory($date, $class_id, $subject){
