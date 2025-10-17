@@ -59,48 +59,56 @@ class AttendanceService
     public function shiftingAttendanceHistory($date, $class_id, $type = 'in', $search)
     {
         $today = Carbon::now()->format('Y-m-d');
-        $dayOff=CustomDayOff::where('date', Carbon::now()->format('Y-m-d'))->where('date', Carbon::parse($date)->format('Y-m-d'))->first();
+
+        $dayOff = CustomDayOff::whereDate('date', $today)->first();
         if ($dayOff) {
             throw new SilentHttpException(400, 'Hari ini adalah hari libur');
         }
-        $query=ShiftingAttendance::query();
+
+        $query = ShiftingAttendance::query();
+
         if ($date) {
             $parsedDate = Carbon::parse($date)->format('Y-m-d');
-            $query->where('submit_date', $parsedDate);
+            $query->whereDate('shifting_attendances.submit_date', $parsedDate);
         }
+
         if ($class_id) {
-            $query->where('class_id', $class_id)->whereHas('student') 
-            ->whereHas('student')
-            ->orderByRaw("FIELD(status, 'present', 'present_in_tolerance', 'alpha') ASC")
-            ->orderBy(
-                Student::select('full_name')
-                ->whereColumn('students.id', 'shifting_attendances.student_id'),'asc'
-            );
+            $query->where('shifting_attendances.class_id', $class_id)
+                ->whereHas('student')
+                ->orderByRaw("FIELD(shifting_attendances.status, 'present', 'present_in_tolerance', 'alpha') ASC")
+                ->orderBy(
+                    Student::select('full_name')
+                        ->whereColumn('students.id', 'shifting_attendances.student_id'),
+                    'asc'
+                );
         }
-        if ($type=='out') {
-            $query->whereNotNull('clock_out_hour');
+
+        if ($type === 'out') {
+            $query->whereNotNull('shifting_attendances.clock_out_hour');
         }
+
         if ($search) {
-            $query->whereHas('student', function($q) use ($search){
+            $query->whereHas('student', function ($q) use ($search) {
                 $q->where('full_name', 'like', "%$search%");
             });
         }
+
         $attendances = $query
-                    ->with(['classroom', 'student'])
-                    ->leftJoin('classrooms', 'shifting_attendances.class_id', '=', 'classrooms.id')
-                    ->leftJoin('students', 'shifting_attendances.student_id', '=', 'students.id')
-                    ->select('shifting_attendances.*')
-                    ->orderByRaw('classrooms.id IS NOT NULL') // siswa tanpa kelas paling atas
-                    ->orderBy('classrooms.name', 'asc')
-                    ->orderBy('students.full_name', 'asc')
-                    ->paginate(10);
-        
+            ->with(['classroom', 'student'])
+            ->leftJoin('classrooms', 'shifting_attendances.class_id', '=', 'classrooms.id')
+            ->leftJoin('students', 'shifting_attendances.student_id', '=', 'students.id')
+            ->select('shifting_attendances.*')
+            ->orderByRaw('classrooms.id IS NOT NULL DESC')
+            ->orderBy('classrooms.name', 'asc')
+            ->orderBy('students.full_name', 'asc')
+            ->paginate(10);
+
         if ($attendances->isEmpty()) {
             throw new SilentHttpException(404, "Data Kosong");
         }
-        
-        $attendancesWithClassroom=$attendances->map(function($attendance){
-            return[
+
+        $attendancesWithClassroom = $attendances->map(function ($attendance) {
+            return [
                 'id' => $attendance->id,
                 'student_name' => optional($attendance->student)->full_name,
                 'classroom' => optional($attendance->classroom)->name,
@@ -116,15 +124,17 @@ class AttendanceService
                 'updated_at' => $attendance->updated_at,
             ];
         });
+
         return [
-            'number_of_attendances' => ShiftingAttendance::whereIn('status', ['present', 'late', 'present_in_tolerance'])
-            ->where('submit_date', $today)
-            ->count(),
+            'number_of_attendances' => ShiftingAttendance::whereIn('status', ['present', 'late',        'present_in_tolerance'])
+                ->whereDate('submit_date', $today)
+                ->count(),
             'current_page' => $attendances->currentPage(),
             'last_page' => $attendances->lastPage(),
             'per_page' => $attendances->perPage(),
             'attendances' => $attendancesWithClassroom,
         ];
+
     }
     
 
@@ -285,15 +295,18 @@ class AttendanceService
             throw new SilentHttpException(404, 'Jadwal kelas tidak ditemukan');
         }
 
-        $pic = ClassShiftingSchedulePic::where('class_shifting_schedule_id', $classSchedule->id)
-            ->first(['teacher_id']);
-        if (!$pic || !$pic->teacher_id) {
-            throw new SilentHttpException(404, 'PIC tidak ditemukan atau belum diatur');
-        }
+        $pics = ClassShiftingSchedulePic::where('class_shifting_schedule_id', $classSchedule->id)
+        ->pluck('teacher_id')
+        ->toArray();
 
-        if ((int) $pic->teacher_id !== (int) auth()->id()) {
-            throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
-        }
+    if (empty($pics)) {
+        throw new SilentHttpException(404, 'PIC tidak ditemukan atau belum diatur');
+    }
+
+
+    if (!in_array(auth()->id(), $pics)) {
+        throw new SilentHttpException(403, 'Anda tidak diizinkan untuk mengedit absensi ini');
+    }
 
         $attendance->update([
             'status' => $data->getStatus(),
