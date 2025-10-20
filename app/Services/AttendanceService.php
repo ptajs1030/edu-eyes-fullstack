@@ -293,7 +293,7 @@ class AttendanceService
         $todayDayOfWeek= $today->dayOfWeek === 0 ? 7 : $today->dayOfWeek;
         $classSchedule = ClassShiftingSchedule::where('day', $todayDayOfWeek)->whereHas('shifting', function($q) use ($attendance) {
             $q->where('name', $attendance->shifting_name);
-        })->first();
+        })->where('class_id', $attendance->class_id)->first();
         if (!$classSchedule) {
             throw new SilentHttpException(404, 'Jadwal kelas tidak ditemukan');
         }
