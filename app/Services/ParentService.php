@@ -55,7 +55,7 @@ class ParentService
         $today = Carbon::now()->format('Y-m-d');
         $dayOff=CustomDayOff::where('date', Carbon::parse($today)->format('Y-m-d'))->first();
         if ($dayOff) {
-            throw new SilentHttpException(400, 'Hari ini adalah hari libur'. $dayOff->description);
+            throw new SilentHttpException(400, 'Hari ini adalah hari libur'. ' '.$dayOff->description);
         }
         $attendance = ShiftingAttendance::where('student_id', $student->id)
         ->where('submit_date', Carbon::now('Asia/Jakarta')->format('Y-m-d'))

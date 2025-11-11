@@ -41,7 +41,7 @@ class AttendanceService
         $today = Carbon::now()->format('Y-m-d');
         $dayOff=CustomDayOff::where('date', Carbon::parse($today)->format('Y-m-d'))->first();
         if ($dayOff) {
-            throw new SilentHttpException(400, 'Hari ini adalah hari libur');
+            throw new SilentHttpException(400, 'Hari ini adalah hari libur'.' '. $dayOff->description);
         }
         $attendances = ShiftingAttendance::where('submit_date', $today)->whereIn('status', ['present', 'late', 'present_in_tolerance'])
             ->with('student', 'classroom')
@@ -411,25 +411,28 @@ return [
 
     public function getClassroomByTeacher($search){
         $classrooms = ClassSubjectSchedule::query()
-        ->where('teacher_id', auth()->user()->id)
-        ->with('classroom')
-        ->whereHas('classroom', function($q) use ($search) {
-            if ($search) {
-                $q->where('name', 'like', "%$search%");
-            }
-        });
-        $classrooms = $classrooms->get();
+            ->where('teacher_id', auth()->user()->id)
+            ->join('classrooms', 'class_subject_schedules.class_id', '=', 'classrooms.id')
+            ->when($search, function($q) use ($search) {
+                $q->where('classrooms.name', 'like', "%{$search}%");
+            })
+            ->select('classrooms.id', 'classrooms.name')
+            ->distinct()
+            ->orderBy('classrooms.name', 'asc')
+            ->get();
+
         if ($classrooms->isEmpty()) {
             throw new SilentHttpException(404, 'Kelas tidak ditemukan');
         }
-        $classroomNames = $classrooms->map(function($item) {
-            return[
-                'id' => $item->classroom->id,
-                'classroom' => $item->classroom->name,
-            ];
-        })->unique()->values();
-        return $classroomNames;
 
+        $classroomNames = $classrooms->map(function($item) {
+            return [
+                'id' => $item->id,
+                'classroom' => $item->name,
+            ];
+        })->values();
+
+        return $classroomNames;
     }
 
     public function getClassroomSubject($class_id, $search = null){
