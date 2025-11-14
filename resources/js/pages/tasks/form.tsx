@@ -1,4 +1,5 @@
 import AppLayout from '@/layouts/app-layout';
+import RichTextEditor from '@/components/rich-text-editor';
 import { BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
@@ -128,10 +129,10 @@ export default function CreateTask({ academicYears, selectedStudents, classrooms
 
     const handleSelectAllStudents = (checked: boolean) => {
         if (checked) {
-     
+
             setSelectedStudentIds((prev) => {
                 const newIds = students.map((student) => student.id);
-                return Array.from(new Set([...prev, ...newIds])); 
+                return Array.from(new Set([...prev, ...newIds]));
             });
         } else {
             const studentIdsToRemove = students.map((student) => student.id);
@@ -267,12 +268,10 @@ export default function CreateTask({ academicYears, selectedStudents, classrooms
                                 <label htmlFor="description" className="block text-sm font-medium text-gray-700">
                                     Deskripsi
                                 </label>
-                                <textarea
-                                    id="description"
+                                <RichTextEditor
                                     value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                                    rows={4}
+                                    onChange={(value) => setFormData({ ...formData, description: value })}
+                                    placeholder="Ketik deskripsi tugas di sini..."
                                 />
                             </div>
                         </div>

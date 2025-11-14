@@ -158,7 +158,7 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                 </div>
                 <div className="mb-3">
                     <label htmlFor="note" className="block text-sm font-medium text-gray-700">
-                        Catatan (optional)
+                        Catatan (opsional)
                     </label>
                     <textarea
                         name="note"

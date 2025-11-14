@@ -113,7 +113,9 @@ export default function CreateAnnouncement() {
                             <label className="mb-1 block text-sm font-medium text-gray-700">
                                 Konten <span className="text-red-500">*</span>
                             </label>
-                            <RichTextEditor value={content} onChange={setContent} placeholder="Ketik konten pengumuman di sini..." />
+                            <div className="[&_.ql-editor]:text-sm sm:[&_.ql-editor]:text-sm">
+                                <RichTextEditor value={content} onChange={setContent} placeholder="Ketik konten pengumuman di sini..." />
+                            </div>
                         </div>
                         <div>
                             <label className="mb-2 block text-sm font-medium text-gray-700">Lampiran</label>

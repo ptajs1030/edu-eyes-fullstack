@@ -41,6 +41,12 @@ class TaskController extends Controller
             ->paginate(10)
             ->withQueryString();
 
+        // Strip HTML tags from description for each task
+        $tasks->getCollection()->transform(function ($task) {
+            $task->description = strip_tags($task->description);
+            return $task;
+        });
+
         return Inertia::render('tasks/index', [
             'tasks' => $tasks,
             'filters' => $request->only(['search', 'sort', 'direction']),
@@ -293,6 +299,7 @@ class TaskController extends Controller
                     'id' => $assignment->id,
                     'student_name' => $assignment->student?->full_name ?? '-',
                     'class_id' => $assignment->class_id,
+                    'nis' => $assignment->student?->nis ?? '-',
                     'class_name' => $assignment->class_name,
                     'score' => $assignment->score,
                 ];
@@ -343,7 +350,7 @@ class TaskController extends Controller
             $assignment->update(['score' => $validated['score']]);
 
 
-            return redirect()->back()->with('success', 'Nilai berhasil disimpan');
+            return redirect()->back();
         } catch (ValidationException $e) {
             return redirect()->back()
                 ->withErrors($e->errors())

@@ -289,7 +289,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                                         </option>
                                     ))}
                                 </select>
-                                <p className="mt-1 text-xs text-gray-500">Dropdown, taken from table subjects</p>
+                                <p className="mt-1 text-xs text-gray-500">Dropdown, diambil dari tabel subjects</p>
                                 {errors.subject_id && <p className="mt-1 text-xs text-red-500">{errors.subject_id}</p>}
                             </>
                         )}
@@ -307,13 +307,13 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                             required
                             disabled={!isEditable}
                         />
-                        <p className="mt-1 text-xs text-gray-500">String, max 70 char ({nameLength}/70)</p>
+                        <p className="mt-1 text-xs text-gray-500">String, maksimal 70 karakter ({nameLength}/70)</p>
                         {errors.name && <p className="mt-1 text-xs text-red-500">{errors.name}</p>}
                     </div>
 
                     {/* Tipe */}
                     <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">Tipe (optional)</label>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">Tipe (opsional)</label>
                         <input
                             type="text"
                             value={data.type}
@@ -322,7 +322,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                             placeholder="Contoh: Ulangan Harian, Quiz, UTS, UAS"
                             disabled={!isEditable}
                         />
-                        <p className="mt-1 text-xs text-gray-500">String, max 70 char (optional) ({typeLength}/70)</p>
+                        <p className="mt-1 text-xs text-gray-500">String, maksimal 70 karakter (opsional) ({typeLength}/70)</p>
                         {errors.type && <p className="mt-1 text-xs text-red-500">{errors.type}</p>}
                     </div>
 
@@ -337,7 +337,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                             required
                             disabled={!isEditable}
                         />
-                        <p className="mt-1 text-xs text-gray-500">Select date (dateonly) in calendar</p>
+                        <p className="mt-1 text-xs text-gray-500">Pilih tanggal pada kalender (tanpa waktu)</p>
                         {errors.date && <p className="mt-1 text-xs text-red-500">{errors.date}</p>}
                     </div>
 
@@ -345,7 +345,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                     <div>
                         <div className="mb-4 flex items-center justify-between">
                             <div>
-                                <h3 className="text-lg font-medium text-gray-900">Student Assignments</h3>
+                                <h3 className="text-lg font-medium text-gray-900">Penugasan Siswa</h3>
                                 <p className="mt-1 text-sm text-gray-600">
                                     {scoredStudents} dari {totalStudents} siswa sudah dinilai
                                 </p>
@@ -370,7 +370,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">NIS</th>
                                             <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Kelas</th>
                                             <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">Status Nilai</th>
-                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Action</th>
+                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -428,7 +428,7 @@ export default function ExamEdit({ exam, subjects, academicYears, classrooms }: 
                                                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                                                             />
                                                         </svg>
-                                                        Remove
+                                                        Hapus
                                                     </button>
                                                 </td>
                                             </tr>

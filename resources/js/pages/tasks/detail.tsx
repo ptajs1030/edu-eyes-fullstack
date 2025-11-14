@@ -242,9 +242,9 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                             <div className="mt-1 rounded-lg border border-gray-300 bg-gray-100 px-3 py-2 text-sm text-gray-600">
                                 {task.due_date
                                     ? (() => {
-                                          const date = new Date(task.due_date.replace(/-/g, '/'));
-                                          return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('id-ID');
-                                      })()
+                                        const date = new Date(task.due_date.replace(/-/g, '/'));
+                                        return isNaN(date.getTime()) ? '-' : date.toLocaleDateString('id-ID');
+                                    })()
                                     : '-'}
                             </div>
                         </div>
@@ -261,20 +261,22 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                 <div className="mb-6">
                     <div className="mb-4 flex items-center justify-between">
                         <h3 className="text-lg font-medium text-gray-900">Student Assignments</h3>
-                        {hasUnsavedChanges && (
+                        <div className="flex gap-2">
                             <button
-                                onClick={handleSaveAllScores}
-                                className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                                onClick={handleExportScores}
+                                className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
                             >
-                                Simpan Semua Nilai
+                                Export Nilai
                             </button>
-                        )}
-                        <button
-                            onClick={handleExportScores}
-                            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
-                        >
-                            Export Nilai
-                        </button>
+                            {hasUnsavedChanges && (
+                                <button
+                                    onClick={handleSaveAllScores}
+                                    className="rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
+                                >
+                                    Simpan Semua Nilai
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     <div className="overflow-hidden rounded-lg border border-gray-200">
@@ -286,7 +288,7 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                                     <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Kelas</th>
                                     <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">NILAI</th>
                                     <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">Status</th>
-                                    <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">Action</th>
+                                    <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -313,9 +315,8 @@ export default function TaskScoring({ task, studentAssignments }: Props) {
                                         </td>
                                         <td className="px-4 py-3 text-center">
                                             <span
-                                                className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
-                                                    assignment.score === null ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'
-                                                }`}
+                                                className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${assignment.score === null ? 'bg-gray-100 text-gray-800' : 'bg-green-100 text-green-800'
+                                                    }`}
                                             >
                                                 {getScoreStatus(assignment.score)}
                                             </span>
