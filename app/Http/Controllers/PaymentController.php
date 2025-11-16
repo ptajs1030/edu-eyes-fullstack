@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
+use App\Services\FirebaseService;
 
 class PaymentController extends Controller
 {
@@ -34,7 +35,7 @@ class PaymentController extends Controller
             ->orderBy($request->sort ?? 'created_at', $request->direction ?? 'desc')
             ->paginate(10)
             ->withQueryString();
-            
+
 
         $payments->getCollection()->transform(function ($payments) {
             return [
@@ -274,6 +275,108 @@ class PaymentController extends Controller
                 );
         } catch (\Exception $e) {
             Log::error('Gagal mengirim notifikasi tagihan', [
+                'payment_id' => $payment->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->route('payments.index')
+                ->with('error', 'Gagal mengirim notifikasi: ' . $e->getMessage());
+        }
+    }
+
+    public function manualResendNotification(Payment $payment)
+    {
+        try {
+
+            $now = now('Asia/Jakarta');
+            $dueDate = $payment->due_date->format('Y-m-d');
+            $dueDateTime = Carbon::parse($dueDate . ' 23:59:59', 'Asia/Jakarta');
+
+            if ($now->greaterThan($dueDateTime)) {
+                return redirect()->route('payments.index')
+                    ->with('error', 'Tidak dapat mengirim notifikasi karena tagihan sudah melewati tenggat waktu.');
+            }
+
+            $payment->load(['assignments.student.parent', 'academicYear']);
+
+            $tokens = [];
+            $noTokenParents = [];
+            $alreadyPaid = 0;
+
+            foreach ($payment->assignments as $assignment) {
+                if ($assignment->payment_date) {
+                    $alreadyPaid++;
+                    continue;
+                }
+
+                $studentName = $assignment->student->full_name ?? 'Unknown';
+
+                if (!$assignment->student?->parent?->notification_key) {
+                    // Tidak punya token
+                    $noTokenParents[] = $studentName;
+                } else {
+                    // Punya token
+                    $tokens[] = $assignment->student->parent->notification_key;
+                }
+            }
+
+            $noTokenCount = count($noTokenParents);
+            $withTokenCount = count($tokens);
+
+            if ($withTokenCount === 0) {
+                $message = "Tidak ada orang tua yang dapat menerima notifikasi.";
+                if ($alreadyPaid > 0) {
+                    $message .= " {$alreadyPaid} tagihan sudah lunas.";
+                }
+                if ($noTokenCount > 0) {
+                    $message .= " {$noTokenCount} tidak memiliki token notifikasi.";
+                }
+
+                return redirect()->route('payments.index')
+                    ->with('info', $message);
+            }
+
+            $firebaseService = app(FirebaseService::class);
+
+            $dueDateFormatted = $payment->due_date->format('d M Y');
+            $nominal = number_format($payment->nominal, 0, ',', '.');
+            $academicYear = $payment->academicYear->title ?? 'Tahun Ajaran';
+
+            $result = $firebaseService->sendToMultipleDevices(
+                $tokens,
+                'Pengingat Tagihan',
+                "Pengingat: Tagihan '{$payment->title}' ({$academicYear}) sebesar Rp {$nominal}. Deadline: {$dueDateFormatted}",
+                [
+                    'type' => 'payment_manual',
+                    'payment_id' => (string) $payment->id,
+                    'title' => $payment->title,
+                    'nominal' => (string) $payment->nominal,
+                    'formatted_nominal' => 'Rp ' . number_format($payment->nominal, 0, ',', '.'),
+                    'due_date' => $payment->due_date->format('Y-m-d'),
+                    'action' => 'view_payment'
+                ]
+            );
+
+            $successCount = $result['success_count'] ?? $result['total_sent'] ?? 0;
+            $failedCount = $result['failure_count'] ?? $result['total_failed'] ?? 0;
+
+            $message = "Notifikasi: {$successCount} berhasil, {$failedCount} gagal";
+
+            if ($noTokenCount > 0) {
+                $message .= ", {$noTokenCount} tidak memiliki token";
+            }
+
+            if ($alreadyPaid > 0) {
+                $message .= ", {$alreadyPaid} sudah lunas";
+            }
+
+            $messageType = $successCount > 0 ? 'success' : 'warning';
+
+            return redirect()->route('payments.index')
+                ->with($messageType, $message);
+        } catch (\Exception $e) {
+            Log::error('Gagal mengirim notifikasi tagihan multicast', [
                 'payment_id' => $payment->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
