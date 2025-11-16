@@ -89,10 +89,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
 
     Route::get('/users/template/{role}', [UserController::class, 'downloadTemplate'])->name('users.template');
     Route::resource('payments', PaymentController::class);
-    Route::patch('/payments/{payment}/transactions/update', [PaymentController::class, 'updateTransactions'])
-        ->name('payments.updateTransactions');
-    Route::post('/payments/{payment}/resend-notification', [PaymentController::class, 'resendNotification'])
-        ->name('payments.resend-notification');
+    Route::patch('/payments/{payment}/transactions/update', [PaymentController::class, 'updateTransactions'])->name('payments.updateTransactions');
+    // Route::post('/payments/{payment}/resend-notification', [PaymentController::class, 'resendNotification'])->name('payments.resend-notification');
+    Route::post('/payments/{payment}/resend-notification', [PaymentController::class, 'manualResendNotification'])->name('payments.resend-notification');
     Route::resource('announcements', AnnouncementController::class);
     Route::resource('academic-years', AcademicYearController::class);
     Route::resource('classrooms', ClassroomController::class);
