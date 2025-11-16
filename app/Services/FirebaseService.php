@@ -49,7 +49,7 @@ class FirebaseService
             }
 
             return ['message_id' => $this->messaging->send($message)];
-        } catch (MessagingException|Exception $e) {
+        } catch (MessagingException | Exception $e) {
             Log::error('Firebase Messaging Error', [
                 'exception' => $e,
                 'message' => $e->getMessage(),
@@ -63,15 +63,25 @@ class FirebaseService
 
     private function formatMulticastResponse($response, array $tokens): array
     {
-        $results = [];
-        foreach ($response->failures()->getItems() as $item) {
-            $results[] = ['token' => $tokens[$item->index()], 'success' => false, 'error' => $item->error()->getMessage()];
-        }
-        foreach ($response->successes()->getItems() as $item) {
-            $results[] = ['token' => $tokens[$item->index()], 'success' => true, 'message_id' => $item->result()];
-        }
 
-        return ['total_sent' => $response->successes()->count(), 'total_failed' => $response->failures()->count(), 'results' => $results];
+        return [
+            'total_sent' => $response->successes()->count(),
+            'total_failed' => $response->failures()->count(),
+            'success_count' => $response->successes()->count(),
+            'failure_count' => $response->failures()->count()
+        ];
+
+        // TODOD: fix this, error
+
+        // $results = [];
+        // foreach ($response->failures()->getItems() as $item) {
+        //     $results[] = ['token' => $tokens[$item->index()], 'success' => false, 'error' => $item->error()->getMessage()];
+        // }
+        // foreach ($response->successes()->getItems() as $item) {
+        //     $results[] = ['token' => $tokens[$item->index()], 'success' => true, 'message_id' => $item->result()];
+        // }
+
+        // return ['total_sent' => $response->successes()->count(), 'total_failed' => $response->failures()->count(), 'results' => $results];
     }
 
     private function applyPlatformConfigs(CloudMessage $message, array $options = []): CloudMessage

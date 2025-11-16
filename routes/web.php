@@ -144,7 +144,9 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::put('/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
     Route::put('/tasks/{task}/assignments/{assignment}/score', [TaskController::class, 'updateScore'])->name('tasks.updateScore');
     Route::put('/tasks/{task}/scores/bulk', [TaskController::class, 'updateBulkScores'])->name('tasks.updateBulkScores');
-    Route::post('/tasks/{task}/resend-notification', [TaskController::class, 'resendNotification'])->name('tasks.resend-notification');
+    // Route::post('/tasks/{task}/resend-notification', [TaskController::class, 'resendNotification'])->name('tasks.resend-notification');
+    Route::post('/tasks/{task}/resend-notification', [TaskController::class, 'manualResendNotification'])->name('tasks.resend-notification');
+
     Route::resource('events', EventController::class);
 
     Route::prefix('events/{event}')->group(function () {
