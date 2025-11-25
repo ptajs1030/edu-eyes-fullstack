@@ -76,7 +76,7 @@ class GradePromotionController extends Controller
     public function index(Request $request): Response
     {
         $currentAcademicYear = $this->getAcademicYear();
-        
+
         if (!$currentAcademicYear) {
             return Inertia::render('grade-promotions/index', [
                 'classGroups' => [],
@@ -112,6 +112,9 @@ class GradePromotionController extends Controller
 
         $validSorts = ['class_id', 'name', 'level', 'status'];
         $validDirections = ['asc', 'desc'];
+
+        $query->orderBy('classrooms.level', 'asc')
+            ->orderBy('classrooms.name', 'asc');
 
         if (in_array($sort, $validSorts) && in_array($direction, $validDirections)) {
             if ($sort === 'name' || $sort === 'level') {
