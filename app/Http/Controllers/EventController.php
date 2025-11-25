@@ -33,7 +33,7 @@ class EventController extends Controller
             ->with(['eventPics.user'])
             ->withCount('participants')
             ->when($request->search, fn($q) => $q->where('name', 'like', "%{$request->search}%"))
-            ->orderBy($request->sort ?? 'start_date', $request->direction ?? 'asc')
+            ->orderBy($request->sort ?? 'start_date', $request->direction ?? 'desc')
             ->paginate(10)
             ->withQueryString();
 
@@ -162,7 +162,7 @@ class EventController extends Controller
                 'start_hour' => $this->formatTimeForDisplay($event->start_hour),
                 'end_hour' => $this->formatTimeForDisplay($event->end_hour),
                 'pics' => $event->eventPics
-                    ->filter(fn ($pic) => $pic->user) // hanya ambil yang ada user
+                    ->filter(fn($pic) => $pic->user) // hanya ambil yang ada user
                     ->map(function ($pic) {
                         return [
                             'id' => $pic->id,
