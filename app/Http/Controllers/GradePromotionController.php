@@ -164,6 +164,8 @@ class GradePromotionController extends Controller
                     ->orWhere('level', $isHighestLevel ? $currentClass->level : $currentClass->level + 1); // Next level or same if highest
             })
                 ->select('id', 'name', 'level')
+                ->orderBy('level', 'asc')
+                ->orderBy('name', 'asc')
                 ->get();
 
             $unassignedCount = TemporaryClassStudent::where('initial_class_id', $classId)
