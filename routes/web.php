@@ -90,8 +90,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/users/template/{role}', [UserController::class, 'downloadTemplate'])->name('users.template');
     Route::resource('payments', PaymentController::class);
     Route::patch('/payments/{payment}/transactions/update', [PaymentController::class, 'updateTransactions'])->name('payments.updateTransactions');
-    // Route::post('/payments/{payment}/resend-notification', [PaymentController::class, 'resendNotification'])->name('payments.resend-notification');
-    Route::post('/payments/{payment}/resend-notification', [PaymentController::class, 'manualResendNotification'])->name('payments.resend-notification');
+    Route::post('/payments/{payment}/resend-notification', [PaymentController::class, 'resendNotification'])->name('payments.async-resend-notification');
+    Route::post('/payments/{payment}/resend-notification', [PaymentController::class, 'manualResendNotification'])->name('payments.sync-resend-notification');
     Route::resource('announcements', AnnouncementController::class);
     Route::resource('academic-years', AcademicYearController::class);
     Route::resource('classrooms', ClassroomController::class);
@@ -143,8 +143,8 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::put('/tasks/{task}', [TaskController::class, 'update'])->name('tasks.update');
     Route::put('/tasks/{task}/assignments/{assignment}/score', [TaskController::class, 'updateScore'])->name('tasks.updateScore');
     Route::put('/tasks/{task}/scores/bulk', [TaskController::class, 'updateBulkScores'])->name('tasks.updateBulkScores');
-    // Route::post('/tasks/{task}/resend-notification', [TaskController::class, 'resendNotification'])->name('tasks.resend-notification');
-    Route::post('/tasks/{task}/resend-notification', [TaskController::class, 'manualResendNotification'])->name('tasks.resend-notification');
+    Route::post('/tasks/{task}/resend-notification', [TaskController::class, 'resendNotification'])->name('tasks.async-resend-notification');
+    Route::post('/tasks/{task}/resend-notification', [TaskController::class, 'manualResendNotification'])->name('tasks.sync-resend-notification');
 
     Route::resource('events', EventController::class);
 
