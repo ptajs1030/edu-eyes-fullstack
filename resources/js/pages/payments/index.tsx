@@ -48,7 +48,8 @@ export default function PaymentIndex() {
     const { flash } = usePage<{ flash?: { success?: string; error?: string } }>().props;
     const [selectedIds, setSelectedIds] = useState<number[]>([]);
     const [paymentToDelete, setPaymentToDelete] = useState<Payment | null>(null);
-    const [paymentToNotify, setPaymentToNotify] = useState<Payment | null>(null);
+    const [paymentToNotifySync, setPaymentToNotifySync] = useState<Payment | null>(null);
+    const [paymentToNotifyAsync, setPaymentToNotifyAsync] = useState<Payment | null>(null);
     const { payments, filters, academicYears } = usePage<{
         payments: PaginatedResponse<Payment, Link>;
         filters: { search?: string; sort?: string; direction?: string };
@@ -225,14 +226,28 @@ export default function PaymentIndex() {
                                     Detail
                                 </Link>
 
+                                {/* Tombol Sync Notification */}
                                 <button
-                                    onClick={() => setPaymentToNotify(payment)}
+                                    onClick={() => setPaymentToNotifySync(payment)}
                                     disabled={isPaymentExpired(payment)}
-                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${isPaymentExpired(payment) ? 'cursor-not-allowed bg-sky-300' : 'bg-sky-500 hover:cursor-pointer'
-                                        }`}
-                                    title={isPaymentExpired(payment) ? 'Tagihan sudah melewati deadline' : 'Kirim notifikasi'}
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
+                                        isPaymentExpired(payment) ? 'cursor-not-allowed bg-orange-300' : 'bg-orange-500 hover:cursor-pointer hover:bg-orange-600'
+                                    }`}
+                                    title={isPaymentExpired(payment) ? 'Tagihan sudah melewati deadline' : 'Kirim notifikasi sync'}
                                 >
-                                    Kirim Notif
+                                    Sync Notif
+                                </button>
+
+                                {/* Tombol Async Notification */}
+                                <button
+                                    onClick={() => setPaymentToNotifyAsync(payment)}
+                                    disabled={isPaymentExpired(payment)}
+                                    className={`rounded px-3 py-1 text-sm font-medium text-white ${
+                                        isPaymentExpired(payment) ? 'cursor-not-allowed bg-purple-300' : 'bg-purple-500 hover:cursor-pointer hover:bg-purple-600'
+                                    }`}
+                                    title={isPaymentExpired(payment) ? 'Tagihan sudah melewati deadline' : 'Kirim notifikasi async'}
+                                >
+                                    Async Notif
                                 </button>
 
                                 {/* Delete Button */}
@@ -269,29 +284,65 @@ export default function PaymentIndex() {
                     ]}
                 />
 
+                {/* Modal Sync Notification */}
                 <ActionModal
-                    isOpen={!!paymentToNotify}
-                    onClose={() => setPaymentToNotify(null)}
-                    title="Konfirmasi Notifikasi"
+                    isOpen={!!paymentToNotifySync}
+                    onClose={() => setPaymentToNotifySync(null)}
+                    title="Konfirmasi Notifikasi Sync"
                     message={
                         <span>
-                            Apakah Anda yakin ingin mengirim notifikasi untuk tagihan <strong>{paymentToNotify?.title}</strong>?
+                            Apakah Anda yakin ingin mengirim notifikasi <strong>SYNC</strong> untuk tagihan <strong>{paymentToNotifySync?.title}</strong>?
                             <br />
-                            <small className="text-gray-500">Notifikasi akan dikirim ke orang tua siswa yang belum melakukan pembayaran.</small>
+                            <small className="text-gray-500">
+                                Notifikasi akan dikirim secara langsung dan mungkin membutuhkan waktu lebih lama.
+                            </small>
                         </span>
                     }
                     buttons={[
                         {
                             label: 'Batal',
-                            onClick: () => setPaymentToNotify(null),
+                            onClick: () => setPaymentToNotifySync(null),
                             variant: 'neutral',
                         },
                         {
-                            label: 'Kirim Notifikasi',
+                            label: 'Kirim Sync',
                             onClick: () => {
-                                if (paymentToNotify) {
-                                    router.post(route('payments.resend-notification', paymentToNotify.id));
-                                    setPaymentToNotify(null);
+                                if (paymentToNotifySync) {
+                                    router.post(route('payments.sync-resend-notification', paymentToNotifySync.id));
+                                    setPaymentToNotifySync(null);
+                                }
+                            },
+                            variant: 'primary',
+                        },
+                    ]}
+                />
+
+                {/* Modal Async Notification */}
+                <ActionModal
+                    isOpen={!!paymentToNotifyAsync}
+                    onClose={() => setPaymentToNotifyAsync(null)}
+                    title="Konfirmasi Notifikasi Async"
+                    message={
+                        <span>
+                            Apakah Anda yakin ingin mengirim notifikasi <strong>ASYNC</strong> untuk tagihan <strong>{paymentToNotifyAsync?.title}</strong>?
+                            <br />
+                            <small className="text-gray-500">
+                                Notifikasi akan dikirim melalui queue job dan lebih cepat untuk proses yang banyak.
+                            </small>
+                        </span>
+                    }
+                    buttons={[
+                        {
+                            label: 'Batal',
+                            onClick: () => setPaymentToNotifyAsync(null),
+                            variant: 'neutral',
+                        },
+                        {
+                            label: 'Kirim Async',
+                            onClick: () => {
+                                if (paymentToNotifyAsync) {
+                                    router.post(route('payments.async-resend-notification', paymentToNotifyAsync.id));
+                                    setPaymentToNotifyAsync(null);
                                 }
                             },
                             variant: 'primary',
