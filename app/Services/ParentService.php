@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\ChangePasswordData;
 use App\Exceptions\SilentHttpException;
+use App\Models\AcademicYear;
 use App\Models\Announcement;
 use App\Models\ClassSubjectSchedule;
 use App\Models\CustomDayOff;
@@ -464,6 +465,14 @@ class ParentService
 
         return [
             'payment_years' => $payments,
+        ];
+    }
+
+    public function getAttendanceMode(){
+        $academicYear=AcademicYear::where('status', 'active')->first();
+
+        return [
+            'attendance_mode'=>$academicYear->attendance_mode
         ];
     }
 }

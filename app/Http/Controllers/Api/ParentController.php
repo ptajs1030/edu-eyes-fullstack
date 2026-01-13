@@ -153,4 +153,8 @@ class ParentController extends BaseApiController
         $student = $request->attributes->get('current_student');
         return $this->success($this->service->getPaymentYear($student));
     }
+
+    public function getAttendanceMode(){
+        return $this->success($this->service->getAttendanceMode());
+    }
 }

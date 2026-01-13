@@ -139,6 +139,10 @@ class AttendanceService
     
 
     public function shiftingAttendance(ShiftingAttendanceData $data){
+        $dayOff=CustomDayOff::whereDate('date', Carbon::now('Asia/Jakarta')->format('Y-m-d'))->first();
+        if ($dayOff) {
+            throw new SilentHttpException(400, 'Hari ini adalah hari libur: '. $dayOff->description);
+        }
         $academic_year=AcademicYear::where('status', 'active')->first()->value('attendance_mode');
         $student=Student::where('uuid', $data->getStudent())->first();
         if (!$student) {
@@ -501,6 +505,10 @@ return [
         return $attendanceWithRelations;
     }
     public function subjectAttendance(SubjectAttendanceData $data){
+        $dayOff=CustomDayOff::whereDate('date', Carbon::now('Asia/Jakarta')->format('Y-m-d'))->first();
+        if ($dayOff) {
+            throw new SilentHttpException(400, 'Hari ini adalah hari libur'. ' '.$dayOff->description);
+        }
         $academic_year=AcademicYear::where('status', 'active')->first()->value('attendance_mode'); 
         $subject = Subject::where('name', $data->getSubjectName())->firstOrFail();
         
@@ -855,6 +863,8 @@ return [
                 'note'=>$attendance->note
             ];
         });
+
+        $attendancesWithRelations = $attendancesWithRelations->sortBy('classroom',);
         return [
             'number_of_attendances' => $attendances->whereIn('status', ['present', 'late', 'present_in_tolerance'])->count() ,
             'current_page' => $attendances->currentPage(),

@@ -113,7 +113,7 @@ Route::prefix('parent')->middleware(['auth:sanctum', 'parent', ])->controller(Pa
         Route::get('/payment', 'getPayment');
         Route::get('/unpaid-payment', 'getUnpaidPayment');
         Route::get('/payment-year', 'getPaymentYear');
-
+        Route::get('/attendance-mode', 'getAttendanceMode');
         Route::prefix('attendance')->group(function (){
             Route::get('/', 'todayAttendance');
             Route::prefix('history')->group(function () {
