@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\DTOs\ChangePasswordData;
 use App\Exceptions\SilentHttpException;
+use App\Models\AcademicYear;
 use App\Models\Announcement;
 use App\Models\ClassSubjectSchedule;
 use App\Models\CustomDayOff;
@@ -55,7 +56,7 @@ class ParentService
         $today = Carbon::now()->format('Y-m-d');
         $dayOff=CustomDayOff::where('date', Carbon::parse($today)->format('Y-m-d'))->first();
         if ($dayOff) {
-            throw new SilentHttpException(400, 'Hari ini adalah hari libur'. $dayOff->description);
+            throw new SilentHttpException(400, 'Hari ini adalah hari libur'. ' '.$dayOff->description);
         }
         $attendance = ShiftingAttendance::where('student_id', $student->id)
         ->where('submit_date', Carbon::now('Asia/Jakarta')->format('Y-m-d'))
@@ -464,6 +465,14 @@ class ParentService
 
         return [
             'payment_years' => $payments,
+        ];
+    }
+
+    public function getAttendanceMode(){
+        $academicYear=AcademicYear::where('status', 'active')->first();
+
+        return [
+            'attendance_mode'=>$academicYear->attendance_mode
         ];
     }
 }
