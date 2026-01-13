@@ -20,6 +20,7 @@ use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\Log;
+use App\Services\FirebaseService;
 
 class TaskController extends Controller
 {
@@ -480,6 +481,77 @@ class TaskController extends Controller
                 'task_id' => $task->id,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->route('tasks.index')
+                ->with('error', 'Gagal mengirim notifikasi: ' . $e->getMessage());
+        }
+    }
+
+    public function manualResendNotification(Task $task)
+    {
+        try {
+            $now = now('Asia/Jakarta');
+            $dueDate = $task->due_date->format('Y-m-d');
+            $dueTime = $task->due_time ? $task->due_time->format('H:i:s') : '23:59:59';
+            $dueDateTime = Carbon::parse($dueDate . ' ' . $dueTime, 'Asia/Jakarta');
+
+            if ($now->greaterThan($dueDateTime)) {
+                return redirect()->route('tasks.index')
+                    ->with('error', 'Tidak dapat mengirim notifikasi karena tugas sudah melewati tenggat waktu.');
+            }
+
+            $task->load(['assignments.student.parent', 'subject']);
+
+            $tokens = [];
+            foreach ($task->assignments as $assignment) {
+                if (
+                    $assignment->student?->parent?->role->name === Role::Parent->value
+                    && $assignment->student->parent->notification_key
+                ) {
+                    $tokens[] = $assignment->student->parent->notification_key;
+                }
+            }
+
+            if (empty($tokens)) {
+                return redirect()->route('tasks.index')
+                    ->with('info', 'Tidak ada orang tua yang dapat menerima notifikasi.');
+            }
+
+            $tokens = array_unique($tokens);
+
+            $firebaseService = app(FirebaseService::class);
+
+            $subjectName = $task->subject->name ?? 'Umum';
+
+            $result = $firebaseService->sendToMultipleDevices(
+                $tokens,
+                'Pengingat Tugas',
+                "Pengingat: Tugas '{$task->title}' ({$subjectName}). Deadline: {$dueDate} {$dueTime}",
+                [
+                    'type' => 'task_manual',
+                    'task_id' => (string) $task->id,
+                    'title' => $task->title,
+                    'due_date' => $task->due_date->format('Y-m-d H:i'),
+                    'subject' => $subjectName,
+                    'action' => 'view_task'
+                ]
+            );
+
+            $successCount = $result['total_sent'] ?? 0;
+            $failedCount = $result['total_failed'] ?? 0;
+
+            $message = "Notifikasi berhasil dikirim ke {$successCount} orang tua.";
+            if ($failedCount > 0) {
+                $message .= " Gagal: {$failedCount}.";
+            }
+
+            return redirect()->route('tasks.index')
+                ->with($successCount > 0 ? 'success' : 'info', $message);
+        } catch (\Exception $e) {
+            Log::error('Gagal mengirim notifikasi synchronous', [
+                'task_id' => $task->id,
+                'error' => $e->getMessage(),
             ]);
 
             return redirect()->route('tasks.index')
