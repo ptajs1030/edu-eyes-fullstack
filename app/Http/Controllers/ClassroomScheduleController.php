@@ -180,7 +180,6 @@ class ClassroomScheduleController extends Controller
     public function saveSubjectSchedule(Request $request, Classroom $classroom)
     {
         try {
-            $this->validateAcademicYear(AttendanceMode::PerSubject->value);
 
             $validated = $request->validate($this->getSubjectScheduleValidationRules());
             $this->assertNoInternalConflicts($validated['schedules']);;
