@@ -472,7 +472,7 @@ class ParentService
         $academicYear=AcademicYear::where('status', 'active')->first();
 
         return [
-            'attendance_mode'=>$academicYear->attendance_mode
+            'attendance_mode'=>"per-subject"
         ];
     }
 }
