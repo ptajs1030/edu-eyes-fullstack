@@ -135,7 +135,7 @@ class TaskController extends Controller
     public function edit($id)
     {
         try {
-            $task = Task::with(['subject', 'academicYear', 'assignments.student', 'assignments.class'])
+            $task = Task::with(['subject', 'academicYear', 'assignments.student', 'assignments.class', 'attachments'])
                 ->findOrFail($id);
 
 
@@ -166,6 +166,7 @@ class TaskController extends Controller
                     'due_time' => $task->due_time->format('H:i'),
                     'student_assignments' => $studentAssignments,
                     'academic_year' => $task->academicYear, // Include academic year data
+                    'attachments' => $task->attachments,
                 ],
                 'subjects' => $subjects,
                 'academicYears' => $academicYears,
@@ -191,6 +192,8 @@ class TaskController extends Controller
                 'description' => 'nullable|string',
                 'due_date' => 'required|date',
                 'due_time' => 'required|date_format:H:i',
+                'attachments' => 'nullable|array',
+                'attachments.*.url' => 'required|url',
                 'student_assignments' => 'required|array|min:1',
                 'student_assignments.*.student_id' => 'required|exists:students,id',
                 'student_assignments.*.student_name' => 'required|string',
@@ -235,6 +238,10 @@ class TaskController extends Controller
                 'due_date' => $validated['due_date'],
                 'due_time' => $validated['due_time'],
             ]);
+
+            if (isset($validated['attachments'])) {
+                $this->handleAttachments($task->id, $validated['attachments']);
+            }
 
 
             $currentAssignments = $task->assignments()->get()->keyBy('student_id');

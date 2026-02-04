@@ -14,6 +14,10 @@ interface Subject {
     curriculum_year: string;
 }
 
+interface Attachment {
+    url: string;
+}
+
 interface AcademicYear {
     id: number;
     title: string;
@@ -46,6 +50,7 @@ interface TaskData {
     due_time: string;
     student_assignments: AssignedStudent[];
     academic_year?: AcademicYear;
+    attachments?: Attachment[];
 }
 
 interface Props {
@@ -75,6 +80,7 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
             score: s.score,
             is_scored: s.is_scored,
         })),
+        attachments: (task.attachments || []).map(a => ({ url: a.url })),
     });
 
     const [showStudentModal, setShowStudentModal] = useState(false);
@@ -145,6 +151,22 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
     //         setDescLength(value.length);
     //     }
     // };
+
+    const handleAddAttachment = () => {
+        setData('attachments', [...data.attachments, { url: '' }]);
+    };
+
+    const handleRemoveAttachment = (index: number) => {
+        const newAttachments = [...data.attachments];
+        newAttachments.splice(index, 1);
+        setData('attachments', newAttachments);
+    };
+
+    const handleAttachmentChange = (index: number, value: string) => {
+        const newAttachments = [...data.attachments];
+        newAttachments[index].url = value;
+        setData('attachments', newAttachments);
+    };
 
     const handleAddStudents = (students: AssignedStudent[]) => {
         const currentStudentIds = data.student_assignments.map((s) => s.student_id);
@@ -268,6 +290,36 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
                             onChange={(value) => setData('description', value)}
                             placeholder="Deskripsi tugas..."
                         />
+                    </div>
+
+                    {/* Attachments */}
+                    <div>
+                        <label className="mb-2 block text-sm font-medium text-gray-700">Lampiran</label>
+                        {data.attachments.map((attachment, index) => (
+                            <div key={index} className="mb-2 flex items-center">
+                                <input
+                                    type="url"
+                                    value={attachment.url}
+                                    onChange={(e) => handleAttachmentChange(index, e.target.value)}
+                                    placeholder="https://example.com/file.pdf"
+                                    className="block w-full flex-1 rounded-md border border-gray-300 p-2 shadow-sm"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => handleRemoveAttachment(index)}
+                                    className="ml-2 rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-200"
+                                >
+                                    Hapus
+                                </button>
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={handleAddAttachment}
+                            className="rounded-md bg-sky-500 px-3 py-2 text-sm font-medium text-white hover:bg-sky-600"
+                        >
+                            Tambah Lampiran
+                        </button>
                     </div>
 
                     {/* Due Date */}
