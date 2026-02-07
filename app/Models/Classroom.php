@@ -6,16 +6,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class Classroom extends Model
 {
-
     protected $fillable = [
         'main_teacher_id',
         'name',
         'level'
     ];
 
+    protected $casts = [
+        'main_teacher_id' => 'integer',
+        'level' => 'integer',
+    ];
+
     public function students()
     {
-        return $this->hasMany(Student::class);
+        return $this->hasMany(Student::class, 'class_id');
     }
 
     public function mainTeacher()
@@ -23,20 +27,33 @@ class Classroom extends Model
         return $this->belongsTo(User::class, 'main_teacher_id');
     }
 
-    public function academicYearHistories()
+    public function classHistories()
     {
-        return $this->belongsToMany(AcademicYear::class, 'class_histories', 'class_id', 'academic_year_id')
-            ->withPivot('student_id');
+        return $this->hasMany(ClassHistory::class, 'class_id');
     }
 
-    public function studentHistories()
+    public function shiftingSchedules()
     {
-        return $this->belongsToMany(Student::class, 'class_histories', 'class_id', 'student_id')
-            ->withPivot('academic_year_id');
+        return $this->hasMany(ClassShiftingSchedule::class, 'class_id');
     }
 
-    public function classShiftingSchedules()
+    public function shiftingAttendances()
     {
-        return $this->hasMany(ClassShiftingSchedule::class);
+        return $this->hasMany(ShiftingAttendance::class, 'class_id');
+    }
+
+    public function subjectSchedules()
+    {
+        return $this->hasMany(ClassSubjectSchedule::class, 'class_id');
+    }
+
+    public function temporaryStatus()
+    {
+        return $this->hasOne(TemporaryClassStatus::class, 'class_id', 'id');
+    }
+
+    public function temporaryStudent()
+    {
+        return $this->hasMany(TemporaryClassStudent::class, 'initial_class_id');
     }
 }

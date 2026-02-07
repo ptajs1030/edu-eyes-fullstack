@@ -2,10 +2,14 @@
 
 namespace App\Models;
 
+use App\Enums\AcademicYearStatus;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class AcademicYear extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'start_year',
         'title',
@@ -14,15 +18,31 @@ class AcademicYear extends Model
         'note',
     ];
 
-    public function classroomHistories()
+    protected $casts = [
+        'start_year' => 'integer',
+    ];
+
+    protected static function booted()
     {
-        return $this->belongsToMany(Classroom::class, 'class_histories', 'academic_year_id', 'class_id')
-            ->withPivot('student_id');
+        static::creating(function (self $academicYear) {
+            if ($academicYear->status === AcademicYearStatus::Active->value) {
+                self::where('status', AcademicYearStatus::Active->value)->update(['status' => AcademicYearStatus::Complete->value]);
+            }
+        });
     }
 
-    public function studentHistories()
+    public function classroomHistories()
     {
-        return $this->belongsToMany(Student::class, 'class_histories', 'academic_year_id', 'student_id')
-            ->withPivot('class_id');
+        return $this->hasMany(ClassHistory::class);
+    }
+
+    public function shiftingAttendances()
+    {
+        return $this->hasMany(ShiftingAttendance::class);
+    }
+
+    public function eventAttendances()
+    {
+        return $this->hasMany(EventAttendance::class);
     }
 }

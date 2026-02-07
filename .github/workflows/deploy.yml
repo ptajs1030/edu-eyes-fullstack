@@ -1,0 +1,41 @@
+name: 🚀 Auto Deploy (SSH Password + Telegram)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install sshpass
+        run: sudo apt-get install -y sshpass
+
+      - name: Deploy to Hosting
+        id: deploy
+        run: |
+          set -e
+          sshpass -p "${{ secrets.SERVER_PASSWORD }}" ssh -o StrictHostKeyChecking=no -p 64000 ${{ secrets.SERVER_USER }} "
+            cd edu-eyes-dev.hantiga.com/edu-eyes-fullstack/ &&
+            git pull &&
+            php artisan migrate --force &&
+            php artisan optimize:clear
+          "
+
+      - name: Send Telegram notification (success)
+        if: success()
+        run: |
+          MESSAGE="✅ Deploy sukses di server (Laravel 12) 🚀\nRepo: $GITHUB_REPOSITORY\nBranch: $GITHUB_REF_NAME\nCommit: $GITHUB_SHA"
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="$MESSAGE"
+
+      - name: Send Telegram notification (failed)
+        if: failure()
+        run: |
+          MESSAGE="❌ Deploy GAGAL di server ⚠️\nRepo: $GITHUB_REPOSITORY\nBranch: $GITHUB_REF_NAME\nCommit: $GITHUB_SHA"
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
+            -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
+            -d text="$MESSAGE"

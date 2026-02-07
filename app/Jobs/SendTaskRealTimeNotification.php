@@ -1,0 +1,105 @@
+<?php
+
+namespace App\Jobs;
+
+use App\Models\Task;
+use App\Models\User;
+use App\Services\FirebaseService;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+
+class SendTaskRealTimeNotification implements ShouldQueue
+{
+    use Queueable, Dispatchable, InteractsWithQueue, SerializesModels;
+
+    protected $task;
+    protected $parentUser;
+    protected $student;
+    protected $type;
+
+    /**
+     * Create a new job instance.
+     */
+    public function __construct(Task $task, User $parentUser, $student, string $type)
+    {
+        $this->task = $task;
+        $this->parentUser = $parentUser;
+        $this->student = $student;
+        $this->type = $type;
+    }
+
+    /**
+     * Execute the job.
+     */
+    public function handle(FirebaseService $firebaseService): void
+    {
+        try {
+            if (!$this->parentUser->notification_key) {
+                Log::warning('User tidak memiliki notification_key', [
+                    'user_id' => $this->parentUser->id,
+                    'task_id' => $this->task->id
+                ]);
+
+                return;
+            }
+
+            $dueDate = $this->task->due_date->format('d M Y');
+            $dueTime = $this->task->due_time ? $this->task->due_time->format('H:i') : '-';
+            $subjectName = $this->task->subject->name ?? 'Umum';
+            $studentName = $this->student ? $this->student->full_name : 'Anak Anda';
+
+            if ($this->type === 'created') {
+                $title = 'Tugas Baru Ditambahkan';
+                $body = "Tugas '{$this->task->title}' ({$subjectName}) telah ditambahkan untuk {$studentName}. Deadline: {$dueDate} {$dueTime}";
+            } elseif ($this->type === 'manual') {
+                $title = 'Pengingat Tugas';
+                $body = "Pengingat: Tugas '{$this->task->title}' ({$subjectName}) untuk {$studentName}. Deadline: {$dueDate} {$dueTime}";
+            } else {
+                Log::warning("Type tidak sesuai");
+            }
+
+            $data = [
+                'type' => 'task_' . $this->type,
+                'task_id' => (string) $this->task->id,
+                'title' => $this->task->title,
+                'due_date' => $this->task->due_date->format('Y-m-d').' '.$dueTime,
+                'subject' => $subjectName,
+                'action' => 'view_task'
+            ];
+
+            $firebaseService->sendToDevice(
+                $this->parentUser->notification_key,
+                $title,
+                $body,
+                $data
+            );
+
+            Log::info('Task real-time notification sent', [
+                'type' => $this->type,
+                'user_id' => $this->parentUser->id,
+                'task_id' => $this->task->id
+            ]);
+        } catch (\Throwable $th) {
+            Log::error('Gagal kirim task real-time notification', [
+                'user_id' => $this->parentUser->id,
+                'task_id' => $this->task->id,
+                'error' => $th->getMessage()
+            ]);
+
+            throw $th;
+        }
+    }
+
+    public function failed(\Throwable $exception): void
+    {
+        Log::error('Job SendTaskRealTimeNotification failed', [
+            'task_id' => $this->task->id,
+            'user_id' => $this->parentUser->id,
+            'error' => $exception->getMessage()
+        ]);
+    }
+}

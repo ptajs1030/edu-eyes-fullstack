@@ -1,7 +1,6 @@
 /.phpunit.cache
 /bootstrap/ssr
 /node_modules
-/public/build
 /public/hot
 /public/storage
 /storage/*.key
@@ -22,3 +21,7 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+.npm
+/storage/edu-eyes-dev-firebase.json
+.cache
+.composer

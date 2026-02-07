@@ -1,0 +1,497 @@
+import FormModal from '@/components/form-modal';
+import SearchableSelect from '@/components/ui/searchable-select';
+import { router } from '@inertiajs/react';
+import React, { useEffect, useRef, useState } from 'react';
+import { toast } from 'sonner';
+
+interface Classroom {
+    id: number;
+    name: string;
+}
+
+interface Parent {
+    id: number;
+    full_name: string;
+}
+
+interface Student {
+    id?: number;
+    parent_id?: number | null;
+    parent?: Parent | null;
+    class_id?: number | null;
+    full_name: string;
+    nis: string | null;
+    entry_year: number;
+    gender: string;
+    status: string;
+    religion: string;
+    birth_place: string;
+    date_of_birth: string;
+    address: string;
+    profile_picture?: string | null;
+}
+
+interface Props {
+    isOpen: boolean;
+    onClose: () => void;
+    student?: Student | null;
+    classrooms: Classroom[];
+    sexes: { value: string; label: string }[];
+    statuses: { value: string; label: string }[];
+    religions: { value: string; label: string }[];
+}
+
+export default function StudentFormModal({ isOpen, onClose, student, classrooms, sexes, statuses, religions }: Props) {
+    const [formData, setFormData] = useState<Omit<Student, 'id'>>({
+        parent_id: null,
+        class_id: null,
+        full_name: '',
+        nis: '',
+        entry_year: new Date().getFullYear(),
+        gender: '',
+        status: '',
+        religion: '',
+        birth_place: '',
+        date_of_birth: '',
+        address: '',
+        profile_picture: null,
+    });
+    const [initialParent, setInitialParent] = useState<Parent | null>(null);
+    const [hasInitialized, setHasInitialized] = useState(false); // Add this flag
+    const [previewImage, setPreviewImage] = useState<string | null>(null);
+    const [removeProfilePicture, setRemoveProfilePicture] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (isOpen && student && !hasInitialized) {
+            // Only initialize once when modal opens
+            setFormData({
+                parent_id: student.parent_id,
+                class_id: student.class_id,
+                full_name: student.full_name,
+                nis: student.nis || '',
+                entry_year: student.entry_year,
+                gender: student.gender,
+                status: student.status,
+                religion: student.religion,
+                birth_place: student.birth_place,
+                date_of_birth: student.date_of_birth,
+                address: student.address,
+                profile_picture: student.profile_picture,
+            });
+
+            if (student.profile_picture) {
+                setPreviewImage(`/storage/${student.profile_picture}`);
+            }
+
+            if (student.parent) {
+                setInitialParent({
+                    id: student.parent_id as number,
+                    full_name: student.parent.full_name,
+                });
+            } else {
+                setInitialParent(null);
+            }
+
+            setHasInitialized(true);
+        } else if (isOpen && !student && !hasInitialized) {
+            setFormData({
+                parent_id: null,
+                class_id: null,
+                full_name: '',
+                nis: '',
+                entry_year: new Date().getFullYear(),
+                gender: '',
+                status: '',
+                religion: '',
+                birth_place: '',
+                date_of_birth: '',
+                address: '',
+                profile_picture: null,
+            });
+            setInitialParent(null);
+            setHasInitialized(true);
+        }
+    }, [student, isOpen, hasInitialized]);
+
+    // Reset initialization flag when modal closes
+    useEffect(() => {
+        if (!isOpen) {
+            setHasInitialized(false);
+            setInitialParent(null);
+            setPreviewImage(null);
+            setRemoveProfilePicture(false);
+        }
+    }, [isOpen]);
+
+    // Update initialParent when formData.parent_id changes (user selects new parent)
+    useEffect(() => {
+        if (formData.parent_id === null) {
+            setInitialParent(null);
+        }
+    }, [formData.parent_id]);
+
+    const handleChange = (field: keyof Omit<Student, 'id'>, value: any) => {
+        setFormData((prev) => ({ ...prev, [field]: value }));
+    };
+
+    const handleNisChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        let value = e.target.value;
+
+        // Remove any non-digit characters
+        value = value.replace(/\D/g, '');
+
+        setFormData((prev) => ({ ...prev, nis: value }));
+    };
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+
+        if (file) {
+            // Preview image
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewImage(reader.result as string);
+            };
+
+            reader.readAsDataURL(file);
+            setFormData((prev) => ({ ...prev, profile_picture: file }));
+            setRemoveProfilePicture(false);
+        }
+    };
+
+    const handleRemoveImage = () => {
+        setPreviewImage(null);
+        setFormData((prev) => ({ ...prev, profile_picture: undefined }));
+        setRemoveProfilePicture(true);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+
+        // set default value
+        if (!formData.status) {
+            formData.status = 'active';
+        }
+
+        const formDataToSend = new FormData();
+
+        Object.entries(formData).forEach(([key, value]) => {
+            if (key !== 'profile_picture' && value !== null) {
+                formDataToSend.append(key, value as string);
+            }
+        });
+
+        if (formData.profile_picture instanceof File) {
+            formDataToSend.append('profile_picture', formData.profile_picture);
+        } else if (removeProfilePicture) {
+            formDataToSend.append('remove_profile_picture', '1');
+        }
+
+        formDataToSend.append('_method', student?.id ? 'PUT' : 'POST');
+
+        const url = student?.id ? `/students/${student.id}` : '/students';
+
+        router.post(url, formDataToSend, {
+            preserveScroll: true,
+            forceFormData: true,
+            onSuccess: () => {
+                onClose();
+                router.reload();
+            },
+            onError: (errors) => {
+                const errorMessage = Object.values(errors).join(', ');
+                toast.error(`Validasi Gagal: ${errorMessage}`);
+            },
+        });
+    };
+
+    const getStatusLabel = (status: string): string => {
+        switch (status.toLowerCase()) {
+            case 'active':
+                return 'Aktif';
+            case 'inactive':
+                return 'Tidak Aktif';
+            case 'graduated':
+                return 'Lulus';
+            default:
+                return status;
+        }
+    };
+
+    const getGenderLabel = (key: string): string => {
+        switch (key.toLowerCase()) {
+            case 'male':
+                return 'Laki-Laki';
+            case 'female':
+                return 'Perempuan';
+            default:
+                return key;
+        }
+    };
+
+    return (
+        <FormModal isOpen={isOpen} onClose={onClose} title={student ? 'Edit Siswa' : 'Tambah Siswa Baru'} onSubmit={handleSubmit}>
+            {/* Profile Picture Section */}
+            <div className="mb-4 flex flex-col items-center">
+                <div className="relative">
+                    <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-gray-300 bg-gray-100">
+                        {previewImage ? (
+                            <img src={previewImage} alt="Profile preview" className="h-full w-full object-cover" />
+                        ) : (
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="h-12 w-12 text-gray-400"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                />
+                            </svg>
+                        )}
+                    </div>
+
+                    {(previewImage || (student?.profile_picture && !removeProfilePicture)) && (
+                        <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white hover:cursor-pointer hover:bg-red-600"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    )}
+                </div>
+
+                <label className="mt-2 cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800">
+                    <span>Upload Photo</span>
+                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
+                </label>
+                <p className="mt-1 text-xs text-gray-500">Max 2MB (300x300)</p>
+            </div>
+            <div className="mb-3">
+                <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
+                    Nama Lengkap
+                </label>
+                <input
+                    id="full_name"
+                    name="full_name"
+                    type="text"
+                    maxLength={70}
+                    value={formData.full_name}
+                    onChange={(e) => handleChange('full_name', e.target.value)}
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                    required
+                />
+            </div>
+            <div className="mb-3">
+                <label htmlFor="nis" className="block text-sm font-medium text-gray-700">
+                    NIS
+                </label>
+                <input
+                    id="nis"
+                    name="nis"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
+                    minLength={4}
+                    maxLength={20}
+                    value={formData.nis ?? ''}
+                    onChange={handleNisChange}
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                />
+            </div>
+            <div className="mb-3">
+                <label htmlFor="parent_id" className="block text-sm font-medium text-gray-700">
+                    Orang Tua/Wali
+                </label>
+                <SearchableSelect
+                    value={formData.parent_id ?? null}
+                    onChange={(value) => handleChange('parent_id', value ? Number(value) : null)}
+                    placeholder="Cari orang tua dengan nama..."
+                    endpoint={route('parents.search')}
+                    initialOption={initialParent}
+                    required={true}
+                />
+            </div>
+            <div className="mb-3">
+                <label htmlFor="class_id" className="block text-sm font-medium text-gray-700">
+                    Kelas
+                </label>
+                <select
+                    id="class_id"
+                    name="class_id"
+                    value={formData.class_id || ''}
+                    onChange={(e) => handleChange('class_id', e.target.value)}
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                >
+                    <option value="">--Pilih kelas--</option>
+                    {classrooms.map((classroom) => (
+                        <option key={classroom.id} value={classroom.id}>
+                            {classroom.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+            <div className="mb-3 flex flex-row justify-between gap-4">
+                <div className="basis-1/2">
+                    <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
+                        Jenis Kelamin
+                    </label>
+                    <select
+                        id="gender"
+                        name="gender"
+                        value={formData.gender}
+                        onChange={(e) => handleChange('gender', e.target.value)}
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                        required
+                    >
+                        <option value="">--Pilih Jenis Kelamin--</option>
+                        {sexes.map((sex) => (
+                            <option key={sex.value} value={sex.value}>
+                                {getGenderLabel(sex.label)}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <div className="basis-1/2">
+                    <label htmlFor="religion" className="block text-sm font-medium text-gray-700">
+                        Agama
+                    </label>
+                    <select
+                        id="religion"
+                        name="religion"
+                        value={formData.religion}
+                        onChange={(e) => handleChange('religion', e.target.value)}
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                        required
+                    >
+                        <option value="">--Pilih Agama--</option>
+                        {religions.map((religion) => (
+                            <option key={religion.value} value={religion.value}>
+                                {religion.label}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+            <div className="mb-3 flex flex-row justify-between gap-4">
+                <div className="basis-1/2">
+                    <label htmlFor="entry_year" className="block text-sm font-medium text-gray-700">
+                        Tahun Masuk
+                    </label>
+                    <input
+                        id="entry_year"
+                        name="entry_year"
+                        type="number"
+                        min="1900"
+                        max={new Date().getFullYear() + 1}
+                        value={formData.entry_year}
+                        onChange={(e) =>
+                            setFormData({
+                                ...formData,
+                                entry_year: parseInt(e.target.value) || new Date().getFullYear(),
+                            })
+                        }
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                        required
+                    />
+                </div>
+                <div className="basis-1/2">
+                    <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                        Status
+                    </label>
+                    {student ? (
+                        <select
+                            id="status"
+                            name="status"
+                            value={formData.status}
+                            onChange={(e) => handleChange('status', e.target.value)}
+                            className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                            required
+                        >
+                            {statuses.map((status) => (
+                                <option key={status.value} value={status.value}>
+                                    {getStatusLabel(status.label)}
+                                </option>
+                            ))}
+                        </select>
+                    ) : (
+                        <input type="text" value="Aktif" disabled className="w-full rounded border bg-gray-100 px-3 py-2" />
+                    )}
+                </div>
+            </div>
+            <div className="mb-3 flex flex-row justify-between gap-4">
+                <div className="basis-1/2">
+                    <label htmlFor="birth_place" className="block text-sm font-medium text-gray-700">
+                        Tempat Lahir
+                    </label>
+                    <input
+                        id="birth_place"
+                        name="birth_place"
+                        type="text"
+                        maxLength={70}
+                        value={formData.birth_place}
+                        onChange={(e) => handleChange('birth_place', e.target.value)}
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                        required
+                    />
+                </div>
+                <div className="basis-1/2">
+                    <label htmlFor="date_of_birth" className="block text-sm font-medium text-gray-700">
+                        Tanggal Lahir
+                    </label>
+                    <input
+                        id="date_of_birth"
+                        name="date_of_birth"
+                        type="date"
+                        value={formData.date_of_birth}
+                        onChange={(e) => handleChange('date_of_birth', e.target.value)}
+                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                        required
+                    />
+                </div>
+            </div>
+            <div className="mb-3"></div>
+            <div className="mb-3"></div>
+            <div className="mb-3">
+                <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                    Alamat
+                </label>
+                <textarea
+                    name="address"
+                    value={formData.address}
+                    onChange={(e) => handleChange('address', e.target.value)}
+                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                    required
+                    rows={3}
+                />
+            </div>
+            <div className="flex justify-end">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
+                >
+                    Batal
+                </button>
+                <button
+                    type="submit"
+                    className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
+                >
+                    {student ? 'Ubah' : 'Simpan'}
+                </button>
+            </div>
+        </FormModal>
+    );
+}

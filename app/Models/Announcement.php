@@ -12,6 +12,11 @@ class Announcement extends Model
     protected $fillable = [
         'title',
         'content',
-        'picture',
+        'short_content',
     ];
+
+    public function attachments()
+    {
+        return $this->hasMany(AnnouncementAttachment::class);
+    }
 }

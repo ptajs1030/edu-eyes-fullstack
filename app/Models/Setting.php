@@ -11,6 +11,13 @@ class Setting extends Model
 
     protected $fillable = [
         'key',
+        'title',
         'value'
     ];
+
+    public static function getValue($key, $default = null)
+    {
+        $setting = self::where('key', $key)->first();
+        return $setting ? $setting->value : $default;
+    }
 }

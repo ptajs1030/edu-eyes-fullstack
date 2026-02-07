@@ -1,0 +1,33 @@
+export const statusOptions = {
+    shift: [
+        { value: 'present', label: 'Hadir' },
+        { value: 'present_in_tolerance', label: 'Hadir (Toleransi)' },
+        { value: 'alpha', label: 'Tidak Hadir' },
+        { value: 'late', label: 'Terlambat' },
+        { value: 'leave', label: 'Izin' },
+        { value: 'sick_leave', label: 'Izin Sakit' },
+        { value: 'day_off', label: 'Libur' },
+    ],
+    subject: [
+        { value: 'present', label: 'Hadir' },
+        { value: 'alpha', label: 'Tidak Hadir' },
+        { value: 'leave', label: 'Izin' },
+        { value: 'sick_leave', label: 'Izin Sakit' },
+        { value: 'day_off', label: 'Libur' },
+    ],
+};
+
+export const months = [
+    { value: 1, label: 'Januari' },
+    { value: 2, label: 'Februari' },
+    { value: 3, label: 'Maret' },
+    { value: 4, label: 'April' },
+    { value: 5, label: 'Mei' },
+    { value: 6, label: 'Juni' },
+    { value: 7, label: 'Juli' },
+    { value: 8, label: 'Agustus' },
+    { value: 9, label: 'September' },
+    { value: 10, label: 'Oktober' },
+    { value: 11, label: 'November' },
+    { value: 12, label: 'Desember' },
+];

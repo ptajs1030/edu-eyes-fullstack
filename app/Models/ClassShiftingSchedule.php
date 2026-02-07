@@ -12,23 +12,32 @@ class ClassShiftingSchedule extends Model
         'day',
     ];
 
+    protected $casts = [
+        'class_id' => 'integer',
+        'shifting_id' => 'integer',
+        'day' => 'integer',
+    ];
+
+    // not used timestamps
+    public $timestamps = false;
+
     public function shifting()
     {
-        return $this->belongsTo(Shifting::class, 'shift_id');
+        return $this->belongsTo(Shifting::class, 'shifting_id');
     }
 
     public function classroom()
     {
-        return $this->belongsTo(Classroom::class, 'classroom_id');
+        return $this->belongsTo(Classroom::class, 'class_id');
     }
 
-    public function shiftingAttendances()
-    {
-        return $this->hasMany(ShiftingAttendance::class);
-    }
-
-    public function classShiftingSchedulePics()
+    public function pics()
     {
         return $this->hasMany(ClassShiftingSchedulePic::class);
+    }
+
+    public function teachers()
+    {
+        return $this->belongsToMany(User::class, 'class_shifting_schedule_pics', 'class_shifting_schedule_id', 'teacher_id');
     }
 }
