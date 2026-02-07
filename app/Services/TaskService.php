@@ -27,20 +27,22 @@ class TaskService
 
         }
 
-        $tasks=$query->with('task')->paginate(10);
+        $tasks = $query->with(['task.subject' => function ($q) { $q->withTrashed(); }])->paginate(10);
         if ($tasks->isEmpty()) {
             throw new SilentHttpException(404, 'tugas tidak ditemukan');
         }
-        $tasksWithRelations=$tasks->map(function($i) {
+        $tasksWithRelations = $tasks->map(function($i) {
+            $task = $i->task;
+            $subjectName = $task && $task->subject ? $task->subject->name : null;
             return [
-                'id'=>$i->id,
-                'subject'=>$i->task->subject->name,
-                'title'=>$i->task->title,
-                'description'=>$i->task->description,
-                'score' => $i->score ?? 0, 
-                'due_date'=>Carbon::parse($i->task->due_date)->format('Y-m-d'),
-                'due_time'=>Carbon::parse($i->task->due_time)->format('H:i'),
-                'created_at'=>$i->task->created_at
+                'id' => $i->id,
+                'subject' => $subjectName,
+                'title' => $task ? $task->title : null,
+                'description' => $task ? $task->description : null,
+                'score' => $i->score ?? 0,
+                'due_date' => $task && $task->due_date ? Carbon::parse($task->due_date)->format('Y-m-d') : null,
+                'due_time' => $task && $task->due_time ? Carbon::parse($task->due_time)->format('H:i') : null,
+                'created_at' => $task ? $task->created_at : null
             ];
         })->toArray();
 
@@ -54,25 +56,28 @@ class TaskService
     }
 
     public function getTaskDetail($id, $student){
-        $query=TaskAssignment::query();
+        $query = TaskAssignment::query();
         $query->where("student_id", $student->id);
         $query->where('id', $id);
-        $task=$query->with('task')->first();
-        $attachments=$task->task->attachments()->pluck('url')->toArray();
+        $task = $query->with(['task.subject' => function ($q) { $q->withTrashed(); }])->first();
 
-        if (!$task) {
+        if (!$task || !$task->task) {
             throw new SilentHttpException(404, 'tugas tidak ditemukan');
         }
+
+        $subjectName = $task->task->subject ? $task->task->subject->name : null;
+        $attachments = $task->task->attachments ? $task->task->attachments()->pluck('url')->toArray() : [];
+
         return [
-            'id'=>$task->id,
-            'subject'=>$task->task->subject->name,
-            'title'=>$task->task->title,
-            'description'=>$task->task->description,
-            'attachments'=>$attachments,
-            'score' => $task->score ?? 0, 
-            'due_date'=>Carbon::parse($task->task->due_date)->format('Y-m-d'),
-            'due_time'=>Carbon::parse($task->task->due_time)->format('H:i'),
-            'created_at'=>$task->task->created_at
+            'id' => $task->id,
+            'subject' => $subjectName,
+            'title' => $task->task->title ?? null,
+            'description' => $task->task->description ?? null,
+            'attachments' => $attachments,
+            'score' => $task->score ?? 0,
+            'due_date' => $task->task->due_date ? Carbon::parse($task->task->due_date)->format('Y-m-d') : null,
+            'due_time' => $task->task->due_time ? Carbon::parse($task->task->due_time)->format('H:i') : null,
+            'created_at' => $task->task->created_at ?? null
         ];
     }
 }
