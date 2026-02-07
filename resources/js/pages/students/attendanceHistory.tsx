@@ -141,11 +141,11 @@ export default function AttendanceHistory({
                         </div>
                         <div>
                             <p className="font-semibold">Kelas</p>
-                            <p>{student.classroom.name}</p>
+                            <p>{student.classroom?.name || '-'}</p>
                         </div>
                         <div>
                             <p className="font-semibold">Wali Kelas</p>
-                            <p>{student.classroom.main_teacher.full_name}</p>
+                            <p>{student.classroom?.main_teacher?.full_name || '-'}</p>
                         </div>
                     </div>
                 </div>

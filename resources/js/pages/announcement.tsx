@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
-import AnnouncementFormModal from '@/components/announcement-form-modal';
 import AnnouncementDeleteConfirmationModal from '@/components/announcement-delete-confirmation-modal';
 import { type BreadcrumbItem } from '@/types';
 import AppLayout from '@/layouts/app-layout';
@@ -195,7 +194,6 @@ export default function Announcement() {
                     ))}
                 </div>
             </div>
-            <AnnouncementFormModal isOpen={isModalOpen} closeModal={() => setIsModalOpen(false)} announcement={selectedAnnouncement} />
             <AnnouncementDeleteConfirmationModal
                 isDeleteModalOpen={isDeleteModalOpen}
                 setIsDeleteModalOpen={setIsDeleteModalOpen}
