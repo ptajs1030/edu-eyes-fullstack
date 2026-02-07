@@ -34,7 +34,7 @@ COPY . .
 
 # Install PHP and JS dependencies
 RUN composer install --no-interaction --prefer-dist && \
-    npm ci && \
+    npm install && \
     npm run build && \
     chown -R www-data:www-data /var/www
 
