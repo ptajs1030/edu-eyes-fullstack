@@ -147,7 +147,7 @@ export default function Announcement() {
                         </tr>
                     </thead>
                     <tbody>
-                        {announcements.data.length > 0 ? announcements.data.map((announcement) => (
+                        {announcements?.data?.length > 0 ? announcements.data.map((announcement) => (
                             <tr key={announcement.id} className='border-b'>
                                 <td className='p-3'>
                                     <input type='checkbox' checked={selectedIds.includes(announcement.id)} onChange={() => toggleSelect(announcement.id)} />

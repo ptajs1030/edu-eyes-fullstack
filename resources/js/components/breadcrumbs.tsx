@@ -6,7 +6,7 @@ import { Fragment } from 'react';
 export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: BreadcrumbItemType[] }) {
     return (
         <>
-            {breadcrumbs.length > 0 && (
+            {breadcrumbs?.length > 0 && (
                 <Breadcrumb>
                     <BreadcrumbList>
                         {breadcrumbs.map((item, index) => {
