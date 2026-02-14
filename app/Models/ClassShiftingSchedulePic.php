@@ -26,4 +26,9 @@ class ClassShiftingSchedulePic extends Pivot
     {
         return $this->belongsTo(User::class, 'teacher_id');
     }
+
+    public function classShiftingSchedule()
+    {
+        return $this->belongsTo(ClassShiftingSchedule::class, 'class_shifting_schedule_id');
+    }
 }

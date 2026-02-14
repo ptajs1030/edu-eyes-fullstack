@@ -7,6 +7,10 @@ use App\Enums\UserStatus;
 use App\Imports\UsersImport;
 use App\Models\Role;
 use App\Models\User;
+use App\Models\ClassShiftingSchedulePic;
+use App\Models\ClassSubjectSchedule;
+use App\Models\Classroom;
+use App\Models\EventPic;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
@@ -329,6 +333,52 @@ class UserController extends Controller
     public function destroy($id)
     {
         try {
+            // Check if user is main teacher in active Classrooms
+            $hasActiveClassroom = Classroom::where('main_teacher_id', $id)
+                ->whereNull('deleted_at')
+                ->exists();
+
+            if ($hasActiveClassroom) {
+                return redirect()->back()
+                    ->with('error', 'User tidak dapat dihapus karena masih menjabat sebagai Wali Kelas di Kelas aktif.');
+            }
+
+            // Check active Class Shifting Schedule Pics
+            $hasActiveShiftingSchedule = ClassShiftingSchedulePic::where('teacher_id', $id)
+                ->whereHas('classShiftingSchedule.classroom', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->exists();
+
+            if ($hasActiveShiftingSchedule) {
+                return redirect()->back()
+                    ->with('error', 'User tidak dapat dihapus karena masih terdaftar sebagai Guru Pendamping di Jadwal Shifting Kelas aktif.');
+            }
+
+            // Check active Class Subject Schedules
+            $hasActiveSubjectSchedule = ClassSubjectSchedule::where('teacher_id', $id)
+                ->whereHas('classroom', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->exists();
+
+            if ($hasActiveSubjectSchedule) {
+                return redirect()->back()
+                    ->with('error', 'User tidak dapat dihapus karena masih terdaftar sebagai Guru Pengajar di Jadwal Pelajaran Kelas aktif.');
+            }
+
+            // Check active Event Pics
+            $hasActiveEventPic = EventPic::where('pic_id', $id)
+                ->whereHas('event', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->exists();
+
+            if ($hasActiveEventPic) {
+                return redirect()->back()
+                    ->with('error', 'User tidak dapat dihapus karena masih menjadi PIC di Event aktif.');
+            }
+
             $user = User::with('role')->findOrFail($id);
             $roleName = $user->role ? strtolower($user->role->name) : 'user';
             if ($roleName === 'teacher') {

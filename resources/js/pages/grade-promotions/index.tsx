@@ -319,16 +319,16 @@ export default function GradePromotionIndex({
                         headers={tableHeaders}
                         data={classGroups.map((group) => ({
                             ...group,
-                            name: group.classroom.name,
-                            level: group.classroom.level,
+                            name: group.classroom?.name,
+                            level: group.classroom?.level,
                         }))}
                         sortColumn={filters.sort ?? ''}
                         sortDirection={filters.direction === 'asc' || filters.direction === 'desc' ? filters.direction : 'asc'}
                         onSort={handleSortChange}
                         rowRender={(group) => (
                             <tr key={group.class_id} className="border-b hover:bg-gray-50">
-                                <td className="p-4 text-sm">Tingkat {group.classroom.level}</td>
-                                <td className="p-4 text-sm">{group.classroom.name}</td>
+                                <td className="p-4 text-sm">Tingkat {group.classroom?.level || '-'}</td>
+                                <td className="p-4 text-sm">{group.classroom?.name || '-'}</td>
                                 <td className="p-4 text-sm">
                                     <span
                                         className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${group.status === 'completed' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'

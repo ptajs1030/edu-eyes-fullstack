@@ -6,6 +6,15 @@ use App\Enums\AcademicYearStatus;
 use App\Models\AcademicYear;
 use App\Models\ClassHistory;
 use App\Models\Classroom;
+use App\Models\Student;
+use App\Models\ClassShiftingSchedule;
+use App\Models\ClassSubjectSchedule;
+use App\Models\ShiftingAttendance;
+use App\Models\SubjectAttendance;
+use App\Models\ExamAssignment;
+use App\Models\TaskAssignment;
+use App\Models\TemporaryClassStatus;
+use App\Models\TemporaryClassStudent;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
@@ -135,6 +144,90 @@ class ClassroomController extends Controller
     public function destroy($id)
     {
         try {
+            // 1. Check active students in class
+            $hasActiveStudents = Student::where('class_id', $id)->exists();
+
+            if ($hasActiveStudents) {
+                return redirect()->back()->with('error', 'Kelas tidak dapat dihapus karena masih memiliki siswa aktif.');
+            }
+
+            // 2. Check class histories linked to active students
+            $hasClassHistory = ClassHistory::where('class_id', $id)
+                ->whereHas('student', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->exists();
+
+            if ($hasClassHistory) {
+                return redirect()->back()->with('error', 'Kelas tidak dapat dihapus karena memiliki riwayat kelas dari siswa aktif.');
+            }
+
+            // 3. Check class shifting schedules
+            $hasClassShiftingSchedule = ClassShiftingSchedule::where('class_id', $id)->exists();
+
+            if ($hasClassShiftingSchedule) {
+                return redirect()->back()->with('error', 'Kelas tidak dapat dihapus karena memiliki jadwal shifting.');
+            }
+
+            // 4. Check class subject schedules
+            $hasClassSubjectSchedule = ClassSubjectSchedule::where('class_id', $id)->exists();
+
+            if ($hasClassSubjectSchedule) {
+                return redirect()->back()->with('error', 'Kelas tidak dapat dihapus karena memiliki jadwal pelajaran.');
+            }
+
+            // 5. Check shifting attendances
+            $hasShiftingAttendance = ShiftingAttendance::where('class_id', $id)->exists();
+
+            if ($hasShiftingAttendance) {
+                return redirect()->back()->with('error', 'Kelas tidak dapat dihapus karena memiliki data absensi shifting.');
+            }
+
+            // 6. Check subject attendances
+            $hasSubjectAttendance = SubjectAttendance::where('class_id', $id)->exists();
+
+            if ($hasSubjectAttendance) {
+                return redirect()->back()->with('error', 'Kelas tidak dapat dihapus karena memiliki data absensi mata pelajaran.');
+            }
+
+            // 7. Check active exam assignments
+            $hasExamAssignment = ExamAssignment::where('class_id', $id)
+                ->whereHas('exam', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->exists();
+
+            if ($hasExamAssignment) {
+                return redirect()->back()->with('error', 'Kelas tidak dapat dihapus karena telah melaksanakan ujian aktif.');
+            }
+
+            // 8. Check active task assignments
+            $hasTaskAssignment = TaskAssignment::where('class_id', $id)
+                ->whereHas('task', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->exists();
+
+            if ($hasTaskAssignment) {
+                return redirect()->back()->with('error', 'Kelas tidak dapat dihapus karena telah diberikan tugas aktif.');
+            }
+
+            // 9. Check temporary class statuses
+            $hasTemporaryStatus = TemporaryClassStatus::where('class_id', $id)->exists();
+
+            if ($hasTemporaryStatus) {
+                return redirect()->back()->with('error', 'Kelas tidak dapat dihapus karena terdata di status kelas sementara.');
+            }
+
+            // 10. Check temporary class students
+            $hasTemporaryStudent = TemporaryClassStudent::where('initial_class_id', $id)
+                ->orWhere('target_class_id', $id)
+                ->exists();
+
+            if ($hasTemporaryStudent) {
+                return redirect()->back()->with('error', 'Kelas tidak dapat dihapus karena terdata di perpindahan siswa sementara.');
+            }
+
             $classroom = Classroom::findOrFail($id);
             $classroom->delete();
 

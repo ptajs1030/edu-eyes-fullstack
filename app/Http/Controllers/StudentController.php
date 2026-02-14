@@ -8,6 +8,15 @@ use App\Enums\StudentStatus;
 use App\Imports\StudentsImport;
 use App\Models\Classroom;
 use App\Models\Student;
+use App\Models\ClassHistory;
+use App\Models\EventAttendance;
+use App\Models\EventParticipant;
+use App\Models\ShiftingAttendance;
+use App\Models\SubjectAttendance;
+use App\Models\ExamAssignment;
+use App\Models\TaskAssignment;
+use App\Models\PaymentAssignment;
+use App\Models\TemporaryClassStudent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
@@ -270,6 +279,93 @@ class StudentController extends Controller
     public function destroy($id)
     {
         try {
+            // 1. Check active class histories
+            $hasClassHistory = ClassHistory::where('student_id', $id)
+                ->whereHas('classroom', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->exists();
+
+            if ($hasClassHistory) {
+                return redirect()->back()->with('error', 'Siswa tidak dapat dihapus karena memiliki riwayat kelas di Kelas aktif.');
+            }
+
+            // 2. Check active event attendances
+            $hasEventAttendance = EventAttendance::where('student_id', $id)
+                ->whereHas('event', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->exists();
+
+            if ($hasEventAttendance) {
+                return redirect()->back()->with('error', 'Siswa tidak dapat dihapus karena memiliki absensi di Event aktif.');
+            }
+
+            // 3. Check active event participants
+            $hasEventParticipant = EventParticipant::where('student_id', $id)
+                ->whereHas('event', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->exists();
+
+            if ($hasEventParticipant) {
+                return redirect()->back()->with('error', 'Siswa tidak dapat dihapus karena terdaftar sebagai peserta di Event aktif.');
+            }
+
+            // 4. Check shifting attendances
+            $hasShiftingAttendance = ShiftingAttendance::where('student_id', $id)->exists();
+
+            if ($hasShiftingAttendance) {
+                return redirect()->back()->with('error', 'Siswa tidak dapat dihapus karena memiliki data absensi shifting.');
+            }
+
+            // 5. Check subject attendances
+            $hasSubjectAttendance = SubjectAttendance::where('student_id', $id)->exists();
+
+            if ($hasSubjectAttendance) {
+                return redirect()->back()->with('error', 'Siswa tidak dapat dihapus karena memiliki data absensi mata pelajaran.');
+            }
+
+            // 6. Check active exam assignments
+            $hasExamAssignment = ExamAssignment::where('student_id', $id)
+                ->whereHas('exam', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->exists();
+
+            if ($hasExamAssignment) {
+                return redirect()->back()->with('error', 'Siswa tidak dapat dihapus karena telah mengikuti ujian aktif.');
+            }
+
+            // 7. Check active task assignments
+            $hasTaskAssignment = TaskAssignment::where('student_id', $id)
+                ->whereHas('task', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->exists();
+
+            if ($hasTaskAssignment) {
+                return redirect()->back()->with('error', 'Siswa tidak dapat dihapus karena telah diberikan tugas aktif.');
+            }
+
+            // 8. Check active payment assignments
+            $hasPaymentAssignment = PaymentAssignment::where('student_id', $id)
+                ->whereHas('payment', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->exists();
+
+            if ($hasPaymentAssignment) {
+                return redirect()->back()->with('error', 'Siswa tidak dapat dihapus karena memiliki tagihan pembayaran aktif.');
+            }
+
+            // 9. Check temporary class students
+            $hasTemporaryClass = TemporaryClassStudent::where('student_id', $id)->exists();
+
+            if ($hasTemporaryClass) {
+                return redirect()->back()->with('error', 'Siswa tidak dapat dihapus karena terdaftar di kelas sementara.');
+            }
+
             $student = Student::findOrFail($id);
             $student->delete();
 

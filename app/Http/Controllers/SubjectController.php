@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Subject;
+use App\Models\ClassSubjectSchedule;
+use App\Models\Exam;
+use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
@@ -78,6 +81,34 @@ class SubjectController extends Controller
     public function destroy($id)
     {
         try {
+            // Check active Class Subject Schedules
+            $hasActiveSubjectSchedule = ClassSubjectSchedule::where('subject_id', $id)
+                ->whereHas('classroom', function ($query) {
+                    $query->whereNull('deleted_at');
+                })
+                ->exists();
+
+            if ($hasActiveSubjectSchedule) {
+                return redirect()->back()
+                    ->with('error', 'Mata pelajaran tidak dapat dihapus karena masih digunakan di Jadwal Pelajaran Kelas aktif.');
+            }
+
+            // Check if subject is used in active exams
+            $hasActiveExam = Exam::where('subject_id', $id)->exists();
+
+            if ($hasActiveExam) {
+                return redirect()->back()
+                    ->with('error', 'Mata pelajaran tidak dapat dihapus karena masih memiliki Ujian aktif.');
+            }
+
+            // Check if subject is used in active tasks
+            $hasActiveTask = Task::where('subject_id', $id)->exists();
+
+            if ($hasActiveTask) {
+                return redirect()->back()
+                    ->with('error', 'Mata pelajaran tidak dapat dihapus karena masih memiliki Tugas aktif.');
+            }
+
             $subject = Subject::findOrFail($id);
             $subject->delete();
 

@@ -129,7 +129,7 @@ export default function ExamIndex() {
             .map((exam) => {
                 // format date to be YYYY-MM-DD
                 const formattedDate = exam.date ? new Date(exam.date).toISOString().slice(0, 10) : '';
-                return `${exam.academic_year?.title},${exam.subject.name},${exam.name},${exam.type || ''},${formattedDate},${exam.student_count}`;
+                return `${exam.academic_year?.title},${exam.subject?.name},${exam?.name},${exam.type || ''},${formattedDate},${exam.student_count}`;
             })
             .join('\n');
         const blob = new Blob([headers, csv], { type: 'text/csv' });
@@ -243,8 +243,8 @@ export default function ExamIndex() {
                                 <input type="checkbox" checked={selectedIds.includes(exam.id)} onChange={() => toggleSelect(exam.id)} />
                             </td>
                             <td className="p-3 text-sm">{exam.academic_year?.title}</td>
-                            <td className="p-3 text-sm">{exam.subject.name}</td>
-                            <td className="p-3 text-sm font-medium">{exam.name}</td>
+                            <td className="p-3 text-sm">{exam.subject?.name || '-'}</td>
+                            <td className="p-3 text-sm font-medium">{exam?.name || '-'}</td>
                             <td className="p-3 text-sm">{exam.type}</td>
                             <td className="p-3 text-sm">{formatDate(exam.date)}</td>
                             <td className="p-3 text-sm">

@@ -11,14 +11,16 @@ use Illuminate\Support\Str;
 
 class Student extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
+
+    protected $dates = ['deleted_at'];
 
     protected $guarded = [
         'id',
         'uuid',
         'qr_code_url',
         'created_at',
-        'updated_at'
+        'updated_at',
     ];
 
     protected $casts = [
