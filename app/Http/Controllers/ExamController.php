@@ -80,11 +80,7 @@ class ExamController extends Controller
         try {
             $exam = Exam::findOrFail($id);
 
-            // Delete related exam assignments first
-            $exam->assignments()->delete();
-
-            // Delete the exam
-            $exam->delete();
+            if ($exam) $exam->delete();
 
             return redirect()->back()
                 ->with('success', 'Ujian berhasil dihapus.');

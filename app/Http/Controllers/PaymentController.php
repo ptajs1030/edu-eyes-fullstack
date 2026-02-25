@@ -223,15 +223,10 @@ class PaymentController extends Controller
     public function destroy(Payment $payment)
     {
         try {
+            if ($payment) $payment->delete();
 
-            if ($payment->assignments()->count() === 0) {
-                $payment->delete();
-                return redirect()->route('payments.index')
-                    ->with('success', 'Tagihan Berhasil Dihapus');
-            } else {
-                return redirect()->back()
-                    ->with('error', 'Tagihan tidak dapat dihapus karena memiliki keterkaitan dengan data daftar pembayaran');
-            }
+            return redirect()->route('payments.index')
+                ->with('success', 'Tagihan Berhasil Dihapus');
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Gagal menghapus tagihan: ' . $e->getMessage());

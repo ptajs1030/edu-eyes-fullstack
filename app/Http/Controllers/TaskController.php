@@ -435,12 +435,7 @@ class TaskController extends Controller
         try {
             $task = Task::withCount('assignments')->findOrFail($id);
 
-            if ($task->assignments_count > 0) {
-                return redirect()->back()
-                    ->with('error', 'Tugas tidak dapat dihapus karena memiliki keterkaitan dengan data nilai siswa.');
-            }
-
-            $task->delete();
+            if ($task) $task->delete();
 
             return redirect()->route('tasks.index')
                 ->with('success', 'Tugas berhasil dihapus.');
