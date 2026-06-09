@@ -17,7 +17,7 @@ class CheckTaskDeadlines extends Command
      *
      * @var string
      */
-    protected $signature = 'check:task-deadlines';
+    protected $signature = 'check:task-deadlines {--force}';
 
     /**
      * The console command description.
@@ -36,7 +36,7 @@ class CheckTaskDeadlines extends Command
         $currentTime = $now->format('H:i');
 
          // Hanya jalan antara 00:28 - 00:33 WIB (make sure only running once at 00:30)
-        if ($currentTime < '00:28' || $currentTime > '00:33') {
+        if (!$this->option('force') && ($currentTime < '00:28' || $currentTime > '00:33')) {
             Log::info('[Cron] Task Deadline Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
             $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
             return;

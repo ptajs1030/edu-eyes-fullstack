@@ -17,7 +17,7 @@ class CheckPaymentDeadlines extends Command
      *
      * @var string
      */
-    protected $signature = 'check:payment-deadlines';
+    protected $signature = 'check:payment-deadlines {--force}';
 
     /**
      * The console command description.
@@ -35,7 +35,7 @@ class CheckPaymentDeadlines extends Command
         $currentTime = $now->format('H:i');
 
         // Hanya jalan antara 00:34 - 00:39 WIB (make sure only running once at 00:36)
-        if ($currentTime < '00:34' || $currentTime > '00:39') {
+        if (!$this->option('force') && ($currentTime < '00:34' || $currentTime > '00:39')) {
             Log::info('[Cron] Payment Deadline Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
             $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
             return;

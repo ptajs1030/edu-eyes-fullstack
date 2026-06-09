@@ -22,7 +22,7 @@ class GenerateShiftingAttendances extends Command
      *
      * @var string
      */
-    protected $signature = 'attendance:generate-shifting';
+    protected $signature = 'attendance:generate-shifting {--force}';
 
     /**
      * The console command description.
@@ -42,7 +42,7 @@ class GenerateShiftingAttendances extends Command
         $todayDate = $now->toDateString();
 
         // Hanya jalan antara 00:00 - 00:05 WIB
-        if ($currentTime < '00:00' || $currentTime > '00:05') {
+        if (!$this->option('force') && ($currentTime < '00:00' || $currentTime > '00:05')) {
             Log::info('[Cron] Shifting Attendance Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
             $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
             return;

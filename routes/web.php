@@ -121,6 +121,10 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::resource('subjects', SubjectController::class);
     Route::resource('shiftings', ShiftingController::class);
     Route::resource('school-settings', SchoolSettingController::class);
+    Route::post('/school-settings/actions/generate-shifting', [SchoolSettingController::class, 'generateShifting'])->name('school-settings.actions.generate-shifting');
+    Route::post('/school-settings/actions/generate-event', [SchoolSettingController::class, 'generateEvent'])->name('school-settings.actions.generate-event');
+    Route::post('/school-settings/actions/check-payment-deadlines', [SchoolSettingController::class, 'checkPaymentDeadlines'])->name('school-settings.actions.check-payment-deadlines');
+    Route::post('/school-settings/actions/check-task-deadlines', [SchoolSettingController::class, 'checkTaskDeadlines'])->name('school-settings.actions.check-task-deadlines');
 
     Route::prefix('grade-promotions')->group(function () {
         Route::get('/', [GradePromotionController::class, 'index'])->name('grade-promotions.index');

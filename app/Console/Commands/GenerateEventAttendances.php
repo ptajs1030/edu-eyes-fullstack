@@ -18,7 +18,7 @@ class GenerateEventAttendances extends Command
      *
      * @var string
      */
-    protected $signature = 'attendance:generate-event';
+    protected $signature = 'attendance:generate-event {--force}';
 
     /**
      * The console command description.
@@ -37,7 +37,7 @@ class GenerateEventAttendances extends Command
         $todayDate = $now->toDateString();
 
         // Hanya jalan antara 00:15 - 00:20 WIB
-        if ($currentTime < '00:15' || $currentTime > '00:20') {
+        if (!$this->option('force') && ($currentTime < '00:15' || $currentTime > '00:20')) {
             Log::info('[Cron] Event Attendance Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan.');
             $this->info('Lewat jam eksekusi (now: ' . $currentTime . '), command tidak dijalankan..');
             return;
