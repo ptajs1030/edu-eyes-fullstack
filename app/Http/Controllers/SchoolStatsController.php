@@ -18,7 +18,7 @@ class SchoolStatsController extends Controller
         $admin = User::where('role_id', function($q) { $q->select('id')->from('roles')->where('name', 'admin'); })->where('status', 'active')->count();
         $orangTua = User::where('role_id', function($q) { $q->select('id')->from('roles')->where('name', 'parent'); })->where('status', 'active')->count();
         $kelas = Classroom::count();
-        $mataPelajaran = Subject::count();
+        $mataPelajaran = Subject::where('is_archived', false)->count();
         $tahunAkademik = AcademicYear::where('status', 'active')->first()?->title ?? '-';
 
         return response()->json([

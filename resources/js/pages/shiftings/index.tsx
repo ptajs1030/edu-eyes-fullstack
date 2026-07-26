@@ -115,104 +115,188 @@ export default function ShiftingIndex() {
             <Head title="Shiftings" />
             <Toaster position="top-right" richColors />
 
-            <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
-                <div className="flex items-center justify-between">
-                    {/* Search and Add Button */}
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="text"
-                            placeholder="Cari shift..."
-                            defaultValue={filters.search || ''}
-                            onChange={(e) => router.get(route('shiftings.index'), { search: e.target.value }, { preserveState: true })}
-                            className="w-64 rounded border px-3 py-1 text-sm"
-                        />
-                        {/* <button
-                            disabled={selectedIds.length === 0}
-                            onClick={exportSelected}
-                            className={`rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700 ${
-                                selectedIds.length === 0 ? 'opacity-50 cursor-not-allowed' : 'hover:cursor-pointer'
-                            }`}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scroll">
+                <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6 lg:py-8">
+
+                    {/* Page Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 animate-fade-in-up">
+                        <div>
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="px-2 py-0.5 rounded-md bg-primary/10 dark:bg-primary/30 text-primary dark:text-primary-400 text-[10px] font-bold uppercase tracking-wider">
+                                    Akademik
+                                </span>
+                            </div>
+                            <h1 className="text-3xl font-extrabold text-foreground dark:text-white tracking-tight">Shiftings</h1>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Kelola jam shift belajar
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => openForm(null)}
+                            className="inline-flex items-center gap-2 px-5 py-2.5 btn-shimmer text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:scale-[1.02] active:scale-[0.98]"
                         >
-                            Ekspor Data
-                        </button> */}
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                            </svg>
+                            Tambah Shifting
+                        </button>
                     </div>
-                    <button
-                        onClick={() => openForm(null)}
-                        className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"
-                    >
-                        Tambah Shifting
-                    </button>
+
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                        <div className="bg-white dark:bg-slate-800/60 rounded-2xl p-5 border border-slate-200/60 dark:border-slate-700/40 shadow-sm card-glow animate-fade-in-up stagger-1">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                                    </svg>
+                                    +{shiftings.total}%
+                                </span>
+                            </div>
+                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{shiftings.total}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Total Shift</p>
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-800/60 rounded-2xl p-5 border border-slate-200/60 dark:border-slate-700/40 shadow-sm card-glow animate-fade-in-up stagger-2">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{shiftings.data.length}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Shift Hari Ini</p>
+                        </div>
+
+                        <div className="bg-white dark:bg-slate-800/60 rounded-2xl p-5 border border-slate-200/60 dark:border-slate-700/40 shadow-sm card-glow animate-fade-in-up stagger-3">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/20">
+                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
+                                    </svg>
+                                </div>
+                            </div>
+                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{shiftings.total}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Total Jam Shift</p>
+                        </div>
+                    </div>
+
+                    {/* Filters */}
+                    <div className="flex flex-col lg:flex-row lg:items-center gap-4 mb-6 animate-fade-in-up stagger-5">
+                        <div className="relative flex-1 min-w-[280px] max-w-lg">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                </svg>
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Cari shift..."
+                                defaultValue={filters.search || ''}
+                                onChange={(e) => router.get(route('shiftings.index'), { search: e.target.value }, { preserveState: true })}
+                                className="input-glow w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-foreground dark:text-white placeholder-muted-foreground outline-none transition-all"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Table */}
+                    <div className="animate-fade-in-up stagger-6">
+                        <Table
+                            headers={tableHeaders}
+                            data={shiftings.data}
+                            sortColumn={filters.sort ?? ''}
+                            sortDirection={filters.direction === 'asc' || filters.direction === 'desc' ? filters.direction : 'asc'}
+                            onSort={handleSortChange}
+                            onSelectAll={(checked) => setSelectedIds(checked ? shiftings.data.map((a) => a.id) : [])}
+                            selectedIds={selectedIds}
+                            rowRender={(shifting) => (
+                                <tr key={shifting.id} className="row-card group bg-white dark:bg-transparent hover:bg-slate-50/80 dark:hover:bg-slate-700/20 transition-colors">
+                                    <td className="px-5 py-4">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedIds.includes(shifting.id)}
+                                            onChange={() => toggleSelect(shifting.id)}
+                                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary-600 focus:ring-primary-500/20 cursor-pointer bg-slate-50 dark:bg-slate-700"
+                                        />
+                                    </td>
+                                    <td className="px-5 py-4">
+                                        <p className="font-semibold text-foreground dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{shifting.name}</p>
+                                    </td>
+                                    <td className="px-5 py-4">
+                                        <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-100 dark:bg-slate-700/50 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600/50">
+                                            {shifting.start_hour} - {shifting.end_hour}
+                                        </span>
+                                    </td>
+                                    <td className="px-5 py-4">
+                                        <div className="flex items-center justify-end gap-1">
+                                            <div className="has-tooltip relative">
+                                                <span className="tooltip absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 dark:bg-slate-700 text-white text-[10px] rounded-md whitespace-nowrap z-10">Edit</span>
+                                                <button
+                                                    onClick={() => openForm(shifting)}
+                                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            <div className="has-tooltip relative">
+                                                <span className="tooltip absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 dark:bg-slate-700 text-white text-[10px] rounded-md whitespace-nowrap z-10">Hapus</span>
+                                                <button
+                                                    onClick={() => setShiftingToDelete(shifting)}
+                                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        />
+                        <Pagination links={shiftings.links} />
+                    </div>
+
                 </div>
-
-                {/* Table */}
-                <Table
-                    headers={tableHeaders}
-                    data={shiftings.data}
-                    sortColumn={filters.sort ?? ''}
-                    sortDirection={filters.direction === 'asc' || filters.direction === 'desc' ? filters.direction : 'asc'}
-                    onSort={handleSortChange}
-                    onSelectAll={(checked) => setSelectedIds(checked ? shiftings.data.map((a) => a.id) : [])}
-                    selectedIds={selectedIds}
-                    rowRender={(shifting) => (
-                        <tr key={shifting.id} className="border-b">
-                            <td className="w-[10px] p-3 text-sm">
-                                <input type="checkbox" checked={selectedIds.includes(shifting.id)} onChange={() => toggleSelect(shifting.id)} />
-                            </td>
-                            <td className="p-3 text-sm">{shifting.name}</td>
-                            <td className="p-3 text-sm">
-                                {shifting.start_hour} - {shifting.end_hour}
-                            </td>
-                            <td className="flex gap-2 p-3">
-                                <button
-                                    onClick={() => openForm(shifting)}
-                                    className="rounded bg-blue-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => setShiftingToDelete(shifting)}
-                                    className="rounded bg-red-500 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
-                                >
-                                    Hapus
-                                </button>
-                            </td>
-                        </tr>
-                    )}
-                />
-
-                <Pagination links={shiftings.links} />
-
-                {/* Modals */}
-                <ShiftingFormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} shifting={selectedShifting} />
-
-                <ActionModal
-                    isOpen={!!shiftingToDelete}
-                    onClose={() => setShiftingToDelete(null)}
-                    title="Konfirmasi Penghapusan"
-                    message={
-                        <span>
-                            Apakah Anda yakin ingin menghapus shifting <strong>{shiftingToDelete?.name}</strong>?
-                        </span>
-                    }
-                    buttons={[
-                        {
-                            label: 'Batal',
-                            onClick: () => setShiftingToDelete(null),
-                            variant: 'neutral',
-                        },
-                        {
-                            label: 'Ya, Hapus',
-                            onClick: () => {
-                                if (shiftingToDelete) {
-                                    handleDelete(shiftingToDelete.id);
-                                    setShiftingToDelete(null);
-                                }
-                            },
-                            variant: 'danger',
-                        },
-                    ]}
-                />
             </div>
+
+            <ShiftingFormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} shifting={selectedShifting} />
+
+            <ActionModal
+                isOpen={!!shiftingToDelete}
+                onClose={() => setShiftingToDelete(null)}
+                title="Konfirmasi Penghapusan"
+                message={
+                    <span>
+                        Apakah Anda yakin ingin menghapus shifting <strong>{shiftingToDelete?.name}</strong>?
+                    </span>
+                }
+                buttons={[
+                    {
+                        label: 'Batal',
+                        onClick: () => setShiftingToDelete(null),
+                        variant: 'neutral',
+                    },
+                    {
+                        label: 'Ya, Hapus',
+                        onClick: () => {
+                            if (shiftingToDelete) {
+                                handleDelete(shiftingToDelete.id);
+                                setShiftingToDelete(null);
+                            }
+                        },
+                        variant: 'danger',
+                    },
+                ]}
+            />
         </AppLayout>
     );
 }

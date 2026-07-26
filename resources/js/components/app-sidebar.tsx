@@ -7,97 +7,111 @@ import { Link } from '@inertiajs/react';
 import { BadgeInfo, BookText, GraduationCap, LayoutGrid, School, Settings2, TimerReset, TrendingUpDown, UserPen, UserSearch, PencilRuler, LandPlot, CalendarOff, CreditCard, BookOpen } from 'lucide-react';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
+const navGroups = [
     {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    },
-    //TODO hide temporarily
-    // {
-    //     title: 'Roles',
-    //     href: '/roles',
-    //     icon: UserCog,
-    // },
-    {
-        title: 'Admin',
-        href: '/admins',
-        icon: UserPen,
+        label: 'Menu Utama',
+        items: [
+            {
+                title: 'Dashboard',
+                href: '/dashboard',
+                icon: LayoutGrid,
+            },
+        ],
     },
     {
-        title: 'Guru',
-        href: '/teachers',
-        icon: UserPen,
+        label: 'Data Pengguna',
+        items: [
+            {
+                title: 'Data Siswa',
+                href: '/students',
+                icon: UserSearch,
+            },
+            {
+                title: 'Data Guru',
+                href: '/teachers',
+                icon: UserPen,
+            },
+            {
+                title: 'Data Orang Tua',
+                href: '/parents',
+                icon: UserPen,
+            },
+            {
+                title: 'Data Admin',
+                href: '/admins',
+                icon: UserPen,
+            },
+        ],
     },
     {
-        title: 'Orang Tua/Wali',
-        href: '/parents',
-        icon: UserPen,
+        label: 'Akademik',
+        items: [
+            {
+                title: 'Tahun Ajaran',
+                href: '/academic-years',
+                icon: GraduationCap,
+            },
+            {
+                title: 'Kelas',
+                href: '/classrooms',
+                icon: School,
+            },
+            {
+                title: 'Mata Pelajaran',
+                href: '/subjects',
+                icon: BookText,
+            },
+        ],
     },
     {
-        title: 'Siswa',
-        href: '/students',
-        icon: UserSearch,
-    },
-    {
-        title: 'Tahun Akademik',
-        href: '/academic-years',
-        icon: GraduationCap,
-    },
-    {
-        title: 'Kelas',
-        href: '/classrooms',
-        icon: School,
-    },
-    {
-        title: 'Kenaikan Kelas',
-        href: '/grade-promotions',
-        icon: TrendingUpDown,
-    },
-    {
-        title: 'Mata Pelajaran',
-        href: '/subjects',
-        icon: BookText,
-    },
-    {
-        title: 'Kegiatan',
-        href: '/events',
-        icon: LandPlot,
-    },
-    {
-        title: 'Ujian',
-        href: '/exams',
-        icon: PencilRuler,
-    },
-    {
-        title: 'Tugas',
-        href: '/tasks',
-        icon: BookOpen,
-    },
-    {
-        title: 'Shiftings',
-        href: '/shiftings',
-        icon: TimerReset,
-    },
-    {
-        title: 'Hari Libur',
-        href: '/custom-day-offs',
-        icon: CalendarOff,
-    },
-    {
-        title: 'Tagihan',
-        href: '/payments',
-        icon: CreditCard,
-    },
-    {
-        title: 'Pengumuman',
-        href: '/announcements',
-        icon: BadgeInfo,
-    },
-    {
-        title: 'Pengaturan Sekolah',
-        href: '/school-settings',
-        icon: Settings2,
+        label: 'Operasional',
+        items: [
+            {
+                title: 'Shifting / Jam',
+                href: '/shiftings',
+                icon: TimerReset,
+            },
+            {
+                title: 'Pembayaran',
+                href: '/payments',
+                icon: CreditCard,
+            },
+            {
+                title: 'Pengumuman',
+                href: '/announcements',
+                icon: BadgeInfo,
+            },
+            {
+                title: 'Event',
+                href: '/events',
+                icon: LandPlot,
+            },
+            {
+                title: 'Tugas',
+                href: '/tasks',
+                icon: BookOpen,
+            },
+            {
+                title: 'Ujian',
+                href: '/exams',
+                icon: PencilRuler,
+            },
+            {
+                title: 'Hari Libur',
+                href: '/custom-day-offs',
+                icon: CalendarOff,
+            },
+            {
+                title: 'Kenaikan Kelas',
+                href: '/grade-promotions',
+                icon: TrendingUpDown,
+            },
+            {
+                title: 'Pengaturan Sekolah',
+                href: '/school-settings',
+                icon: Settings2,
+            },
+        ],
     },
 ];
 
@@ -107,11 +121,11 @@ export function AppSidebar() {
     const { state } = useSidebar();
 
     return (
-        <Sidebar collapsible="icon" variant="inset">
-            <SidebarHeader>
+        <Sidebar collapsible="icon" variant="sidebar" className="border-r border-border">
+            <SidebarHeader className="h-16 px-6 border-b border-slate-100">
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton size="lg" asChild>
+                        <SidebarMenuButton size="lg" asChild className="p-0 hover:bg-transparent">
                             <Link href="/dashboard" prefetch>
                                 <AppLogo small={state === 'collapsed'} />
                             </Link>
@@ -120,11 +134,11 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
-                <NavMain items={mainNavItems} />
+            <SidebarContent className="py-5 px-3">
+                <NavMain groups={navGroups} />
             </SidebarContent>
 
-            <SidebarFooter>
+            <SidebarFooter className="p-3 border-t border-slate-100">
                 <NavFooter items={footerNavItems} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>

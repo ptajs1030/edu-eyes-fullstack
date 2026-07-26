@@ -47,7 +47,6 @@ export default function RoleIndex() {
         if (flash?.success) {
             toast.success(flash.success);
         }
-
         if (flash?.error) {
             toast.error(flash.error);
         }
@@ -74,8 +73,6 @@ export default function RoleIndex() {
     };
 
     const exportSelected = () => {
-        if (selectedIds.length === 0) return;
-        
         const selectedData = roles.data.filter((a) => selectedIds.includes(a.id));
         const headers = `Name\n`;
         const csv = selectedData.map((a) => `${a.name}`).join('\n');
@@ -87,7 +84,7 @@ export default function RoleIndex() {
         link.click();
 
         toast.success(`Berhasil mengekspor ${selectedData.length} data roles`, {
-            description: 'File CSV telah didownload otomatis'
+            description: 'File CSV telah didownload otomatis',
         });
     };
 
@@ -112,95 +109,147 @@ export default function RoleIndex() {
             <Head title="Hak Akses" />
             <Toaster position="top-right" richColors />
 
-            <div className="flex flex-col gap-6 rounded-xl bg-white p-6 text-black shadow-lg">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="text"
-                            placeholder="Cari roles..."
-                            defaultValue={filters.search || ''}
-                            onChange={(e) => router.get(route('roles.index'), { search: e.target.value }, { preserveState: true })}
-                            className="w-64 rounded border px-3 py-1 text-sm"
-                        />
+            <div className="flex-1 overflow-y-auto overflow-x-hidden custom-scroll">
+                <div className="max-w-7xl mx-auto px-4 lg:px-6 py-6 lg:py-8">
+                    {/* Page Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 animate-fade-in-up">
+                        <div>
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="px-2 py-0.5 rounded-md bg-primary/10 dark:bg-primary/30 text-primary dark:text-primary-400 text-[10px] font-bold uppercase tracking-wider">
+                                    Pengaturan
+                                </span>
+                            </div>
+                            <h1 className="text-3xl font-extrabold text-foreground dark:text-white tracking-tight">Hak Akses</h1>
+                            <p className="text-sm text-muted-foreground mt-1">
+                                Kelola hak akses pengguna sistem
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Stats Cards */}
+                    <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                        <div className="bg-white dark:bg-slate-800/60 rounded-2xl p-5 border border-slate-200/60 dark:border-slate-700/40 shadow-sm card-glow animate-fade-in-up stagger-1">
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                                    </svg>
+                                </div>
+                                <span className="flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 rounded-full">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 19.5l15-15m0 0H8.25m11.25 0v11.25" />
+                                    </svg>
+                                    +{roles.total}%
+                                </span>
+                            </div>
+                            <p className="text-2xl font-bold text-slate-900 dark:text-white">{roles.total}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mt-0.5">Total Hak Akses</p>
+                        </div>
+                    </div>
+
+                    {/* Filters */}
+                    <div className="flex flex-col lg:flex-row lg:items-center gap-4 mb-6 animate-fade-in-up stagger-5">
+                        <div className="relative flex-1 min-w-[280px] max-w-lg">
+                            <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                                <svg className="w-4 h-4 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                                </svg>
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Cari hak akses..."
+                                defaultValue={filters.search || ''}
+                                onChange={(e) => router.get(route('roles.index'), { search: e.target.value }, { preserveState: true })}
+                                className="input-glow w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-foreground dark:text-white placeholder-muted-foreground outline-none transition-all"
+                            />
+                        </div>
                         <button
                             onClick={exportSelected}
-                            className="rounded bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:cursor-pointer"
+                            className="inline-flex items-center gap-2 px-5 py-2.5 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-sm font-semibold rounded-xl transition-all hover:bg-slate-50 dark:hover:bg-slate-700/40 shadow-sm"
                         >
-                            Export Selected
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
+                            </svg>
+                            Export
                         </button>
                     </div>
-                    {/*<button*/}
-                    {/*    onClick={() => openForm(null)}*/}
-                    {/*    className="rounded bg-green-600 px-3 py-1 text-sm font-medium text-white transition hover:cursor-pointer hover:bg-green-700"*/}
-                    {/*>*/}
-                    {/*    Add Role*/}
-                    {/*</button>*/}
+
+                    {/* Table */}
+                    <div className="animate-fade-in-up stagger-6">
+                        <Table
+                            headers={tableHeaders}
+                            data={roles.data}
+                            sortColumn={filters.sort ?? ''}
+                            sortDirection={filters.direction === 'asc' || filters.direction === 'desc' ? filters.direction : 'asc'}
+                            onSort={handleSortChange}
+                            onSelectAll={(checked) => setSelectedIds(checked ? roles.data.map((a) => a.id) : [])}
+                            selectedIds={selectedIds}
+                            rowRender={(role) => (
+                                <tr key={role.id} className="row-card group bg-white dark:bg-transparent hover:bg-slate-50/80 dark:hover:bg-slate-700/20 transition-colors">
+                                    <td className="px-5 py-4">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedIds.includes(role.id)}
+                                            onChange={() => toggleSelect(role.id)}
+                                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary-600 focus:ring-primary-500/20 cursor-pointer bg-slate-50 dark:bg-slate-700"
+                                        />
+                                    </td>
+                                    <td className="px-5 py-4">
+                                        <p className="font-semibold text-foreground dark:text-white group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors">{role.name}</p>
+                                    </td>
+                                    <td className="px-5 py-4">
+                                        <div className="flex items-center justify-end gap-1">
+                                            <div className="has-tooltip relative">
+                                                <span className="tooltip absolute bottom-full mb-2 left-1/2 -translate-x-1/2 px-2 py-1 bg-slate-800 dark:bg-slate-700 text-white text-[10px] rounded-md whitespace-nowrap z-10">Edit</span>
+                                                <button
+                                                    onClick={() => openForm(role)}
+                                                    className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-primary-600 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                            {/* Delete button commented out */}
+                                        </div>
+                                    </td>
+                                </tr>
+                            )}
+                        />
+                        <Pagination links={roles.links} />
+                    </div>
                 </div>
-
-                <Table
-                    headers={tableHeaders}
-                    data={roles.data}
-                    sortColumn={filters.sort ?? ''}
-                    sortDirection={filters.direction === 'asc' || filters.direction === 'desc' ? filters.direction : 'asc'}
-                    onSort={handleSortChange}
-                    onSelectAll={(checked) => setSelectedIds(checked ? roles.data.map((a) => a.id) : [])}
-                    selectedIds={selectedIds}
-                    rowRender={(role) => (
-                        <tr key={role.id} className="border-b">
-                            <td className="w-[10px] p-3 text-sm">
-                                <input type="checkbox" checked={selectedIds.includes(role.id)} onChange={() => toggleSelect(role.id)} />
-                            </td>
-                            <td className="p-3 text-sm">{role.name}</td>
-                            <td className="flex gap-2 p-3 text-sm">
-                                <button
-                                    onClick={() => openForm(role)}
-                                    className="rounded bg-blue-500 px-3 py-1 font-medium text-white hover:cursor-pointer"
-                                >
-                                    Edit
-                                </button>
-                                {/*<button*/}
-                                {/*    onClick={() => setRoleToDelete(role)}*/}
-                                {/*    className="rounded bg-red-500 px-3 py-1 font-medium text-white hover:cursor-pointer"*/}
-                                {/*>*/}
-                                {/*    Delete*/}
-                                {/*</button>*/}
-                            </td>
-                        </tr>
-                    )}
-                />
-
-                <Pagination links={roles.links} />
-
-                <RoleFormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} role={selectedRole} />
-
-                <ActionModal
-                    isOpen={!!roleToDelete}
-                    onClose={() => setRoleToDelete(null)}
-                    title="Konfirmasi Penghapusan"
-                    message={
-                        <span>
-                            Apakah Anda yakin ingin menghapus role <strong>{roleToDelete?.name}</strong>?
-                        </span>
-                    }
-                    buttons={[
-                        {
-                            label: 'Batal',
-                            onClick: () => setRoleToDelete(null),
-                            variant: 'neutral',
-                        },
-                        {
-                            label: 'Ya, Hapus',
-                            onClick: () => {
-                                if (roleToDelete) {
-                                    handleDelete(roleToDelete.id);
-                                    setRoleToDelete(null);
-                                }
-                            },
-                            variant: 'danger',
-                        },
-                    ]}
-                />
             </div>
+
+            <RoleFormModal isOpen={isFormOpen} onClose={() => setIsFormOpen(false)} role={selectedRole} />
+
+            <ActionModal
+                isOpen={!!roleToDelete}
+                onClose={() => setRoleToDelete(null)}
+                title="Konfirmasi Penghapusan"
+                message={
+                    <span>
+                        Apakah Anda yakin ingin menghapus role <strong>{roleToDelete?.name}</strong>?
+                    </span>
+                }
+                buttons={[
+                    {
+                        label: 'Batal',
+                        onClick: () => setRoleToDelete(null),
+                        variant: 'neutral',
+                    },
+                    {
+                        label: 'Ya, Hapus',
+                        onClick: () => {
+                            if (roleToDelete) {
+                                handleDelete(roleToDelete.id);
+                                setRoleToDelete(null);
+                            }
+                        },
+                        variant: 'danger',
+                    },
+                ]}
+            />
         </AppLayout>
     );
 }

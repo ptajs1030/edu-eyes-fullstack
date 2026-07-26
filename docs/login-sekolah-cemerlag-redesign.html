@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Masuk — Sekolah Cemerlang</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
+            slate: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a' }
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.6s ease-out forwards',
+            'fade-in': 'fadeIn 0.5s ease-out forwards',
+            'slide-in-right': 'slideInRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'slide-in-left': 'slideInLeft 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+            'float': 'float 6s ease-in-out infinite',
+            'float-delayed': 'float 6s ease-in-out 2s infinite',
+            'float-slow': 'float 8s ease-in-out 1s infinite',
+            'pulse-soft': 'pulseSoft 3s ease-in-out infinite',
+            'shimmer': 'shimmer 2s infinite',
+            'spin-slow': 'spin 20s linear infinite',
+            'bounce-soft': 'bounceSoft 2s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(30px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideInRight: {
+              '0%': { opacity: '0', transform: 'translateX(60px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' },
+            },
+            slideInLeft: {
+              '0%': { opacity: '0', transform: 'translateX(-60px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+              '50%': { transform: 'translateY(-20px) rotate(3deg)' },
+            },
+            pulseSoft: {
+              '0%, 100%': { opacity: '0.4', transform: 'scale(1)' },
+              '50%': { opacity: '0.7', transform: 'scale(1.05)' },
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' },
+            },
+            bounceSoft: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-6px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+
+    /* Mesh gradient background */
+    .mesh-bg {
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(at 0% 0%, hsla(215,98%,61%,0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(256,96%,67%,0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(190,98%,61%,0.12) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, hsla(340,82%,76%,0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, hsla(215,98%,61%,0.06) 0px, transparent 50%);
+    }
+    .dark .mesh-bg {
+      background-color: #0f172a;
+      background-image: 
+        radial-gradient(at 0% 0%, hsla(215,98%,61%,0.18) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(256,96%,67%,0.14) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(190,98%,61%,0.14) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, hsla(215,98%,61%,0.1) 0px, transparent 50%);
+    }
+
+    /* Glass morphism */
+    .glass {
+      background: rgba(255, 255, 255, 0.65);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+    }
+    .dark .glass {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.05),
+        0 10px 40px -10px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255,255,255,0.6);
+    }
+    .dark .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 
+        0 4px 6px -1px rgba(0, 0, 0, 0.3),
+        0 10px 40px -10px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+
+    /* Decorative orbs */
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      opacity: 0.5;
+      pointer-events: none;
+    }
+    .orb-1 {
+      width: 300px; height: 300px;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      top: 10%; left: 10%;
+      animation: float 8s ease-in-out infinite;
+    }
+    .orb-2 {
+      width: 250px; height: 250px;
+      background: linear-gradient(135deg, #06b6d4, #3b82f6);
+      bottom: 15%; right: 15%;
+      animation: float 10s ease-in-out 2s infinite;
+    }
+    .orb-3 {
+      width: 180px; height: 180px;
+      background: linear-gradient(135deg, #ec4899, #8b5cf6);
+      top: 50%; left: 50%;
+      animation: float 7s ease-in-out 1s infinite;
+    }
+
+    /* Grid pattern overlay */
+    .grid-pattern {
+      background-image: 
+        linear-gradient(rgba(59, 130, 246, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .dark .grid-pattern {
+      background-image: 
+        linear-gradient(rgba(59, 130, 246, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.05) 1px, transparent 1px);
+    }
+
+    /* Input styling */
+    .form-input {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .form-input:focus {
+      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1), 0 0 0 1px rgba(37, 99, 235, 0.3);
+      border-color: #3b82f6;
+    }
+    .dark .form-input:focus {
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15), 0 0 0 1px rgba(59, 130, 246, 0.4);
+      border-color: #3b82f6;
+    }
+
+    /* Button shimmer */
+    .btn-shimmer {
+      background: linear-gradient(90deg, #2563eb 0%, #3b82f6 25%, #60a5fa 50%, #3b82f6 75%, #2563eb 100%);
+      background-size: 200% auto;
+      position: relative;
+      overflow: hidden;
+    }
+    .btn-shimmer::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s;
+    }
+    .btn-shimmer:hover::after {
+      left: 100%;
+    }
+    .btn-shimmer:hover {
+      animation: shimmer 1.5s linear infinite;
+    }
+
+    /* Toggle switch */
+    .toggle-checkbox:checked {
+      right: 0;
+      border-color: #2563eb;
+    }
+    .toggle-checkbox:checked + .toggle-label {
+      background-color: #2563eb;
+    }
+    .dark .toggle-checkbox:checked + .toggle-label {
+      background-color: #3b82f6;
+    }
+
+    /* Password visibility toggle */
+    .password-toggle {
+      transition: all 0.2s ease;
+    }
+    .password-toggle:hover {
+      color: #2563eb;
+    }
+
+    /* Social button hover */
+    .social-btn {
+      transition: all 0.2s ease;
+    }
+    .social-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px -2px rgba(0,0,0,0.1);
+    }
+
+    /* Stagger animations */
+    .stagger-1 { animation-delay: 0.1s; opacity: 0; }
+    .stagger-2 { animation-delay: 0.2s; opacity: 0; }
+    .stagger-3 { animation-delay: 0.3s; opacity: 0; }
+    .stagger-4 { animation-delay: 0.4s; opacity: 0; }
+    .stagger-5 { animation-delay: 0.5s; opacity: 0; }
+    .stagger-6 { animation-delay: 0.6s; opacity: 0; }
+
+    /* Decorative ring */
+    .decorative-ring {
+      border: 1px solid rgba(59, 130, 246, 0.15);
+      border-radius: 50%;
+      position: absolute;
+      pointer-events: none;
+    }
+    .dark .decorative-ring {
+      border-color: rgba(59, 130, 246, 0.2);
+    }
+
+    /* Quote styling */
+    .quote-mark {
+      font-size: 6rem;
+      line-height: 1;
+      font-family: Georgia, serif;
+      opacity: 0.15;
+      position: absolute;
+      top: -20px;
+      left: -10px;
+    }
+
+    /* Scrollbar */
+    .custom-scroll::-webkit-scrollbar { width: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
+
+    /* Loading spinner */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    .spinner {
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+  </style>
+</head>
+<body class="mesh-bg text-slate-900 antialiased transition-colors duration-300 min-h-screen overflow-hidden">
+
+  <script>
+    // Dark mode detection
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+    function toggleDark() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    }
+
+    // Password visibility toggle
+    function togglePassword() {
+      const input = document.getElementById('passwordInput');
+      const iconShow = document.getElementById('iconShow');
+      const iconHide = document.getElementById('iconHide');
+      if (input.type === 'password') {
+        input.type = 'text';
+        iconShow.classList.add('hidden');
+        iconHide.classList.remove('hidden');
+      } else {
+        input.type = 'password';
+        iconShow.classList.remove('hidden');
+        iconHide.classList.add('hidden');
+      }
+    }
+
+    // Loading state
+    function handleLogin(e) {
+      e.preventDefault();
+      const btn = document.getElementById('loginBtn');
+      const btnText = document.getElementById('btnText');
+      const btnSpinner = document.getElementById('btnSpinner');
+
+      btn.disabled = true;
+      btnText.classList.add('opacity-0');
+      btnSpinner.classList.remove('hidden');
+      btn.classList.add('cursor-not-allowed', 'opacity-90');
+
+      // Simulate login
+      setTimeout(() => {
+        btn.disabled = false;
+        btnText.classList.remove('opacity-0');
+        btnSpinner.classList.add('hidden');
+        btn.classList.remove('cursor-not-allowed', 'opacity-90');
+      }, 2000);
+    }
+
+    // Input focus effects
+    document.addEventListener('DOMContentLoaded', () => {
+      const inputs = document.querySelectorAll('.form-input');
+      inputs.forEach(input => {
+        input.addEventListener('focus', () => {
+          input.parentElement.classList.add('scale-[1.01]');
+        });
+        input.addEventListener('blur', () => {
+          input.parentElement.classList.remove('scale-[1.01]');
+        });
+      });
+    });
+  </script>
+
+  <div class="flex min-h-screen">
+
+    <!-- LEFT SIDE — Branding & Visual (hidden on mobile, visible on lg+) -->
+    <div class="hidden lg:flex lg:w-1/2 xl:w-[55%] relative overflow-hidden items-center justify-center">
+
+      <!-- Grid pattern -->
+      <div class="absolute inset-0 grid-pattern opacity-60"></div>
+
+      <!-- Decorative orbs -->
+      <div class="orb orb-1"></div>
+      <div class="orb orb-2"></div>
+      <div class="orb orb-3"></div>
+
+      <!-- Decorative rings -->
+      <div class="decorative-ring w-[500px] h-[500px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin-slow opacity-30"></div>
+      <div class="decorative-ring w-[400px] h-[400px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin-slow opacity-20" style="animation-direction: reverse; animation-duration: 25s;"></div>
+      <div class="decorative-ring w-[600px] h-[600px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-spin-slow opacity-10" style="animation-duration: 30s;"></div>
+
+      <!-- Floating geometric shapes -->
+      <div class="absolute top-[15%] left-[15%] w-16 h-16 border-2 border-primary-300/30 dark:border-primary-500/20 rounded-2xl rotate-12 animate-float opacity-40"></div>
+      <div class="absolute bottom-[20%] right-[10%] w-12 h-12 bg-gradient-to-br from-primary-400/20 to-purple-400/20 rounded-xl rotate-45 animate-float-delayed opacity-50"></div>
+      <div class="absolute top-[60%] left-[8%] w-8 h-8 bg-gradient-to-br from-cyan-400/20 to-blue-400/20 rounded-lg -rotate-12 animate-float-slow opacity-40"></div>
+      <div class="absolute top-[25%] right-[20%] w-6 h-6 bg-primary-400/20 rounded-full animate-bounce-soft opacity-50"></div>
+
+      <!-- Content -->
+      <div class="relative z-10 max-w-md px-8 animate-slide-in-left">
+        <!-- Logo -->
+        <div class="flex items-center gap-3 mb-10">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary-600 to-indigo-600 flex items-center justify-center shadow-xl shadow-primary-500/30 animate-fade-in-up">
+            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.499 5.84 51.39 51.39 0 00-2.658.813m-15.482 0A50.55 50.55 0 0112 13.489a50.55 50.55 0 0112-3.342"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white tracking-tight">Sekolah Cemerlang</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Admin Panel v2.0</p>
+          </div>
+        </div>
+
+        <!-- Quote -->
+        <div class="relative animate-fade-in-up stagger-2">
+          <span class="quote-mark text-primary-400 dark:text-primary-600">"</span>
+          <blockquote class="text-2xl xl:text-3xl font-bold text-slate-800 dark:text-white leading-relaxed pl-6">
+            Pendidikan adalah <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-indigo-600 dark:from-primary-400 dark:to-indigo-400">kunci masa depan</span>, dan kunci tersebut ada di tangan Anda.
+          </blockquote>
+          <p class="mt-4 text-sm text-slate-500 dark:text-slate-400 font-medium pl-6">— Selamat datang kembali</p>
+        </div>
+
+        <!-- Mini stats -->
+        <div class="mt-12 flex items-center gap-6 pl-6 animate-fade-in-up stagger-4">
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">1,240 Siswa Aktif</span>
+          </div>
+          <div class="w-px h-4 bg-slate-300 dark:bg-slate-600"></div>
+          <div class="flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-primary-500 animate-pulse" style="animation-delay: 0.5s;"></div>
+            <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">86 Guru & Staff</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom gradient fade -->
+      <div class="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white/50 dark:from-slate-900/50 to-transparent pointer-events-none"></div>
+    </div>
+
+    <!-- RIGHT SIDE — Login Form -->
+    <div class="w-full lg:w-1/2 xl:w-[45%] flex items-center justify-center p-6 sm:p-8 lg:p-12 relative">
+
+      <!-- Mobile-only top decoration -->
+      <div class="lg:hidden absolute top-0 left-0 right-0 h-48 mesh-bg opacity-50 pointer-events-none">
+        <div class="absolute top-4 left-4 w-20 h-20 bg-primary-400/10 rounded-full blur-2xl"></div>
+        <div class="absolute top-8 right-8 w-24 h-24 bg-indigo-400/10 rounded-full blur-2xl"></div>
+      </div>
+
+      <!-- Dark mode toggle (top right) -->
+      <button onclick="toggleDark()" class="absolute top-6 right-6 w-10 h-10 rounded-xl glass flex items-center justify-center text-slate-400 hover:text-amber-500 transition-all z-20" title="Toggle Dark Mode">
+        <svg class="w-5 h-5 hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/>
+        </svg>
+        <svg class="w-5 h-5 block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/>
+        </svg>
+      </button>
+
+      <!-- Form Container -->
+      <div class="w-full max-w-sm relative z-10">
+
+        <!-- Mobile Logo -->
+        <div class="lg:hidden flex items-center gap-3 mb-8 animate-fade-in-up">
+          <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-primary-500/25">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.499 5.84 51.39 51.39 0 00-2.658.813m-15.482 0A50.55 50.55 0 0112 13.489a50.55 50.55 0 0112-3.342"/>
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-sm font-bold text-slate-900 dark:text-white">Sekolah Cemerlang</h2>
+            <p class="text-[10px] text-slate-400">Admin Panel v2.0</p>
+          </div>
+        </div>
+
+        <!-- Welcome Text -->
+        <div class="mb-8 animate-fade-in-up stagger-1">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="px-2 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 text-[10px] font-bold uppercase tracking-wider">Secure Login</span>
+          </div>
+          <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Selamat Datang</h1>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">
+            Masukkan kredensial Anda untuk mengakses panel administrasi sekolah.
+          </p>
+        </div>
+
+        <!-- Login Form -->
+        <form onsubmit="handleLogin(event)" class="space-y-5 animate-fade-in-up stagger-2">
+
+          <!-- Email Input -->
+          <div class="group">
+            <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              Email <span class="text-rose-500">*</span>
+            </label>
+            <div class="relative transition-transform duration-200">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
+                </svg>
+              </div>
+              <input 
+                type="email" 
+                placeholder="nama@sekolah.id" 
+                value="admin@sekolah.id"
+                class="form-input w-full pl-11 pr-4 py-3 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none"
+                required
+              >
+            </div>
+          </div>
+
+          <!-- Password Input -->
+          <div class="group">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Kata Sandi <span class="text-rose-500">*</span>
+              </label>
+              <a href="#" class="text-xs font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
+                Lupa kata sandi?
+              </a>
+            </div>
+            <div class="relative transition-transform duration-200">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/>
+                </svg>
+              </div>
+              <input 
+                id="passwordInput"
+                type="password" 
+                placeholder="••••••••" 
+                value="password123"
+                class="form-input w-full pl-11 pr-11 py-3 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none"
+                required
+              >
+              <button type="button" onclick="togglePassword()" class="password-toggle absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400">
+                <!-- Eye icon (show password) -->
+                <svg id="iconShow" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <!-- Eye slash icon (hide password) -->
+                <svg id="iconHide" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Remember Me Toggle -->
+          <div class="flex items-center justify-between animate-fade-in-up stagger-3">
+            <div class="flex items-center gap-3">
+              <div class="relative inline-block w-11 h-6 align-middle select-none">
+                <input type="checkbox" id="rememberToggle" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 border-slate-200 dark:border-slate-600 appearance-none cursor-pointer transition-all duration-300 ease-in-out" style="top: 2px; left: 2px;" checked>
+                <label for="rememberToggle" class="toggle-label block overflow-hidden h-6 rounded-full bg-slate-200 dark:bg-slate-600 cursor-pointer transition-colors duration-300 ease-in-out"></label>
+              </div>
+              <label for="rememberToggle" class="text-sm text-slate-600 dark:text-slate-400 cursor-pointer select-none">Ingat saya</label>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-2 animate-fade-in-up stagger-4">
+            <button 
+              id="loginBtn"
+              type="submit" 
+              class="btn-shimmer w-full py-3.5 text-white text-sm font-bold rounded-xl transition-all shadow-xl shadow-primary-500/25 hover:shadow-primary-500/40 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center relative overflow-hidden"
+            >
+              <span id="btnText" class="transition-opacity duration-200">Masuk ke Dashboard</span>
+              <div id="btnSpinner" class="hidden absolute inset-0 flex items-center justify-center">
+                <div class="spinner w-5 h-5"></div>
+              </div>
+            </button>
+          </div>
+
+          <!-- Divider -->
+          <div class="relative flex items-center gap-4 py-2 animate-fade-in-up stagger-5">
+            <div class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+            <span class="text-xs text-slate-400 dark:text-slate-500 font-medium">atau masuk dengan</span>
+            <div class="flex-1 h-px bg-slate-200 dark:bg-slate-700"></div>
+          </div>
+
+          <!-- Social Login -->
+          <div class="grid grid-cols-2 gap-3 animate-fade-in-up stagger-6">
+            <button type="button" class="social-btn flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600">
+              <svg class="w-5 h-5" viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/>
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+              </svg>
+              Google
+            </button>
+            <button type="button" class="social-btn flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-medium text-slate-700 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-600">
+              <svg class="w-5 h-5 text-slate-900 dark:text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+              GitHub
+            </button>
+          </div>
+        </form>
+
+        <!-- Footer -->
+        <div class="mt-10 text-center animate-fade-in-up stagger-6">
+          <p class="text-xs text-slate-400 dark:text-slate-500">
+            Belum punya akun? 
+            <a href="#" class="font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">Hubungi administrator</a>
+          </p>
+          <div class="mt-6 flex items-center justify-center gap-4">
+            <span class="text-[10px] text-slate-300 dark:text-slate-600">© 2026 Sekolah Cemerlang</span>
+            <span class="text-slate-200 dark:text-slate-700">•</span>
+            <a href="#" class="text-[10px] text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Kebijakan Privasi</a>
+            <span class="text-slate-200 dark:text-slate-700">•</span>
+            <a href="#" class="text-[10px] text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">Bantuan</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>

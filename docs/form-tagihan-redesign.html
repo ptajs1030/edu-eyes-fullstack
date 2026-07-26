@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buat Tagihan Baru — Sekolah Cemerlang</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'sans-serif'] },
+          colors: {
+            primary: { 50: '#eff6ff', 100: '#dbeafe', 200: '#bfdbfe', 300: '#93c5fd', 400: '#60a5fa', 500: '#3b82f6', 600: '#2563eb', 700: '#1d4ed8', 800: '#1e40af', 900: '#1e3a8a' },
+            slate: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a' }
+          },
+          animation: {
+            'fade-in-up': 'fadeInUp 0.5s ease-out forwards',
+            'fade-in': 'fadeIn 0.3s ease-out forwards',
+            'slide-in-left': 'slideInLeft 0.4s ease-out forwards',
+            'slide-in-right': 'slideInRight 0.4s ease-out forwards',
+            'pulse-soft': 'pulseSoft 2s ease-in-out infinite',
+            'shimmer': 'shimmer 2s infinite',
+            'float': 'float 6s ease-in-out infinite',
+            'bounce-soft': 'bounceSoft 2s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeInUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' },
+            },
+            slideInLeft: {
+              '0%': { opacity: '0', transform: 'translateX(-20px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' },
+            },
+            slideInRight: {
+              '0%': { opacity: '0', transform: 'translateX(20px)' },
+              '100%': { opacity: '1', transform: 'translateX(0)' },
+            },
+            pulseSoft: {
+              '0%, 100%': { opacity: '1' },
+              '50%': { opacity: '0.6' },
+            },
+            shimmer: {
+              '0%': { backgroundPosition: '-200% 0' },
+              '100%': { backgroundPosition: '200% 0' },
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            },
+            bounceSoft: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-4px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .custom-scroll::-webkit-scrollbar { width: 5px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .dark .custom-scroll::-webkit-scrollbar-thumb { background: #334155; }
+    .dark .custom-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+    .glass {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .dark .glass {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .mesh-bg {
+      background-color: #f8fafc;
+      background-image: 
+        radial-gradient(at 0% 0%, hsla(215,98%,61%,0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(256,96%,67%,0.06) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(190,98%,61%,0.06) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, hsla(340,82%,76%,0.04) 0px, transparent 50%);
+    }
+    .dark .mesh-bg {
+      background-color: #0f172a;
+      background-image: 
+        radial-gradient(at 0% 0%, hsla(215,98%,61%,0.12) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(256,96%,67%,0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, hsla(190,98%,61%,0.08) 0px, transparent 50%);
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 10px 40px -10px rgba(0,0,0,0.08);
+    }
+    .dark .glass-card {
+      background: rgba(30, 41, 59, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 10px 40px -10px rgba(0,0,0,0.4);
+    }
+
+    .avatar-gradient-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .avatar-gradient-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+    .avatar-gradient-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+    .avatar-gradient-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+    .avatar-gradient-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+    .avatar-gradient-6 { background: linear-gradient(135deg, #30cfd0 0%, #330867 100%); }
+
+    .btn-shimmer {
+      background: linear-gradient(90deg, #2563eb 0%, #3b82f6 25%, #60a5fa 50%, #3b82f6 75%, #2563eb 100%);
+      background-size: 200% auto;
+    }
+    .btn-shimmer:hover {
+      animation: shimmer 1.5s linear infinite;
+    }
+
+    .form-input {
+      transition: all 0.2s ease;
+    }
+    .form-input:focus {
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12), 0 4px 12px -4px rgba(37, 99, 235, 0.15);
+      border-color: #2563eb;
+    }
+    .dark .form-input:focus {
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 4px 12px -4px rgba(59, 130, 246, 0.1);
+      border-color: #3b82f6;
+    }
+
+    .stagger-1 { animation-delay: 0.05s; opacity: 0; }
+    .stagger-2 { animation-delay: 0.1s; opacity: 0; }
+    .stagger-3 { animation-delay: 0.15s; opacity: 0; }
+    .stagger-4 { animation-delay: 0.2s; opacity: 0; }
+    .stagger-5 { animation-delay: 0.25s; opacity: 0; }
+    .stagger-6 { animation-delay: 0.3s; opacity: 0; }
+    .stagger-7 { animation-delay: 0.35s; opacity: 0; }
+    .stagger-8 { animation-delay: 0.4s; opacity: 0; }
+
+    .step-line {
+      height: 2px;
+      background: #e2e8f0;
+      flex: 1;
+      transition: all 0.4s ease;
+    }
+    .dark .step-line { background: #334155; }
+    .step-line.active {
+      background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    }
+    .step-circle {
+      transition: all 0.3s ease;
+    }
+    .step-circle.active {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+    }
+    .step-circle.completed {
+      background: linear-gradient(135deg, #10b981, #34d399);
+    }
+
+    .student-item {
+      transition: all 0.2s ease;
+    }
+    .student-item.selected {
+      background: rgba(59, 130, 246, 0.08);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+    .dark .student-item.selected {
+      background: rgba(59, 130, 246, 0.12);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+    .student-item:hover {
+      background: rgba(59, 130, 246, 0.04);
+    }
+    .dark .student-item:hover {
+      background: rgba(59, 130, 246, 0.08);
+    }
+
+    .chip {
+      transition: all 0.2s ease;
+    }
+    .chip:hover {
+      transform: scale(1.05);
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      opacity: 0.5;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator:hover {
+      opacity: 0.8;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+  </style>
+</head>
+<body class="mesh-bg text-slate-900 antialiased transition-colors duration-300">
+
+  <script>
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    }
+    function toggleDark() {
+      document.documentElement.classList.toggle('dark');
+      localStorage.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+    }
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('mobileOverlay');
+      if (sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+        setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('opacity-0');
+        setTimeout(() => overlay.classList.add('hidden'), 300);
+      }
+    }
+    function formatNominal(input) {
+      let value = input.value.replace(/\D/g, '');
+      if (value) {
+        input.value = new Intl.NumberFormat('id-ID').format(value);
+      } else {
+        input.value = '';
+      }
+    }
+
+    const selectedStudents = new Set();
+
+    function toggleStudent(id, name, initial, gradientClass) {
+      const checkbox = document.getElementById('student-' + id);
+      const item = document.getElementById('student-item-' + id);
+
+      if (selectedStudents.has(id)) {
+        selectedStudents.delete(id);
+        item.classList.remove('selected');
+        checkbox.checked = false;
+        removeSelectedChip(id);
+      } else {
+        selectedStudents.add(id);
+        item.classList.add('selected');
+        checkbox.checked = true;
+        addSelectedChip(id, name, initial, gradientClass);
+      }
+
+      updateSelectedCount();
+      updateEmptyState();
+    }
+
+    function addSelectedChip(id, name, initial, gradientClass) {
+      const container = document.getElementById('selectedChips');
+      const chip = document.createElement('div');
+      chip.id = 'chip-' + id;
+      chip.className = 'chip flex items-center gap-2 px-3 py-1.5 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800/30 rounded-full text-xs font-medium text-primary-700 dark:text-primary-400';
+      chip.innerHTML = `
+        <div class="w-5 h-5 rounded-full ${gradientClass} flex items-center justify-center text-white text-[9px] font-bold">${initial}</div>
+        <span class="truncate max-w-[100px]">${name}</span>
+        <button onclick="toggleStudent('${id}', '${name}', '${initial}', '${gradientClass}')" class="ml-1 w-4 h-4 rounded-full hover:bg-primary-200 dark:hover:bg-primary-800 flex items-center justify-center transition-colors">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      `;
+      container.appendChild(chip);
+    }
+
+    function removeSelectedChip(id) {
+      const chip = document.getElementById('chip-' + id);
+      if (chip) chip.remove();
+    }
+
+    function updateSelectedCount() {
+      const count = selectedStudents.size;
+      document.getElementById('selectedCount').textContent = count;
+      document.getElementById('selectedCountBadge').textContent = count;
+
+      const step2Circle = document.getElementById('step2-circle');
+      if (count > 0) {
+        step2Circle.classList.add('completed');
+        step2Circle.innerHTML = '<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>';
+      } else {
+        step2Circle.classList.remove('completed');
+        step2Circle.innerHTML = '2';
+      }
+    }
+
+    function updateEmptyState() {
+      const emptyState = document.getElementById('emptyState');
+      if (selectedStudents.size === 0) {
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+      }
+    }
+
+    function selectAllStudents() {
+      const checkboxes = document.querySelectorAll('.student-checkbox');
+      checkboxes.forEach(cb => {
+        if (!cb.checked) {
+          cb.click();
+        }
+      });
+    }
+
+    function searchStudents(query) {
+      const items = document.querySelectorAll('.student-item');
+      const lowerQuery = query.toLowerCase();
+      items.forEach(item => {
+        const name = item.dataset.name.toLowerCase();
+        if (name.includes(lowerQuery)) {
+          item.classList.remove('hidden');
+        } else {
+          item.classList.add('hidden');
+        }
+      });
+    }
+
+    function loadStudents(kelas) {
+      const container = document.getElementById('studentList');
+      const emptySelect = document.getElementById('emptySelectClass');
+
+      if (!kelas) {
+        container.innerHTML = '';
+        emptySelect.classList.remove('hidden');
+        return;
+      }
+
+      emptySelect.classList.add('hidden');
+
+      const students = [
+        { id: '1', name: 'Ahmad Fauzi', nisn: '0012345678', grad: 'avatar-gradient-1', init: 'AF' },
+        { id: '2', name: 'Budi Santoso', nisn: '0012345679', grad: 'avatar-gradient-2', init: 'BS' },
+        { id: '3', name: 'Citra Lestari', nisn: '0012345680', grad: 'avatar-gradient-3', init: 'CL' },
+        { id: '4', name: 'Dewi Anggraini', nisn: '0012345681', grad: 'avatar-gradient-4', init: 'DA' },
+        { id: '5', name: 'Eko Prasetyo', nisn: '0012345682', grad: 'avatar-gradient-5', init: 'EP' },
+        { id: '6', name: 'Fitriani Sari', nisn: '0012345683', grad: 'avatar-gradient-6', init: 'FS' },
+        { id: '7', name: 'Guntur Wibowo', nisn: '0012345684', grad: 'avatar-gradient-1', init: 'GW' },
+        { id: '8', name: 'Hani Rahmawati', nisn: '0012345685', grad: 'avatar-gradient-2', init: 'HR' },
+      ];
+
+      container.innerHTML = students.map((s, i) => `
+        <div id="student-item-${s.id}" data-name="${s.name}" class="student-item flex items-center gap-3 p-3 rounded-xl border border-transparent cursor-pointer ${selectedStudents.has(s.id) ? 'selected' : ''}" onclick="toggleStudent('${s.id}', '${s.name}', '${s.init}', '${s.grad}')" style="animation: fadeInUp 0.3s ease-out ${i * 0.05}s forwards; opacity: 0;">
+          <input type="checkbox" id="student-${s.id}" class="student-checkbox w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary-600 focus:ring-primary-500/20 cursor-pointer" ${selectedStudents.has(s.id) ? 'checked' : ''} onclick="event.stopPropagation()">
+          <div class="w-9 h-9 rounded-full ${s.grad} flex items-center justify-center text-white text-xs font-bold shadow-md">${s.init}</div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">${s.name}</p>
+            <p class="text-[11px] text-slate-400 dark:text-slate-500 font-mono">${s.nisn}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function validateForm() {
+      const nama = document.getElementById('namaTagihan');
+      const batas = document.getElementById('batasWaktu');
+      const nominal = document.getElementById('nominal');
+      let valid = true;
+
+      [nama, batas, nominal].forEach(input => {
+        if (!input.value.trim()) {
+          input.classList.add('border-rose-300', 'dark:border-rose-600');
+          input.classList.remove('border-slate-200', 'dark:border-slate-600');
+          valid = false;
+        } else {
+          input.classList.remove('border-rose-300', 'dark:border-rose-600');
+          input.classList.add('border-slate-200', 'dark:border-slate-600');
+        }
+      });
+
+      if (selectedStudents.size === 0) {
+        document.getElementById('pesertaSection').scrollIntoView({ behavior: 'smooth' });
+        valid = false;
+      }
+
+      return valid;
+    }
+
+    function handleSubmit(e) {
+      e.preventDefault();
+      if (validateForm()) {
+        const btn = document.getElementById('btnSimpan');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<div class="flex items-center gap-2"><div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div><span>Menyimpan...</span></div>';
+        btn.disabled = true;
+
+        setTimeout(() => {
+          btn.innerHTML = '<div class="flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg><span>Tersimpan!</span></div>';
+          btn.classList.remove('btn-shimmer');
+          btn.classList.add('bg-emerald-500');
+
+          setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+            btn.classList.add('btn-shimmer');
+            btn.classList.remove('bg-emerald-500');
+          }, 1500);
+        }, 1500);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const inputs = document.querySelectorAll('.validate-input');
+      inputs.forEach(input => {
+        input.addEventListener('input', () => {
+          input.classList.remove('border-rose-300', 'dark:border-rose-600');
+          input.classList.add('border-slate-200', 'dark:border-slate-600');
+        });
+      });
+    });
+  </script>
+
+  <div id="mobileOverlay" class="fixed inset-0 bg-black/50 z-40 hidden lg:hidden opacity-0 transition-opacity" onclick="toggleSidebar()"></div>
+
+  <div class="flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 w-72 bg-white/90 dark:bg-slate-900/95 backdrop-blur-xl border-r border-slate-200/60 dark:border-slate-700/40 flex flex-col flex-shrink-0 z-50 transform -translate-x-full lg:translate-x-0 drawer custom-scroll overflow-y-auto">
+      <div class="h-16 flex items-center px-6 border-b border-slate-100 dark:border-slate-800 animate-slide-in-left">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-600 to-indigo-600 flex items-center justify-center mr-3 shadow-lg shadow-primary-500/25">
+          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.499 5.84 51.39 51.39 0 00-2.658.813m-15.482 0A50.55 50.55 0 0112 13.489a50.55 50.55 0 0112-3.342"/>
+          </svg>
+        </div>
+        <div>
+          <span class="font-bold text-slate-900 dark:text-white text-sm tracking-tight">Sekolah Cemerlang</span>
+          <p class="text-[10px] text-slate-400 font-medium">Admin Panel v2.0</p>
+        </div>
+      </div>
+
+      <nav class="flex-1 py-6 px-3 space-y-6">
+        <div class="animate-slide-in-left stagger-1">
+          <p class="px-3 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Menu Utama</p>
+          <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all text-sm group">
+            <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:shadow-md transition-all">
+              <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+            </div>
+            Dashboard
+          </a>
+        </div>
+
+        <div class="animate-slide-in-left stagger-2">
+          <p class="px-3 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Data Pengguna</p>
+          <div class="space-y-1">
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all text-sm group">
+              <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:shadow-md transition-all">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+              </div>
+              Data Siswa
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all text-sm group">
+              <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:shadow-md transition-all">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+              </div>
+              Data Guru
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all text-sm group">
+              <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:shadow-md transition-all">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+              </div>
+              Data Orang Tua
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all text-sm group">
+              <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:shadow-md transition-all">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+              </div>
+              Data Admin
+            </a>
+          </div>
+        </div>
+
+        <div class="animate-slide-in-left stagger-3">
+          <p class="px-3 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Akademik</p>
+          <div class="space-y-1">
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all text-sm group">
+              <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:shadow-md transition-all">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+              </div>
+              Tahun Ajaran
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all text-sm group">
+              <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:shadow-md transition-all">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3.75h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008zm0 3h.008v.008h-.008v-.008z"/></svg>
+              </div>
+              Kelas
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all text-sm group">
+              <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:shadow-md transition-all">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+              </div>
+              Mata Pelajaran
+            </a>
+          </div>
+        </div>
+
+        <div class="animate-slide-in-left stagger-4">
+          <p class="px-3 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">Operasional</p>
+          <div class="space-y-1">
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all text-sm group">
+              <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:shadow-md transition-all">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              </div>
+              Shifting / Jam
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-r from-primary-50 to-blue-50 dark:from-primary-900/20 dark:to-blue-900/20 text-primary-700 dark:text-primary-400 transition-all text-sm font-semibold border border-primary-100 dark:border-primary-800/30 shadow-sm shadow-primary-500/10">
+              <div class="w-8 h-8 rounded-lg bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm">
+                <svg class="w-[18px] h-[18px] text-primary-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z"/></svg>
+              </div>
+              Pembayaran
+              <span class="ml-auto w-2 h-2 rounded-full bg-primary-500 animate-pulse-soft"></span>
+            </a>
+            <a href="#" class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all text-sm group">
+              <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-slate-700 group-hover:shadow-md transition-all">
+                <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"/></svg>
+              </div>
+              Pengumuman
+            </a>
+          </div>
+        </div>
+      </nav>
+
+      <div class="p-3 border-t border-slate-100 dark:border-slate-800 animate-slide-in-left stagger-5">
+        <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-all text-left group">
+          <div class="w-10 h-10 rounded-full avatar-gradient-1 flex items-center justify-center text-white text-xs font-bold shadow-md">AS</div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-slate-900 dark:text-white truncate">Admin School</p>
+            <p class="text-xs text-slate-400 truncate">admin@tosir.com</p>
+          </div>
+          <svg class="w-4 h-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300 transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 15L12 18.75 15.75 15m-7.5-6L12 5.25 15.75 9"/></svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+
+      <!-- Top Header -->
+      <header class="h-16 glass flex items-center justify-between px-4 lg:px-8 flex-shrink-0 sticky top-0 z-30">
+        <div class="flex items-center gap-3">
+          <button onclick="toggleSidebar()" class="lg:hidden w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+          </button>
+          <div class="flex items-center gap-2 text-sm text-slate-400 dark:text-slate-500">
+            <span class="hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer transition-colors">Operasional</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            <span class="hover:text-slate-600 dark:hover:text-slate-300 cursor-pointer transition-colors">Pembayaran</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+            <span class="text-slate-900 dark:text-white font-semibold">Buat Tagihan</span>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="toggleDark()" class="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-amber-500 hover:bg-amber-50 dark:hover:bg-slate-800 transition-all" title="Toggle Dark Mode">
+            <svg class="w-[18px] h-[18px] hidden dark:block" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>
+            <svg class="w-[18px] h-[18px] block dark:hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg>
+          </button>
+          <button class="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all relative">
+            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+            <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 border-2 border-white dark:border-slate-900"></span>
+          </button>
+          <button class="w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+            <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 010 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.212 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 010-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281z"/></svg>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <div class="flex-1 overflow-y-auto custom-scroll">
+        <div class="max-w-6xl mx-auto px-4 lg:px-8 py-6 lg:py-8">
+
+          <!-- Page Header -->
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 animate-fade-in-up">
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <span class="px-2 py-0.5 rounded-md bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 text-[10px] font-bold uppercase tracking-wider">Operasional</span>
+              </div>
+              <h1 class="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Buat Tagihan Baru</h1>
+              <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">Buat tagihan pembayaran untuk siswa dengan mudah</p>
+            </div>
+          </div>
+
+          <!-- Stepper -->
+          <div class="mb-8 animate-fade-in-up stagger-1">
+            <div class="flex items-center">
+              <div class="flex items-center gap-3">
+                <div id="step1-circle" class="step-circle active w-8 h-8 rounded-full bg-gradient-to-br from-primary-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold shadow-lg shadow-primary-500/25">1</div>
+                <div class="hidden sm:block">
+                  <p class="text-xs font-bold text-slate-900 dark:text-white">Detail Tagihan</p>
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500">Isi informasi tagihan</p>
+                </div>
+              </div>
+              <div class="step-line active mx-4"></div>
+              <div class="flex items-center gap-3">
+                <div id="step2-circle" class="step-circle w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 text-xs font-bold">2</div>
+                <div class="hidden sm:block">
+                  <p class="text-xs font-bold text-slate-700 dark:text-slate-300">Pilih Peserta</p>
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500">Tentukan siswa yang ditagih</p>
+                </div>
+              </div>
+              <div class="step-line mx-4"></div>
+              <div class="flex items-center gap-3">
+                <div class="step-circle w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-500 dark:text-slate-400 text-xs font-bold">3</div>
+                <div class="hidden sm:block">
+                  <p class="text-xs font-bold text-slate-700 dark:text-slate-300">Konfirmasi</p>
+                  <p class="text-[10px] text-slate-400 dark:text-slate-500">Review dan simpan</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <form onsubmit="handleSubmit(event)">
+
+            <!-- Section 1: Detail Tagihan -->
+            <div class="glass-card rounded-2xl p-6 lg:p-8 mb-6 animate-fade-in-up stagger-2">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-primary-500/20">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                </div>
+                <div>
+                  <h2 class="text-lg font-bold text-slate-900 dark:text-white">Detail Tagihan</h2>
+                  <p class="text-xs text-slate-400 dark:text-slate-500">Lengkapi informasi tagihan pembayaran</p>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Nama Tagihan -->
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Nama Tagihan <span class="text-rose-500">*</span>
+                  </label>
+                  <input 
+                    id="namaTagihan"
+                    type="text" 
+                    placeholder="Contoh: SPP Bulan Juli 2026" 
+                    class="validate-input form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none"
+                  >
+                </div>
+
+                <!-- Tahun Ajaran -->
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Tahun Ajaran <span class="text-rose-500">*</span>
+                  </label>
+                  <div class="relative">
+                    <input 
+                      type="text" 
+                      value="2026/2027" 
+                      disabled
+                      class="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-500 dark:text-slate-400 outline-none cursor-not-allowed"
+                    >
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                      <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                  </div>
+                  <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5">Tahun ajaran otomatis dipilih dari yang aktif.</p>
+                </div>
+
+                <!-- Batas Waktu -->
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Batas Waktu <span class="text-rose-500">*</span>
+                  </label>
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                    </div>
+                    <input 
+                      id="batasWaktu"
+                      type="date" 
+                      class="validate-input form-input w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white outline-none"
+                    >
+                  </div>
+                </div>
+
+                <!-- Nominal -->
+                <div>
+                  <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Nominal <span class="text-rose-500">*</span>
+                  </label>
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <span class="text-sm font-semibold text-slate-400">Rp</span>
+                    </div>
+                    <input 
+                      id="nominal"
+                      type="text" 
+                      placeholder="0" 
+                      oninput="formatNominal(this)"
+                      class="validate-input form-input w-full pl-12 pr-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none font-mono"
+                    >
+                  </div>
+                  <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5">Gunakan angka saja, otomatis diformat dengan pemisah ribuan.</p>
+                </div>
+
+                <!-- Deskripsi -->
+                <div class="lg:col-span-2">
+                  <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Deskripsi
+                  </label>
+                  <textarea 
+                    rows="3"
+                    placeholder="Tambahkan keterangan tagihan (opsional)..." 
+                    class="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none resize-none"
+                  ></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section 2: Pilih Peserta -->
+            <div id="pesertaSection" class="glass-card rounded-2xl p-6 lg:p-8 mb-6 animate-fade-in-up stagger-3">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                </div>
+                <div class="flex-1">
+                  <h2 class="text-lg font-bold text-slate-900 dark:text-white">Pilih Peserta</h2>
+                  <p class="text-xs text-slate-400 dark:text-slate-500">Pilih siswa yang akan dikenai tagihan ini</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span id="selectedCountBadge" class="px-2.5 py-1 rounded-lg bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 text-xs font-bold">0</span>
+                  <span class="text-xs text-slate-400 dark:text-slate-500">terpilih</span>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Left: Pilih Kelas & Daftar Siswa -->
+                <div class="space-y-4">
+                  <!-- Kelas Dropdown -->
+                  <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Kelas</label>
+                    <div class="relative">
+                      <select onchange="loadStudents(this.value)" class="form-input appearance-none w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-300 outline-none cursor-pointer pr-10">
+                        <option value="">Pilih Kelas</option>
+                        <option value="X-RPL-1">X RPL 1</option>
+                        <option value="X-RPL-2">X RPL 2</option>
+                        <option value="XI-TKJ-1">XI TKJ 1</option>
+                        <option value="XI-TKJ-2">XI TKJ 2</option>
+                        <option value="XII-MM-1">XII MM 1</option>
+                      </select>
+                      <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                        <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Search -->
+                  <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                      <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
+                    </div>
+                    <input 
+                      type="text" 
+                      placeholder="Cari siswa..." 
+                      oninput="searchStudents(this.value)"
+                      class="form-input w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 outline-none"
+                    >
+                  </div>
+
+                  <!-- Select All -->
+                  <div class="flex items-center justify-between">
+                    <button type="button" onclick="selectAllStudents()" class="text-xs font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
+                      Pilih Semua
+                    </button>
+                    <span class="text-[11px] text-slate-400 dark:text-slate-500">Klik item untuk memilih</span>
+                  </div>
+
+                  <!-- Student List -->
+                  <div class="relative">
+                    <!-- Empty: No class selected -->
+                    <div id="emptySelectClass" class="flex flex-col items-center justify-center py-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+                      <div class="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3">
+                        <svg class="w-7 h-7 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                      </div>
+                      <p class="text-sm text-slate-400 dark:text-slate-500 font-medium">Pilih kelas untuk melihat siswa</p>
+                    </div>
+
+                    <!-- Student list container -->
+                    <div id="studentList" class="space-y-1 max-h-80 overflow-y-auto custom-scroll hidden">
+                      <!-- Populated by JS -->
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right: Peserta Terpilih -->
+                <div class="lg:border-l lg:border-slate-200 dark:lg:border-slate-700 lg:pl-6">
+                  <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">
+                      Peserta Terpilih 
+                      <span id="selectedCount" class="ml-1 text-xs text-slate-400 dark:text-slate-500 font-normal">(0)</span>
+                    </h3>
+                    <button type="button" onclick="selectedStudents.clear(); document.querySelectorAll('.student-item').forEach(el => {el.classList.remove('selected'); el.querySelector('input').checked = false;}); document.getElementById('selectedChips').innerHTML = ''; updateSelectedCount(); updateEmptyState();" class="text-[11px] font-medium text-rose-500 hover:text-rose-600 dark:hover:text-rose-400 transition-colors">
+                      Hapus Semua
+                    </button>
+                  </div>
+
+                  <!-- Empty State -->
+                  <div id="emptyState" class="flex flex-col items-center justify-center py-12 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl">
+                    <div class="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-3 animate-float">
+                      <svg class="w-7 h-7 text-slate-300 dark:text-slate-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <p class="text-sm text-slate-400 dark:text-slate-500 font-medium">Belum ada peserta terpilih</p>
+                    <p class="text-[11px] text-slate-300 dark:text-slate-600 mt-1">Pilih siswa dari daftar di sebelah kiri</p>
+                  </div>
+
+                  <!-- Selected Chips -->
+                  <div id="selectedChips" class="flex flex-wrap gap-2">
+                    <!-- Populated by JS -->
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sticky Footer Actions -->
+            <div class="sticky bottom-0 z-20 -mx-4 lg:-mx-8 px-4 lg:px-8 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200/60 dark:border-slate-700/40 animate-fade-in-up stagger-4">
+              <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+                  <div class="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
+                  </div>
+                  <span class="text-xs">Pastikan semua data sudah benar sebelum menyimpan.</span>
+                </div>
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                  <button type="button" class="flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-slate-200 dark:border-slate-700">
+                    Batal
+                  </button>
+                  <button 
+                    id="btnSimpan"
+                    type="submit" 
+                    class="flex-1 sm:flex-none px-6 py-2.5 btn-shimmer text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:scale-[1.02] active:scale-[0.98]"
+                  >
+                    <span>Simpan Tagihan</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </main>
+  </div>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, ArrowDownUp } from 'lucide-react'; // Import ikon
+import { ArrowDown, ArrowUp, ArrowDownUp } from 'lucide-react';
 
 interface SortableTableHeaderProps {
   column: string;
@@ -9,33 +9,30 @@ interface SortableTableHeaderProps {
 }
 
 const SortableTableHeader: React.FC<SortableTableHeaderProps> = ({ column, sortColumn, sortDirection, onSortChange, children }) => {
-  const isActive = column === sortColumn
+  const isActive = column === sortColumn;
 
-  // className dan strokeWidth dinamis
   const activeIconProps = {
-    className: 'w-4 h-4 text-gray-800 opacity-100',
-    strokeWidth: 1.8,
-  }
+    className: 'w-3.5 h-3.5 text-slate-600',
+    strokeWidth: 2,
+  };
   const inactiveIconProps = {
-    className: 'w-4 h-4 text-gray-800 opacity-70 group-hover:opacity-100 transition-opacity',
-    strokeWidth: 1,
-  }
+    className: 'w-3.5 h-3.5 text-slate-300 group-hover:text-slate-400 transition-colors',
+    strokeWidth: 2,
+  };
 
   return (
-    <div className="flex items-center" onClick={() => onSortChange(column)}>
+    <div className="flex items-center gap-1.5 cursor-pointer group" onClick={() => onSortChange(column)}>
       <span>{children}</span>
-      <span className="ml-2 flex-none">
+      <span className="flex-none">
         {isActive
           ? sortDirection === 'asc'
-            ? <ArrowDown   {...activeIconProps} />
+            ? <ArrowDown {...activeIconProps} />
             : <ArrowUp {...activeIconProps} />
           : <ArrowDownUp {...inactiveIconProps} />
         }
       </span>
     </div>
-  )
-
-
-}
+  );
+};
 
 export default SortableTableHeader;

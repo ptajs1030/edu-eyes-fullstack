@@ -325,7 +325,7 @@ export default function EventAttendance({ event, attendances, canEditAttendance,
                                 value={limit}
                                 onChange={(e) => {
                                     const val = e.target.value;
-                                    let newLimit = val === 'all' ? 'all' : Number(val);
+                                    const newLimit = val === 'all' ? 'all' : Number(val);
                                     // Kirim ke backend, reset ke page 1
                                     const params: any = { limit: newLimit, page: 1 };
                                     if (selectedDates.length > 0) params.dates = selectedDates;
