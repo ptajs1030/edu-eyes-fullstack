@@ -20,13 +20,13 @@ interface Props {
 }
 
 export default function AcademicYearFormModal({ isOpen, closeModal, academicYear, attendanceModes }: Props) {
-    const isLocked = academicYear?.status === 'complete'; // <— true jika harus di-disable
+    const isLocked = academicYear?.status === 'complete';
     const [formData, setFormData] = useState<AcademicYear>({
         start_year: new Date().getFullYear(),
         attendance_mode: '',
         note: '',
     });
-    const [hasInitialized, setHasInitialized] = useState(false); // Add this flag
+    const [hasInitialized, setHasInitialized] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
 
     useEffect(() => {
@@ -36,7 +36,6 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                 attendance_mode: academicYear.attendance_mode,
                 note: academicYear.note || '',
             });
-
             setHasInitialized(true);
         } else if (isOpen && !academicYear && !hasInitialized) {
             setFormData({
@@ -44,16 +43,12 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                 attendance_mode: '',
                 note: '',
             });
-
             setHasInitialized(true);
         }
     }, [academicYear, isOpen, hasInitialized]);
 
-    // Reset initialization flag when modal closes
     useEffect(() => {
-        if (!isOpen) {
-            setHasInitialized(false);
-        }
+        if (!isOpen) setHasInitialized(false);
     }, [isOpen]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -67,7 +62,6 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
             toast.error('Tahun ajaran sudah complete — tidak bisa diedit.');
             return;
         }
-
         if (!academicYear) {
             setShowConfirm(true);
         } else {
@@ -78,34 +72,19 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
     const handleConfirm = () => {
         setShowConfirm(false);
         const payload = { ...formData };
-
         if (academicYear) {
             router.post(
                 `/academic-years/${academicYear.id}`,
                 { ...payload, _method: 'PUT' },
                 {
-                    onSuccess: () => {
-                        closeModal();
-                        toast.success('Tahun ajaran berhasil diperbarui.');
-                        router.reload();
-                    },
-                    onError: (errors) => {
-                        const errorMessage = Object.values(errors).join('\n');
-                        toast.error('Gagal memperbarui tahun ajaran: ' + errorMessage);
-                    },
+                    onSuccess: () => { closeModal(); toast.success('Tahun ajaran berhasil diperbarui.'); router.reload(); },
+                    onError: (errors) => toast.error('Gagal memperbarui tahun ajaran: ' + Object.values(errors).join('\n')),
                 },
             );
         } else {
             router.post('/academic-years', payload, {
-                onSuccess: () => {
-                    closeModal();
-                    toast.success('Tahun ajaran berhasil ditambahkan.');
-                    router.reload();
-                },
-                onError: (errors) => {
-                    const errorMessage = Object.values(errors).join('\n');
-                    toast.error('Gagal menambahkan tahun ajaran: ' + errorMessage);
-                },
+                onSuccess: () => { closeModal(); toast.success('Tahun ajaran berhasil ditambahkan.'); router.reload(); },
+                onError: (errors) => toast.error('Gagal menambahkan tahun ajaran: ' + Object.values(errors).join('\n')),
             });
         }
     };
@@ -114,15 +93,10 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
 
     return (
         <>
-            <FormModal
-                isOpen={isOpen}
-                onClose={closeModal}
-                title={academicYear ? 'Edit Tahun Akademik' : 'Tambah Tahun Akademik'}
-                onSubmit={handleSubmit}
-            >
-                <div className="mb-3 flex flex-wrap justify-between">
-                    <label htmlFor="start_year" className="block text-sm font-medium text-gray-700">
-                        Tahun Mulai
+            <FormModal isOpen={isOpen} onClose={closeModal} title={academicYear ? 'Edit Tahun Akademik' : 'Tambah Tahun Akademik'} onSubmit={handleSubmit}>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                        Tahun Mulai <span className="text-rose-500">*</span>
                     </label>
                     <input
                         type="number"
@@ -130,34 +104,32 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                         name="start_year"
                         value={formData.start_year}
                         min={new Date().getFullYear()}
-                        disabled={academicYear ? true : false}
+                        disabled={!!academicYear}
                         onChange={handleChange}
-                        className={`mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm ${academicYear ? 'bg-gray-100' : ''} `}
+                        className={`form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white outline-none ${academicYear ? 'opacity-60 cursor-not-allowed' : ''}`}
                         required
-                    ></input>
+                    />
                 </div>
-                <div className="mb-3">
-                    <label htmlFor="attendance_mode" className="block text-sm font-medium text-gray-700">
-                        Mode Kehadiran
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                        Mode Kehadiran <span className="text-rose-500">*</span>
                     </label>
                     <select
                         name="attendance_mode"
                         value={formData.attendance_mode}
                         onChange={handleChange}
                         disabled={isLocked}
-                        className={`mt-1 block w-full rounded-md border p-2 shadow-sm ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                        className={`form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-300 outline-none ${isLocked ? 'opacity-60 cursor-not-allowed' : ''}`}
                         required
                     >
                         <option value="">-- Select Mode --</option>
                         {attendanceModes.map((mode) => (
-                            <option key={mode.value} value={mode.value}>
-                                {mode.label}
-                            </option>
+                            <option key={mode.value} value={mode.value}>{mode.label}</option>
                         ))}
                     </select>
                 </div>
-                <div className="mb-3">
-                    <label htmlFor="note" className="block text-sm font-medium text-gray-700">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                         Catatan (opsional)
                     </label>
                     <textarea
@@ -165,22 +137,15 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                         value={formData.note}
                         onChange={handleChange}
                         disabled={isLocked}
-                        className={`mt-1 block w-full rounded-md border p-2 shadow-sm ${isLocked ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                        className={`form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none resize-none ${isLocked ? 'opacity-60 cursor-not-allowed' : ''}`}
+                        rows={3}
                     />
                 </div>
-                <div className="flex justify-end">
-                    <button
-                        type="button"
-                        onClick={closeModal}
-                        className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
-                    >
+                <div className="flex justify-end pt-2">
+                    <button type="button" onClick={closeModal} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-slate-200 dark:border-slate-700">
                         Batal
                     </button>
-                    <button
-                        type="submit"
-                        disabled={isLocked}
-                        className={`rounded-md px-4 py-2 text-sm font-medium text-white shadow-sm ${isLocked ? 'bg-gray-400 cursor-not-allowed' : 'hover:cursor-pointer bg-blue-600 hover:bg-blue-700'}`}
-                    >
+                    <button type="submit" disabled={isLocked} className={`ml-3 px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 ${isLocked ? 'bg-slate-400' : 'btn-shimmer'}`}>
                         {academicYear ? 'Ubah' : 'Simpan'}
                     </button>
                 </div>
@@ -190,19 +155,8 @@ export default function AcademicYearFormModal({ isOpen, closeModal, academicYear
                 title="Konfirmasi"
                 message="Apakah Anda yakin ingin menambahkan tahun ajaran baru?"
                 buttons={[
-                    {
-                        label: 'Batal',
-                        onClick: () => setShowConfirm(false),
-                        variant: 'neutral',
-                    },
-                    {
-                        label: 'Ya',
-                        onClick: () => {
-                            handleConfirm();
-                            setShowConfirm(false);
-                        },
-                        variant: 'primary',
-                    },
+                    { label: 'Batal', onClick: () => setShowConfirm(false), variant: 'neutral' },
+                    { label: 'Ya', onClick: () => { handleConfirm(); setShowConfirm(false); }, variant: 'primary' },
                 ]}
                 onClose={() => setShowConfirm(false)}
             />

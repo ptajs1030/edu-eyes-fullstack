@@ -17,38 +17,20 @@ interface Props {
 }
 
 export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
-    const [hasInitialized, setHasInitialized] = useState(false); // Add this flag
-    const [formData, setFormData] = useState<Subject>({
-        name: '',
-        curriculum_year: '',
-        is_archived: false,
-    });
+    const [hasInitialized, setHasInitialized] = useState(false);
+    const [formData, setFormData] = useState<Subject>({ name: '', curriculum_year: '', is_archived: false });
 
     useEffect(() => {
         if (isOpen && subject && !hasInitialized) {
-            setFormData({
-                name: subject.name,
-                curriculum_year: subject.curriculum_year,
-                is_archived: subject.is_archived,
-            });
-
+            setFormData({ name: subject.name, curriculum_year: subject.curriculum_year, is_archived: subject.is_archived });
             setHasInitialized(true);
         } else if (isOpen && !subject && !hasInitialized) {
-            setFormData({
-                name: '',
-                curriculum_year: '',
-                is_archived: false,
-            });
-
+            setFormData({ name: '', curriculum_year: '', is_archived: false });
             setHasInitialized(true);
         }
     }, [subject, isOpen, hasInitialized]);
 
-    useEffect(() => {
-        if (!isOpen) {
-            setHasInitialized(false);
-        }
-    }, [isOpen]);
+    useEffect(() => { if (!isOpen) setHasInitialized(false); }, [isOpen]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -62,105 +44,63 @@ export default function SubjectFormModal({ isOpen, onClose, subject }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
         if (subject?.id) {
-            router.put(
-                `/subjects/${subject.id}`,
-                { ...formData },
-                {
-                    preserveScroll: true,
-                    onSuccess: () => {
-                        onClose();
-                        router.reload();
-                    },
-                    onError: (errors) => {
-                        const errorMessage = Object.values(errors).join('\n');
-                        toast.error(`Gagal memperbarui mata pelajaran: ${errorMessage}`);
-                    },
-                },
-            );
+            router.put(`/subjects/${subject.id}`, { ...formData }, {
+                preserveScroll: true,
+                onSuccess: () => { onClose(); router.reload(); },
+                onError: (errors) => toast.error('Gagal memperbarui mata pelajaran: ' + Object.values(errors).join('\n')),
+            });
         } else {
-            router.post(
-                '/subjects',
-                { ...formData },
-                {
-                    preserveScroll: true,
-                    onSuccess: () => {
-                        onClose();
-                        router.reload();
-                    },
-                    onError: (errors) => {
-                        const errorMessage = Object.values(errors).join('\n');
-                        toast.error(`Gagal menambahkan mata pelajaran baru: ${errorMessage}`);
-                    },
-                },
-            );
+            router.post('/subjects', { ...formData }, {
+                preserveScroll: true,
+                onSuccess: () => { onClose(); router.reload(); },
+                onError: (errors) => toast.error('Gagal menambahkan mata pelajaran baru: ' + Object.values(errors).join('\n')),
+            });
         }
     };
 
     return (
         <FormModal isOpen={isOpen} onClose={onClose} title={subject ? 'Edit Mata Pelajaran' : 'Tambah Mata Pelajaran'} onSubmit={handleSubmit}>
-            <div className="mb-3">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Nama
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Nama <span className="text-rose-500">*</span>
                 </label>
                 <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    maxLength={70}
-                    value={formData.name}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                />
-            </div>
-            <div className="mb-3">
-                <label htmlFor="curriculum_year" className="block text-sm font-medium text-gray-700">
-                    Nama Kurikulum
-                </label>
-                <input
-                    id="curriculum_year"
-                    name="curriculum_year"
-                    type="text"
-                    maxLength={70}
-                    value={formData.curriculum_year}
-                    onChange={handleChange}
-                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                    type="text" name="name" maxLength={70} value={formData.name} onChange={handleChange}
+                    className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none"
                     required
                 />
             </div>
-            <div className="mb-4">
-                <label className="flex items-start gap-3">
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Nama Kurikulum <span className="text-rose-500">*</span>
+                </label>
+                <input
+                    type="text" name="curriculum_year" maxLength={70} value={formData.curriculum_year} onChange={handleChange}
+                    className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none"
+                    required
+                />
+            </div>
+            <div>
+                <label className="flex items-start gap-3 cursor-pointer">
                     <div className="flex h-5 items-center">
                         <input
-                            type="checkbox"
-                            id="is_archived"
-                            name="is_archived"
-                            checked={formData.is_archived}
-                            onChange={handleCheckboxChange}
-                            className="h-4 w-4 rounded border-gray-300 text-blue-600 transition-all focus:ring-2 focus:ring-blue-500 focus:ring-offset-0 focus:ring-offset-white"
+                            type="checkbox" id="is_archived" name="is_archived"
+                            checked={formData.is_archived} onChange={handleCheckboxChange}
+                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-primary-600 focus:ring-primary-500/20 transition-all cursor-pointer"
                         />
                     </div>
                     <div className="flex flex-col">
-                        <span className="block text-sm font-medium text-gray-700">Archive this subject</span>
-                        <span className="mt-0.5 block text-xs text-gray-500">
-                            Archived subjects will be hidden from default views but remain accessible
-                        </span>
+                        <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Archive this subject</span>
+                        <span className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">Archived subjects will be hidden from default views but remain accessible</span>
                     </div>
                 </label>
             </div>
-            <div className="flex justify-end">
-                <button
-                    type="button"
-                    onClick={onClose}
-                    className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
-                >
+            <div className="flex justify-end pt-2">
+                <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-slate-200 dark:border-slate-700">
                     Batal
                 </button>
-                <button
-                    type="submit"
-                    className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
-                >
+                <button type="submit" className="ml-3 px-5 py-2.5 btn-shimmer text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:scale-[1.02] active:scale-[0.98]">
                     {subject ? 'Ubah' : 'Simpan'}
                 </button>
             </div>

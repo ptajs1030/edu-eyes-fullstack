@@ -1,4 +1,3 @@
-// resources/js/Pages/Tasks/TaskEdit.tsx
 import ConfirmationModal from '@/components/confirmation-modal';
 import StudentAssignmentModal from '@/components/student-assignment-modal';
 import AppLayout from '@/layouts/app-layout';
@@ -68,7 +67,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function TaskEdit({ task, subjects, academicYears, classrooms }: Props) {
     const { data, setData, put, processing } = useForm({
         subject_id: task.subject_id,
-        title: task.title, // ✅ konsisten pakai title
+        title: task.title,
         description: task.description || '',
         due_date: task.due_date,
         due_time: task.due_time,
@@ -85,7 +84,6 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
 
     const [showStudentModal, setShowStudentModal] = useState(false);
     const [titleLength, setTitleLength] = useState(task.title.length);
-    // const [descLength, setDescLength] = useState((task.description || '').length);
 
     const { errors, flash } = usePage<{
         errors?: Record<string, string>;
@@ -143,14 +141,6 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
             setTitleLength(value.length);
         }
     };
-
-    // const handleDescChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    //     const value = e.target.value;
-    //     if (value.length <= 70) {
-    //         setData('description', value);
-    //         setDescLength(value.length);
-    //     }
-    // };
 
     const handleAddAttachment = () => {
         setData('attachments', [...data.attachments, { url: '' }]);
@@ -230,247 +220,287 @@ export default function TaskEdit({ task, subjects, academicYears, classrooms }: 
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`Edit Tugas - ${task.title}`} />
             <Toaster position="top-right" richColors />
-
-            <div className="rounded-xl bg-white p-6 shadow-lg">
-                <h2 className="mb-6 text-2xl font-semibold text-gray-900">Edit Exam: {task.title}</h2>
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {/* Tahun Ajaran */}
-                    <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">Tahun Ajaran</label>
-                        <input
-                            type="text"
-                            value={academicYear?.title || 'Loading...'}
-                            disabled
-                            className="w-full cursor-not-allowed rounded-lg border border-gray-300 bg-gray-100 px-4 py-2 text-gray-600"
-                            readOnly
-                        />
-                        <p className="mt-1 text-xs text-amber-600">Tahun ajaran tidak dapat diperbarui setelah ujian ditambahkan</p>
-                    </div>
-
-                    {/* Mata Pelajaran */}
-                    <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">Mata Pelajaran *</label>
-                        <select
-                            value={data.subject_id}
-                            onChange={(e) => setData('subject_id', parseInt(e.target.value))}
-                            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                            required
-                        >
-                            <option value="">Pilih mata pelajaran</option>
-                            {subjects.map((subject) => (
-                                <option key={subject.id} value={subject.id}>
-                                    {subject.name}
-                                </option>
-                            ))}
-                        </select>
-                        {errors.subject_id && <p className="mt-1 text-xs text-red-500">{errors.subject_id}</p>}
-                    </div>
-
-                    {/* Title */}
-                    <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">Nama *</label>
-                        <input
-                            type="text"
-                            value={data.title}
-                            onChange={handleTitleChange}
-                            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                            placeholder="Masukkan nama exam"
-                            required
-                        />
-                        <p className="mt-1 text-xs text-gray-500">String, max 70 char ({titleLength}/70)</p>
-                        {errors.title && <p className="mt-1 text-xs text-red-500">{errors.title}</p>}
-                    </div>
-
-                    {/* Description */}
-                    <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">Deskripsi</label>
-                        <RichTextEditor
-                            value={data.description}
-                            onChange={(value) => setData('description', value)}
-                            placeholder="Deskripsi tugas..."
-                        />
-                    </div>
-
-                    {/* Attachments */}
-                    <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">Lampiran</label>
-                        {data.attachments.map((attachment, index) => (
-                            <div key={index} className="mb-2 flex items-center">
-                                <input
-                                    type="url"
-                                    value={attachment.url}
-                                    onChange={(e) => handleAttachmentChange(index, e.target.value)}
-                                    placeholder="https://example.com/file.pdf"
-                                    className="block w-full flex-1 rounded-md border border-gray-300 p-2 shadow-sm"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => handleRemoveAttachment(index)}
-                                    className="ml-2 rounded-md bg-red-100 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-200"
-                                >
-                                    Hapus
-                                </button>
+            <div className="flex-1 overflow-y-auto">
+                <div className="max-w-4xl mx-auto px-4 lg:px-8 py-6 lg:py-8">
+                    <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8 animate-fade-in-up">
+                        <div>
+                            <div className="flex items-center gap-2 mb-1">
+                                <span className="px-2 py-0.5 rounded-md bg-violet-100 dark:bg-violet-900/30 text-violet-700 dark:text-violet-400 text-[10px] font-bold uppercase tracking-wider">Tugas</span>
                             </div>
-                        ))}
-                        <button
-                            type="button"
-                            onClick={handleAddAttachment}
-                            className="rounded-md bg-sky-500 px-3 py-2 text-sm font-medium text-white hover:bg-sky-600"
-                        >
-                            Tambah Lampiran
-                        </button>
+                            <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Edit Tugas</h1>
+                            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">{task.title}</p>
+                        </div>
                     </div>
 
-                    {/* Due Date */}
-                    <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">Batas Pengumpulan *</label>
-                        <input
-                            type="date"
-                            value={data.due_date}
-                            onChange={(e) => setData('due_date', e.target.value)}
-                            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                            required
-                        />
-                        {errors.due_date && <p className="mt-1 text-xs text-red-500">{errors.due_date}</p>}
-                    </div>
-
-                    {/* Due Time */}
-                    <div>
-                        <label className="mb-2 block text-sm font-medium text-gray-700">Batas Pengumpulan (Jam)*</label>
-                        <input
-                            type="time"
-                            value={data.due_time}
-                            onChange={(e) => setData('due_time', e.target.value)}
-                            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-                            required
-                        />
-                        {errors.due_time && <p className="mt-1 text-xs text-red-500">{errors.due_time}</p>}
-                    </div>
-
-                    <div>
-                        <div className="mb-4 flex items-center justify-between">
-                            <div>
-                                <h3 className="text-lg font-medium text-gray-900">Student Assignments</h3>
-                                <p className="mt-1 text-sm text-gray-600">
-                                    {scoredStudents} dari {totalStudents} siswa sudah dinilai
-                                </p>
+                    <form onSubmit={handleSubmit}>
+                        <div className="glass-card rounded-2xl p-6 lg:p-8 mb-6 animate-fade-in-up stagger-1">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Detail Tugas</h2>
+                                    <p className="text-xs text-slate-400 dark:text-slate-500">Informasi utama tugas</p>
+                                </div>
                             </div>
-                            <p className="max-w-md text-right text-sm text-red-600">
-                                ⚠️ Warning: Menghapus siswa yang sudah dinilai akan menghilangkan data skor mereka!
-                            </p>
+
+                            <div className="space-y-6">
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Tahun Ajaran</label>
+                                    <input
+                                        type="text"
+                                        value={academicYear?.title || 'Loading...'}
+                                        disabled
+                                        className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white cursor-not-allowed opacity-60 outline-none"
+                                        readOnly
+                                    />
+                                    <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-1.5 flex items-center gap-1">
+                                        <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.99-.833-2.46 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                        </svg>
+                                        Tahun ajaran tidak dapat diperbarui setelah tugas ditambahkan
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                                        Mata Pelajaran <span className="text-rose-500">*</span>
+                                    </label>
+                                    <select
+                                        value={data.subject_id}
+                                        onChange={(e) => setData('subject_id', parseInt(e.target.value))}
+                                        className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white outline-none"
+                                        required
+                                    >
+                                        <option value="">Pilih mata pelajaran</option>
+                                        {subjects.map((subject) => (
+                                            <option key={subject.id} value={subject.id}>
+                                                {subject.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.subject_id && <p className="text-[11px] text-rose-500 mt-1.5">{errors.subject_id}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                                        Nama Tugas <span className="text-rose-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        value={data.title}
+                                        onChange={handleTitleChange}
+                                        className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none"
+                                        placeholder="Masukkan nama tugas"
+                                        required
+                                    />
+                                    <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1.5">{titleLength}/70 karakter</p>
+                                    {errors.title && <p className="text-[11px] text-rose-500 mt-1.5">{errors.title}</p>}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Deskripsi</label>
+                                    <div className="[&_.ql-editor]:text-sm sm:[&_.ql-editor]:text-sm">
+                                        <RichTextEditor
+                                            value={data.description}
+                                            onChange={(value) => setData('description', value)}
+                                            placeholder="Deskripsi tugas..."
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-3">Lampiran</label>
+                                    <div className="space-y-3">
+                                        {data.attachments.map((attachment, index) => (
+                                            <div key={index} className="flex items-center gap-2">
+                                                <input
+                                                    type="url"
+                                                    value={attachment.url}
+                                                    onChange={(e) => handleAttachmentChange(index, e.target.value)}
+                                                    placeholder="https://example.com/file.pdf"
+                                                    className="form-input flex-1 px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveAttachment(index)}
+                                                    className="px-3 py-2.5 rounded-xl text-sm font-semibold text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all border border-slate-200 dark:border-slate-700"
+                                                >
+                                                    Hapus
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button
+                                            type="button"
+                                            onClick={handleAddAttachment}
+                                            className="px-4 py-2.5 rounded-xl text-sm font-semibold text-primary-600 dark:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all border border-dashed border-primary-300 dark:border-primary-700"
+                                        >
+                                            + Tambah Lampiran
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                                            Batas Pengumpulan <span className="text-rose-500">*</span>
+                                        </label>
+                                        <input
+                                            type="date"
+                                            value={data.due_date}
+                                            onChange={(e) => setData('due_date', e.target.value)}
+                                            className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white outline-none"
+                                            required
+                                        />
+                                        {errors.due_date && <p className="text-[11px] text-rose-500 mt-1.5">{errors.due_date}</p>}
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                                            Batas Pengumpulan (Jam) <span className="text-rose-500">*</span>
+                                        </label>
+                                        <input
+                                            type="time"
+                                            value={data.due_time}
+                                            onChange={(e) => setData('due_time', e.target.value)}
+                                            className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white outline-none"
+                                            required
+                                        />
+                                        {errors.due_time && <p className="text-[11px] text-rose-500 mt-1.5">{errors.due_time}</p>}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        {data.student_assignments.length > 0 ? (
-                            <div className="mb-4 overflow-hidden rounded-lg border border-gray-200">
-                                <table className="w-full">
-                                    <thead className="bg-gray-50">
-                                        <tr>
-                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Nama</th>
-                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">NIS</th>
-                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Kelas</th>
-                                            <th className="px-4 py-3 text-center text-sm font-medium text-gray-900">Status Nilai</th>
-                                            <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Aksi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {data.student_assignments.map((student) => (
-                                            <tr key={student.student_id} className="border-t">
-                                                <td className="px-4 py-3 text-sm font-medium">
-                                                    <div className="flex items-center gap-2">
-                                                        {student.student_name}
-                                                        {student.is_scored && (
-                                                            <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800">
-                                                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                                    <path
-                                                                        strokeLinecap="round"
-                                                                        strokeLinejoin="round"
-                                                                        strokeWidth={2}
-                                                                        d="M5 13l4 4L19 7"
-                                                                    />
-                                                                </svg>
-                                                                Sudah Dinilai
+                        <div className="glass-card rounded-2xl p-6 lg:p-8 mb-6 animate-fade-in-up stagger-2">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
+                                    </svg>
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-bold text-slate-900 dark:text-white">Penugasan Siswa</h2>
+                                    <p className="text-xs text-slate-400 dark:text-slate-500">{scoredStudents} dari {totalStudents} siswa sudah dinilai</p>
+                                </div>
+                            </div>
+
+                            <div className="mb-4 flex items-center justify-end">
+                                <p className="text-xs text-rose-600 dark:text-rose-400">
+                                    ⚠️ Menghapus siswa yang sudah dinilai akan menghilangkan data skor mereka!
+                                </p>
+                            </div>
+
+                            {data.student_assignments.length > 0 ? (
+                                <div className="mb-4 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+                                    <table className="w-full">
+                                        <thead className="bg-slate-50 dark:bg-slate-800/50">
+                                            <tr>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Nama</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Kelas</th>
+                                                <th className="px-4 py-3 text-center text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Status Nilai</th>
+                                                <th className="px-4 py-3 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {data.student_assignments.map((student) => (
+                                                <tr key={student.student_id} className="border-t border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30">
+                                                    <td className="px-4 py-3 text-sm font-medium text-slate-900 dark:text-white">
+                                                        <div className="flex items-center gap-2">
+                                                            {student.student_name}
+                                                            {student.is_scored && (
+                                                                <span className="inline-flex items-center gap-1 rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-0.5 text-xs font-medium text-green-800 dark:text-green-400">
+                                                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                                    </svg>
+                                                                    Sudah Dinilai
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-3 text-sm text-slate-500">{student.class_name}</td>
+                                                    <td className="px-4 py-3 text-center">
+                                                        {student.is_scored ? (
+                                                            <div className="flex flex-col items-center">
+                                                                <span className="inline-flex rounded-full bg-green-100 dark:bg-green-900/30 px-2 py-1 text-xs font-semibold text-green-800 dark:text-green-400">
+                                                                    Sudah Dinilai
+                                                                </span>
+                                                                <span className="mt-1 text-[11px] text-slate-500">Nilai: {student.score}</span>
+                                                            </div>
+                                                        ) : (
+                                                            <span className="inline-flex rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-1 text-xs font-semibold text-slate-600 dark:text-slate-400">
+                                                                Belum Dinilai
                                                             </span>
                                                         )}
-                                                    </div>
-                                                </td>
-                                                <td className="px-4 py-3 text-sm">{student.nis || '-'}</td>
-                                                <td className="px-4 py-3 text-sm">{student.class_name}</td>
-                                                <td className="px-4 py-3 text-center">
-                                                    {student.is_scored ? (
-                                                        <div className="flex flex-col items-center">
-                                                            <span className="inline-flex rounded-full bg-green-100 px-2 py-1 text-xs font-semibold text-green-800">
-                                                                Sudah Dinilai
-                                                            </span>
-                                                            <span className="mt-1 text-xs text-gray-600">Nilai: {student.score}</span>
-                                                        </div>
-                                                    ) : (
-                                                        <span className="inline-flex rounded-full bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-800">
-                                                            Belum Dinilai
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="px-4 py-3 text-center">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => handleRemoveStudent(student.student_id, student.is_scored)}
-                                                        className={`flex items-center gap-1 rounded bg-red-500 px-2 py-1 text-xs text-white hover:bg-red-600 hover:opacity-90`}
-                                                        title={
-                                                            student.is_scored ? 'Hati-hati: Siswa ini sudah memiliki nilai!' : 'Hapus siswa dari exam'
-                                                        }
-                                                    >
-                                                        <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path
-                                                                strokeLinecap="round"
-                                                                strokeLinejoin="round"
-                                                                strokeWidth={2}
-                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                                            />
-                                                        </svg>
-                                                        Hapus
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        ) : (
-                            <div className="mb-4 rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
-                                <p className="text-gray-500">Belum ada siswa yang di-assign ke exam ini</p>
-                            </div>
-                        )}
+                                                    </td>
+                                                    <td className="px-4 py-3">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => handleRemoveStudent(student.student_id, student.is_scored)}
+                                                            className="px-3 py-1.5 rounded-lg text-xs font-semibold text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all border border-slate-200 dark:border-slate-700"
+                                                            title={student.is_scored ? 'Hati-hati: Siswa ini sudah memiliki nilai!' : 'Hapus siswa dari tasks'}
+                                                        >
+                                                            Hapus
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <div className="mb-4 rounded-xl border-2 border-dashed border-slate-300 dark:border-slate-600 p-8 text-center">
+                                    <svg className="w-10 h-10 mx-auto text-slate-300 dark:text-slate-600 mb-3" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" />
+                                    </svg>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">Belum ada siswa yang di-assign ke tugas ini</p>
+                                </div>
+                            )}
 
-                        <button
-                            type="button"
-                            onClick={() => setShowStudentModal(true)}
-                            className="flex items-center gap-2 rounded-lg bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700"
-                        >
-                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                            </svg>
-                            Tambah Siswa
-                        </button>
-                    </div>
+                            <button
+                                type="button"
+                                onClick={() => setShowStudentModal(true)}
+                                className="px-4 py-2.5 rounded-xl text-sm font-semibold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all border border-dashed border-emerald-300 dark:border-emerald-700"
+                            >
+                                + Tambah Siswa
+                            </button>
+                        </div>
 
-                    {/* Submit Button */}
-                    <div className="flex justify-end gap-4 border-t pt-6">
-                        <button
-                            type="button"
-                            onClick={() => router.get('/tasks')}
-                            className="rounded-lg border border-gray-300 bg-white px-6 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            type="submit"
-                            disabled={processing}
-                            className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-                        >
-                            {processing ? 'Memperbarui...' : 'Simpan'}
-                        </button>
-                    </div>
-                </form>
+                        <div className="sticky bottom-0 z-20 -mx-4 lg:-mx-8 px-4 lg:px-8 py-4 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-t border-slate-200/60 dark:border-slate-700/40 animate-fade-in-up stagger-3">
+                            <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+                                <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
+                                    <div className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                                        </svg>
+                                    </div>
+                                    <span className="text-xs">Pastikan semua data sudah benar sebelum menyimpan.</span>
+                                </div>
+                                <div className="flex items-center gap-3 w-full sm:w-auto">
+                                    <button
+                                        type="button"
+                                        onClick={() => router.get('/tasks')}
+                                        className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-slate-200 dark:border-slate-700 text-center"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        disabled={processing}
+                                        className="flex-1 sm:flex-none px-6 py-2.5 btn-shimmer text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-violet-500/25 hover:shadow-violet-500/40 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100 flex items-center justify-center gap-2"
+                                    >
+                                        {processing ? (
+                                            <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div><span>Memperbarui...</span></>
+                                        ) : (
+                                            <span>Simpan Perubahan</span>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
 
             <StudentAssignmentModal

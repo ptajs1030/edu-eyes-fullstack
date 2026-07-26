@@ -43,117 +43,61 @@ interface Props {
 
 export default function StudentFormModal({ isOpen, onClose, student, classrooms, sexes, statuses, religions }: Props) {
     const [formData, setFormData] = useState<Omit<Student, 'id'>>({
-        parent_id: null,
-        class_id: null,
-        full_name: '',
-        nis: '',
-        entry_year: new Date().getFullYear(),
-        gender: '',
-        status: '',
-        religion: '',
-        birth_place: '',
-        date_of_birth: '',
-        address: '',
-        profile_picture: null,
+        parent_id: null, class_id: null, full_name: '', nis: '', entry_year: new Date().getFullYear(),
+        gender: '', status: '', religion: '', birth_place: '', date_of_birth: '', address: '', profile_picture: null,
     });
     const [initialParent, setInitialParent] = useState<Parent | null>(null);
-    const [hasInitialized, setHasInitialized] = useState(false); // Add this flag
+    const [hasInitialized, setHasInitialized] = useState(false);
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [removeProfilePicture, setRemoveProfilePicture] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         if (isOpen && student && !hasInitialized) {
-            // Only initialize once when modal opens
             setFormData({
-                parent_id: student.parent_id,
-                class_id: student.class_id,
-                full_name: student.full_name,
-                nis: student.nis || '',
-                entry_year: student.entry_year,
-                gender: student.gender,
-                status: student.status,
-                religion: student.religion,
-                birth_place: student.birth_place,
-                date_of_birth: student.date_of_birth,
-                address: student.address,
-                profile_picture: student.profile_picture,
+                parent_id: student.parent_id, class_id: student.class_id, full_name: student.full_name,
+                nis: student.nis || '', entry_year: student.entry_year, gender: student.gender,
+                status: student.status, religion: student.religion, birth_place: student.birth_place,
+                date_of_birth: student.date_of_birth, address: student.address, profile_picture: student.profile_picture,
             });
-
-            if (student.profile_picture) {
-                setPreviewImage(`/storage/${student.profile_picture}`);
-            }
-
+            if (student.profile_picture) setPreviewImage(`/storage/${student.profile_picture}`);
             if (student.parent) {
-                setInitialParent({
-                    id: student.parent_id as number,
-                    full_name: student.parent.full_name,
-                });
+                setInitialParent({ id: student.parent_id as number, full_name: student.parent.full_name });
             } else {
                 setInitialParent(null);
             }
-
             setHasInitialized(true);
         } else if (isOpen && !student && !hasInitialized) {
             setFormData({
-                parent_id: null,
-                class_id: null,
-                full_name: '',
-                nis: '',
-                entry_year: new Date().getFullYear(),
-                gender: '',
-                status: '',
-                religion: '',
-                birth_place: '',
-                date_of_birth: '',
-                address: '',
-                profile_picture: null,
+                parent_id: null, class_id: null, full_name: '', nis: '', entry_year: new Date().getFullYear(),
+                gender: '', status: '', religion: '', birth_place: '', date_of_birth: '', address: '', profile_picture: null,
             });
             setInitialParent(null);
             setHasInitialized(true);
         }
     }, [student, isOpen, hasInitialized]);
 
-    // Reset initialization flag when modal closes
     useEffect(() => {
         if (!isOpen) {
-            setHasInitialized(false);
-            setInitialParent(null);
-            setPreviewImage(null);
-            setRemoveProfilePicture(false);
+            setHasInitialized(false); setInitialParent(null); setPreviewImage(null); setRemoveProfilePicture(false);
         }
     }, [isOpen]);
 
-    // Update initialParent when formData.parent_id changes (user selects new parent)
-    useEffect(() => {
-        if (formData.parent_id === null) {
-            setInitialParent(null);
-        }
-    }, [formData.parent_id]);
+    useEffect(() => { if (formData.parent_id === null) setInitialParent(null); }, [formData.parent_id]);
 
     const handleChange = (field: keyof Omit<Student, 'id'>, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
     const handleNisChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        let value = e.target.value;
-
-        // Remove any non-digit characters
-        value = value.replace(/\D/g, '');
-
-        setFormData((prev) => ({ ...prev, nis: value }));
+        setFormData((prev) => ({ ...prev, nis: e.target.value.replace(/\D/g, '') }));
     };
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-
         if (file) {
-            // Preview image
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setPreviewImage(reader.result as string);
-            };
-
+            reader.onloadend = () => setPreviewImage(reader.result as string);
             reader.readAsDataURL(file);
             setFormData((prev) => ({ ...prev, profile_picture: file }));
             setRemoveProfilePicture(false);
@@ -164,156 +108,89 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
         setPreviewImage(null);
         setFormData((prev) => ({ ...prev, profile_picture: undefined }));
         setRemoveProfilePicture(true);
-        if (fileInputRef.current) {
-            fileInputRef.current.value = '';
-        }
+        if (fileInputRef.current) fileInputRef.current.value = '';
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        // set default value
-        if (!formData.status) {
-            formData.status = 'active';
-        }
-
+        if (!formData.status) formData.status = 'active';
         const formDataToSend = new FormData();
-
         Object.entries(formData).forEach(([key, value]) => {
-            if (key !== 'profile_picture' && value !== null) {
-                formDataToSend.append(key, value as string);
-            }
+            if (key !== 'profile_picture' && value !== null) formDataToSend.append(key, value as string);
         });
-
         if (formData.profile_picture instanceof File) {
             formDataToSend.append('profile_picture', formData.profile_picture);
         } else if (removeProfilePicture) {
             formDataToSend.append('remove_profile_picture', '1');
         }
-
         formDataToSend.append('_method', student?.id ? 'PUT' : 'POST');
-
-        const url = student?.id ? `/students/${student.id}` : '/students';
-
-        router.post(url, formDataToSend, {
-            preserveScroll: true,
-            forceFormData: true,
-            onSuccess: () => {
-                onClose();
-                router.reload();
-            },
-            onError: (errors) => {
-                const errorMessage = Object.values(errors).join(', ');
-                toast.error(`Validasi Gagal: ${errorMessage}`);
-            },
+        router.post(student?.id ? `/students/${student.id}` : '/students', formDataToSend, {
+            preserveScroll: true, forceFormData: true,
+            onSuccess: () => { onClose(); router.reload(); },
+            onError: (errors) => toast.error('Validasi Gagal: ' + Object.values(errors).join(', ')),
         });
     };
 
-    const getStatusLabel = (status: string): string => {
-        switch (status.toLowerCase()) {
-            case 'active':
-                return 'Aktif';
-            case 'inactive':
-                return 'Tidak Aktif';
-            case 'graduated':
-                return 'Lulus';
-            default:
-                return status;
-        }
-    };
-
-    const getGenderLabel = (key: string): string => {
-        switch (key.toLowerCase()) {
-            case 'male':
-                return 'Laki-Laki';
-            case 'female':
-                return 'Perempuan';
-            default:
-                return key;
-        }
-    };
+    const getStatusLabel = (s: string) => { switch (s.toLowerCase()) { case 'active': return 'Aktif'; case 'inactive': return 'Tidak Aktif'; case 'graduated': return 'Lulus'; default: return s; } };
+    const getGenderLabel = (k: string) => { switch (k.toLowerCase()) { case 'male': return 'Laki-Laki'; case 'female': return 'Perempuan'; default: return k; } };
 
     return (
         <FormModal isOpen={isOpen} onClose={onClose} title={student ? 'Edit Siswa' : 'Tambah Siswa Baru'} onSubmit={handleSubmit}>
-            {/* Profile Picture Section */}
-            <div className="mb-4 flex flex-col items-center">
+            <div className="flex flex-col items-center">
                 <div className="relative">
-                    <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-gray-300 bg-gray-100">
+                    <div className="w-24 h-24 rounded-full border-2 border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 flex items-center justify-center overflow-hidden">
                         {previewImage ? (
                             <img src={previewImage} alt="Profile preview" className="h-full w-full object-cover" />
                         ) : (
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-12 w-12 text-gray-400"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                />
+                            <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                             </svg>
                         )}
                     </div>
-
                     {(previewImage || (student?.profile_picture && !removeProfilePicture)) && (
-                        <button
-                            type="button"
-                            onClick={handleRemoveImage}
-                            className="absolute -top-2 -right-2 rounded-full bg-red-500 p-1 text-white hover:cursor-pointer hover:bg-red-600"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <button type="button" onClick={handleRemoveImage} className="absolute -top-1 -right-1 rounded-full bg-rose-500 p-1.5 text-white hover:bg-rose-600 transition-all">
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     )}
                 </div>
-
-                <label className="mt-2 cursor-pointer text-sm font-medium text-blue-600 hover:text-blue-800">
+                <label className="mt-2 cursor-pointer text-sm font-semibold text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors">
                     <span>Upload Photo</span>
                     <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleImageChange} />
                 </label>
-                <p className="mt-1 text-xs text-gray-500">Max 2MB (300x300)</p>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">Max 2MB (300x300)</p>
             </div>
-            <div className="mb-3">
-                <label htmlFor="full_name" className="block text-sm font-medium text-gray-700">
-                    Nama Lengkap
+
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Nama Lengkap <span className="text-rose-500">*</span>
                 </label>
-                <input
-                    id="full_name"
-                    name="full_name"
-                    type="text"
-                    maxLength={70}
-                    value={formData.full_name}
+                <input type="text" maxLength={70} value={formData.full_name}
                     onChange={(e) => handleChange('full_name', e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                    required
-                />
+                    className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none" required />
             </div>
-            <div className="mb-3">
-                <label htmlFor="nis" className="block text-sm font-medium text-gray-700">
-                    NIS
-                </label>
-                <input
-                    id="nis"
-                    name="nis"
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    minLength={4}
-                    maxLength={20}
-                    value={formData.nis ?? ''}
-                    onChange={handleNisChange}
-                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                />
+
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">NIS</label>
+                    <input type="text" inputMode="numeric" pattern="[0-9]*" minLength={4} maxLength={20}
+                        value={formData.nis ?? ''} onChange={handleNisChange}
+                        className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none font-mono" />
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                        Tahun Masuk <span className="text-rose-500">*</span>
+                    </label>
+                    <input type="number" min="1900" max={new Date().getFullYear() + 1}
+                        value={formData.entry_year}
+                        onChange={(e) => setFormData({ ...formData, entry_year: parseInt(e.target.value) || new Date().getFullYear() })}
+                        className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white outline-none" required />
+                </div>
             </div>
-            <div className="mb-3">
-                <label htmlFor="parent_id" className="block text-sm font-medium text-gray-700">
-                    Orang Tua/Wali
-                </label>
+
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Orang Tua/Wali</label>
                 <SearchableSelect
                     value={formData.parent_id ?? null}
                     onChange={(value) => handleChange('parent_id', value ? Number(value) : null)}
@@ -323,172 +200,97 @@ export default function StudentFormModal({ isOpen, onClose, student, classrooms,
                     required={true}
                 />
             </div>
-            <div className="mb-3">
-                <label htmlFor="class_id" className="block text-sm font-medium text-gray-700">
-                    Kelas
-                </label>
-                <select
-                    id="class_id"
-                    name="class_id"
-                    value={formData.class_id || ''}
+
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Kelas</label>
+                <select value={formData.class_id || ''}
                     onChange={(e) => handleChange('class_id', e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                >
+                    className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-300 outline-none">
                     <option value="">--Pilih kelas--</option>
-                    {classrooms.map((classroom) => (
-                        <option key={classroom.id} value={classroom.id}>
-                            {classroom.name}
-                        </option>
-                    ))}
+                    {classrooms.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
             </div>
-            <div className="mb-3 flex flex-row justify-between gap-4">
-                <div className="basis-1/2">
-                    <label htmlFor="gender" className="block text-sm font-medium text-gray-700">
-                        Jenis Kelamin
-                    </label>
-                    <select
-                        id="gender"
-                        name="gender"
-                        value={formData.gender}
-                        onChange={(e) => handleChange('gender', e.target.value)}
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                        required
-                    >
-                        <option value="">--Pilih Jenis Kelamin--</option>
-                        {sexes.map((sex) => (
-                            <option key={sex.value} value={sex.value}>
-                                {getGenderLabel(sex.label)}
-                            </option>
-                        ))}
-                    </select>
-                </div>
 
-                <div className="basis-1/2">
-                    <label htmlFor="religion" className="block text-sm font-medium text-gray-700">
-                        Agama
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                        Jenis Kelamin <span className="text-rose-500">*</span>
                     </label>
-                    <select
-                        id="religion"
-                        name="religion"
-                        value={formData.religion}
+                    <select value={formData.gender}
+                        onChange={(e) => handleChange('gender', e.target.value)}
+                        className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-300 outline-none" required>
+                        <option value="">--Pilih Jenis Kelamin--</option>
+                        {sexes.map((s) => <option key={s.value} value={s.value}>{getGenderLabel(s.label)}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                        Agama <span className="text-rose-500">*</span>
+                    </label>
+                    <select value={formData.religion}
                         onChange={(e) => handleChange('religion', e.target.value)}
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                        required
-                    >
+                        className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-300 outline-none" required>
                         <option value="">--Pilih Agama--</option>
-                        {religions.map((religion) => (
-                            <option key={religion.value} value={religion.value}>
-                                {religion.label}
-                            </option>
-                        ))}
+                        {religions.map((r) => <option key={r.value} value={r.value}>{r.label}</option>)}
                     </select>
                 </div>
             </div>
-            <div className="mb-3 flex flex-row justify-between gap-4">
-                <div className="basis-1/2">
-                    <label htmlFor="entry_year" className="block text-sm font-medium text-gray-700">
-                        Tahun Masuk
+
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                        Tempat Lahir <span className="text-rose-500">*</span>
                     </label>
-                    <input
-                        id="entry_year"
-                        name="entry_year"
-                        type="number"
-                        min="1900"
-                        max={new Date().getFullYear() + 1}
-                        value={formData.entry_year}
-                        onChange={(e) =>
-                            setFormData({
-                                ...formData,
-                                entry_year: parseInt(e.target.value) || new Date().getFullYear(),
-                            })
-                        }
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                        required
-                    />
-                </div>
-                <div className="basis-1/2">
-                    <label htmlFor="status" className="block text-sm font-medium text-gray-700">
-                        Status
-                    </label>
-                    {student ? (
-                        <select
-                            id="status"
-                            name="status"
-                            value={formData.status}
-                            onChange={(e) => handleChange('status', e.target.value)}
-                            className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                            required
-                        >
-                            {statuses.map((status) => (
-                                <option key={status.value} value={status.value}>
-                                    {getStatusLabel(status.label)}
-                                </option>
-                            ))}
-                        </select>
-                    ) : (
-                        <input type="text" value="Aktif" disabled className="w-full rounded border bg-gray-100 px-3 py-2" />
-                    )}
-                </div>
-            </div>
-            <div className="mb-3 flex flex-row justify-between gap-4">
-                <div className="basis-1/2">
-                    <label htmlFor="birth_place" className="block text-sm font-medium text-gray-700">
-                        Tempat Lahir
-                    </label>
-                    <input
-                        id="birth_place"
-                        name="birth_place"
-                        type="text"
-                        maxLength={70}
-                        value={formData.birth_place}
+                    <input type="text" maxLength={70} value={formData.birth_place}
                         onChange={(e) => handleChange('birth_place', e.target.value)}
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                        required
-                    />
+                        className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none" required />
                 </div>
-                <div className="basis-1/2">
-                    <label htmlFor="date_of_birth" className="block text-sm font-medium text-gray-700">
-                        Tanggal Lahir
+                <div>
+                    <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                        Tanggal Lahir <span className="text-rose-500">*</span>
                     </label>
-                    <input
-                        id="date_of_birth"
-                        name="date_of_birth"
-                        type="date"
-                        value={formData.date_of_birth}
-                        onChange={(e) => handleChange('date_of_birth', e.target.value)}
-                        className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                        required
-                    />
+                    <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                            <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+                            </svg>
+                        </div>
+                        <input type="date" value={formData.date_of_birth}
+                            onChange={(e) => handleChange('date_of_birth', e.target.value)}
+                            className="form-input w-full pl-10 pr-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white outline-none" required />
+                    </div>
                 </div>
             </div>
-            <div className="mb-3"></div>
-            <div className="mb-3"></div>
-            <div className="mb-3">
-                <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                    Alamat
+
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Status <span className="text-rose-500">*</span>
                 </label>
-                <textarea
-                    name="address"
-                    value={formData.address}
-                    onChange={(e) => handleChange('address', e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
-                    required
-                    rows={3}
-                />
+                {student ? (
+                    <select value={formData.status}
+                        onChange={(e) => handleChange('status', e.target.value)}
+                        className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-700 dark:text-slate-300 outline-none" required>
+                        {statuses.map((s) => <option key={s.value} value={s.value}>{getStatusLabel(s.label)}</option>)}
+                    </select>
+                ) : (
+                    <input type="text" value="Aktif" disabled className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-500 dark:text-slate-400 outline-none cursor-not-allowed" />
+                )}
             </div>
-            <div className="flex justify-end">
-                <button
-                    type="button"
-                    onClick={onClose}
-                    className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
-                >
+
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Alamat <span className="text-rose-500">*</span>
+                </label>
+                <textarea value={formData.address}
+                    onChange={(e) => handleChange('address', e.target.value)}
+                    className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none resize-none" required rows={3} />
+            </div>
+
+            <div className="flex justify-end pt-2">
+                <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-slate-200 dark:border-slate-700">
                     Batal
                 </button>
-                <button
-                    type="submit"
-                    className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
-                >
+                <button type="submit" className="ml-3 px-5 py-2.5 btn-shimmer text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:scale-[1.02] active:scale-[0.98]">
                     {student ? 'Ubah' : 'Simpan'}
                 </button>
             </div>

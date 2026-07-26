@@ -38,107 +38,64 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
         if (isOpen) {
             setErrors({});
             setIsSubmitting(false);
-
             if (classroom) {
-                // Edit mode - isi dengan data classroom
-                setFormData({
-                    name: classroom.name,
-                    level: classroom.level,
-                    main_teacher_id: classroom.main_teacher_id,
-                });
-
+                setFormData({ name: classroom.name, level: classroom.level, main_teacher_id: classroom.main_teacher_id });
                 if (classroom.main_teacher) {
-                    setInitialTeacher({
-                        id: classroom.main_teacher_id as number,
-                        full_name: classroom.main_teacher.full_name,
-                    });
+                    setInitialTeacher({ id: classroom.main_teacher_id as number, full_name: classroom.main_teacher.full_name });
                 } else {
                     setInitialTeacher(null);
                 }
             } else {
-                // Create mode - reset ke default
-                setFormData({
-                    name: '',
-                    level: 1,
-                    main_teacher_id: null,
-                });
+                setFormData({ name: '', level: 1, main_teacher_id: null });
                 setInitialTeacher(null);
             }
-            // Increment key untuk force reset SearchableSelect
             setResetSelectKey((prev) => prev + 1);
         }
     }, [isOpen, classroom]);
 
     const handleChange = (field: keyof Omit<Classroom, 'id'>, value: any) => {
         setFormData((prev) => ({ ...prev, [field]: value }));
-        if (errors[field]) {
-            setErrors((prev) => ({ ...prev, [field]: '' }));
-        }
+        if (errors[field]) setErrors((prev) => ({ ...prev, [field]: '' }));
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setErrors({});
         setIsSubmitting(true);
-
-        const requestData = {
-            ...formData,
-            _method: classroom?.id ? 'PUT' : 'POST',
-        };
-
-        const url = classroom?.id ? `/classrooms/${classroom.id}` : '/classrooms';
-
-        router.post(url, requestData, {
-            preserveScroll: true,
-            preserveState: true,
-            onSuccess: () => {
-                setIsSubmitting(false);
-                onClose();
-            },
-            onError: (errors) => {
-                setIsSubmitting(false);
-                const errorMessage = Object.values(errors).join('\n');
-                toast.error(`Gagal memperbarui kelas: ${errorMessage}`);
-            },
+        const requestData = { ...formData, _method: classroom?.id ? 'PUT' : 'POST' };
+        router.post(classroom?.id ? `/classrooms/${classroom.id}` : '/classrooms', requestData, {
+            preserveScroll: true, preserveState: true,
+            onSuccess: () => { setIsSubmitting(false); onClose(); },
+            onError: (errors) => { setIsSubmitting(false); toast.error(`Gagal memperbarui kelas: ${Object.values(errors).join('\n')}`); },
         });
     };
 
     return (
         <FormModal isOpen={isOpen} onClose={onClose} title={classroom ? 'Edit Kelas' : 'Tambahkan Kelas Baru'} onSubmit={handleSubmit}>
-            <div className="mb-3">
-                <label htmlFor="level" className="block text-sm font-medium text-gray-700">
-                    Tingkat
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Tingkat <span className="text-rose-500">*</span>
                 </label>
                 <input
-                    id="level"
-                    name="level"
-                    type="number"
-                    min="1"
-                    value={formData.level}
+                    type="number" min="1" value={formData.level}
                     onChange={(e) => handleChange('level', parseInt(e.target.value) || 1)}
-                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                    className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white outline-none"
                     required
                 />
             </div>
-            <div className="mb-3">
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                    Nama Kelas
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    Nama Kelas <span className="text-rose-500">*</span>
                 </label>
                 <input
-                    id="name"
-                    name="name"
-                    type="text"
-                    maxLength={70}
-                    value={formData.name}
+                    type="text" maxLength={70} value={formData.name}
                     onChange={(e) => handleChange('name', e.target.value)}
-                    className="mt-1 block w-full rounded-md border border-gray-300 p-2 shadow-sm"
+                    className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none"
                     required
                 />
             </div>
-            <div className="mb-3">
-                <label htmlFor="main_teacher_id" className="block text-sm font-medium text-gray-700">
-                    Wali Murid
-                </label>
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Wali Murid</label>
                 <SearchableSelect
                     key={resetSelectKey}
                     value={formData.main_teacher_id}
@@ -150,18 +107,11 @@ export default function ClassroomFormModal({ isOpen, onClose, classroom }: Props
                     maxInitialOptions={10}
                 />
             </div>
-            <div className="flex justify-end">
-                <button
-                    type="button"
-                    onClick={onClose}
-                    className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
-                >
+            <div className="flex justify-end pt-2">
+                <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-slate-200 dark:border-slate-700">
                     Batal
                 </button>
-                <button
-                    type="submit"
-                    className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
-                >
+                <button type="submit" className="ml-3 px-5 py-2.5 btn-shimmer text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:scale-[1.02] active:scale-[0.98]">
                     {classroom ? 'Ubah' : 'Simpan'}
                 </button>
             </div>

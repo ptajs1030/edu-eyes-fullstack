@@ -18,34 +18,19 @@ interface Props {
 }
 
 export default function SettingFormModal({ isOpen, onClose, setting }: Props) {
-    const [formData, setFormData] = useState<Setting>({
-        key: '',
-        value: '',
-        title: '',
-    });
+    const [formData, setFormData] = useState<Setting>({ key: '', value: '', title: '' });
 
     useEffect(() => {
         if (setting) {
-            setFormData({
-                key: setting.key,
-                value: setting.value,
-                title: setting.title || '',
-                type: setting.type || 'text',
-            });
+            setFormData({ key: setting.key, value: setting.value, title: setting.title || '', type: setting.type || 'text' });
         } else {
-            setFormData({
-                key: '',
-                value: '',
-                title: '',
-                type: 'text',
-            });
+            setFormData({ key: '', value: '', title: '', type: 'text' });
         }
     }, [setting]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value, type } = e.target;
+        const { name, value } = e.target;
         if (formData.type === 'number' && name === 'value') {
-            // Only allow numbers
             if (value === '' || /^\d+$/.test(value)) {
                 setFormData((prev) => ({ ...prev, [name]: value }));
             }
@@ -56,79 +41,46 @@ export default function SettingFormModal({ isOpen, onClose, setting }: Props) {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!setting?.id) {
-            onClose();
-            return;
-        }
-
-        const payload = {
-            ...formData,
-            _method: 'PUT',
-        };
-
-        router.post(`/school-settings/${setting.id}`, payload, {
+        if (!setting?.id) { onClose(); return; }
+        router.post(`/school-settings/${setting.id}`, { ...formData, _method: 'PUT' }, {
             preserveScroll: true,
-            onSuccess: () => {
-                onClose();
-                router.reload();
-            },
-            onError: (errors) => {
-                const errorMessage = Object.values(errors).join('\n');
-                toast.error(`Gagal memperbarui pengaturan: ${errorMessage}`);
-            },
+            onSuccess: () => { onClose(); router.reload(); },
+            onError: (errors) => toast.error('Gagal memperbarui pengaturan: ' + Object.values(errors).join('\n')),
         });
     };
 
     return (
         <FormModal isOpen={isOpen} onClose={onClose} title="Edit Pengaturan" onSubmit={handleSubmit}>
-            <div className="mb-3">
-                <label htmlFor="key" className="block text-sm font-medium text-gray-700">
-                    Key
-                </label>
-                <input id="key" name="key" type="text" value={formData.title || formData.key} readOnly className="w-full rounded border bg-gray-100 p-2" />
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Key</label>
+                <input type="text" value={formData.title || formData.key} readOnly className="w-full px-4 py-2.5 bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm text-slate-500 dark:text-slate-400 outline-none cursor-not-allowed" />
             </div>
-            <div className="mb-3">
-                <label htmlFor="value" className="block text-sm font-medium text-gray-700">
+            <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                     Value
                     {['late_tolerance', 'early_tolerance'].includes(formData.key) && ' (Menit)'}
                     {['payment_reminder_days', 'task_reminder_days'].includes(formData.key) && ' (Hari)'}
+                    <span className="text-rose-500">*</span>
                 </label>
                 {formData.type === 'text' ? (
                     <textarea
-                        id="value"
-                        name="value"
-                        value={formData.value}
-                        onChange={handleChange}
-                        className="w-full rounded border p-2"
-                        required
-                        rows={5}
+                        name="value" value={formData.value} onChange={handleChange}
+                        className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none resize-none"
+                        required rows={5}
                     />
                 ) : (
                     <input
-                        id="value"
-                        name="value"
-                        type="text"
-                        value={formData.value}
-                        onChange={handleChange}
-                        className="w-full rounded border p-2"
-                        required
-                        pattern="\d*"
+                        type="text" name="value" value={formData.value} onChange={handleChange}
+                        className="form-input w-full px-4 py-2.5 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-xl text-sm text-slate-900 dark:text-white outline-none font-mono"
+                        required pattern="\d*"
                     />
                 )}
             </div>
-            <div className="flex justify-end">
-                <button
-                    type="button"
-                    onClick={onClose}
-                    className="mr-2 rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:cursor-pointer hover:bg-gray-50"
-                >
+            <div className="flex justify-end pt-2">
+                <button type="button" onClick={onClose} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all border border-slate-200 dark:border-slate-700">
                     Batal
                 </button>
-                <button
-                    type="submit"
-                    className="rounded rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:cursor-pointer hover:bg-blue-700"
-                >
+                <button type="submit" className="ml-3 px-5 py-2.5 btn-shimmer text-white text-sm font-bold rounded-xl transition-all shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 hover:scale-[1.02] active:scale-[0.98]">
                     Ubah
                 </button>
             </div>
